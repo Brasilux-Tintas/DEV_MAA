@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.4.2.v201410272105 Build &lt;4.4.2.v20150217-1805></property>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="layoutPreference">fixed layout</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <parameters>
+        <scalar-parameter name="de Código" id="10">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <simple-property-list name="defaultValue">
+                <value type="constant"></value>
+            </simple-property-list>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="concealValue">false</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="até Código" id="11">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="de Tipo" id="12">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <simple-property-list name="defaultValue">
+                <value type="constant"></value>
+            </simple-property-list>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="até Tipo" id="13">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="BANCO" id="8">
+            <list-property name="privateDriverProperties">
+                <ex-property>
+                    <name>metadataBidiFormatStr</name>
+                    <value>ILYNN</value>
+                </ex-property>
+                <ex-property>
+                    <name>disabledMetadataBidiFormatStr</name>
+                </ex-property>
+                <ex-property>
+                    <name>contentBidiFormatStr</name>
+                    <value>ILYNN</value>
+                </ex-property>
+                <ex-property>
+                    <name>disabledContentBidiFormatStr</name>
+                </ex-property>
+            </list-property>
+            <property name="odaDriverClass">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
+            <property name="odaURL">jdbc:sqlserver://10.1.1.200:1433;databaseName=TECPOLPA</property>
+            <property name="odaUser">sa</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">NjgyODYxNGpvLTYz</encrypted-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="QUERY" id="94">
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">COD_INS</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">COD_INS</text-property>
+                    <text-property name="heading">COD_INS</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DESCRIÇÃO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DESCRIÇÃO</text-property>
+                    <text-property name="heading">DESCRIÇÃO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">B1_TIPO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">B1_TIPO</text-property>
+                    <text-property name="heading">B1_TIPO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">B1_UM</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">B1_UM</text-property>
+                    <text-property name="heading">B1_UM</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">B2_TER</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">B2_TER</text-property>
+                    <text-property name="heading">B2_TER</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">QTD_INS_NO_TA</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">QTD_INS_NO_TA</text-property>
+                    <text-property name="heading">QTD_INS_NO_TA</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">B2_QATU</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">B2_QATU</text-property>
+                    <text-property name="heading">B2_QATU</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">SALDO_TER_CALC</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">SALDO_TER_CALC</text-property>
+                    <text-property name="heading">SALDO_TER_CALC</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DIFERENCA</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">DIFERENCA</text-property>
+                    <text-property name="heading">DIFERENCA</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DATA</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DATA</text-property>
+                    <text-property name="heading">DATA</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">HORA</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">HORA</text-property>
+                    <text-property name="heading">HORA</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">de Código</property>
+                    <property name="paramName">de Código</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">até Código</property>
+                    <property name="paramName">até Código</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">2</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">de Tipo</property>
+                    <property name="paramName">de Tipo</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">3</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">até Tipo</property>
+                    <property name="paramName">até Tipo</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">4</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">COD_INS</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">DESCRIÇÃO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">B1_TIPO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">B1_UM</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">B2_TER</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">QTD_INS_NO_TA</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">B2_QATU</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">SALDO_TER_CALC</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">DIFERENCA</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">DATA</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">HORA</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">BANCO</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">COD_INS</property>
+                    <property name="nativeName">COD_INS</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">DESCRIÇÃO</property>
+                    <property name="nativeName">DESCRIÇÃO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">B1_TIPO</property>
+                    <property name="nativeName">B1_TIPO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">B1_UM</property>
+                    <property name="nativeName">B1_UM</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">B2_TER</property>
+                    <property name="nativeName">B2_TER</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">QTD_INS_NO_TA</property>
+                    <property name="nativeName">QTD_INS_NO_TA</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">B2_QATU</property>
+                    <property name="nativeName">B2_QATU</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">SALDO_TER_CALC</property>
+                    <property name="nativeName">SALDO_TER_CALC</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">DIFERENCA</property>
+                    <property name="nativeName">DIFERENCA</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">DATA</property>
+                    <property name="nativeName">DATA</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">HORA</property>
+                    <property name="nativeName">HORA</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[SELECT *, B2_QATU +  QTD_INS_NO_TA AS SALDO_TER_CALC,  B2_QATU +  QTD_INS_NO_TA - B2_TER DIFERENCA,
+CONVERT(VARCHAR(10), GETDATE(), 103) AS DATA, CONVERT(VARCHAR(10), GETDATE(), 108) AS HORA
+FROM 
+(SELECT	B1_COD COD_INS, SUBSTRING(B1_DESC,1,60) as 'DESCRIÇÃO',B1_TIPO,  B1_UM,
+ISNULL((SELECT SUM(B2_QTNP + B2_QTER) FROM  SB2110 SB2 WHERE B2_COD = B1_COD  AND SB2.D_E_L_E_T_ = ''),0) B2_TER,
+ISNULL(SUM(QTD_INS),0) QTD_INS_NO_TA ,
+ISNULL((SELECT SUM(B2_QATU) FROM  SB2110 SB2 WHERE B2_COD = B1_COD  AND SB2.D_E_L_E_T_ = ''),0) B2_QATU
+FROM	SB1110 SB1
+LEFT JOIN INSUMOS_SB6 ON B1_COD = COD_INS AND COD_INS LIKE '4%'
+WHERE	  SB1.D_E_L_E_T_ = '' AND B1_COD LIKE '4%' AND  B1_COD BETWEEN 	 ?  AND ?
+AND  B1_TIPO BETWEEN ? AND  ?
+GROUP BY B1_COD , B1_DESC, B1_TIPO, B1_UM)A
+WHERE (B2_TER + QTD_INS_NO_TA + B2_QATU ) != 0
+ORDER BY A.COD_INS]]></xml-property>
+        </oda-data-set>
+    </data-sets>
+    <styles>
+        <style name="report" id="4">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">10pt</property>
+        </style>
+        <style name="crosstab" id="5">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="crosstab-cell" id="6">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <page-header>
+                <grid id="15">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="width">7.84375in</property>
+                    <column id="16">
+                        <property name="width">5.125in</property>
+                    </column>
+                    <column id="17">
+                        <property name="width">2.71875in</property>
+                    </column>
+                    <row id="18">
+                        <cell id="19">
+                            <label id="22">
+                                <property name="fontSize">16pt</property>
+                                <property name="textAlign">center</property>
+                                <text-property name="text">Análise do saldo de terceiros - sintético</text-property>
+                            </label>
+                        </cell>
+                        <cell id="20">
+                            <grid id="23">
+                                <property name="width">2.65625in</property>
+                                <column id="24">
+                                    <property name="width">0.53125in</property>
+                                </column>
+                                <column id="25">
+                                    <property name="width">2.125in</property>
+                                </column>
+                                <row id="26">
+                                    <cell id="27">
+                                        <label id="32">
+                                            <text-property name="text">Data</text-property>
+                                        </label>
+                                    </cell>
+                                    <cell id="28">
+                                        <data id="148">
+                                            <property name="dataSet">QUERY</property>
+                                            <list-property name="boundDataColumns">
+                                                <structure>
+                                                    <property name="name">DATA</property>
+                                                    <text-property name="displayName">DATA</text-property>
+                                                    <expression name="expression" type="javascript">dataSetRow["DATA"]</expression>
+                                                    <property name="dataType">string</property>
+                                                </structure>
+                                            </list-property>
+                                            <property name="resultSetColumn">DATA</property>
+                                        </data>
+                                    </cell>
+                                </row>
+                                <row id="29">
+                                    <cell id="30">
+                                        <label id="33">
+                                            <text-property name="text">Hora</text-property>
+                                        </label>
+                                    </cell>
+                                    <cell id="31">
+                                        <data id="149">
+                                            <property name="dataSet">QUERY</property>
+                                            <list-property name="boundDataColumns">
+                                                <structure>
+                                                    <property name="name">HORA</property>
+                                                    <text-property name="displayName">HORA</text-property>
+                                                    <expression name="expression" type="javascript">dataSetRow["HORA"]</expression>
+                                                    <property name="dataType">string</property>
+                                                </structure>
+                                            </list-property>
+                                            <property name="resultSetColumn">HORA</property>
+                                        </data>
+                                    </cell>
+                                </row>
+                            </grid>
+                        </cell>
+                    </row>
+                </grid>
+            </page-header>
+            <page-footer>
+                <label id="150">
+                    <property name="fontSize">7pt</property>
+                    <property name="paddingTop">1pt</property>
+                    <text-property name="text">Saldo terceiro sistema = B2_QTER + B2_QTNP / Saldo Terceiros Calculado = B2_QATU + Saldo do insumo nos produtos acabados</text-property>
+                </label>
+            </page-footer>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <table id="96">
+            <property name="width">7.947916666666667in</property>
+            <property name="dataSet">QUERY</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">DESCRIÇÃO</property>
+                    <text-property name="displayName">DESCRIÇÃO</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["DESCRIÇÃO"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">B1_TIPO</property>
+                    <text-property name="displayName">B1_TIPO</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["B1_TIPO"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">B1_UM</property>
+                    <text-property name="displayName">B1_UM</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["B1_UM"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">COD_INS</property>
+                    <text-property name="displayName">COD_INS</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["COD_INS"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">DIFERENCA</property>
+                    <text-property name="displayName">DIFERENCA</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["DIFERENCA"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">QTD_INS_NO_TA</property>
+                    <text-property name="displayName">QTD_INS_NO_TA</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["QTD_INS_NO_TA"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">B2_TER</property>
+                    <text-property name="displayName">B2_TER</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["B2_TER"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">B2_QATU</property>
+                    <text-property name="displayName">B2_QATU</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["B2_QATU"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+            </list-property>
+            <column id="124">
+                <property name="width">1in</property>
+            </column>
+            <column id="125">
+                <property name="width">2.2604166666666665in</property>
+            </column>
+            <column id="126">
+                <property name="width">0.375in</property>
+            </column>
+            <column id="127">
+                <property name="width">0.3541666666666667in</property>
+            </column>
+            <column id="128">
+                <property name="width">0.9895833333333334in</property>
+            </column>
+            <column id="129">
+                <property name="width">0.9895833333333334in</property>
+            </column>
+            <column id="130">
+                <property name="width">0.9895833333333334in</property>
+            </column>
+            <column id="131">
+                <property name="width">0.9895833333333334in</property>
+            </column>
+            <header>
+                <row id="97">
+                    <property name="fontSize">9pt</property>
+                    <property name="fontWeight">bold</property>
+                    <property name="verticalAlign">top</property>
+                    <cell id="98">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="138">
+                            <text-property name="text">Código</text-property>
+                        </label>
+                    </cell>
+                    <cell id="99">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="132">
+                            <text-property name="text">Descrição</text-property>
+                        </label>
+                    </cell>
+                    <cell id="100">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="134">
+                            <text-property name="text">Tipo</text-property>
+                        </label>
+                    </cell>
+                    <cell id="101">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="136">
+                            <text-property name="text">UM</text-property>
+                        </label>
+                    </cell>
+                    <cell id="102">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="144">
+                            <text-property name="text">Saldo Terc NF</text-property>
+                        </label>
+                    </cell>
+                    <cell id="103">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="146">
+                            <text-property name="text">Saldo Atual</text-property>
+                        </label>
+                    </cell>
+                    <cell id="104">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="142">
+                            <text-property name="text">Saldo em TA</text-property>
+                        </label>
+                    </cell>
+                    <cell id="105">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">thin</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">thin</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">thin</property>
+                        <label id="140">
+                            <text-property name="text">Diferença</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="106">
+                    <property name="fontSize">8pt</property>
+                    <property name="height">0.28125in</property>
+                    <cell id="107">
+                        <data id="139">
+                            <property name="color">black</property>
+                            <property name="resultSetColumn">COD_INS</property>
+                        </data>
+                    </cell>
+                    <cell id="108">
+                        <data id="133">
+                            <property name="resultSetColumn">DESCRIÇÃO</property>
+                        </data>
+                    </cell>
+                    <cell id="109">
+                        <data id="135">
+                            <property name="resultSetColumn">B1_TIPO</property>
+                        </data>
+                    </cell>
+                    <cell id="110">
+                        <data id="137">
+                            <property name="resultSetColumn">B1_UM</property>
+                        </data>
+                    </cell>
+                    <cell id="111">
+                        <data id="145">
+                            <structure name="numberFormat">
+                                <property name="category">Currency</property>
+                                <property name="pattern">#,##0.000{RoundingMode=HALF_UP}</property>
+                            </structure>
+                            <property name="resultSetColumn">B2_TER</property>
+                        </data>
+                    </cell>
+                    <cell id="112">
+                        <data id="147">
+                            <structure name="numberFormat">
+                                <property name="category">Currency</property>
+                                <property name="pattern">#,##0.000{RoundingMode=HALF_UP}</property>
+                            </structure>
+                            <property name="resultSetColumn">B2_QATU</property>
+                        </data>
+                    </cell>
+                    <cell id="113">
+                        <data id="143">
+                            <structure name="numberFormat">
+                                <property name="category">Currency</property>
+                                <property name="pattern">#,##0.000{RoundingMode=HALF_UP}</property>
+                            </structure>
+                            <property name="resultSetColumn">QTD_INS_NO_TA</property>
+                        </data>
+                    </cell>
+                    <cell id="114">
+                        <data id="141">
+                            <structure name="numberFormat">
+                                <property name="category">Currency</property>
+                                <property name="pattern">#,##0.000{RoundingMode=HALF_UP}</property>
+                            </structure>
+                            <property name="resultSetColumn">DIFERENCA</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="115">
+                    <cell id="116"/>
+                    <cell id="117"/>
+                    <cell id="118"/>
+                    <cell id="119"/>
+                    <cell id="120"/>
+                    <cell id="121"/>
+                    <cell id="122"/>
+                    <cell id="123"/>
+                </row>
+            </footer>
+        </table>
+    </body>
+</report>

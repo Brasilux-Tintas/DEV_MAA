@@ -1,0 +1,2542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.4.2.v201410272105 Build &lt;4.4.2.v20150217-1805></property>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">odaDriverClass</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">odaURL</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">odaUser</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">odaAutoCommit</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">odaIsolationMode</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">odaPassword</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">odaJndiName</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileName</property>
+            <property name="id">8</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileStorePath</property>
+            <property name="id">8</property>
+        </structure>
+    </list-property>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="layoutPreference">fixed layout</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <parameters>
+        <scalar-parameter name="De Op" id="10">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Até Op" id="11">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="De Data" id="12">
+            <property name="valueType">static</property>
+            <property name="isRequired">true</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Custom</property>
+                <property name="pattern">yyyyMMdd</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Até Data" id="13">
+            <property name="valueType">static</property>
+            <property name="isRequired">true</property>
+            <property name="dataType">date</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Custom</property>
+                <property name="pattern">yyyyMMdd</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="BANCO" id="8">
+            <list-property name="privateDriverProperties">
+                <ex-property>
+                    <name>metadataBidiFormatStr</name>
+                    <value>ILYNN</value>
+                </ex-property>
+                <ex-property>
+                    <name>disabledMetadataBidiFormatStr</name>
+                </ex-property>
+                <ex-property>
+                    <name>contentBidiFormatStr</name>
+                    <value>ILYNN</value>
+                </ex-property>
+                <ex-property>
+                    <name>disabledContentBidiFormatStr</name>
+                </ex-property>
+            </list-property>
+            <property name="odaDriverClass">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
+            <property name="odaURL">jdbc:sqlserver://10.1.1.200:1433;databaseName=PROTHEUSPRD</property>
+            <property name="odaUser">sa</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">NjgyODYxNGpvLTYz</encrypted-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="R2" id="9">
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">QTDUM1</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">QTDUM1</text-property>
+                    <text-property name="heading">QTDUM1</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">QTDKG</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">QTDKG</text-property>
+                    <text-property name="heading">QTDKG</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_XLOTE</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_XLOTE</text-property>
+                    <text-property name="heading">C2_XLOTE</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">CLINHA</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">CLINHA</text-property>
+                    <text-property name="heading">CLINHA</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">NNR_DESCRI</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">NNR_DESCRI</text-property>
+                    <text-property name="heading">NNR_DESCRI</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_EMISSAO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_EMISSAO</text-property>
+                    <text-property name="heading">C2_EMISSAO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_FILIAL</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_FILIAL</text-property>
+                    <text-property name="heading">C2_FILIAL</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DESC1</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DESC1</text-property>
+                    <text-property name="heading">DESC1</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_NUM</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_NUM</text-property>
+                    <text-property name="heading">C2_NUM</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_ITEM</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_ITEM</text-property>
+                    <text-property name="heading">C2_ITEM</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_SEQUEN</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_SEQUEN</text-property>
+                    <text-property name="heading">C2_SEQUEN</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_ITEMGRD</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_ITEMGRD</text-property>
+                    <text-property name="heading">C2_ITEMGRD</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_DATRF</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_DATRF</text-property>
+                    <text-property name="heading">C2_DATRF</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_PRODUTO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_PRODUTO</text-property>
+                    <text-property name="heading">C2_PRODUTO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_DESTINA</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_DESTINA</text-property>
+                    <text-property name="heading">C2_DESTINA</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_PEDIDO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_PEDIDO</text-property>
+                    <text-property name="heading">C2_PEDIDO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_ROTEIRO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_ROTEIRO</text-property>
+                    <text-property name="heading">C2_ROTEIRO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_QUJE</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">C2_QUJE</text-property>
+                    <text-property name="heading">C2_QUJE</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_PERDA</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">C2_PERDA</text-property>
+                    <text-property name="heading">C2_PERDA</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_QUANT</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">C2_QUANT</text-property>
+                    <text-property name="heading">C2_QUANT</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">QTDLIQ</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">QTDLIQ</text-property>
+                    <text-property name="heading">QTDLIQ</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_OBS</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_OBS</text-property>
+                    <text-property name="heading">C2_OBS</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_TPOP</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_TPOP</text-property>
+                    <text-property name="heading">C2_TPOP</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">SC2RECNO</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">SC2RECNO</text-property>
+                    <text-property name="heading">SC2RECNO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_SEQ</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">D4_SEQ</text-property>
+                    <text-property name="heading">D4_SEQ</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_OP</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">D4_OP</text-property>
+                    <text-property name="heading">D4_OP</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_LOCAL</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">D4_LOCAL</text-property>
+                    <text-property name="heading">D4_LOCAL</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">UM1</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">UM1</text-property>
+                    <text-property name="heading">UM1</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">UM2</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">UM2</text-property>
+                    <text-property name="heading">UM2</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DESC2</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DESC2</text-property>
+                    <text-property name="heading">DESC2</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_COD</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">D4_COD</text-property>
+                    <text-property name="heading">D4_COD</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_QTDEORI</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">D4_QTDEORI</text-property>
+                    <text-property name="heading">D4_QTDEORI</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DT_BRANCO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DT_BRANCO</text-property>
+                    <text-property name="heading">DT_BRANCO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">HR_BRANCO</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">HR_BRANCO</text-property>
+                    <text-property name="heading">HR_BRANCO</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_DATPRI</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_DATPRI</text-property>
+                    <text-property name="heading">C2_DATPRI</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_DATPRF</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_DATPRF</text-property>
+                    <text-property name="heading">C2_DATPRF</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_CC</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_CC</text-property>
+                    <text-property name="heading">C2_CC</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_DATAJI</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_DATAJI</text-property>
+                    <text-property name="heading">C2_DATAJI</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_DATAJF</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_DATAJF</text-property>
+                    <text-property name="heading">C2_DATAJF</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">C2_STATUS</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">C2_STATUS</text-property>
+                    <text-property name="heading">C2_STATUS</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_LOTECTL</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">D4_LOTECTL</text-property>
+                    <text-property name="heading">D4_LOTECTL</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">D4_NUMLOTE</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">D4_NUMLOTE</text-property>
+                    <text-property name="heading">D4_NUMLOTE</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">cOPDe</property>
+                    <property name="paramName">De Op</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">cOPAte</property>
+                    <property name="paramName">Até Op</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">2</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">dDataDe</property>
+                    <property name="paramName">De Data</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">date</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">3</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">dDataAté</property>
+                    <property name="paramName">Até Data</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">date</property>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">4</property>
+                    <property name="isOptional">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">QTDUM1</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">QTDKG</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">C2_XLOTE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">CLINHA</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">NNR_DESCRI</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">C2_EMISSAO</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">C2_FILIAL</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">DESC1</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">C2_NUM</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">C2_ITEM</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">C2_SEQUEN</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">C2_ITEMGRD</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">C2_DATRF</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">C2_PRODUTO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">C2_DESTINA</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">C2_PEDIDO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">17</property>
+                        <property name="name">C2_ROTEIRO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">18</property>
+                        <property name="name">C2_QUJE</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">19</property>
+                        <property name="name">C2_PERDA</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">20</property>
+                        <property name="name">C2_QUANT</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">21</property>
+                        <property name="name">QTDLIQ</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">22</property>
+                        <property name="name">C2_OBS</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">23</property>
+                        <property name="name">C2_TPOP</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">24</property>
+                        <property name="name">SC2RECNO</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">25</property>
+                        <property name="name">D4_SEQ</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">26</property>
+                        <property name="name">D4_OP</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">27</property>
+                        <property name="name">D4_LOCAL</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">28</property>
+                        <property name="name">UM1</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">29</property>
+                        <property name="name">UM2</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">30</property>
+                        <property name="name">DESC2</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">31</property>
+                        <property name="name">D4_COD</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">32</property>
+                        <property name="name">D4_QTDEORI</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">33</property>
+                        <property name="name">DT_BRANCO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">34</property>
+                        <property name="name">HR_BRANCO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">35</property>
+                        <property name="name">C2_DATPRI</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">36</property>
+                        <property name="name">C2_DATPRF</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">37</property>
+                        <property name="name">C2_CC</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">38</property>
+                        <property name="name">C2_DATAJI</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">39</property>
+                        <property name="name">C2_DATAJF</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">40</property>
+                        <property name="name">C2_STATUS</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">41</property>
+                        <property name="name">D4_LOTECTL</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">42</property>
+                        <property name="name">D4_NUMLOTE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">BANCO</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">QTDUM1</property>
+                    <property name="nativeName">QTDUM1</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">QTDKG</property>
+                    <property name="nativeName">QTDKG</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">C2_XLOTE</property>
+                    <property name="nativeName">C2_XLOTE</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">CLINHA</property>
+                    <property name="nativeName">CLINHA</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">NNR_DESCRI</property>
+                    <property name="nativeName">NNR_DESCRI</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">C2_EMISSAO</property>
+                    <property name="nativeName">C2_EMISSAO</property>
+                    <property name="dataType">date-time</property>
+                    <property name="nativeDataType">93</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">C2_FILIAL</property>
+                    <property name="nativeName">C2_FILIAL</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">DESC1</property>
+                    <property name="nativeName">DESC1</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">C2_NUM</property>
+                    <property name="nativeName">C2_NUM</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">C2_ITEM</property>
+                    <property name="nativeName">C2_ITEM</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">C2_SEQUEN</property>
+                    <property name="nativeName">C2_SEQUEN</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">C2_ITEMGRD</property>
+                    <property name="nativeName">C2_ITEMGRD</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">C2_DATRF</property>
+                    <property name="nativeName">C2_DATRF</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">C2_PRODUTO</property>
+                    <property name="nativeName">C2_PRODUTO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">C2_DESTINA</property>
+                    <property name="nativeName">C2_DESTINA</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">16</property>
+                    <property name="name">C2_PEDIDO</property>
+                    <property name="nativeName">C2_PEDIDO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">17</property>
+                    <property name="name">C2_ROTEIRO</property>
+                    <property name="nativeName">C2_ROTEIRO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">18</property>
+                    <property name="name">C2_QUJE</property>
+                    <property name="nativeName">C2_QUJE</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">19</property>
+                    <property name="name">C2_PERDA</property>
+                    <property name="nativeName">C2_PERDA</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">20</property>
+                    <property name="name">C2_QUANT</property>
+                    <property name="nativeName">C2_QUANT</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">21</property>
+                    <property name="name">QTDLIQ</property>
+                    <property name="nativeName">QTDLIQ</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">22</property>
+                    <property name="name">C2_OBS</property>
+                    <property name="nativeName">C2_OBS</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">23</property>
+                    <property name="name">C2_TPOP</property>
+                    <property name="nativeName">C2_TPOP</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">24</property>
+                    <property name="name">SC2RECNO</property>
+                    <property name="nativeName">SC2RECNO</property>
+                    <property name="dataType">integer</property>
+                    <property name="nativeDataType">4</property>
+                </structure>
+                <structure>
+                    <property name="position">25</property>
+                    <property name="name">D4_SEQ</property>
+                    <property name="nativeName">D4_SEQ</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">26</property>
+                    <property name="name">D4_OP</property>
+                    <property name="nativeName">D4_OP</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">27</property>
+                    <property name="name">D4_LOCAL</property>
+                    <property name="nativeName">D4_LOCAL</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">28</property>
+                    <property name="name">UM1</property>
+                    <property name="nativeName">UM1</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">29</property>
+                    <property name="name">UM2</property>
+                    <property name="nativeName">UM2</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">30</property>
+                    <property name="name">DESC2</property>
+                    <property name="nativeName">DESC2</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">31</property>
+                    <property name="name">D4_COD</property>
+                    <property name="nativeName">D4_COD</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">32</property>
+                    <property name="name">D4_QTDEORI</property>
+                    <property name="nativeName">D4_QTDEORI</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">33</property>
+                    <property name="name">DT_BRANCO</property>
+                    <property name="nativeName">DT_BRANCO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">34</property>
+                    <property name="name">HR_BRANCO</property>
+                    <property name="nativeName">HR_BRANCO</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">35</property>
+                    <property name="name">C2_DATPRI</property>
+                    <property name="nativeName">C2_DATPRI</property>
+                    <property name="dataType">date-time</property>
+                    <property name="nativeDataType">93</property>
+                </structure>
+                <structure>
+                    <property name="position">36</property>
+                    <property name="name">C2_DATPRF</property>
+                    <property name="nativeName">C2_DATPRF</property>
+                    <property name="dataType">date-time</property>
+                    <property name="nativeDataType">93</property>
+                </structure>
+                <structure>
+                    <property name="position">37</property>
+                    <property name="name">C2_CC</property>
+                    <property name="nativeName">C2_CC</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">38</property>
+                    <property name="name">C2_DATAJI</property>
+                    <property name="nativeName">C2_DATAJI</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">39</property>
+                    <property name="name">C2_DATAJF</property>
+                    <property name="nativeName">C2_DATAJF</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">40</property>
+                    <property name="name">C2_STATUS</property>
+                    <property name="nativeName">C2_STATUS</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">41</property>
+                    <property name="name">D4_LOTECTL</property>
+                    <property name="nativeName">D4_LOTECTL</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">42</property>
+                    <property name="name">D4_NUMLOTE</property>
+                    <property name="nativeName">D4_NUMLOTE</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[SELECT
+
+    'Quantidade (' + Rtrim(LTrim(SB1.B1_UM))  + ')'QTDUM1,
+
+     CASE
+          WHEN  SB1.B1_UM = 'LT' AND C2_XCONV <> 0  THEN C2_XCONV * C2_QUANT
+          ELSE  NULL
+     END    QTDKG,
+
+     C2_XLOTE,
+      '______________' CLINHA,
+			NNR_DESCRI,
+			CAST(SC2.C2_EMISSAO AS DATETIME) C2_EMISSAO,
+			SC2.C2_FILIAL,
+			SB1.B1_DESC DESC1,
+			 SC2.C2_NUM,
+			 SC2.C2_ITEM,
+			 SC2.C2_SEQUEN,
+			 SC2.C2_ITEMGRD,
+			 SC2.C2_DATRF,
+			 SC2.C2_PRODUTO,
+			 SC2.C2_DESTINA,
+			 SC2.C2_PEDIDO,
+			 SC2.C2_ROTEIRO,
+			 SC2.C2_QUJE,
+			 SC2.C2_PERDA,
+			 SC2.C2_QUANT,
+			 C2_QUANT -C2_QUJE QTDLIQ,
+
+			  SC2.C2_OBS,
+			  SC2.C2_TPOP,
+			 SC2.R_E_C_N_O_  SC2RECNO ,
+			 D4_SEQ, D4_OP,
+			 D4_LOCAL,
+			 SB1.B1_UM UM1,
+			 SB1_.B1_UM UM2,
+			 SUBSTRING(SB1_.B1_DESC,1,30) DESC2,
+			 D4_COD,
+			 D4_QTDEORI,
+			  '___/___/___' DT_BRANCO,
+			    '___:___' HR_BRANCO,
+
+
+			 CAST(SC2.C2_DATPRI AS DATETIME) C2_DATPRI,
+			 CAST(SC2.C2_DATPRF AS DATETIME) C2_DATPRF,
+			 SC2.C2_CC,
+
+			CASE
+				WHEN    SC2.C2_DATAJI = ' '  THEN '___/___/___'
+				ELSE  SUBSTRING(C2_DATAJI, 7,2) +'/'+SUBSTRING(C2_DATAJI, 5,2) +'/'+ SUBSTRING(C2_DATAJI, 1,4)
+			END C2_DATAJI	,
+
+			CASE
+				WHEN    SC2.C2_DATAJF = ' '  THEN '___/___/___'
+				ELSE SUBSTRING(C2_DATAJF, 7,2) +'/'+SUBSTRING(C2_DATAJF, 5,2) +'/'+ SUBSTRING(C2_DATAJF, 1,4)
+			END C2_DATAJF	,
+
+			CASE
+				WHEN C2_STATUS IN ( 'S') THEN 'Sacramentada'
+				WHEN C2_STATUS IN ( 'U') THEN 'Suspensa'
+				WHEN C2_STATUS IN ( 'N') THEN 'Normal'
+			END C2_STATUS,
+			D4_LOTECTL, D4_NUMLOTE
+
+
+
+
+FROM SC2110 SC2
+        INNER JOIN SB1110 SB1 ON B1_FILIAL = '11' AND C2_PRODUTO = B1_COD AND SB1.D_E_L_E_T_=' '
+        INNER JOIN SD4110 SD4 ON D4_FILIAL = '11' AND C2_NUM+C2_ITEM+C2_SEQUEN+C2_ITEMGRD = D4_OP AND SD4.D_E_L_E_T_=' '
+        INNER JOIN SB1110 SB1_ ON SB1_.B1_FILIAL = '11' AND D4_COD = SB1_.B1_COD AND SB1_.D_E_L_E_T_=' '
+        LEFT JOIN NNR110 NNR ON NNR.NNR_FILIAL = '11' AND  NNR_CODIGO = D4_LOCAL AND NNR.D_E_L_E_T_=' '
+
+WHERE  SC2.C2_FILIAL='11'
+		AND SC2.D_E_L_E_T_=' '
+
+		AND D4_OP BETWEEN 	? AND 	?
+		AND SC2.C2_DATPRF BETWEEN  ? AND ?
+
+
+	--cQuery += "SC2.C2_NUM || SC2.C2_ITEM || SC2.C2_SEQUEN || SC2.C2_ITEMGRD >= '" + mv_par01 + "' AND "
+	--cQuery += "SC2.C2_NUM || SC2.C2_ITEM || SC2.C2_SEQUEN || SC2.C2_ITEMGRD <= '" + mv_par02 + "' AND "
+	--SC2.C2_DATPRF BETWEEN '" + Dtos(mv_par03) + "' AND '" + Dtos(mv_par04) + "' "
+	--cQuery += "AND SC2.C2_DATRF = ' '"
+
+ORDER BY SC2.C2_FILIAL, SC2.C2_DATPRF, D4_OP, SB1_.B1_COD]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>QTDUM1</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>QTDUM1</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>QTDUM1</design:label>
+            <design:formattingHints>
+              <design:displaySize>15</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>QTDKG</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>QTDKG</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>QTDKG</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_XLOTE</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>16</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_XLOTE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_XLOTE</design:label>
+            <design:formattingHints>
+              <design:displaySize>16</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>CLINHA</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>14</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>CLINHA</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>CLINHA</design:label>
+            <design:formattingHints>
+              <design:displaySize>14</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>NNR_DESCRI</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>20</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>NNR_DESCRI</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>NNR_DESCRI</design:label>
+            <design:formattingHints>
+              <design:displaySize>20</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_EMISSAO</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>93</design:nativeDataTypeCode>
+            <design:precision>23</design:precision>
+            <design:scale>3</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_EMISSAO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_EMISSAO</design:label>
+            <design:formattingHints>
+              <design:displaySize>23</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_FILIAL</design:name>
+              <design:position>7</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>2</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_FILIAL</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_FILIAL</design:label>
+            <design:formattingHints>
+              <design:displaySize>2</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DESC1</design:name>
+              <design:position>8</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>55</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DESC1</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DESC1</design:label>
+            <design:formattingHints>
+              <design:displaySize>55</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_NUM</design:name>
+              <design:position>9</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>6</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_NUM</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_NUM</design:label>
+            <design:formattingHints>
+              <design:displaySize>6</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_ITEM</design:name>
+              <design:position>10</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>2</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_ITEM</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_ITEM</design:label>
+            <design:formattingHints>
+              <design:displaySize>2</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_SEQUEN</design:name>
+              <design:position>11</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>3</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_SEQUEN</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_SEQUEN</design:label>
+            <design:formattingHints>
+              <design:displaySize>3</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_ITEMGRD</design:name>
+              <design:position>12</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>3</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_ITEMGRD</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_ITEMGRD</design:label>
+            <design:formattingHints>
+              <design:displaySize>3</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_DATRF</design:name>
+              <design:position>13</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>8</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_DATRF</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_DATRF</design:label>
+            <design:formattingHints>
+              <design:displaySize>8</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_PRODUTO</design:name>
+              <design:position>14</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>12</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_PRODUTO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_PRODUTO</design:label>
+            <design:formattingHints>
+              <design:displaySize>12</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_DESTINA</design:name>
+              <design:position>15</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>1</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_DESTINA</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_DESTINA</design:label>
+            <design:formattingHints>
+              <design:displaySize>1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_PEDIDO</design:name>
+              <design:position>16</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>6</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_PEDIDO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_PEDIDO</design:label>
+            <design:formattingHints>
+              <design:displaySize>6</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_ROTEIRO</design:name>
+              <design:position>17</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>2</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_ROTEIRO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_ROTEIRO</design:label>
+            <design:formattingHints>
+              <design:displaySize>2</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_QUJE</design:name>
+              <design:position>18</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_QUJE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_QUJE</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_PERDA</design:name>
+              <design:position>19</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_PERDA</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_PERDA</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_QUANT</design:name>
+              <design:position>20</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_QUANT</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_QUANT</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>QTDLIQ</design:name>
+              <design:position>21</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>QTDLIQ</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>QTDLIQ</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_OBS</design:name>
+              <design:position>22</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>30</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_OBS</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_OBS</design:label>
+            <design:formattingHints>
+              <design:displaySize>30</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_TPOP</design:name>
+              <design:position>23</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>1</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_TPOP</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_TPOP</design:label>
+            <design:formattingHints>
+              <design:displaySize>1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>SC2RECNO</design:name>
+              <design:position>24</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>4</design:nativeDataTypeCode>
+            <design:precision>10</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>SC2RECNO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>SC2RECNO</design:label>
+            <design:formattingHints>
+              <design:displaySize>11</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_SEQ</design:name>
+              <design:position>25</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>4</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_SEQ</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_SEQ</design:label>
+            <design:formattingHints>
+              <design:displaySize>4</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_OP</design:name>
+              <design:position>26</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>14</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_OP</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_OP</design:label>
+            <design:formattingHints>
+              <design:displaySize>14</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_LOCAL</design:name>
+              <design:position>27</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>4</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_LOCAL</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_LOCAL</design:label>
+            <design:formattingHints>
+              <design:displaySize>4</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>UM1</design:name>
+              <design:position>28</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>2</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>UM1</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>UM1</design:label>
+            <design:formattingHints>
+              <design:displaySize>2</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>UM2</design:name>
+              <design:position>29</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>2</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>UM2</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>UM2</design:label>
+            <design:formattingHints>
+              <design:displaySize>2</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DESC2</design:name>
+              <design:position>30</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>55</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DESC2</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DESC2</design:label>
+            <design:formattingHints>
+              <design:displaySize>55</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_COD</design:name>
+              <design:position>31</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>12</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_COD</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_COD</design:label>
+            <design:formattingHints>
+              <design:displaySize>12</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_QTDEORI</design:name>
+              <design:position>32</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>15</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_QTDEORI</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_QTDEORI</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DT_BRANCO</design:name>
+              <design:position>33</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>11</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DT_BRANCO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DT_BRANCO</design:label>
+            <design:formattingHints>
+              <design:displaySize>11</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>HR_BRANCO</design:name>
+              <design:position>34</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>7</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>HR_BRANCO</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>HR_BRANCO</design:label>
+            <design:formattingHints>
+              <design:displaySize>7</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_DATPRI</design:name>
+              <design:position>35</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>93</design:nativeDataTypeCode>
+            <design:precision>23</design:precision>
+            <design:scale>3</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_DATPRI</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_DATPRI</design:label>
+            <design:formattingHints>
+              <design:displaySize>23</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_DATPRF</design:name>
+              <design:position>36</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>93</design:nativeDataTypeCode>
+            <design:precision>23</design:precision>
+            <design:scale>3</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_DATPRF</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_DATPRF</design:label>
+            <design:formattingHints>
+              <design:displaySize>23</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_CC</design:name>
+              <design:position>37</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>9</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_CC</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_CC</design:label>
+            <design:formattingHints>
+              <design:displaySize>9</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_DATAJI</design:name>
+              <design:position>38</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>11</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_DATAJI</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_DATAJI</design:label>
+            <design:formattingHints>
+              <design:displaySize>11</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_DATAJF</design:name>
+              <design:position>39</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>11</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_DATAJF</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_DATAJF</design:label>
+            <design:formattingHints>
+              <design:displaySize>11</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>C2_STATUS</design:name>
+              <design:position>40</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>12</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>C2_STATUS</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>C2_STATUS</design:label>
+            <design:formattingHints>
+              <design:displaySize>12</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_LOTECTL</design:name>
+              <design:position>41</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>16</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_LOTECTL</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_LOTECTL</design:label>
+            <design:formattingHints>
+              <design:displaySize>16</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>D4_NUMLOTE</design:name>
+              <design:position>42</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>6</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>NotNullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>D4_NUMLOTE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>D4_NUMLOTE</design:label>
+            <design:formattingHints>
+              <design:displaySize>6</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+    </data-sets>
+    <styles>
+        <style name="report" id="4">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">10pt</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <page-header>
+                <label id="20">
+                    <property name="fontSize">18pt</property>
+                    <property name="fontWeight">normal</property>
+                    <property name="textUnderline">none</property>
+                    <property name="textAlign">center</property>
+                    <text-property name="text">Ordem de Produção</text-property>
+                </label>
+            </page-header>
+            <page-footer>
+                <text id="3">
+                    <property name="contentType">html</property>
+                    <text-property name="content"><![CDATA[<value-of>new Date()</value-of>]]></text-property>
+                </text>
+            </page-footer>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <data id="976">
+            <property name="resultSetColumn">D4_OP</property>
+        </data>
+        <table id="368">
+            <property name="marginTop">30pt</property>
+            <property name="width">7.947916666666667in</property>
+            <property name="dataSet">R2</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">D4_COD</property>
+                    <text-property name="displayName">D4_COD</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_COD"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">DESC2</property>
+                    <text-property name="displayName">DESC2</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["DESC2"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">QTDUM1</property>
+                    <text-property name="displayName">QTDUM1</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["QTDUM1"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">D4_QTDEORI</property>
+                    <text-property name="displayName">D4_QTDEORI</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_QTDEORI"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">UM2</property>
+                    <text-property name="displayName">UM2</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["UM2"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">D4_LOTECTL</property>
+                    <text-property name="displayName">D4_LOTECTL</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_LOTECTL"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">NNR_DESCRI</property>
+                    <text-property name="displayName">NNR_DESCRI</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["NNR_DESCRI"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">D4_SEQ</property>
+                    <text-property name="displayName">D4_SEQ</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_SEQ"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">D4_NUMLOTE</property>
+                    <text-property name="displayName">D4_NUMLOTE</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_NUMLOTE"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">D4_LOCAL</property>
+                    <text-property name="displayName">D4_LOCAL</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_LOCAL"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">D4_OP</property>
+                    <text-property name="displayName">D4_OP</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["D4_OP"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <column id="405">
+                <property name="width">0.9479166666666666in</property>
+            </column>
+            <column id="406">
+                <property name="width">1.5416666666666667in</property>
+            </column>
+            <column id="407">
+                <property name="width">0.53125in</property>
+            </column>
+            <column id="408">
+                <property name="width">0.375in</property>
+            </column>
+            <column id="409">
+                <property name="width">0.46875in</property>
+            </column>
+            <column id="410">
+                <property name="width">1.7916666666666667in</property>
+            </column>
+            <column id="411">
+                <property name="width">0.5104166666666666in</property>
+            </column>
+            <column id="412">
+                <property name="width">0.4479166666666667in</property>
+            </column>
+            <column id="413">
+                <property name="width">0.78125in</property>
+            </column>
+            <column id="414">
+                <property name="width">0.5520833333333334in</property>
+            </column>
+            <column id="949">
+                <list-property name="visibility">
+                    <structure>
+                        <property name="format">all</property>
+                        <expression name="valueExpr" type="javascript">true</expression>
+                    </structure>
+                </list-property>
+                <property name="width">0.5520833333333334in</property>
+            </column>
+            <header>
+                <row id="369">
+                    <property name="backgroundColor">#000000</property>
+                    <property name="color">#FFFFFF</property>
+                    <property name="textAlign">left</property>
+                    <cell id="370">
+                        <label id="416">
+                            <text-property name="text">Código</text-property>
+                        </label>
+                    </cell>
+                    <cell id="371">
+                        <label id="418">
+                            <text-property name="text">Descrição</text-property>
+                        </label>
+                    </cell>
+                    <cell id="372">
+                        <label id="420">
+                            <text-property name="text">Qtde</text-property>
+                        </label>
+                    </cell>
+                    <cell id="373">
+                        <label id="423">
+                            <text-property name="text">U.M.</text-property>
+                        </label>
+                    </cell>
+                    <cell id="374">
+                        <label id="425">
+                            <text-property name="text">Lote</text-property>
+                        </label>
+                    </cell>
+                    <cell id="375">
+                        <label id="427">
+                            <text-property name="text">Descrição</text-property>
+                        </label>
+                    </cell>
+                    <cell id="376">
+                        <label id="448">
+                            <text-property name="text">Check</text-property>
+                        </label>
+                    </cell>
+                    <cell id="377">
+                        <label id="429">
+                            <text-property name="text">Seq.</text-property>
+                        </label>
+                    </cell>
+                    <cell id="378">
+                        <label id="431">
+                            <text-property name="text">Lote</text-property>
+                        </label>
+                    </cell>
+                    <cell id="379">
+                        <label id="433">
+                            <text-property name="text">Perda</text-property>
+                        </label>
+                    </cell>
+                    <cell id="946">
+                        <label id="975">
+                            <text-property name="text">D4_OP</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <group id="977">
+                <property name="groupName">OP</property>
+                <expression name="keyExpr" type="javascript">row["D4_OP"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue" type="javascript">row["D4_OP"]</expression>
+                </structure>
+                <property name="hideDetail">false</property>
+                <property name="pageBreakAfter">always-excluding-last</property>
+                <header>
+                    <row id="978">
+                        <cell id="979"/>
+                        <cell id="980"/>
+                        <cell id="981"/>
+                        <cell id="982"/>
+                        <cell id="983"/>
+                        <cell id="984"/>
+                        <cell id="985"/>
+                        <cell id="986"/>
+                        <cell id="987"/>
+                        <cell id="988"/>
+                        <cell id="989"/>
+                    </row>
+                </header>
+                <footer>
+                    <row id="990">
+                        <cell id="991"/>
+                        <cell id="992"/>
+                        <cell id="993"/>
+                        <cell id="994"/>
+                        <cell id="995"/>
+                        <cell id="996"/>
+                        <cell id="997"/>
+                        <cell id="998"/>
+                        <cell id="999"/>
+                        <cell id="1000"/>
+                        <cell id="1001"/>
+                    </row>
+                </footer>
+            </group>
+            <detail>
+                <row id="381">
+                    <property name="fontSize">8pt</property>
+                    <property name="height">0.25in</property>
+                    <cell id="382">
+                        <data id="417">
+                            <property name="resultSetColumn">D4_COD</property>
+                        </data>
+                    </cell>
+                    <cell id="383">
+                        <data id="419">
+                            <property name="resultSetColumn">DESC2</property>
+                        </data>
+                    </cell>
+                    <cell id="384">
+                        <data id="422">
+                            <property name="resultSetColumn">D4_QTDEORI</property>
+                        </data>
+                    </cell>
+                    <cell id="385">
+                        <data id="424">
+                            <property name="resultSetColumn">UM2</property>
+                        </data>
+                    </cell>
+                    <cell id="386">
+                        <data id="436">
+                            <property name="resultSetColumn">D4_LOCAL</property>
+                        </data>
+                    </cell>
+                    <cell id="387">
+                        <data id="428">
+                            <property name="resultSetColumn">NNR_DESCRI</property>
+                        </data>
+                    </cell>
+                    <cell id="388">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">medium</property>
+                        <property name="borderLeftStyle">solid</property>
+                        <property name="borderLeftWidth">medium</property>
+                        <property name="borderRightStyle">solid</property>
+                        <property name="borderRightWidth">medium</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">medium</property>
+                    </cell>
+                    <cell id="389">
+                        <data id="430">
+                            <property name="resultSetColumn">D4_SEQ</property>
+                        </data>
+                    </cell>
+                    <cell id="390">
+                        <data id="437">
+                            <property name="resultSetColumn">D4_LOTECTL</property>
+                        </data>
+                    </cell>
+                    <cell id="391">
+                        <data id="434">
+                            <property name="resultSetColumn">D4_NUMLOTE</property>
+                        </data>
+                    </cell>
+                    <cell id="947"/>
+                </row>
+            </detail>
+            <footer>
+                <row id="393">
+                    <cell id="394">
+                        <property name="colSpan">10</property>
+                        <property name="rowSpan">1</property>
+                    </cell>
+                    <cell id="948"/>
+                </row>
+            </footer>
+        </table>
+        <grid id="257">
+            <property name="marginTop">30px</property>
+            <property name="marginLeft">33%</property>
+            <property name="masterPage">Simple MasterPage</property>
+            <property name="pageBreakAfter">auto</property>
+            <property name="pageBreakBefore">auto</property>
+            <property name="pageBreakInside">auto</property>
+            <property name="height">2.8541666666666665in</property>
+            <property name="width">2.6145833333333335in</property>
+            <column id="258">
+                <property name="width">1.1979166666666667in</property>
+            </column>
+            <column id="259">
+                <property name="width">1.4166666666666667in</property>
+            </column>
+            <row id="260">
+                <property name="height">0.25in</property>
+                <cell id="261">
+                    <property name="colSpan">2</property>
+                    <property name="rowSpan">1</property>
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="293">
+                        <property name="fontSize">8pt</property>
+                        <property name="fontWeight">bold</property>
+                        <property name="textAlign">center</property>
+                        <text-property name="text">Análises para Liberação de Tanque</text-property>
+                    </label>
+                </cell>
+            </row>
+            <row id="263">
+                <property name="height">0.23958333333333334in</property>
+                <cell id="264">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="294">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Brix Original (°)</text-property>
+                    </label>
+                </cell>
+                <cell id="265">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="266">
+                <property name="height">0.22916666666666666in</property>
+                <cell id="267">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="295">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Brix Corrigido(°)</text-property>
+                    </label>
+                </cell>
+                <cell id="268">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="269">
+                <property name="height">0.2708333333333333in</property>
+                <cell id="270">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="296">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Acidez(%)</text-property>
+                    </label>
+                </cell>
+                <cell id="271">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="272">
+                <property name="height">0.28125in</property>
+                <cell id="273">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="297">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Ratio</text-property>
+                    </label>
+                </cell>
+                <cell id="274">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="275">
+                <property name="height">0.25in</property>
+                <cell id="276">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="303">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">pH</text-property>
+                    </label>
+                </cell>
+                <cell id="277">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="278">
+                <property name="height">0.2604166666666667in</property>
+                <cell id="279">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="302">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Sabor</text-property>
+                    </label>
+                </cell>
+                <cell id="280">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="281">
+                <property name="height">0.2916666666666667in</property>
+                <cell id="282">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="301">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Cor</text-property>
+                    </label>
+                </cell>
+                <cell id="283">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="284">
+                <property name="height">0.2604166666666667in</property>
+                <cell id="285">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="300">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Defeito</text-property>
+                    </label>
+                </cell>
+                <cell id="286">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="287">
+                <property name="height">0.25in</property>
+                <cell id="288">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="299">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Hora de Análise</text-property>
+                    </label>
+                </cell>
+                <cell id="289">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+            <row id="290">
+                <property name="height">0.2708333333333333in</property>
+                <cell id="291">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                    <label id="298">
+                        <property name="fontSize">8pt</property>
+                        <text-property name="text">Analista</text-property>
+                    </label>
+                </cell>
+                <cell id="292">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">thin</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">thin</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">thin</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">thin</property>
+                </cell>
+            </row>
+        </grid>
+    </body>
+    <property name="pageVariables">
+        <variable-element name="Data">
+            <expression name="value" type="javascript">BirtDateTime.now()</expression>
+            <property name="type">page</property>
+        </variable-element>
+    </property>
+</report>

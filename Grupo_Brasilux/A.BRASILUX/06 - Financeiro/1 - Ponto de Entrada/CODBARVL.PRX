@@ -1,0 +1,175 @@
+#include "protheus.ch"
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
+ฑฑบPrograma  ณ CODBARVL บAutor  ณ Vicente Sementilli บ Data ณ  26/02/97   บฑฑ
+ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
+ฑฑบDesc.     ณ Calculo do modulo 11 sugerido pelo ITAU. Esta fun็ใo somen-บฑฑ
+ฑฑบ          ณ te ้ utilizada como valida็ใo do campo E2_CODBAR.          บฑฑ
+ฑฑบ          ณ Esta rotina tamb้m tranforma o c๓digo digitado em c๓digo deบฑฑ
+ฑฑบ          ณ barras se necessแrio.                                      บฑฑ
+ฑฑบ          ณ O campo E2_CODBAR nใo existe. No padrใo ele deve ser criadoบฑฑ
+ฑฑบ          ณ Nome         Tipo   Tamanho  Validacao                     บฑฑ
+ฑฑบ          ณ -----------  --     ----     ----------------------------  บฑฑ
+ฑฑบ          ณ E2_CODBAR    C      44       EXECBLOCK("CODBARVL")         บฑฑ
+ฑฑบ          ณ A partir da versใo 8.11 o campo passou a ser padrใo no sis-บฑฑ
+ฑฑบ          ณ tema, nใo necessitando mais aprova-lo.                     บฑฑ
+ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
+ฑฑบUso       ณ BRASILUX TINTAS TษCNICAS LTDA.                             บฑฑ
+ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
+ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
+฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿*/
+//30/09/2019 - Luํs Gustavo - Adequa็ใo para release 12.1.25
+User Function Codbarvl()
+     Local lRet    := .F.
+     Local cStr    := ""
+     Local i       := 0
+     Local nMult   := 0
+     Local nModulo := 0
+     Local cChar   := ""
+
+     If FWCodEmp() <> '11' //Empresas que nใo sใo do grupo 11(Tecpolpa).
+        SetPrvt("CDIGITO, CDV1, CDV2, CDV3, CCAMPO1, CCAMPO2")
+        SetPrvt("CCAMPO3, NVAL, NCALC_DV1, NCALC_DV2, NCALC_DV3, NREST")
+
+        If ValType(M->E2_CODBAR) == NIL
+           Return(.t.)
+        Endif
+
+        cStr    := M->E2_CODBAR
+        i       := 0
+        nMult   := 2
+        nModulo := 0
+        cChar   := Space(1)
+        cDigito := Space(1)
+
+        If Len(AllTrim(cStr)) < 44
+           cDV1    := SubStr(cStr, 10, 01)
+           cDV2    := SubStr(cStr, 21, 01)
+           cDV3    := SubStr(cStr, 32, 01)
+
+           cCampo1 := SubStr(cStr, 01, 09)
+           cCampo2 := SubStr(cStr, 11, 10)
+           cCampo3 := SubStr(cStr, 22, 10)
+
+           /*/
+           ฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆ
+           ฆฆ+-----------------------------------------------------------------------+ฆฆ
+           ฆฆฆDescri็เo ฆ Calculo do modulo 10 sugerido pelo ITAU. Esta funcao       ฆฆฆ
+           ฆฆฆ          ฆ somente e utilizada como validacao do campo E2_CODBAR.     ฆฆฆ
+           ฆฆฆ          ฆ Verifica a digitacao do codigo de barras                   ฆฆฆ
+           ฆฆ+-----------------------------------------------------------------------+ฆฆ
+           ฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆ
+           /*/
+           // Calcula DV1
+           nMult   := 2
+           nModulo := 0
+           nVal    := 0
+
+           For i := Len(cCampo1) TO 1 Step -1
+               cChar := SubStr(cCampo1, i, 1)
+               If isAlpha(cChar)
+                  Help(" ", 1, "ONLYNUM")
+                  Return(.f.)
+               Endif
+               nModulo := Val(cChar) * nMult
+               If nModulo >= 10
+                  nVal := NVAL + 1
+                  nVal := nVal + (nModulo-10)
+               Else
+                  nVal := nVal + nModulo
+               EndIf
+               nMult:= If(nMult==2, 1, 2)
+           Next
+           nCalc_DV1 := 10 - (nVal % 10)
+           nCalc_DV1 := Iif(nCalc_DV1 == 10, 0, nCalc_DV1)
+
+           // Calcula DV2
+           nMult   := 2
+           nModulo := 0
+           nVal    := 0
+
+           For i := Len(cCampo2) TO 1 Step -1
+               cChar := Substr(cCampo2, i, 1)
+               If isAlpha(cChar)
+                  Help(" ", 1, "ONLYNUM")
+                  Return(.f.)
+               Endif
+               nModulo := Val(cChar) * nMult
+               If nModulo >= 10
+                  nVal := nVal + 1
+                  nVal := nVal + (nModulo - 10)
+               Else
+                  nVal := nVal + nModulo
+               EndIf
+               nMult := If(nMult == 2, 1, 2)
+           Next        
+           nCalc_DV2 := 10 - (nVal % 10)
+           nCalc_DV2 := Iif(nCalc_DV2 == 10, 0, nCalc_DV2)
+
+           // Calcula DV3
+           nMult   := 2
+           nModulo := 0
+           nVal    := 0
+
+           For i := Len(cCampo3) TO 1 Step -1
+               cChar := Substr(cCampo3, i, 1)
+               If isAlpha(cChar)
+                  Help(" ", 1, "ONLYNUM")
+                  Return(.f.)    
+               Endif
+               nModulo := Val(cChar) * nMult
+               If nModulo >= 10
+                  nVal := nVal + 1
+                  nVal := nVal + (nModulo - 10)
+               Else
+                  nVal := nVal + nModulo
+               EndIf
+               nMult:= if(nMult == 2, 1, 2)
+           Next
+           nCalc_DV3 := 10 - (nVal % 10)
+           nCalc_DV3 := Iif(nCalc_DV3 == 10, 0, nCalc_DV3)
+
+           If !(nCalc_DV1 == Val(cDV1) .and. nCalc_DV2 == Val(cDV2) .and. nCalc_DV3 == Val(cDV3) )
+              Help(" ",1,"INVALCODBAR")
+              lRet := .f.
+           Else
+              lRet := .t.
+           Endif
+        Else
+           cDigito := SubStr(cStr, 5, 1)
+           cStr    := SubStr(cStr, 1, 4)+SubStr(cStr, 6, 39)
+           /*/
+           ฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆ
+           ฆฆ+-----------------------------------------------------------------------+ฆฆ
+           ฆฆฆDescri็เo ฆ Calculo do modulo 11 sugerido pelo ITAU. Esta funcao       ฆฆฆ
+           ฆฆฆ          ฆ somente e utilizada como validacao do campo E2_CODBAR.     ฆฆฆ
+           ฆฆฆ          ฆ Verifica o codigo de barras grafico (Atraves de leitor)    ฆฆฆ
+           ฆฆ+-----------------------------------------------------------------------+ฆฆ
+           ฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆฆ
+           /*/
+           cStr := AllTrim(cStr)
+           If Len(cStr) < 43
+              Help(" ", 1, "FALTADG")
+              Return(.f.)   
+           Endif
+           For i := Len(cStr) TO 1 Step -1
+               cChar := Substr(cStr, i, 1)
+               If isAlpha(cChar)
+                  Help(" ", 1, "ONLYNUM")
+                  Return(.f.)
+               Endif
+               nModulo := nModulo + Val(cChar) * nMult
+               nMult   := if(nMult == 9, 2, nMult+1)
+           Next
+           nRest := 11 - (nModulo % 11)
+           nRest := If(nRest == 10 .or. nRest == 11, 1, nRest)
+           If nRest <> Val(cDigito)
+              Help(" ", 1, "DgSISPAG")
+              lRet := .f.
+           Else         
+              lRet := .t.
+           Endif
+        Endif
+     Endif  
+Return(lRet)

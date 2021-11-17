@@ -1,0 +1,58 @@
+/*
+Padrao Zebra
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³IMG02     ºAutor  ³Sandro Valex        º Data ³  19/06/01   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Ponto de entrada referente a imagem de identificacao da     º±±
+±±º          ³endereco                                                    º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP5                                                        º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±ºTicket    ³ #018835 - Ajuste de código                                 º±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function Img02( cArm )
+
+	Local _lRet		:= .F.
+	Local cCodigo	:= " "
+	//Local cCodID	:= ParamIxb[ 01 ]
+	Local cArmazem	:= cArm
+
+	If Empty( SBE->BE_IDETIQ )
+		If Usacb0("02")
+			cCodigo := CBGrvEti( "02", { SBE->BE_LOCALIZ, SBE->BE_LOCAL } )
+			RecLock("SBE",.F.)
+				SBE->BE_IDETIQ := cCodigo
+			MsUnlock()
+		Else
+			cCodigo := SBE->( BE_LOCAL + BE_LOCALIZ )
+		EndIf
+	Else
+		If Usacb0("02")
+			cCodigo := SBE->BE_IDETIQ
+		Else
+			cCodigo := SBE->( BE_LOCAL + BE_LOCALIZ )
+		EndIf
+	EndIf
+
+	cCodigo := Alltrim( cCodigo )
+
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN( 01, 06 )
+	MSCBBOX( 30, 05, 76, 05 )
+	MSCBBOX( 02, 12.7, 76, 12.7 )
+	MSCBBOX( 02, 21, 76, 21 )
+	MSCBBOX( 30, 01, 30, 12.7, 03 )
+	MSCBGRAFIC( 02, 03, "SIGA" )
+	MSCBSAY( 05, 04, cArmazem, "N", "0", "032,035")
+	MSCBSAY( 33, 02, "ENDERECO ETQ.", "N", "0", "025,035", , , , , .T. )
+	MSCBSAY( 33, 08, Substr( SBE->BE_LOCALIZ, 01, 04 ), "N", "0", "032,035" )
+	MSCBSAYBAR( 25, 22, cCodigo, "N", "MB07", /*8.36*/ 18, .F., .T., .F., , 04, 01, .F., .F., "1", .T. )
+	MSCBSAY( 05, 62, Substr( SBE->BE_LOCALIZ, 05, 02 ) + "." + Substr( SBE->BE_LOCALIZ, 07, 04 ) + "." + Substr( SBE->BE_LOCALIZ, 11, 01 ), "N", "0", "200,170" )
+	MSCBInfoEti("Endereco", "30X100")
+	MSCBEND()
+
+Return( _lRet )

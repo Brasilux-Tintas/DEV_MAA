@@ -1,0 +1,188 @@
+#IFNDEF WINDOWS
+#DEFINE PSAY SAY
+#ENDIF
+#include "rwmake.ch"        
+#include "topconn.ch"
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ ACDE001 ºAutor ³ Jose Uliana            º Data ³ 27/01/21 º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Relatório das Etiquetas para Bipar Estornos Carregamento   º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ TecPolpa Industri e Comercio de Sucos LTDA.                º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+Parametros de entrada foi criado no SX1 Grupo ACDE001      
+SIGACFG
+- Base de Dados 
+  - Dicionário
+    - Base de Dados
+      - Clicar em Perguntas
+        - Clicar em Incluir
+         - Colocar o no  do Grupo (Geralmente colocar o nome do programa)
+           - Incluir as colunas (parametros Ex:- MV_Par01, MV_Oar02, MV_Par03, e etc)
+MV_PAR01 = Filial  DE
+MV_PAR02 = Filial  ATE
+MV_PAR03 = Ord. Separação DE
+MV_PAR04 = Ord. Separação ATE
+MV_PAR05 = Pedido DE
+MV_PAR06 = Pedido ATE
+*/
+
+User Function ACDE001()     
+     SetPrvt("CBTXT,CBCONT,NORDEM,ALFA,Z,M")
+     SetPrvt("TAMANHO,LIMITE,TITULO,CDESC1,CDESC2,CDESC3")
+     SetPrvt("CCABEC,CCABPRO,CNATUREZA,ARETURN,NOMEPROG,CPERG")
+     SetPrvt("NLASTKEY,LCONTINUA,NLIN,NCOL,WNREL,NTIPO")
+     SetPrvt("M_PAG,CCABEC1,CCABEC2,CCABEC3,CSTRING")
+     SetPrvt("CQUERY","Result")
+
+     Result   := 0
+     CbTxt    := ""
+     CbCont   := 0
+     nOrdem   := 0
+     Alfa     := 0
+     Z        := 0
+     M        := 0
+     //tamanho  := "M"
+     tamanho  := "P"
+     limite   := 110
+
+     titulo   := "Etiquetas Estorno da Ordem Separação(BIP)"
+     cDesc1   := PADC("Relatório de Códigos das Etiquetas para Bipar Estornos Carregamento ",74)
+     cDesc2   := ""
+     cDesc3   := PADC(" ",74)
+     cCabec   := PADC("Relatório de Códigos das Etiquetas para Bipar Estornos Carregamento",68)
+     cCabPro  := ""
+     cNatureza:= ""
+     aReturn  := { "Especial", 1,"Administracao", 1, 2, 1,"",1 }
+     nomeprog := "ACDE001"
+     cPerg    := "ACDE001"
+     nLastKey := 0
+     lContinua:= .T.
+     _nLin    := 90
+     nCol     := 60
+     wnrel    := "ACDE001"
+     nTipo    := 18
+     m_pag    := 01
+
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³ Inicializa  regua de impressao                            ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+     //		     0         1         2         3         4         5         6         7         8         9         0         1         2         3         4         5
+     //          1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
+     cCabec1  :="ORD.SEPARAÇÃO  ETIQUETA  PRODUTO      LOTECT    LOCAL    LCALIZ  QTESEP   PEDIDO " // SEQUEN  ITESEP  CODSEP  STATUS"
+     
+     cCabec2  :=""   
+     cCabec3  :=""
+
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³ Verifica as perguntas selecionadas, busca o padrao                      ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     cString  :="CB9"
+
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³ Envia controle para a funcao SETPRINT                        ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     
+   if !u_VldAcesso(funname())
+      MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
+      return 
+  endif 
+
+     Pergunte("ACDE001",.F.)   
+     wnrel := SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3,.T.,,,Tamanho)
+
+     If nLastKey == 27
+        Return
+     Endif
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³ Verifica Posicao do Formulario na Impressora                 ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     SetDefault(aReturn,cString)
+
+     If nLastKey == 27
+        Return
+     Endif
+
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³ Inicio do Processamento do Relatorio                         ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+     #IFDEF WINDOWS
+            RptStatus({|| RptDetail()})
+            Return
+            Static Function RptDetail()
+     #ENDIF
+ 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Montagem da Query                                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+cQuery := "SELECT   CB9_ORDSEP AS 'ORDSEP', CB9_CODETI AS 'CODETI', CB9_PROD   AS 'PROD',   CB9_LOTECT AS 'LOTECT', " + CHR(13) + CHR(10)
+cQuery := cQuery + "CB9_LOCAL  AS 'LOCALL',  CB9_LCALIZ AS 'LCALIZ', CB9_QTESEP AS 'QTESEP', CB9_PEDIDO AS 'PEDIDO'," + CHR(13) + CHR(10)
+cQuery := cQuery + "CB9_SEQUEN AS 'SEQUEN', CB9_ITESEP AS 'ITESEP', CB9_CODSEP AS 'CODSEP', CB9_STATUS AS 'STATUS'" + CHR(13) + CHR(10)
+cQuery := cQuery + " from CB9110 " + CHR(13) + CHR(10)
+cQuery := cQuery + "where D_E_L_E_T_ = '' " + CHR(13) + CHR(10)
+cQuery := cQuery + "AND CB9_FILIAL BETWEEN "+ MV_PAR01 +" AND "+ MV_PAR02 +" " + CHR(13) + CHR(10)
+cQuery := cQuery + "AND CB9_ORDSEP BETWEEN "+ MV_PAR03 +" AND "+ MV_PAR04 +" " + CHR(13) + CHR(10)
+cQuery := cQuery + "AND CB9_PEDIDO BETWEEN "+ MV_PAR05 +" AND "+ MV_PAR06 +" " + CHR(13) + CHR(10)
+cQuery := cQuery + "GROUP BY CB9_ORDSEP,CB9_CODETI,CB9_PROD,CB9_LOTECT,CB9_LOCAL,CB9_LCALIZ,CB9_QTESEP,CB9_PEDIDO, " + CHR(13) + CHR(10)
+cQuery := cQuery + "         CB9_SEQUEN,CB9_ITESEP,CB9_CODSEP,CB9_STATUS " + CHR(13) + CHR(10)
+cQuery := cQuery + "ORDER BY ORDSEP, CODETI" + CHR(13) + CHR(10)
+
+     TCQuery cQuery NEW ALIAS "TCQ" 
+
+     _nLin := 80	
+     DbSelectArea("TCQ")
+     DbGoTop()
+
+     SetRegua(Reccount())
+     While !EoF()      
+           If _nlin >= 60
+              Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)
+              _nLin:= 08
+           Endif
+     //	 0         1         2         3         4         5         6         7         8         9         0         1         2         3         4         5         6
+     //  012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
+     //  "ORDSEP    CODETI     PROD           LOTECT      LOCAL    LCALIZ QTESEP  PEDIDO  SEQUEN  ITESEP  CODSEP  STATUS"     
+     
+           @ _nLin,005 PSAY Alltrim(TCQ->ORDSEP)  Picture "@E 999999"
+           @ _nLin,013 PSAY Alltrim(TCQ->CODETI)  Picture "@E 9999999999"
+           @ _nLin,025 PSAY Alltrim(TCQ->PROD)    Picture "@!"
+           @ _nlin,039 PSAY TCQ->LOTECT           Picture "@E 999999"
+           @ _nlin,049 PSAY TCQ->LOCALL           Picture "@!"
+           @ _nlin,058 PSAY TCQ->LCALIZ           Picture "@!"
+           @ _nlin,065 PSAY TCQ->QTESEP           Picture "@E 999,999"  
+           @ _nlin,075 PSAY TCQ->PEDIDO           Picture "@E 999999999"  
+//           @ _nlin,091 PSAY TCQ->SEQUEN           Picture "@E 9999"  
+//           @ _nlin,100 PSAY TCQ->ITESEP           Picture "@E 9999"  
+//           @ _nlin,105 PSAY TCQ->CODSEP           Picture "@E 999999"
+//           @ _nlin,115 PSAY TCQ->STATUS           Picture "@E 999"  
+
+            _nlin++  
+           DbSelectArea("TCQ")  
+           DbSkip()
+     EndDo
+
+     Roda(cbcont,cbtxt,tamanho)
+
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³                      FIM DA IMPRESSAO                        ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     DbSelectArea("TCQ")
+     DbCloseArea()
+
+     Set Device To Screen
+     If aReturn[5] == 1
+        Set Printer TO
+        DbCommitAll()
+        ourspool(wnrel)
+     Endif
+
+Return
