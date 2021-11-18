@@ -18,7 +18,7 @@ User Function BRCOM005()
      Local nPrcUni := 0
      Local cQry    := ""
      Local aArea      := GetArea()  
-     
+     u_zcfga01( 'BRCOM005' ) //LGS#2021118 - Gravação de log de utilização da rotina
      cQry += "SELECT TOP 1 SD1.D1_VUNIT AS PRCUNIT "
      cQry += "FROM "+RetSqlName("SD1")+" SD1 WITH (NOLOCK) "
      cQry += "WHERE SD1.D1_FILIAL  = '"+xFilial("SD1")+"' "

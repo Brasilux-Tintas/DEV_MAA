@@ -34,7 +34,7 @@ User Function MT100TOK()
      Local nPosVunit   := aScan(aHeader, { |x| Trim( x[2] ) == "D1_VUNIT"    } ) //Posicionamento do campo D1_VUNIT no aHeader
      Local lPis, lCof, cMens,_cGrpEmp,lAchou,_nTam,_nVlrUnit //, cTes
      Local _lVVarNull  := Type("l103Auto") <> "U"
-
+     u_zcfga01( 'MT100TOK' ) //LGS#2021118 - Gravação de log de utilização da rotina
 _cGrpEmp := alltrim(FWGrpCompany())
 
      //If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa). //Cleber(24/02/20) -> Considerar TecPolpa para MasterSales, outras validações também serão consideradas

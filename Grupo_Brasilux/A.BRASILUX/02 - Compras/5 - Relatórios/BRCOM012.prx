@@ -41,7 +41,7 @@ Private cFilSC7		:= xFilial("SC7")
 Private cFilSCR		:= xFilial("SCR")
 Private cFilSE4		:= xFilial("SE4")
 Private cFilSM4		:= xFilial("SM4")
-
+u_zcfga01( 'BRCOM012' ) //LGS#2021118 - Grava豫o de log de utiliza豫o da rotina
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //쿛ara versoes localizadas em TReport R4 e usado o MATR110, a chamada e       �
 //퀁ealizada atraves do MATR111 onde a funcao TRepInUse() e executada para     �

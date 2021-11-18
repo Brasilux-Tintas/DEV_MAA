@@ -27,7 +27,7 @@ User Function BRCOM001()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-   
+     u_zcfga01( 'BRCOM001' ) //LGS#2021118 - Gravação de log de utilização da rotina
      cPerg := padr("BRCO01",10," ")
      ValidPerg()                     
      Pergunte(cPerg, .t.)

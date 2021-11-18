@@ -34,7 +34,7 @@ Local cMens1,_cGrpEmp,_cFilial,_cNumEmp
         MessageBox( "Acesso não autorizado!---->" + FunName(), "Atenção", 48 )
         Return 
      Endif 
-  
+     u_zcfga01( 'BRCOM011' ) //LGS#2021118 - Gravação de log de utilização da rotina
      If !(alltrim(_cNumEmp) == "01010106") .and. !(alltrim(_cNumEmp) == "01010107")
         cMens1 := "Acesso deverá ser feito no Depósito Fechado!"
         MessageBox( cMens1, "Atenção", 48 )

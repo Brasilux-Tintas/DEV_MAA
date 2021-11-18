@@ -52,7 +52,7 @@ User Function brcom02()
      Private wnrel        := "BRCOM02" // Coloque aqui o nome do arquivo usado para impressao em disco
 
      Private cString      := "SD1"
-
+     u_zcfga01( 'BRCOM02' ) //LGS#2021118 - Gravação de log de utilização da rotina
      ValidPerg()
      pergunte(cPerg,.f.)
      dbSelectArea("SD1")

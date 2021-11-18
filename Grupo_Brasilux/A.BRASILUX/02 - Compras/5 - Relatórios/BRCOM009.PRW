@@ -47,7 +47,7 @@ User Function BRCOM009()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRCOM009' ) //LGS#2021118 - Gravação de log de utilização da rotina
    
      dbSelectArea("ZZ3")
      dbSetOrder(1)

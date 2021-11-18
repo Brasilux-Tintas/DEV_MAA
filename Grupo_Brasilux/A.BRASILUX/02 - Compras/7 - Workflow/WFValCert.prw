@@ -16,7 +16,9 @@ User Function WFValCert()
 	Local cPara    			 	:= "compras@brasilux.com.br;thiago@brasilux.com.br"  //lista de rementes 
 	Local cAssunto			    := "CERTIFICADOS ISO DE FORNECEDORES ( VENCIDOS OU A VENCER )"
 	Local cMsg					:= ""
-   
+
+    u_zcfga01( 'WFVALCERT' ) //LGS#2021118 - Gravação de log de utilização da rotina
+
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" //TABLES "SB2"   
 
       

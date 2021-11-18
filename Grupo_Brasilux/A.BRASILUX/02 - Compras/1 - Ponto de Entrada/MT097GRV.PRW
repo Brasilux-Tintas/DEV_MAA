@@ -30,6 +30,7 @@ User Function MT097GRV()
      Local _nTAXACOF := GETMV("MV_TXCOFIN") //LGS#20200108 - Ajuste para adequação de release 12.1.25
      Private lRetPed := .f.
      Private oTemptable := ""
+     u_zcfga01( 'MT097GRV' ) //LGS#2021118 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         _aAreaAnt := u_PegaArea({"SC7","SF4","SB1","SC8","SE4","ZZ3","SB2","SA5"})
         _cFuncao := funname() //Verificar qual função está chamando o Ponto de Entrada, qdo vem do EIC está dando problema

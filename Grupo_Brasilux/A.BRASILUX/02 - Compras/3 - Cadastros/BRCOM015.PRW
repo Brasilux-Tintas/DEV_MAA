@@ -36,7 +36,7 @@ Private lOut,lOk,_oPT00005,cCodBar
         MessageBox( "Acesso não autorizado!---->" + FunName(), "Atenção", 48 )
         Return 
      Endif 
-  
+     u_zcfga01( 'BRCOM015' ) //LGS#2021118 - Gravação de log de utilização da rotina
      If !(alltrim(_cNumEmp) == "01010101") .and. !(alltrim(_cNumEmp) == "01010104")
         cMens1 := "Acesso deverá ser feito na Brasilux Matriz ou Resina!"
         MessageBox( cMens1, "Atenção", 48 )

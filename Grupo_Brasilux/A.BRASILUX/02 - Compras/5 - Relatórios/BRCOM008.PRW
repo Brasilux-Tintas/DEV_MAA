@@ -36,7 +36,7 @@ User Function BRCOM008()
      PRIVATE nLastKey := 0
      PRIVATE cPerg    := padr("MTR100",10)
      PRIVATE aInd     := {}
-
+     u_zcfga01( 'BRCOM008' ) //LGS#2021118 - Gravação de log de utilização da rotina
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Verifica as perguntas selecionadas                           ³
      //³mv_par01             // a partir do numero                    ³

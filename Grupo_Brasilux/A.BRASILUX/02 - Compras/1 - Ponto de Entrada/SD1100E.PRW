@@ -11,7 +11,7 @@
 User Function SD1100E 
      Local _cArea := Alias()         
      Local nRegD1,_cGrpEmp,_cFilial,_cNumEmp
-
+     u_zcfga01( 'SD1100E' ) //LGS#2021118 - Gravação de log de utilização da rotina
 _cGrpEmp := alltrim(FWGrpCompany())
 _cFilial := alltrim(FWCodFil())
 _cNumEmp := _cGrpEmp+_cFilial

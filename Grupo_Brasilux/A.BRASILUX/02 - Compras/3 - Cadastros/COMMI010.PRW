@@ -31,7 +31,7 @@ User Function COMMI010()
      Private c3StartPath := Trim(c2StartPath)+AllTrim(Str(Month(Date())))+"\"	//MES
      Private cStartError := Trim(cStartPath)+"ERRO\"
      Private _cAliasSX3  := GetNextAlias() //LGS#20200128 - Adequação para release 12.1.25
-
+     u_zcfga01( 'COMMI010' ) //LGS#2021118 - Gravação de log de utilização da rotina
      // ABERTURA DO DICIONÁRIO SX3 - LGS#20200128 - Adequação para release 12.1.25
      OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
      _lOpen := Select( _cAliasSX3 ) > 0

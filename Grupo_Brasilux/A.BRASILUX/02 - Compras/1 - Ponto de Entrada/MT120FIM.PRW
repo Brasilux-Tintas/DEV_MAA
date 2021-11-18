@@ -26,7 +26,7 @@ User Function MT120FIM()
     Local cPedCom    := PARAMIXB[2]
     Local nPosItem
     //Local ,nPosQtde,nPosVlr,nPosQtde 
-     
+     u_zcfga01( 'MT120FIM' ) //LGS#2021118 - Gravação de log de utilização da rotina
 _cEmpr := alltrim(FWCodEmp())
 _cGrpEmp := alltrim(FWGrpCompany())
 _cFilial := alltrim(FWCodFil())

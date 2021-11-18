@@ -19,7 +19,7 @@ User Function AVALCOT()
      Local cAlias := Alias()
      Local aAreaAnt := u_PegaArea({"SB1","SA5"})
      Local cTes := ""
-
+     u_zcfga01( 'AVALCOT' ) //LGS#2021118 - Gravação de log de utilização da rotina
 dbselectarea("SA5")
 IF (SA5->(FieldPos("A5_TES")) > 0) // Campo customizado que grava o TES na amarração Produto x Fornecedor
    If (nEvento == 4) .and. EMPTY(alltrim(SC7->C7_TES))

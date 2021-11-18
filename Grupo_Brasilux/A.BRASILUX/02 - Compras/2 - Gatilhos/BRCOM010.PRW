@@ -19,6 +19,7 @@ User Function BRCOM010()
      Local nUlPrc  := 0
      Local nRegB1,nOrdB1,lRegB1
      Local nPosCod := aScan( aHeader, {|x| x[2] $ 'D1_COD' } )
+     u_zcfga01( 'BRCOM010' ) //LGS#2021118 - Gravação de log de utilização da rotina
 		DbSelectArea("SB1")
         if !eof() .and. !bof()
 			lRegB1 := .t.

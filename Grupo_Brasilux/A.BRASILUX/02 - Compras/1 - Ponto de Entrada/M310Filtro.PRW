@@ -12,6 +12,8 @@ Cleber(23/09/2021)->Adaptação para transf. entre Brasilux/Matriz e Resina
 
 User Function M310Filtro()
 Local _cRet,cQuery,_cFilOrig,cFornec,cLojafor,nCont,cCliente,cLojacli,cFildest,_cFilial
+
+     u_zcfga01( 'M310FILTRO' ) //LGS#2021118 - Gravação de log de utilização da rotina
 _cRet := "" 
 
      // Rotina criada pelo usuário: selecionará apenas os produtos PA001, PA007, PA009 e PA015

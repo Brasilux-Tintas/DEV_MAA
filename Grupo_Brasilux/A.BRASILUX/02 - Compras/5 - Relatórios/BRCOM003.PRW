@@ -51,7 +51,7 @@ User Function BRCOM003()
      	 MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       	 return 
 	 endif 
-
+    u_zcfga01( 'BRCOM003' ) //LGS#2021118 - Gravação de log de utilização da rotina
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
      //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ

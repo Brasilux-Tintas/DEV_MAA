@@ -31,7 +31,7 @@ private oDlg1
 		MsgBox("Esta operação só pode ser executada na Brasilux/Matriz ou Resina!", "Atenção!", "STOP")
 		return
 	endif 
-
+     u_zcfga01( 'BRCOM013' ) //LGS#2021118 - Gravação de log de utilização da rotina
      @ 96,42 TO 323,505 DIALOG oDlg1 TITLE "Remessa Simbolica de Compras"
 
 //     @ 91,139 BMPBUTTON TYPE 5 ACTION Pergunte(cPerg)

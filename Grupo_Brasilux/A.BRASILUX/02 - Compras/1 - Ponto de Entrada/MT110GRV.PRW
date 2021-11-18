@@ -9,7 +9,7 @@
 User Function MT110GRV()   
      Local _cAlias  := Alias()
      Local aAreaAnt := u_PegaArea({"SZU"})
-
+     u_zcfga01( 'MT110GRV' ) //LGS#2021118 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If !Empty(SC1->C1_IDREQUI)
            DbSelectArea("SZU")

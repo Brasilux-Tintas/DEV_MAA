@@ -15,7 +15,7 @@
 User Function MT100CLA()   
 Local cAlias := Alias()  
 Local aArea  := U_PegaArea({"SD1","SA5"})  
-
+     u_zcfga01( 'MT100CLA' ) //LGS#2021118 - Gravação de log de utilização da rotina
 dbselectarea("SA5")
 IF (SA5->(FieldPos("A5_TES")) > 0) // Campo customizado que grava o TES na amarração Produto x Fornecedor
         dbselectarea("SA5")

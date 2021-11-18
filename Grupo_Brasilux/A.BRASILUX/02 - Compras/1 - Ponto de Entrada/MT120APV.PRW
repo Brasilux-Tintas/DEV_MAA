@@ -28,7 +28,7 @@ User Function MT120APV()
      //ExpC2 := PARAMIXB[2]
      //Código do usuário manipulando o grupo de aprovação, conforme necessidade.
      //MV_GRPEMPR
-
+     u_zcfga01( 'MT120APV' ) //LGS#2021118 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If !(cNumEmp = "01060101") .AND. !EMPTY(_cGrupoLib) .AND. !EMPTY(SC7->C7_FORNECE)
            dbselectarea("SA2")

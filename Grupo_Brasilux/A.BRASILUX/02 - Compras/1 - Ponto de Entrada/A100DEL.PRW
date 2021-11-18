@@ -15,7 +15,7 @@ User Function A100DEL()
 Local _cArea := Alias()
 Local aAreaAnt := U_PegaArea({"SF1"})
 Local _cGrpEmp,_cFilial,lRet,cFilDep,cDoc,nReg,_cPed,cMens
-
+     u_zcfga01( 'A100DEL' ) //LGS#2021118 - Gravação de log de utilização da rotina
 lRet := .t.
 _cGrpEmp := alltrim(FWGrpCompany())
 _cFilial := alltrim(FWCodFil())

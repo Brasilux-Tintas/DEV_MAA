@@ -102,7 +102,8 @@ Private _lVerISN    //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTE
 Private _lVerIOri   //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTERIORES ***/
 Private _lVerICST   //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTERIORES ***/
 Private _lVerICSO   //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTERIORES ***/
-private _oBrwCodb 
+private _oBrwCodb
+     u_zcfga01( 'PRENOTAXML' ) //LGS#2021118 - Gravação de log de utilização da rotina
 _cGrpEmp := ALLTRIM(FWGrpCompany())
 _cFilial := alltrim(FWCodFil())
 _cNumEmp := _cGrpEmp+_cFilial

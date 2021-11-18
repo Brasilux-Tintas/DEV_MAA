@@ -43,7 +43,7 @@ User Function BRCOM004()
 
      PRIVATE cCadastro  := OemtoAnsi("Requisição de Compras")
      PRIVATE lSelecao
-
+     u_zcfga01( 'BRCOM004' ) //LGS#2021118 - Gravação de log de utilização da rotina
      pergunte("COM004",.f.)
      lSelecao := IIF(mv_par01==1,.T.,.F.)
 
