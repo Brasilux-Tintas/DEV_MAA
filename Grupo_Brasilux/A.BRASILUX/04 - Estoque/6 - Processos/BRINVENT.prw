@@ -40,7 +40,7 @@ user function BRINVENT()
 	private oDlg1
 	private aStruct := {}
 	private cPerg := PADR("BRINVENT",10) //grupo de perguntas especifico para importacao de planilha
-
+    u_zcfga01( 'BRINVENT' ) //LGS#2021118 - Gravação de log de utilização da rotina
 	//PREPARE ENVIRONMENT EMPRESA "99" FILIAL "01" TABLES "SA1990" //Prepara ambiente para executar programa sem chamar pelo menu
 	//RpcSetType(3) //Desliga o contador de licencas
 	//RpcSetEnv("99","01", "","","","",{"SB8","SB1"}) //Abrindo empresa 01 e filial 02

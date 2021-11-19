@@ -16,7 +16,7 @@ If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
         MsgBox("Acesso não autorizado!", "Atenção...", "STOP")
         Return
     Endif
-
+     u_zcfga01( 'HISTXCUS' ) //LGS#2021119 - Gravação de log de utilização da rotina
 AAdd(aRotina,{"Visualizar"	 , "AxVisual" , 0, 3})
 AAdd(aRotina,{"Relatorio"	 , "u_ImpHisCus", 0, 4})
 

@@ -46,7 +46,7 @@ User Function BRESTX04()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRESTX04' ) //LGS#2021118 - Gravação de log de utilização da rotina
      dbSelectArea("SB2")
      dbSetOrder(1)
      //VldPerg()  //LGS#20200130 - Adequação a release 12.1.25 

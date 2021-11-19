@@ -11,6 +11,7 @@ if !(cnumemp $ "01010101_01010104")
 	Alert("Nada a executar!")
 	return
 endif
+u_zcfga01( 'BREST028' ) //LGS#2021118 - Gravação de log de utilização da rotina
 
 AADD(aSays,"Este programa ira atualizar o estoque de acordo com as        ")
 AADD(aSays,"movimentacoes de entrada e saida do periodo.")

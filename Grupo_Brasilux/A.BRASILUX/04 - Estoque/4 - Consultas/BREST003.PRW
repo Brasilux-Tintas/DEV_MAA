@@ -29,6 +29,7 @@ User Function BREST003()
 			Return
 		Endif
 	ENDIF
+     u_zcfga01( 'BREST003' ) //LGS#2021119 - Gravação de log de utilização da rotina
      aPrazos  := {}
      aAdd(aPrazos,0) 
      mv_par01 := ""

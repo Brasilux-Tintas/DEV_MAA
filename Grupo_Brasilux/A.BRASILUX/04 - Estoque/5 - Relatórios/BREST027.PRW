@@ -43,7 +43,7 @@ User Function BREST027()
      Private wnrel        := "BREST027"
 
      Private cString      := ""
-
+     u_zcfga01( 'BREST027' ) //LGS#2021119 - Gravação de log de utilização da rotina
      dbSelectArea("SB1")
      dbSetOrder(1)
 

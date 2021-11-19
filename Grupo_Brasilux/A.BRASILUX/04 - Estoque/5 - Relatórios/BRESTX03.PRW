@@ -25,7 +25,7 @@ User Function BRESTX03()
      Private oGeraTxt
 
      Private cString := "SB1"
-     
+     u_zcfga01( 'BRESTX03' ) //LGS#2021118 - Gravação de log de utilização da rotina
      ValPerg1()
      Pergunte(cPerg, .f.)
      DbSelectArea("SB1")

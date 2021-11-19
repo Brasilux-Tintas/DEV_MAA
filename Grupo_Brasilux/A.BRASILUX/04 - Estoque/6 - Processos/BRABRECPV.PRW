@@ -8,7 +8,7 @@ User Function BRABRECPV()
 
     Local _Titulo := 'Tabela Auxiliar Fechamento - Z99'
     Local cPerg   := 'BRZ99'
-
+    u_zcfga01( 'BRABRECPV' ) //LGS#2021118 - Gravação de log de utilização da rotina
     If !u_VldAcesso(funname())
         MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
         Return 

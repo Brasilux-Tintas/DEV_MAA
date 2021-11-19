@@ -25,7 +25,7 @@ User Function WFESTPRO()
 	 Local cPara    			 	:= "materiais@brasilux.com.br;expedicao@brasilux.com.br"
 	 Local cAssunto				    := "Verificar as divergências abaixo"
      Local cMsg						:= ""
-   
+     u_zcfga01( 'WFESTPRO' ) //LGS#2021118 - Gravação de log de utilização da rotina
      PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" //TABLES "SB2"   	
      
                 

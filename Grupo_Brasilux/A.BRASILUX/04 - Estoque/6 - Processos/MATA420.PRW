@@ -9,6 +9,7 @@ do MATA420
 
 User Function MATA420()  
 Local cAuxUser,lAutoriz
+u_zcfga01( 'MATA420' ) //LGS#2021118 - Gravação de log de utilização da rotina
 lAutoriz := .t.
 If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
 	cAuxUser := UPPER(alltrim(cUserName))

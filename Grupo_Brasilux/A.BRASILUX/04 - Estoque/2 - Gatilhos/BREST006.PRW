@@ -2,6 +2,7 @@
 
 User Function BREST006(cCod)
      Local cCodBar := IIf(cCod == Nil,"",cCod)
+     u_zcfga01( 'BREST006' ) //LGS#2021119 - Gravação de log de utilização da rotina
      if len(alltrim(cCod) < 12)
      	return("")
      endif 

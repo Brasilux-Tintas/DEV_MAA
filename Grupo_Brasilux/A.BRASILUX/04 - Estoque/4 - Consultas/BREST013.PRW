@@ -42,7 +42,7 @@ User Function BREST013()
      
      dbSelectArea("SB1")
      dbSetOrder(1)
-     
+          u_zcfga01( 'BREST013' ) //LGS#2021119 - Gravação de log de utilização da rotina
      ValPerg5()
      lPerg := pergunte(cPerg5,.T.)   // Escolher 1 - Consumo ou 2 - Classificação
      If lPerg

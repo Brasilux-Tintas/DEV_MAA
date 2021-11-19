@@ -51,7 +51,7 @@ User Function BRESTR02()
       	Return 
 	 Endif 
 
-             
+     u_zcfga01( 'BRESTR02' ) //LGS#2021118 - Gravação de log de utilização da rotina
 	//If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
     //    MsgBox("Acesso não autorizado!", "Atenção...", "STOP")
     //    Return

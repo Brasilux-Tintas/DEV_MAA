@@ -26,7 +26,7 @@ User Function BRESTX06()
         MessageBox( cMens1, "Atenção!", 48 )
         return
      Endif 
-
+     u_zcfga01( 'BRESTX06' ) //LGS#2021118 - Gravação de log de utilização da rotina
      nOpca	  := 0
      AADD(aSays,"Este programa ira atualizar o estoque do Deposito Fechado     ")
      AADD(aSays,"com as movimentacoes de entrada e saida do periodo.")

@@ -16,7 +16,7 @@ User Function ZESTF01()
      Local _oFont1CHV := TFont():New( "MS Sans Serif", 0, -16, , .T., 0, , 700, .F., .F., , , , , , )
      Local _aStatusCH := { '', 'Pré Nota Fiscal', 'Processada pelo Robo', 'Conferencia estoque', 'Classificada Robo' }
      Local _cStatusCH := ''
-
+     u_zcfga01( 'ZESTF01' ) //LGS#2021118 - Gravação de log de utilização da rotina
      oModal := FWDialogModal():New()
      oModal:SetEscClose( .F. )
      oModal:setTitle( "Legenda" )

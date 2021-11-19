@@ -59,7 +59,7 @@ User Function BREST010
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BREST010' ) //LGS#2021119 - Gravação de log de utilização da rotina
      dbSelectArea("SB1")
      dbSetOrder(1)
 

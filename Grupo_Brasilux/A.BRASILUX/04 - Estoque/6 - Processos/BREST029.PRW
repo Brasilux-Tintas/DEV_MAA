@@ -15,7 +15,7 @@
 User Function BREST029()  
 
 private cPERG,mv_par01
-
+     u_zcfga01( 'BREST029' ) //LGS#2021118 - Gravação de log de utilização da rotina
 cPerg   := "BRES29"
                       
 VldPerg()            // Verifica as perguntas selecionadas 

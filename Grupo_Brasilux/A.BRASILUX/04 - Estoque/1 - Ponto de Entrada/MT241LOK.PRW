@@ -21,7 +21,7 @@ User function MT241LOK()
      Local n := ParamIxb[1]
      Local cArea := Alias()
      Local aArea := U_PegaArea({"SB1"})
-
+     u_zcfga01( 'MT241LOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         DbSelectArea("SB1")
         DbSetorder(1)
