@@ -43,7 +43,7 @@ Local cMens1,_cGrpEmp,_cFilial,_cNumEmp
         MessageBox( cMens1, "Atenção", 48 )
         return
      Endif 
-	
+     u_zcfga01( 'BRFAT101' ) //LGS#2021130 - Gravação de log de utilização da rotina    
 
     @ 96,42 TO 323,505 DIALOG oDlg1 TITLE "Remarcação Dep. Fechado."
 

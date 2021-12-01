@@ -22,7 +22,7 @@ PRIVATE aReturn := {"Zebrado", 1,"Administracao", 2, 2, 1, "",1 }
 PRIVATE nomeprog:= "BRFATR25"
 PRIVATE aLinha  := { },nLastKey := 0
 PRIVATE cPerg   := "BRFATR25"
-
+     u_zcfga01( 'BRFATR25' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA¢¯
 //©ø Verifica as perguntas selecionadas                           ©ø
 //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU

@@ -47,7 +47,7 @@ User Function BRFATR20()
       	MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       	return 
      endif 
-
+     u_zcfga01( 'BRFATR20' ) //LGS#2021201 - Gravação de log de utilização da rotina
      dbSelectArea("SC5")
      dbSetOrder(1)
      //CriaSX1(_cPerg)

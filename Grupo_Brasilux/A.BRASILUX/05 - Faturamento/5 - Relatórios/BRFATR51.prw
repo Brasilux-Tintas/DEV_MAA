@@ -56,7 +56,7 @@ Private cString  := "SZA"
       return 
   endif 
 
-
+     u_zcfga01( 'BRFATR51' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Envia controle para a funcao SETPRINT                        �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸

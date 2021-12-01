@@ -15,7 +15,7 @@ User Function BRFATR93()
 Local aCabExcel :={}
 Local aItensExcel :={}
 Local _cPerg:="BRFATR93"
-
+     u_zcfga01( 'BRFATR93' ) //LGS#2021201 - Gravação de log de utilização da rotina
 /**********************************************************************************
    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
    //³ Envia controle para a funcao SETPRINT - checa se o uauário tem permissão   ³

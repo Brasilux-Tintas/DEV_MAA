@@ -28,7 +28,7 @@ PRIVATE cPerg   := "BRFAT087"
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Verifica as perguntas selecionadas                           �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸
-    
+     u_zcfga01( 'BRFAT087' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
 //CriaSX1(cPerg)
 Pergunte(cPerg,.F.)
 

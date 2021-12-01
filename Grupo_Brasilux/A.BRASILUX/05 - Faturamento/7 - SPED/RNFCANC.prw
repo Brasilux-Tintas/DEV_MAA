@@ -34,7 +34,7 @@ Private Moeda    	:= "9"
 Private cPerg   	:= PadR("RNFCANC", 10)
 Private nValor 	  	:= 0 
 PRIVATE MV_PAR01,MV_PAR02,MV_PAR03,MV_PAR04_MV_PAR05,MV_PAR06,MV_PAR07
-
+     u_zcfga01( 'RNFCANC' ) //LGS#2021119 - Gravação de log de utilização da rotina
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Variaveis utilizadas para parametros                         ³
 //³ mv_par01            // Prefixo                               ³

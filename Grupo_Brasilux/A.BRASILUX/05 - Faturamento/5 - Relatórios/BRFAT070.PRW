@@ -27,7 +27,7 @@ if !u_VldAcesso(funname())
     MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
 	return 
 endif 
-
+     u_zcfga01( 'BRFAT070' ) //LGS#2021201 - Gravação de log de utilização da rotina
 cPerg := "BRFT70"
 ValidPerg()                     
 Pergunte(cPerg,.T.)

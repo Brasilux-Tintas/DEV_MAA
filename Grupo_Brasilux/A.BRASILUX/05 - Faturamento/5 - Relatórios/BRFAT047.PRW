@@ -47,7 +47,7 @@ Descricao:Rel Tabela de Descontos
 		MsgBox("Acesso nгo autorizado!---->"+funname(),"Atenзгo","Alert")
         return 
     endif 
-    
+     u_zcfga01( 'BRFAT047' ) //LGS#2021201 - Gravaзгo de log de utilizaзгo da rotina
     //ЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДї
     //і Tamanho do Formulario  (em Linhas)                        і
     //АДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ

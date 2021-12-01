@@ -34,7 +34,7 @@ User Function BRFATR19()
         return 
     endif 
 
-
+     u_zcfga01( 'BRFATR19' ) //LGS#2021201 - Gravação de log de utilização da rotina
     //CriaSX1(cPerg)
     Pergunte(cPerg,.F.)
     //UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA¢¯

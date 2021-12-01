@@ -30,7 +30,7 @@ PRIVATE cPerg   :="BRFATR28"
       MsgBox("Acesso nao autorizado!---->"+funname(),"Atencao","Alert")
       return 
   endif 
-  
+     u_zcfga01( 'BRFATR28' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //CriaSX1(cPerg)
 Pergunte(cPerg,.F.)
 //UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA¢¯

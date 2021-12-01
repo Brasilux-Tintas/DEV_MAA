@@ -24,7 +24,7 @@ Local oReport
 //Else
 //	BRFATR18R3()
 //EndIf
-
+     u_zcfga01( 'BRFATR18' ) //LGS#2021201 - GravaÁ„o de log de utilizaÁ„o da rotina
 Return
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹

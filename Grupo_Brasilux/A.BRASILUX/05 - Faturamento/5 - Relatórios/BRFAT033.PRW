@@ -41,7 +41,7 @@ Private wnrel    :=""
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-                                     
+     u_zcfga01( 'BRFAT033' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //////////////////////////////////////
 //|                                |//
 //| mv_par01 <...> Data Emissao de |//

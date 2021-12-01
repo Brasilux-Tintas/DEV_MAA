@@ -48,7 +48,7 @@ User Function BRFATX05()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   	endif 
-  
+     u_zcfga01( 'BRFATX05' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //ValPerg()
      Pergunte(cPerg,.F.)
 

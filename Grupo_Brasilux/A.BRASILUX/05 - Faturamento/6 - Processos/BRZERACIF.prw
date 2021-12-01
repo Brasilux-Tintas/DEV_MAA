@@ -16,7 +16,7 @@ if !u_VldAcesso(funname())
       return 
 endif 
 
-
+    u_zcfga01( 'BRZERACIF' ) //LGS#2021123 - Gravação de log de utilização da rotina    
 //CriaSX1(_cPerg)
 Pergunte(_cPerg,.F.)
 

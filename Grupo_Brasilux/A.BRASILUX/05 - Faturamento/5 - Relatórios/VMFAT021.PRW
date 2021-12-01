@@ -20,7 +20,7 @@
 User Function VMFAT021()
 	Local cQry
     Private cPerg := padr("VMF021",10)
-
+     u_zcfga01( 'VMFAT021' ) //LGS#2021201 - Gravação de log de utilização da rotina
     
     oFont1 := TFont():New( "Courier New Negrito"        , 9, 19, .F., .T., 5, .T., 5, .F., .F.)
     oFont2 := TFont():New( "Courier New Negrito"        , 9, 12, .F., .T., 5, .T., 5, .F., .F.)

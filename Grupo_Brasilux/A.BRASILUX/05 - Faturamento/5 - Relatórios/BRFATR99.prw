@@ -27,7 +27,7 @@ SetPrvt("CCABEC,CCABPRO,CNATUREZA,ARETURN,NOMEPROG,CPERG")
 SetPrvt("NLASTKEY,LCONTINUA,NLIN,NCOL,WNREL,NTIPO")
 SetPrvt("M_PAG,CCABEC1,CCABEC2,CCABEC3,NTAMNF,CSTRING")
 SetPrvt("LIMPFIN,AREGS")
-
+     u_zcfga01( 'BRFATR99' ) //LGS#2021201 - Gravação de log de utilização da rotina
 CbTxt    :=""
 CbCont   :=0
 nOrdem   :=0

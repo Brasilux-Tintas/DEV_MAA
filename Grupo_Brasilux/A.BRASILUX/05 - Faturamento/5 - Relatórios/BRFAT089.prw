@@ -44,7 +44,7 @@ User Function BRFAT089()
      Private m_pag        := 01
      Private wnrel        := "BRFAT089" // Coloque aqui o nome do arquivo usado para impressao em disco
      Private cString      := "SD2"
-
+     u_zcfga01( 'BRFAT089' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SD2")
      DbSetOrder(1)
      

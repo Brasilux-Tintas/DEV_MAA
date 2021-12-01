@@ -55,6 +55,7 @@ User Function BRFAT069()
          MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       	 return 
 	 endif 
+     u_zcfga01( 'BRFAT069' ) //LGS#2021201 - Gravação de log de utilização da rotina
      ValidPerg()
      Pergunte(cPerg, .F.)   
 

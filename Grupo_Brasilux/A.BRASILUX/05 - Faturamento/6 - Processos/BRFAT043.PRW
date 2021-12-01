@@ -16,7 +16,7 @@
 */
 User Function BRFAT043()
      Private cPerg
-
+     u_zcfga01( 'BRFAT043' ) //LGS#2021130 - Gravação de log de utilização da rotina    
      cPerg   := "BRFT43"
 
      VldPerg()            // Verifica as perguntas selecionadas

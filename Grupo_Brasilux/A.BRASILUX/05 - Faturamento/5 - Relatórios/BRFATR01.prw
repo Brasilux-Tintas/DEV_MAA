@@ -50,7 +50,7 @@ User Function BRFATR01()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFATR01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SD2")
      DbSetOrder(1)
      //VldPerg()

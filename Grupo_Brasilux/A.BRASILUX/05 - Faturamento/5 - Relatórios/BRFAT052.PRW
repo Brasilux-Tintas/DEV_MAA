@@ -74,7 +74,7 @@ User Function BRFAT052()
      //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
      //� Envia controle para a funcao SETPRINT                        �
      //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸
-    
+     u_zcfga01( 'BRFAT052' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
 
      _cUser := upper(alltrim(cUserName))
 

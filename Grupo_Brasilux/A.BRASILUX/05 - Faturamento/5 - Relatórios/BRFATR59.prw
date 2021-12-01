@@ -9,7 +9,7 @@ User Function BRFATR59()
 Private tamanho,limite,cDesc1,cDesc2,cDesc3,cCabec,cCabec1,cCabec2,cCabec3
 Private aReturn,nomeprog,cPerg,nLastKey,nLin,nCol,wnrel,nTipo
 Private mv_par01,m_pag,nQtdeLinhas
-
+     u_zcfga01( 'BRFATR59' ) //LGS#2021201 - Gravação de log de utilização da rotina
 m_pag = 01 
 nQtdeLinhas := 70
 tamanho  :="M"

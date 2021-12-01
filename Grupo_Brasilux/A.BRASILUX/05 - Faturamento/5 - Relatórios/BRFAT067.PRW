@@ -62,7 +62,7 @@ cString  := "SC9"
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif  
-
+     u_zcfga01( 'BRFAT067' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //ValidPerg()
 Pergunte(cPerg,.F.)   
 

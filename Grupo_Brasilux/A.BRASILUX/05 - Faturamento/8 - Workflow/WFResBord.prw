@@ -33,7 +33,7 @@ User Function WFResBord(cNumBor)
     Local cTmp1     := ""
     Local cQDet     := ""
     //CNUMBOR :='012856'
-
+     u_zcfga01( 'WFRESBORD' ) //LGS#2021119 - Gravação de log de utilização da rotina
     //PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
     //Chamado: 007146 - Detalhar os itens do Resumo do Bordero de Pedidos que é enviado por e-mail. 25/05/17
      /**	Monta a query para buscar os dados	**/   

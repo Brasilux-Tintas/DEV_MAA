@@ -36,7 +36,7 @@ User Function BRFAT032()
 		MsgBox("Acesso não autorizado!----> " + funname(), "Atenção", "Alert")
 		return
 	endif
-
+     u_zcfga01( 'BRFAT032' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	SetPrvt("CBTXT,CBCONT,NORDEM,ALFA,Z,M")
 	SetPrvt("TAMANHO,LIMITE,TITULO,CDESC1,CDESC2,CDESC3")
 	SetPrvt("CCABEC,CCABPRO,CNATUREZA,ARETURN,NOMEPROG,CPERG")

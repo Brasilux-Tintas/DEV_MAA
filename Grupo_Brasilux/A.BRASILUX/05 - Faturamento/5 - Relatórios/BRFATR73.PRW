@@ -30,7 +30,7 @@ PRIVATE cPerg   :="BRFATR73"
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFATR73' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Verifica as perguntas selecionadas                           ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ

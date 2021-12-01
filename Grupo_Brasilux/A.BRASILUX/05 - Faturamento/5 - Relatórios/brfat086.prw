@@ -12,7 +12,7 @@ User Function BRFAT086()
 
      Private mv_par01,mv_par02
      mv_par02 = 1
-
+     u_zcfga01( 'BRFAT086' ) //LGS#2021201 - Gravação de log de utilização da rotina
      SetPrvt("CBTXT,CBCONT,NORDEM,ALFA,Z,M")
      SetPrvt("TAMANHO,LIMITE,TITULO,CDESC1,CDESC2,CDESC3")
      SetPrvt("CCABEC,CCABPRO,CNATUREZA,ARETURN,NOMEPROG,CPERG")

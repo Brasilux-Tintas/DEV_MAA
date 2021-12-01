@@ -18,6 +18,7 @@ Parametros: mv_par01    // Da Data de Emissao
 */
 User Function BRFAT040()
      Private cPERG := "BRFT40"
+     u_zcfga01( 'BRFAT040' ) //LGS#2021130 - Gravação de log de utilização da rotina    
      VldPerg()             // Verifica as perguntas selecionadas 
      Pergunte(cPerg, .F.)  // Pergunta no SX1
 

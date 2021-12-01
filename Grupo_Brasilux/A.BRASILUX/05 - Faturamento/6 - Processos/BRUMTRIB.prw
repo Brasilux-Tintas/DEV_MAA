@@ -9,6 +9,7 @@ User Function BRUMTRIB()
 //АДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ
 Private _cPerg     := "BRUMTRIB"
 Private _oGeraTxt,MV_PAR01,MV_PAR02
+    u_zcfga01( 'BRUMTRIB' ) //LGS#2021123 - Gravaзгo de log de utilizaзгo da rotina    
 MV_PAR01 := ""
 MV_PAR02 := "" 
 

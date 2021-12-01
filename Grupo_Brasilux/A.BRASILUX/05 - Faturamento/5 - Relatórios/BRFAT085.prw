@@ -32,7 +32,7 @@ User Function BRFAT085()
       return 
   endif 
 
-
+     u_zcfga01( 'BRFAT085' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //VldPerg()
      If !Pergunte(cPerg,.t.)
         Return

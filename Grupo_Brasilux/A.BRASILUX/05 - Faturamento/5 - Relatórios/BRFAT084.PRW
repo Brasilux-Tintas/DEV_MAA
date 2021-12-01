@@ -25,7 +25,7 @@ User Function BRFAT084()
 Private CbTxt,CbCont,nOrdem,Alfa,Z,M,tamanho,limite,titulo,cDesc1,cDesc2,cDesc3,;
 cCabec,cCabPro,aReturn,nomeprog,cPerg,nLastKey,lContinua,_nLin,nCol,wnrel,nTipo,;
 m_pag
-
+     u_zcfga01( 'BRFAT084' ) //LGS#2021201 - Gravação de log de utilização da rotina
 CbTxt    :=""
 CbCont   :=0
 nOrdem   :=0

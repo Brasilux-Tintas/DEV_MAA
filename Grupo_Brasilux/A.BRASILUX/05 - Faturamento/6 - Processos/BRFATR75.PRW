@@ -47,7 +47,7 @@ User Function BRFATR75()
       		MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       		return 
       endif 
-
+      u_zcfga01( 'BRFATR75' ) //LGS#2021130 - Gravação de log de utilização da rotina    
      //ValidPerg()  //LGS#20200207 - Adequação de release 12.1.25 e posteriores
      Pergunte(cPerg, .F.)   
 

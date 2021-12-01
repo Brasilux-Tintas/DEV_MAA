@@ -26,7 +26,8 @@ User Function WFDIVEPD()
     Local cMsg		:= ""
     Local cQuery    := ""
 
-    
+    u_zcfga01( 'WFDIVEPD' ) //LGS#2021119 - Gravação de log de utilização da rotina    
+
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
 
     cQuery := ""

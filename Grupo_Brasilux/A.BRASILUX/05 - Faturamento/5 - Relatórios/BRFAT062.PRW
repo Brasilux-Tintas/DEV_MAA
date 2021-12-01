@@ -70,7 +70,7 @@ cString  := "SZA"
       MsgBox("Acesso nгo autorizado!---->"+funname(),"Atenзгo","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFAT062' ) //LGS#2021201 - Gravaзгo de log de utilizaзгo da rotina
 //ЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДї
 //і Envia controle para a funcao SETPRINT                        і
 //АДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ

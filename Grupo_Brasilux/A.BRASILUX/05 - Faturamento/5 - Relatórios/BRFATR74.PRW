@@ -17,7 +17,7 @@ User Function BRFATR74()
 Local oReport
 Private lM415SOL := ExistBlock("M415SOLI")
 Private lM415ICM := ExistBlock("M415ICM")
-
+     u_zcfga01( 'BRFATR74' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If FindFunction("TRepInUse") .And. TRepInUse()
 	//-- Interface de impressao
 	oReport := ReportDef()

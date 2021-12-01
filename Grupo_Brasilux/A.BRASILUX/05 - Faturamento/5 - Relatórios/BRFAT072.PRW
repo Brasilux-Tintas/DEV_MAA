@@ -63,7 +63,7 @@ cString  := "SA1"
       return 
   endif 
 
-
+     u_zcfga01( 'BRFAT072' ) //LGS#2021201 - Gravação de log de utilização da rotina
 ValidPerg()
 Pergunte(cPerg,.F.)   
 

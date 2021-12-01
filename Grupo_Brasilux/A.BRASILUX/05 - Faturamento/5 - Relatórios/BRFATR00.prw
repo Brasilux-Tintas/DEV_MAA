@@ -5,7 +5,7 @@ User Function BRFATR00()
 Private tamanho,limite,cDesc1,cDesc2,cDesc3,cCabec,cCabec1,cCabec2,cCabec3
 Private aReturn,nomeprog,cPerg,nLastKey,nLin,nCol,wnrel,nTipo
 Private mv_par01,MV_PAR02,m_pag,nTamNf
-
+     u_zcfga01( 'BRFATR00' ) //LGS#2021201 - Gravação de log de utilização da rotina
 m_pag = 01
 tamanho  :="M"
 titulo   :=" borderô de despacho por produto"
