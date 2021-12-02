@@ -8,7 +8,7 @@ Uso: Brasilux/Matriz e Brasitec.
 User Function MTA010E()
      Local nArea, lMandarBrasRepres
 nArea = Alias()
-
+     u_zcfga01( 'MTA010E' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If ALLTRIM(FWGrpCompany()) == '01' //Empresas que  são do grupo 01
 
    // Enviar alteracoes p/ representante

@@ -37,7 +37,7 @@ Local nQtdVenGer
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFIN025' ) //LGS#2021202 - Gravação de log de utilização da rotina
 
      cPerg      := "FIN025"
      VldPerg()       

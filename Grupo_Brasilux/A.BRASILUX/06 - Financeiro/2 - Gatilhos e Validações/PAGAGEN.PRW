@@ -14,6 +14,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function PagAgen() 
+     u_zcfga01( 'PAGAGEN' ) //LGS#2021202 - Gravação de log de utilização da rotina
      _Agencia := "00000"
 
      IF SUBSTR(SE2->E2_CODBAR, 1, 3) == "237"

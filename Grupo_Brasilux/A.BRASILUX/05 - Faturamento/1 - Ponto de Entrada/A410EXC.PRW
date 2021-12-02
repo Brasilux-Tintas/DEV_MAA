@@ -23,7 +23,7 @@ User Function A410EXC()
      Local cAuxMen := ""
      Local cQry1   := ""
      Local _cGrpEmp
-
+     u_zcfga01( 'A410EXC' ) //LGS#2021201 - Gravação de log de utilização da rotina
     _cGrpEmp := ALLTRIM(FWGrpCompany())
      If _cGrpEmp == "01" //Apenas empresas do Grupo 01 (TecPolpa e UnionSur não entram)
         cQry1 += "SELECT C6_ITEM,C6_PRODUTO,C6_NUMOP,C6_NUMLOTE "

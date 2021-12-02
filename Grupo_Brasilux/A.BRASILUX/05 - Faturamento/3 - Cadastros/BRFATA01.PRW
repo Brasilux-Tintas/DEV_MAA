@@ -29,7 +29,7 @@ User Function BRFATA01()
 		MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
 	 	Return 
  	 Endif 
-
+     u_zcfga01( 'BRFATA01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      Private aRotina   := { {"Pesquisa"             , 'AxPesqui'       , 0 , 1 },;
                             {"Visualizar"           , 'U_FATA01_1("V")', 0 , 2 } }     
 /*

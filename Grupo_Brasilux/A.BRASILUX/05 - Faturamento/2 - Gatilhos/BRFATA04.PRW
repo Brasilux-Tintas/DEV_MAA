@@ -18,6 +18,7 @@ User Function BRFATA04()
      Local nPosQuan := aScan(aHeader, { |x| Trim(x[2]) == 'C6_QTDVEN' })
      Local nCapProd := Iif(Len(Alltrim(aCols[n][nPosProd])) == 12, Iif( SubStr(Alltrim(aCols[n][nPosProd]), 11, 2) == '11' .and. SubStr(Alltrim(aCols[n][nPosProd]), 01, 2) $ 'CT.ED', Posicione("SZ5", 1, xFilial("SZ5")+SubStr(Alltrim(aCols[n][nPosProd]), 11, 2), "Z5_CAPMIN"), Posicione("SZ5", 1, xFilial("SZ5")+SubStr(Alltrim(aCols[n][nPosProd]), 11, 2), "Z5_CAPACID")), 1)
      Local nPallets := 0
+     u_zcfga01( 'BRFATA04' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If aCols[n][nPosQuan] == 0
         nPallets := 0
      Else

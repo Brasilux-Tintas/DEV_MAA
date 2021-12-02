@@ -22,7 +22,7 @@ User Function BRFAT007
      Local cVldAlt := ".T." // Validacao para permitir a alteracao. Pode-se utilizar ExecBlock.
      Local cVldExc := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
      Private cString := "SZ6"
-
+     u_zcfga01( 'BRFAT007' ) //LGS#2021201 - Gravação de log de utilização da rotina
    	if !u_VldAcesso(funname())
 		MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
 	 	return 

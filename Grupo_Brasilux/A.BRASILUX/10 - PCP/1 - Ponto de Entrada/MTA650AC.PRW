@@ -38,6 +38,7 @@ User Function MTA650AC()
      //Else
         //aHeader := Nil
      //Endif
+     u_zcfga01( 'MTA650AC' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
       	aArray := {}
         aAdd( aArray, { "Acerto Cor", "D4_ACECOR", "@E 99,999,999.9999", TamSX3("D4_ACECOR")[1], TamSX3("D4_ACECOR")[2], "", .T., "N", "", " " } )

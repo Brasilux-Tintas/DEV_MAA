@@ -14,6 +14,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function Pagcar()
+     u_zcfga01( 'PAGCAR' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If SubStr(SE2->E2_CODBAR, 01, 3) != "237"
         _Retcar := "000"
      Else

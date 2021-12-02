@@ -17,7 +17,7 @@ User Function ZFINF01()
      Local oBrowse as Object
      Public lF100Auto := .T.
      Public cRecPag   := " "
-
+     u_zcfga01( 'ZFINF01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      fSIFStatus()
 
      oBrowse := FWMBrowse():New()

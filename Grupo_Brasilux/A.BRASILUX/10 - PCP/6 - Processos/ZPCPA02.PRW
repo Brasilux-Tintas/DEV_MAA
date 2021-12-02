@@ -12,7 +12,7 @@ User Function ZPCPA02()
      Local _oBrowse
      Local oVisions   := getVisions()
      Private _nContMnt := 0
-
+     u_zcfga01( 'ZPCPA02' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //Instaciamento da Classe
      _oBrowse := FWMBrowse():New()
 

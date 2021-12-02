@@ -32,6 +32,7 @@ User Function BRPCPA06()
                           {"Log Alteração" ,"u_PCPA06_3", 0, 7}  }
 
      Private oTempTable
+     u_zcfga01( 'BRPCPA06' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("ZZE")
      DbSetOrder(1)
 

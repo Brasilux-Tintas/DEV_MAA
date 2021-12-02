@@ -25,7 +25,7 @@ PRIVATE aReturn := {"Zebrado", 1,"Administracao", 2, 2, 1, "",1 }
 PRIVATE nomeprog:= "BRDESR99"
 PRIVATE aLinha  := { },nLastKey := 0
 PRIVATE cPerg   := "BRDESR99"
-
+     u_zcfga01( 'BRDESR99' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Verifica as perguntas selecionadas                           �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸

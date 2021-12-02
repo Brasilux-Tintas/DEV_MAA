@@ -11,7 +11,7 @@
 /*/
 User Function QIPF3SC2()
      Local _cRet := "QC2"
-      
+     u_zcfga01( 'QIPF3SC2' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         _cRet := "XC3"
      Endif

@@ -20,7 +20,7 @@ User Function QP010DEL()
      Local cRotAtu := PARAMIXB[3]
      Local cRevAnt := Iif(Val(PARAMIXB[2]) - 1 <= 0,StrZero(0,2), StrZero(Val(PARAMIXB[2]) - 1,2) )
      Local cQry1   := ""
-     
+          u_zcfga01( 'QP010DEL' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         cQry1 += "SELECT COUNT(*) AS QTDREC "
         cQry1 += "FROM "+RetSqlName("QP6")+" QP6 "

@@ -14,5 +14,6 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function BRFAT092()
+     u_zcfga01( 'BRFAT092' ) //LGS#2021201 - Gravação de log de utilização da rotina
      U_EditaX5("T3", "999999")
 Return

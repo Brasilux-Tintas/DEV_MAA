@@ -10,7 +10,7 @@
 User Function BRPCP046()
 Private aRotina := {}
 Private cCadastro := "Cadastro "
-
+     u_zcfga01( 'BRPCP046' ) //LGS#2021201 - Gravação de log de utilização da rotina
 TcRefresh(RetSqlName("ZZ1"))
 
 AAdd(aRotina, {"Pesquisar"             , "AxPesqui"  , 0, 1})

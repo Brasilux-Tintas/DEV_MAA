@@ -19,7 +19,7 @@ User Function BRFAT064()
      Local nIndex   := IndexOrd()
      Local cCliente
      Local cMun     := Space(30)
-
+     u_zcfga01( 'BRFAT064' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SF2")
      DbSetOrder(1)
      DbSeek(xfilial("SF2")+M->ZD_NOTA, .F.)

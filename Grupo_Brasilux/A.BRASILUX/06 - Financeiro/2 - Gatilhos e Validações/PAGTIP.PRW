@@ -15,7 +15,7 @@
 */
 User Function Pagtip()
      Local _RETTIP
-
+     u_zcfga01( 'PAGTIP' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If SubStr(SE2->E2_TIPO, 1, 2) == "FT"
         _RETTIP := "02"
      ElseIf SubStr(SE2->E2_TIPO, 1, 2) == "NF"

@@ -16,7 +16,7 @@
 User Function MTA200() 
      Local cAux := oTree:GetCargo()
      Local lRet := .t.
-
+     u_zcfga01( 'MTA200' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).  
         If (Val(SubStr(cAux, 43, 9)) != 1) .and. (Val(SubStr(cAux, 43, 9)) != 0)
            If (Paramixb == "I")

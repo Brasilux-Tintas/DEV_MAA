@@ -14,7 +14,7 @@
 //30/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function CampFree()
      Private cCampo
-     
+     u_zcfga01( 'CAMPFREE' ) //LGS#2021202 - Gravação de log de utilização da rotina
  //    If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa). (Cleber(21/01/20))
         If Len(Alltrim(SE2->E2_CODBAR)) < 44
            cCampo := SubStr(SE2->E2_CODBAR, 5, 5)+SubStr(SE2->E2_CODBAR, 11, 10)+SubStr(SE2->E2_CODBAR, 22, 10)

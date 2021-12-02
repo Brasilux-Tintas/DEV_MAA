@@ -47,7 +47,7 @@ User Function ZPCPA01( _cParam )
      /*+-----------------------------------------------------+
        | Abertura de Empresa                                 |
        +-----------------------------------------------------+*/
-
+     u_zcfga01( 'ZPCPA01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If Empty( _cParam )
         _cParam := '010101011'
      Endif

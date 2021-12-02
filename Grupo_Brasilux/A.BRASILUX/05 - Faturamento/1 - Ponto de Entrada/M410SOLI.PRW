@@ -46,7 +46,7 @@ User Function M410SOLI()
 	Local _nAliqFCP := 0 // Aliquota do FCP-ST
 	Local _nValFCP := 0 // Valor do FCP-ST
      Local nPosTES, nMva, nMvaSist, cTpPedido, cCodTes, cCodPro, nQtdVen, nPrcVen, nVlrTot
-
+     u_zcfga01( 'M410SOLI' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Chamada via Webservice GetImposto.                    ³
      //³ Variáveis do GETIMPOSTO que podem ser utilizadas:     ³

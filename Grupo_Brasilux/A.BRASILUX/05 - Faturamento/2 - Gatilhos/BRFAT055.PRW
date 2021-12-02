@@ -17,7 +17,7 @@ User Function BRFAT055()
      Local cArea    := alias()
      Local aAreaAnt := U_PegaArea({"SF2","SA1"})
      Local cCliente
-
+     u_zcfga01( 'BRFAT055' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SF2")
      DbSetOrder(1)
      DbSeek(xFilial("SF2")+M->ZD_NOTA, .F.) 

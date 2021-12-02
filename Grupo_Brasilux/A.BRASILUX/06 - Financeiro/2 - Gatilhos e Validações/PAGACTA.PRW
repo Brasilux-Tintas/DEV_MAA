@@ -14,6 +14,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function Pagacta()
+     u_zcfga01( 'PAGACTA' ) //LGS#2021202 - Gravação de log de utilização da rotina
      _CTACED := "0000000000000"
      If SubStr(SE2->E2_CODBAR, 1, 3) == "237"
         _Ctaced := StrZero(Val(SubStr(SE2->E2_CODBAR, 37, 7)), 13, 0)

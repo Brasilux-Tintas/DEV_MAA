@@ -15,7 +15,7 @@
 User Function F460NCC()
      Local nArea := Alias()
      Local nRecno, nIndex, lBloqueado
-
+     u_zcfga01( 'F460NCC' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         DbSelectArea("SA1")
         nRecno := Recno()

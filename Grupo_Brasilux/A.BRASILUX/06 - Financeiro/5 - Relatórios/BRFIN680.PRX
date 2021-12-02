@@ -23,7 +23,7 @@ USER Function BRFIN680()
 
 Local oReport
 Local aAreaR4	:= GetArea()
-
+     u_zcfga01( 'BRFIN680' ) //LGS#2021202 - Gravação de log de utilização da rotina
 If TRepInUse()
 	oReport := ReportDef()
 	oReport:PrintDialog()

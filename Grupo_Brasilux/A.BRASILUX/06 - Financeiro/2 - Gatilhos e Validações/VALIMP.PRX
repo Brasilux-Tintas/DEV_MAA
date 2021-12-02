@@ -15,6 +15,7 @@
 */
 User Function Valimp()
      Local cCampo
+     u_zcfga01( 'VALIMP' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If Len(Alltrim(SE2->E2_CODBAR)) < 44
         cCampo := SubStr(SE2->E2_CODBAR, 34, 05)
      Else

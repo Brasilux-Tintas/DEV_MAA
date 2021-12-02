@@ -64,7 +64,7 @@ User Function BRPCP045()
         MSGBOX("Relatório Exclusivo da Filial Brasilux - Resina","Atenção","INFO")
         Return
      Endif
-
+     u_zcfga01( 'BRPCP045' ) //LGS#2021201 - Gravação de log de utilização da rotina
      dbSelectArea("SC2")
      dbSetOrder(1)
 

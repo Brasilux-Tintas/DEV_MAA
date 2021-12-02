@@ -3,7 +3,7 @@
 
 User Function ZPCPA04(  )
      Local oBrowse
-
+     u_zcfga01( 'ZPCPA04' ) //LGS#2021201 - Gravação de log de utilização da rotina
      oBrowse := FWMBrowse():New()
      oBrowse:SetAlias("ZZA")
      oBrowse:Activate()

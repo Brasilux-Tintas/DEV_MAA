@@ -49,7 +49,7 @@ User Function BRFINR01()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
 	endif 
-
+     u_zcfga01( 'BRFINR01' ) //LGS#2021202 - Gravação de log de utilização da rotina
      ValidPerg()
      Pergunte(cPergBol, .f.)
 

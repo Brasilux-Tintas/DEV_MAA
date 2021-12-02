@@ -57,6 +57,7 @@ Private cxData   := "Televendas - "+DTOC(dDataBase)
 Private cxCabec3 := cxEmp+space(79-(Len(cxEmp)+Len(cxData)))+cxData
 Private nTamNf   := 83     // Apenas Informativo
 Private cString  := "SUB"
+     u_zcfga01( 'BRTLV001' ) //LGS#2021201 - Gravação de log de utilização da rotina
 ValidPerg()
 Pergunte("TLV001",.F.)
 

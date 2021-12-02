@@ -14,7 +14,7 @@ user function VOLPEDS()
 	Local cBordero := "      "
 	Local cPedido := "      "
 	Local lOk		 	:= .F. 
-
+     u_zcfga01( 'VOLPEDS' ) //LGS#2021201 - Gravação de log de utilização da rotina
 /*
 if !u_VldAcesso(funname())
 	MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")

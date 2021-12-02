@@ -17,7 +17,7 @@ User Function ZPCPA05()
      Private oTable1
      Private oTable2
      Private _aDiverg  := {}
-
+     u_zcfga01( 'ZPCPA05' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If Pergunte( _cPergunta, .T. )
         nOpc := FWExecView( _cTitulo, _cPrograma, _nOperation, /*oDlg*/, { || .t. }, /*bOk*/, 0 /*nPercReducao*/, _aButtons /*aEnableButtons*/ )
      Endif

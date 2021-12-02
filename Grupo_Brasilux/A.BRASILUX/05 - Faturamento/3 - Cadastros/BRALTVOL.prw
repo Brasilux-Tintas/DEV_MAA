@@ -10,6 +10,9 @@ User Function BRALTVOL()
 Private aRotina := {}
 Private cCadastro := "Cadastro "
 Private cAlias := "SC5"
+
+     u_zcfga01( 'BRALTVOL' ) //LGS#2021201 - Gravação de log de utilização da rotina
+
 TcRefresh(RetSqlName("SC5"))
 
 AAdd(aRotina, {"Pesquisar"             , "AxPesqui"  , 0, 1})

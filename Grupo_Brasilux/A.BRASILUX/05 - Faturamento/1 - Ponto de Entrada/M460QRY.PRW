@@ -17,7 +17,7 @@ User Function M460QRY()
      Local _cSzg, cQuery
      Local mvpar19, mvpar20
      //Local _cUserId := RetCodUsr()
-     
+     u_zcfga01( 'M460QRY' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
 	 If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
         //_cRet := Paramixb[1] 

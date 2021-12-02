@@ -29,7 +29,7 @@ User Function WFOPPARA()
 
     
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-
+     u_zcfga01( 'WFOPPARA' ) //LGS#2021201 - Gravação de log de utilização da rotina
     cQuery := ""
     cQuery += " SELECT SC2.C2_LOTE AS 'LOTE', SC2.C2_PRODUTO AS 'PRODUTO', SB1.B1_DESC AS 'DESCRICAO', "
     cQuery += " SUBSTRING(ZZAPI.ZZA_DTFIM,7,2)+'/'+SUBSTRING(ZZAPI.ZZA_DTFIM,5,2)+'/'+SUBSTRING(ZZAPI.ZZA_DTFIM,1,4) AS 'DTENCERRA'," 

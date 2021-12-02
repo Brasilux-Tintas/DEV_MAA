@@ -17,7 +17,7 @@
 User Function BRFIN018()
 
 SetPrvt("cPerg,cQuery,cAux")
-
+     u_zcfga01( 'BRFIN018' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
 //=//=//=//=//=//=//=//=//=//=//=//=//   
 //           PARAMETROS             //

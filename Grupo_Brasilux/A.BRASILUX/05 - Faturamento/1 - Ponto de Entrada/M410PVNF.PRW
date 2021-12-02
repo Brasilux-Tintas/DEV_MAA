@@ -15,7 +15,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function M410PVNF()   
 Local lRet := .T.
-
+     u_zcfga01( 'M410PVNF' ) //LGS#2021201 - Gravação de log de utilização da rotina
 IF (SC5->(FieldPos("C5_APROVA")) > 0)
    IF !(SC5->C5_APROVA = '1')
       lRet := .f.

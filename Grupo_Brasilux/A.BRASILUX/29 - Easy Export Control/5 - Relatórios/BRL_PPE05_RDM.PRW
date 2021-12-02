@@ -39,7 +39,7 @@ Private cPict      := if(lIngles,"999,999,999.99","@E 999,999,999.99")
 Private cPictDecPrc, cPictDecPes,;
         cPictDecQtd, cPictPreco ,;
         cPictPeso  , cPictQtde        
-
+     u_zcfga01( 'BRL_PPE05_RDM' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If Type ("EE7->EE7_DECPRC") == "N"
    cPictDecPrc := if(EE7->EE7_DECPRC > 0, "."+Replic("9",EE7->EE7_DECPRC),"")
    cPictPreco  := "9,999,999" +cPictDecPrc      

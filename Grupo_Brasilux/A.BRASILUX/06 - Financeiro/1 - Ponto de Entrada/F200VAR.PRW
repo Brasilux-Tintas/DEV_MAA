@@ -16,6 +16,7 @@ User Function F200VAR()
 Local cArea := Alias()
 Local aArea, lBaixa, lLiqui, lBloqueado, lAchou,_cTitulo
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
+     u_zcfga01( 'F200VAR' ) //LGS#2021202 - Gravação de log de utilização da rotina
 If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
    aArea := U_PegaArea({"SE1","SEA"})
    DbSelectArea("SE1")

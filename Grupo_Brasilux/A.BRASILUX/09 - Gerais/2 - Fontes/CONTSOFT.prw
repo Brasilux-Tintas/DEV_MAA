@@ -16,7 +16,7 @@ User Function CONTSOFT()
                             { "Z10_STATUS=='2'", 'BR_VERMELHO'},;  // Sem licença
                             { "Z10_STATUS=='3'", 'BR_AMARELO '} }  // Numero de liceças baixo <2
      Private _cAliasSX3  := GetNextAlias() //LGS#20200128 - Adequação para release 12.1.25
-
+     u_zcfga01( 'CONTSOFT' ) //LGS#2021202 - Gravação de log de utilização da rotina
      // ABERTURA DO DICIONÁRIO SX3 - LGS#20200128 - Adequação para release 12.1.25
      OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
      _lOpen := Select( _cAliasSX3 ) > 0

@@ -20,6 +20,7 @@
 User Function BRFISR02()
 Local oReport := nil
 PRIVATE cPerg,MV_PAR01,MV_PAR02,MV_PAR03 
+     u_zcfga01( 'BRFISR02' ) //LGS#2021201 - Gravação de log de utilização da rotina
 cPerg    :="BRFISR02"
 MV_PAR03 := ""
 ValidPerg()

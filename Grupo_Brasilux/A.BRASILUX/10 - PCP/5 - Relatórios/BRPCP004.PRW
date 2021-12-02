@@ -31,7 +31,7 @@ User Function BRPCP004()
      SetPrvt("M_PAG,CCABEC1,CCABEC2,CCABEC3,NTAMNF,CSTRING")
      SetPrvt("CQUERY,_TOTALG,_TOTFIN,_TOTESTE,_TOTESTS,LIMPEST")
      SetPrvt("LIMPFIN,_DTGERAD,_NRAVAR,_TOTAL,_SALIAS,AREGS")
-
+     u_zcfga01( 'BRPCP004' ) //LGS#2021201 - Gravação de log de utilização da rotina
      CbTxt     := ""
      CbCont    := 0
      nOrdem    := 0

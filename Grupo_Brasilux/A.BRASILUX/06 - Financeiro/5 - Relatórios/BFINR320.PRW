@@ -28,7 +28,7 @@ User Function BFINR320()
 Local aArea		  := GetArea()
 //Local cPerg       := "BFINR320"		// Nome do grupo de perguntas   (FIN320)
 PRIVATE aReturn := { OemToAnsi(STR0003), 1,OemToAnsi(STR0004), 2, 2, 1, "",1 }  //"Zebrado"###"Administracao"
-
+     u_zcfga01( 'BFINR320' ) //LGS#2021202 - Gravação de log de utilização da rotina
 /*
 If FindFunction("TRepInUse") .And. TRepInUse()
 	oReport := ReportDef( cPerg )

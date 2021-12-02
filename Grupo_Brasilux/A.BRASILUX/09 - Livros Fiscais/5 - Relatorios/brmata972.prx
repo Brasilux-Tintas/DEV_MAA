@@ -84,6 +84,7 @@ Private oTempTbl10
 Private cCredAcum := GetNextAlias()
 Private oTempTbl11
 Private cArqExpt  := GetNextAlias()
+     u_zcfga01( 'BRMATA972' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Janela Principal                                             �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸

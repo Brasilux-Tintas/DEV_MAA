@@ -19,7 +19,7 @@ Local _cRet := ""
 Local cAuxUser := Alltrim(Upper(cUsername))
 Local _cCodUsr,cAuxFilt,cQuery
 
-
+     u_zcfga01( 'M200FIL' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If (ALLTRIM(cNumEmp) == "01010101") .OR. (ALLTRIM(cNumEmp) == "01060101")   //Empresas que não são do grupo 11(Tecpolpa).
    If !(cAuxUser $ "CAIO_KELLY_RUI_ADMINISTRADOR")
       _cRet := "(Len(Alltrim(G1_COD)) # 12)"

@@ -94,7 +94,7 @@ User Function FINFUN_01(nBrowse, aAlias, aParam, lExibe, aGet, lRelat, lAcsCre)
      Private _lRelat  := Iif(lRelat == Nil, .F., lRelat)
      Private _cAliasSX3  := GetNextAlias() //LGS#20200128 - Adequação para release 12.1.25
      Private oTempTbl01
-     
+     u_zcfga01( 'FINFUN_01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      aGet := {"","","","","",""}
 
      // ABERTURA DO DICIONÁRIO SX3 - LGS#20200128 - Adequação para release 12.1.25

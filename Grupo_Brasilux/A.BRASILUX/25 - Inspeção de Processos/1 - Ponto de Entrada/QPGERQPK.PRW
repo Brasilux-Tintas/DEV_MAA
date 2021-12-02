@@ -11,6 +11,7 @@
 @type function
 /*/
 User Function QPGERQPK()
+     u_zcfga01( 'QPGERQPK' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If PARAMIXB[1] $ 'SC2' //Alias da Operação SC2 (Ordem de Produção) ou SH6(Apontamento de produção)
            If PARAMIXB[2] == 1 //Operação 1 - Inclusão

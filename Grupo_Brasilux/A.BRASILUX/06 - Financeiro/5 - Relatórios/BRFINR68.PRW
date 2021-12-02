@@ -19,7 +19,7 @@ User Function BRFINR68()
 
 //Local oReport
 Local aAreaR4	:= GetArea()
-
+     u_zcfga01( 'BRFINR68' ) //LGS#2021202 - Gravação de log de utilização da rotina
 //AjustaSX1() //LGS#20200130 - Adequação para release 12.1.25 e posteriores
 
 /*

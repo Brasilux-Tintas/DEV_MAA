@@ -38,7 +38,7 @@ User Function M460SOLI()
 	Local _nItem := ParamIxb[1] //Item do aCols
 //	Local _cItemSC6
      Local nMva,nMvaSist
-
+     u_zcfga01( 'M460SOLI' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
  	//_cItemSC6 := ParamIxb[2] //Item do Pedido de Venda (C6_ITEM)
     If SC5->C5_TIPO = "N" //Tipo de Pedido sempre de Vendas ("N") Normal

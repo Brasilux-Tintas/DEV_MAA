@@ -25,7 +25,7 @@ PRIVATE nomeprog:="BRQMTR01"
 PRIVATE aLinha  := { },nLastKey := 0
 PRIVATE cPerg   :="BRQMTR01"
 
-
+     u_zcfga01( 'BRQMTR01' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Verifica as perguntas selecionadas                           �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸

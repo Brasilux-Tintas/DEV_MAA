@@ -14,6 +14,7 @@
 */
 User Function fNumCNAB(nVar)
 Local xNum
+     u_zcfga01( 'FNUMCNAB' ) //LGS#2021202 - Gravação de log de utilização da rotina
 	nLinha++
 	xNum := StrZero(nLinha, 6)
 /*  

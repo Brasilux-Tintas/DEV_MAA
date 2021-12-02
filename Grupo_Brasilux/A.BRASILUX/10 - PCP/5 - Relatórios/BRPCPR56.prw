@@ -29,7 +29,7 @@ SetPrvt("M_PAG,CCABEC1,CCABEC2,CCABEC3,NTAMNF,CSTRING")
 SetPrvt("CQUERY,_TOTALG,_TOTFIN,_TOTESTE,_TOTESTS,LIMPEST")
 SetPrvt("LIMPFIN,_DTGERAD,_NRAVAR,_TOTAL,_SALIAS,AREGS")
 SetPrvt("MV_PAR01,MV_PAR02")
-
+     u_zcfga01( 'BRPCPR56' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
 
 CbTxt    :=""

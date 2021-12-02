@@ -22,7 +22,7 @@
 User Function BRFIN033() 
 Local cMens1,_cGrpEmp,_cFilial,_cNumEmp,cTcq,cAux,cDia,nMes,nAno,cMes,cAno,nSucesso
 Private lOut,lOk,_oPT00005,cVend,nPercComis,_cData,_dData,cNomeVend,nReg,cUserLga,_cUsuario,_dUltAlt
-
+     u_zcfga01( 'BRFIN033' ) //LGS#2021202 - Gravação de log de utilização da rotina
 	_cGrpEmp := alltrim(FWGrpCompany())
 	_cFilial := alltrim(FWCodFil())
 	_cNumEmp := _cGrpEmp+_cFilial

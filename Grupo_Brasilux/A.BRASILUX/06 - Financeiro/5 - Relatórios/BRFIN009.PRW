@@ -34,7 +34,7 @@ Private tamanho :="G"
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFIN009' ) //LGS#2021202 - Gravação de log de utilização da rotina
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Defini‡„o dos cabe‡alhos ³

@@ -19,7 +19,7 @@ User function F050MDVC()
      Local nNextMes := Month(dVencRea)+1 
      Local nAno     := Year(dVencRea)
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
-
+     u_zcfga01( 'F050MDVC' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If nNextMes == 13
            nNextMes := 1     

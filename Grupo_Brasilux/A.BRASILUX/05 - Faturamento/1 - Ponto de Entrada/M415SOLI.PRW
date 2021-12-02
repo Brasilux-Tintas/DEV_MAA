@@ -35,7 +35,7 @@ User Function M415SOLI()
      lOCAL nAliqSol  := 0
      Local aRetSol    := {}  
      Local nPosTES,nMva,nMvaSist
-
+     u_zcfga01( 'M415SOLI' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
 		_nLinha := PARAMIXB[1]    
 		nAliqICM := MaFisRet(_nLinha, "IT_ALIQICM")

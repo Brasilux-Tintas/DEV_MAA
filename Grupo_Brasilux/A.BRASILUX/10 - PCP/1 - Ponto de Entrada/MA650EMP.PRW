@@ -20,7 +20,7 @@ User Function MA650EMP()
      Local _aArea := getarea()
      Local lRegD4, nRegD4, nOrdD4
      Local nPosAce, nPosTRT, nPosSLo, nPosNLo, nY
-
+     u_zcfga01( 'MA650EMP' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         DbSelectArea("SD4") 
         nOrdD4 := IndexOrd()

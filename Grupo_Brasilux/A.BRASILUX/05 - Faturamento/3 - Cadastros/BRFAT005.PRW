@@ -18,7 +18,7 @@ User Function BRFAT005()
      Local cVldAlt   := ".T." // Validacao para permitir a alteracao. Pode-se utilizar ExecBlock.
      Local cVldExc   := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
      Private cString := "SZ4"
-              
+     u_zcfga01( 'BRFAT005' ) //LGS#2021201 - Gravação de log de utilização da rotina
      cVldAlt := 'ExecBlock("FAT005_1", .F., .F.)'
      cVldExc := 'ExecBlock("FAT005_2", .F., .F.)'
 

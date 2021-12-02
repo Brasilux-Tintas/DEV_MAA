@@ -9,6 +9,7 @@ USER Function ETIQ_AVULSA()
            Return
         Endif
      Endif
+     u_zcfga01( 'ETIQ_AVULSA' ) //LGS#2021202 - Gravação de log de utilização da rotina
      MSCBPRINTER("S600"    , "LPT1"  ,             , 120       , .F.   ,         ,          ,       ,           ,        , .F.      ,             )
      MSCBBEGIN(1, 6, , .f.)
      MSCBSAYBAR(10, 03, Alltrim(mv_par01), "N", "MB02", 15, .F., .T., .F., , 3, 2)

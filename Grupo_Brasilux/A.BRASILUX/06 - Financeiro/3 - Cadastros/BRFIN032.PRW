@@ -29,7 +29,7 @@ User Function BRFIN032()
         MsgStop("Acesso não autorizado!---->"+funname())
      	Return 
 	 Endif           
-
+     u_zcfga01( 'BRFIN032' ) //LGS#2021202 - Gravação de log de utilização da rotina
      DbSelectArea("FIG")
      DbSetOrder(1)
      Set Filter to FIG->FIG_CONCIL = '2'

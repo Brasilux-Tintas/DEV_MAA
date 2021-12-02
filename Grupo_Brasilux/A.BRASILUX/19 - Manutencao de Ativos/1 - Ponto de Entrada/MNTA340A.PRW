@@ -15,7 +15,7 @@ User Function MNTA340A()
      Local oDlg, oList
      Local aProdutos := {}
      Local nList     := 1
-
+     u_zcfga01( 'MNTA340A' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         cTerceiro := GetMv("MV_PRODTER") //Para incluir mais de um Terceiro no parâmetro, dividir ambos com barra ( / ).
         DEFINE MSDIALOG oDlg TITLE "Selecione o Insumo" From 3,0 TO 150,320 COLOR CLR_BLACK,CLR_WHITE PIXEL

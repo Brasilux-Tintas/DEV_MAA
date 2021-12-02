@@ -21,7 +21,7 @@ User Function BRFAT012()
      Local _cVariac  := ""
      Local _cTipoEmb :=""
      Private cString  := M->B1_COD
-     
+     u_zcfga01( 'BRFAT012' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If INCLUI
         If !Empty(M->B1_CARAC)
            cString := M->B1_CARAC+SubStr(cString, 6, 10)

@@ -20,7 +20,7 @@ User Function BRFAT013()
      Private _cVariac  := SubStr(M->B1_COD,  8, 3)
      Private _cTipoEmb := SubStr(M->B1_COD, 11, 2)
      Private cString
-
+     u_zcfga01( 'BRFAT013' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If INCLUI .and. M->B1_TIPO == 'PA' .and. len(Alltrim(M->B1_COD))=12
         DbSelectArea("SZ1")
         DbSeek(xFilial("SZ1")+_cLinha)

@@ -28,6 +28,7 @@ PRIVATE cPerg   :="BRCLR01"
 PRIVATE flag := 0
 PRIVATE cParam, cCountTotal :=0, cContEnc:= 0.0,cCountPen:= 0,cUsername
 PRIVATE cCountEnc:= 0
+     u_zcfga01( 'BRCLR01' ) //LGS#2021202 - Grava豫o de log de utiliza豫o da rotina
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 //� Verifica as perguntas selecionadas                           �
 //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸

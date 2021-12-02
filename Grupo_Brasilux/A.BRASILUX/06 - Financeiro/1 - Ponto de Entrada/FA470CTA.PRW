@@ -18,7 +18,7 @@ User Function FA470CTA()
      Local _cConta   := mv_par05
      Local _aRet     := {}
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
-
+     u_zcfga01( 'FA470CTA' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         _aRet := {_cBanco, _cAgencia, _cConta}
      Endif

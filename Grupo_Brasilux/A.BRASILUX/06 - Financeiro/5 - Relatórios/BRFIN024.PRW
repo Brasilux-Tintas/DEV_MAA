@@ -41,7 +41,7 @@ User Function BRFIN024()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFIN024' ) //LGS#2021202 - Gravação de log de utilização da rotina
      //ValPerg() //LGS#20200130 - Adequação para release 12.1.25 e posteriores
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Defini‡„o dos cabe‡alhos ³

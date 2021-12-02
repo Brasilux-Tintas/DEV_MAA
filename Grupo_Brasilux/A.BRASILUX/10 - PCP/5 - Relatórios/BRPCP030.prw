@@ -21,6 +21,7 @@ User Function BRPCP030()
    Local cPerg   := Padr("BRPCP030",10)
    Local xNome   := "Programação da Produção"
    Local Xdescri := "Programação da Produção baseada no bordero de pedidos"
+     u_zcfga01( 'BRPCP030' ) //LGS#2021201 - Gravação de log de utilização da rotina
    Pergunte(cPerg,.F.)              
    oReport := RptDef(cPerg,xNome,Xdescri)
    oReport:PrintDialog()

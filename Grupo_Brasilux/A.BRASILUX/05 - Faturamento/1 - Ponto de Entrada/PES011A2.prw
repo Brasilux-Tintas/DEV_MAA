@@ -30,7 +30,7 @@ Local cOrigem := alltrim(Upper( PARAMIXB[1] ))
 	Local lProdExcluido  := .F.	// Indica se um item será excluído
 	Local i,cRepres,cBco,cCodCli,cLojaCli,cProd,nQtde,cAux,nValor,nQtdItens,cObsAntes,cAuxTrans,cMens
 	Local _cGrpEmp,_cFilial,_cNumEmp,_cFilPed,dEmissao,_cDep,_cPvsim
-	
+     u_zcfga01( 'PES011A2' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	_cGrpEmp := ALLTRIM(FWGrpCompany())
 	_cFilial := FWCodFil()
 	_cNumEmp := _cGrpEmp+alltrim(_cFilial)

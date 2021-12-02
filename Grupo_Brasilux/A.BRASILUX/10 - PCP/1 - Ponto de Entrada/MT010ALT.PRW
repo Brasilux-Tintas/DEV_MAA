@@ -21,7 +21,7 @@ User Function MT010ALT()
      Local aAreaAnt := u_PegaArea({"SX5","SB5","SYD","SZ1","SB1","DA1"})
      Local lBloqueouB1, cAuxMens,lMandarBrasRepres, lRet, nPicmret, cNcm, cTs, cConta, cCest, nPrcTab, cObs, _cItem, _nItem,lTabloqueado
      Local _cEmpr,_cGrpEmp,_cFilial,_cNumEmp
-
+     u_zcfga01( 'MT010ALT' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	_cEmpr := alltrim(FWCodEmp())
 	_cGrpEmp := ALLTRIM(FWGrpCompany())
 	_cFilial := FWCodFil()

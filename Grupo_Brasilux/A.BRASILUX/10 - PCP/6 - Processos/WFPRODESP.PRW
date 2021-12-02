@@ -28,7 +28,7 @@ User Function WFPRODESP()
 
     
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-
+     u_zcfga01( 'WFPRODESP' ) //LGS#2021201 - Gravação de log de utilização da rotina
     cQuery := ""
     cQuery += " SELECT C2_PRODUTO AS 'CODPRO', B1_DESC AS 'DESC', SUM(C2_QUJE) AS 'QTDE', (B1_CONV * SUM(C2_QUJE)) AS 'VOLUME', SUBSTRING(C2_DATRF,1,6) AS 'ANOMES', COUNT(SC2.R_E_C_N_O_) AS 'PRODUCOES' "
     cQuery += " FROM "+RetSqlName("SC2")+" SC2 WITH(NOLOCK) " 

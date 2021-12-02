@@ -185,6 +185,7 @@ Default aRegT050AD    := {}
 Default aRegT008      := {}
 Default aRegT008Aux   := {}
 Private _lVerProc     := Type( "oProcess" ) == "O"
+     u_zcfga01( 'BRBLOCOG' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //---------------------------------------------------------
 //Tratamento para quando a chamada seja via extrator fiscal
 //---------------------------------------------------------

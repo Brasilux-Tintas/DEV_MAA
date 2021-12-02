@@ -15,7 +15,7 @@ User Function BRMAN002()
 Local aCabExcel :={}
 Local aItensExcel :={}
 Local _cPerg:="BRMAN002"
-
+     u_zcfga01( 'BRMAN002' ) //LGS#2021202 - GravaГЦo de log de utilizaГЦo da rotina
      //здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
      //Ё Envia controle para a funcao SETPRINT - checa se o uauАrio tem permissЦo Ё
      //юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды

@@ -17,7 +17,7 @@
 User Function MTA410E()   
      Local cQry1,cTmp
      Local cAliAtu := Alias()
-
+     u_zcfga01( 'MTA410E' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If (cNumEmp = "01010101") .OR. (cNumEmp = "01060101") // .and. !empty(M->C5_PEDREPR)
            cTmp := U_NovoCursor()

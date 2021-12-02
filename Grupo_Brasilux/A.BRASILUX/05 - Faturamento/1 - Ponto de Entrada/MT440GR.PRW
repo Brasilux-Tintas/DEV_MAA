@@ -14,7 +14,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function MT440GR()
      Local lRet := .t.
-
+     u_zcfga01( 'MT440GR' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If SC5->C5_NAOCONF == "S"
            MsgBox("Atencao! Pedido NAO RESPEITA as Politicas Comerciais Para Revenda! Liberacao Nao Permitida!", "ATENÇÃO", "STOP")

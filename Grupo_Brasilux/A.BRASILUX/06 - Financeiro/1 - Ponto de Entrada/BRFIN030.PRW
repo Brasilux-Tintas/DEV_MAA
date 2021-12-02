@@ -24,7 +24,7 @@ User Function BRFIN030( _cParam01 )
 
     Local _cRet         := ""
     Local _cModPgto     := _cParam01
-
+     u_zcfga01( 'BRFIN030' ) //LGS#2021202 - Gravação de log de utilização da rotina
     If _cModPgto $ "30"                  // boletos do mesmo banco
         _cRet := " Substr( E2_CODBAR, 01, 03 ) == '" + cPort240 + "' .AND. !Empty( E2_CODBAR ) "
 

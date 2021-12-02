@@ -122,6 +122,7 @@ User Function TMKVOK()
      Local _nMVICMPAD := GETMV("MV_ICMPAD")
      Local _nMVTXPIS  := GETMV("MV_TXPIS")
      Local _nMVTXCOFI := GETMV("MV_TXCOFIN")
+     u_zcfga01( 'TMKVOK' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         //Se estiver nas empresas de Gestão Imobiliária não executar
         IF (cNumEmp = "01") .and. (SUBSTR(cNumEmp,3,2) $ "07*08*09")

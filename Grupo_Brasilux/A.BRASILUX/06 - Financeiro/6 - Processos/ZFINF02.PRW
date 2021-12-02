@@ -23,7 +23,7 @@ Conciliação Bancaria especifica para Brasilux, conforme solicitado no chamado 01
 /*/
 User Function ZFINF02()
      Local _aArea := GetArea()
-
+     u_zcfga01( 'ZFINF02' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //Pergunte( "FINA473", .F. )
      Pergunte( "ZFINF01", .F. )
 

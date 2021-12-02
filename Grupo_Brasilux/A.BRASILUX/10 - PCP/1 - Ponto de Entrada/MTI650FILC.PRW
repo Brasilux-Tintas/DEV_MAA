@@ -23,7 +23,7 @@ Local nRecno     := PARAMIXB[8]
 Local cComp      := PARAMIXB[2]
 Local aArea 	 := {SB1->(GetArea()),GetArea()}
 Local lRet 		 := .T.
-
+     u_zcfga01( 'MTI650FILC' ) //LGS#2021201 - Gravação de log de utilização da rotina
 SB1->(dbSetOrder(1))
 If SB1->(MsSeek(xFilial("SB1")+cComp))
 	If U_IsProdCusto(SB1->B1_COD)

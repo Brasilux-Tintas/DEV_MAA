@@ -38,7 +38,7 @@ User Function BRPCP090()
      SetPrvt("NLASTKEY,LCONTINUA,NLIN,NCOL,WNREL,NTIPO")
      SetPrvt("M_PAG,CCABEC1,CCABEC2,CCABEC3,CSTRING")
      SetPrvt("CQUERY","Result")
-
+     u_zcfga01( 'BRPCP090' ) //LGS#2021201 - Gravação de log de utilização da rotina
      Result   := 0
      CbTxt    := ""
      CbCont   := 0

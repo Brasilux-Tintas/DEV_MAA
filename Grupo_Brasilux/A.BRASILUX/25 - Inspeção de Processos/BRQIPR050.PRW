@@ -23,7 +23,7 @@ Private cPerg1	:="QPR051"
 Private  __cPRODUTO := CriaVar("QP6_PRODUT") //Codigo do Produto, quando a Especificacao for em Grupo      
 Private lProduto   := .F.
 Private lFase3     := IIF(QP6->(FieldPos("QP6_SITREV"))<>0,.T.,.F.)
-
+     u_zcfga01( 'BRQIPR050' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //AjustaSX1()
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -283,7 +283,7 @@ Return .T.
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 Static Function A050Imp(lEnd,wnRel,cString,cTitulo)
-Local cAcentos		:="€ú‡úŽúú…ú†úƒú úúˆú‚ú¡ú“ú”ú¢ú™ú£ú",cAcSubst := "C,c,A~A'a`a~a^a'E'e^e'i'o^o~o'O~U'"
+Local cAcentos		:="€ú‡úŽúú…ú†úƒú úúˆú‚ú¡ú“ú”ú¢ú™ú£ú",cAcSubst := "C,c,A~A'a`a~a^a'E'e^e'i'o^o~o'O~U'"
 Local aMeses		:={"JANEIRO","FEVEREIRO","MARÇO","ABRIL","MAIO","JUNHO","JULHO","AGOSTO","SETEMBRO","OUTUBRO","NOVEMRO","DEZEMBRO"}	
 Local dDat			:=Ctod("  /  /  ")
 Local cCliente		:=mv_par01

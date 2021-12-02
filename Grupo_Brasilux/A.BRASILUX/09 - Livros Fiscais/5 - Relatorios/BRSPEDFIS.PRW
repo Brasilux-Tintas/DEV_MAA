@@ -43,7 +43,7 @@ Private aReg0206	:=	{}
 Private lBuild    := .f. //GetBuild() >= "7.00.131227A"
 Private oHash0200
 Private aWizScreen	:=	{}	//Wizard preenchido antes de chamar function SpedFiscal, permitindo utilizar SpedFiscal via Job/RPC
-
+     u_zcfga01( 'BRSPEDFIS' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If lBuild
     oHash0200 := &cNew
 EndIf 

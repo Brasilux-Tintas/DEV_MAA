@@ -24,7 +24,7 @@ User Function M410ALOK()
      Local cMsgUse   := ""  
      Local cTmp, cMsgPed, nConPed, cAuxMen   
      Local _cCodUser := RetCodUsr()
-	
+     u_zcfga01( 'M410ALOK' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         lAdmin := (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUser) = 0)
 

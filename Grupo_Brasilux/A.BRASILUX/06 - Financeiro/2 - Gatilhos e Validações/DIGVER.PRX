@@ -15,6 +15,7 @@
 */
 User Function Digver()
      Local cCampo
+     u_zcfga01( 'DIGVER' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If Len(Alltrim(SE2->E2_CODBAR)) < 44
         cCampo := SubStr(SE2->E2_CODBAR, 33, 1)
      Else

@@ -16,7 +16,7 @@
 */
 User Function BRFIN013()
      Private cPERG,mv_par01
-
+     u_zcfga01( 'BRFIN013' ) //LGS#2021201 - Gravação de log de utilização da rotina
 cPerg   := "BRFI13"
                       
 @ 96,42 TO 323,505 DIALOG oDlg1 TITLE "Calcular Indice de Liquidez p/ Clientes"

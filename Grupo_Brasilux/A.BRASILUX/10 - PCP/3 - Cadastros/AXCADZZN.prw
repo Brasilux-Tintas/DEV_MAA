@@ -36,7 +36,7 @@ Local cVldAlt := ".T." // Validacao para permitir a alteracao. Pode-se utilizar 
 Local cVldExc := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
 
 Private cString := "ZZN"
-
+     u_zcfga01( 'AXCADZZN' ) //LGS#2021201 - Gravação de log de utilização da rotina
 dbSelectArea("ZZN")
 dbSetOrder(1)
                             

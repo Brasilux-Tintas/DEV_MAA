@@ -20,7 +20,7 @@
 User Function MA410DEL()
      Local cArea  := Alias()
      Local _cAux
-
+     u_zcfga01( 'MA410DEL' ) //LGS#2021201 - Gravação de log de utilização da rotina
 If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
      If substr(cNumEmp,1,2) == "01"
         U_EnviaRec("SC5", SC5->C5_NUM, .t.,SC5->C5_VEND1)

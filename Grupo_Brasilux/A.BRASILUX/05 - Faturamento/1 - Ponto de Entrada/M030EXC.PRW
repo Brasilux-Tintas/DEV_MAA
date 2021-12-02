@@ -17,7 +17,7 @@
 User Function M030EXC()
      Local aArea := GetArea()
      Local lBloqueado,_cGrpEmp
-
+     u_zcfga01( 'M030EXC' ) //LGS#2021201 - Gravação de log de utilização da rotina
 _cGrpEmp := ALLTRIM(FWGrpCompany())
      If _cGrpEmp == '01' //Empresas que não são do grupo 11(Tecpolpa).
         U_EnviaRec("SA1", SA1->A1_COD, .T.,SA1->A1_VEND)

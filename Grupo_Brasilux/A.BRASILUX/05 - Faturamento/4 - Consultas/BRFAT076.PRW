@@ -65,7 +65,7 @@ User Function BRFAT076()
 						  {"VOLUME"   ,OemToAnsi("Volume")      ,"999999"},;
 						  {"VOLQUEB"  ,OemToAnsi("Vol.Quebr")   ,""      }}
 						  //{"TINTAPO"  ,OemToAnsi("Tinta Po")    ,""      } }
-
+     u_zcfga01( 'BRFAT076' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
      _cUser := alltrim(upper(cUsername))
 
 	 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커

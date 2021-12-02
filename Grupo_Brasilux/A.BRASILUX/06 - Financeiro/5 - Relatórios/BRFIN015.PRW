@@ -21,7 +21,7 @@
 */
 User Function BRFIN015()
      SetPrvt("cPerg,cQuery,nPag")
-
+     u_zcfga01( 'BRFIN015' ) //LGS#2021202 - Gravação de log de utilização da rotina
 //=//=//=//=//=//=//=//=//=//=//=//=//   
 //           PARAMETROS             //
 //=//=//=//=//=//=//=//=//=//=//=//=//

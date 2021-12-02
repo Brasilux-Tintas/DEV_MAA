@@ -90,7 +90,7 @@
          Private hHorLab   := ""
 
          SetPrvt("oFontApt", "oDlg1Apt", "oBtn1Apt", "oSay1Apt", "oGet1Apt")
-
+     u_zcfga01( 'BRPCPA09' ) //LGS#2021201 - Gravação de log de utilização da rotina
          If !Empty(cParInf4)
             If Empty(xConnect)
                // Ajuste pelo Environment do Server

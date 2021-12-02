@@ -17,7 +17,7 @@ User Function BRFAT054()
      Local cVldAlt := ".T." // Validacao para permitir a alteracao. Pode-se utilizar ExecBlock.
      Local cVldExc := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
      Private cString := "SZD"
-            
+     u_zcfga01( 'BRFAT054' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SZD")
      DbSetOrder(5)
 

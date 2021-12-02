@@ -23,7 +23,7 @@ Chamada do fonte BRFIN030 para elaborar filtro na montagem do bordero
 User Function F240FIL()
 
     Local _cRet := " "
-
+     u_zcfga01( 'F240FIL' ) //LGS#2021202 - Gravação de log de utilização da rotina
     If FindFunction("U_BRFIN030")
         _cRet := U_BRFIN030( cModPgto )
     EndIf

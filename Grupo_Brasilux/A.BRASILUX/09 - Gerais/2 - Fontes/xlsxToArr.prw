@@ -21,7 +21,7 @@ User function xlsxToArr(cArq, cIdPlan, cDelimiter)
     Default cIdPlan := "1"
     Default cArq    := ""
     Default cDelimiter := ","
-
+     u_zcfga01( 'XLSXTOARR' ) //LGS#2021202 - Gravação de log de utilização da rotina
     oProcess := MsNewProcess():New({|lEnd| aRes:= Converter(cArq, cIdPlan, cDelimiter, @oProcess, @lEnd)  },"Extraindo dados da planilha XLSX","Efetuando a leitura do arquivo xlsx...", .T.)
 
     oProcess:Activate()

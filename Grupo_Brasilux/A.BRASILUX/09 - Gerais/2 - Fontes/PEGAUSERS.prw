@@ -1,6 +1,7 @@
 #include "topconn.ch"
 User Function PEGAUSERS()
 Local i,lNovo,_aRetUser,cCod,_cGrpEmp,cMat,cQry1
+     u_zcfga01( 'PEGAUSERS' ) //LGS#2021202 - Gravação de log de utilização da rotina
 //Local cAux
 /*
 nArray

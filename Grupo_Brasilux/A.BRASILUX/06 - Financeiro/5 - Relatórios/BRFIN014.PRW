@@ -25,7 +25,7 @@ User Function BRFIN014()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFIN014' ) //LGS#2021202 - Gravação de log de utilização da rotina
 
      SetPrvt("cPerg, cQuery, nPag")
 

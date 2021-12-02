@@ -18,7 +18,7 @@ User Function FC010CON()
      Local nArea  := Alias() 
      Local cQuery := ""
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
-
+     u_zcfga01( 'FC010CON' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If _cGrpEmp == '01' //Empresas que são do grupo 01-BRASILUX.
         cQuery += "SELECT TOP 1 '01' AS EMPRESA "
         cQuery += "FROM "+RetSqlName("SE1")+" SE1 WITH (NOLOCK) "

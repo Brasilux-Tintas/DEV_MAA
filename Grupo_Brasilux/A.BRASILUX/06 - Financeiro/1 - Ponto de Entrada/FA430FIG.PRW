@@ -17,7 +17,7 @@ User Function FA430FIG
 Local cCNPJ := alltrim(ParamIxb[1])
 Local cArea := Alias()
 Local cAuxCgc,cQuery,_cTitulo,cValor,cAuxQuery,cAuxTit,cCnpjOrig,nCont,nTam,nQtde,nPos
-
+     u_zcfga01( 'FA430FIG' ) //LGS#2021202 - Gravação de log de utilização da rotina
 _cTitulo := U_SoDig(cNumTit)
 nPos := iif(len(cCNPJ) == 15,2,1)
 cAuxCgc := substr(cCNPJ,nPos,8)

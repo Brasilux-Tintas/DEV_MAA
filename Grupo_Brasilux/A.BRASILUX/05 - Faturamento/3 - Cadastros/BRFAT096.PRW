@@ -36,7 +36,7 @@ Local cMens1
         MessageBox( cMens1, "Atenção", 48 )
         return
      Endif 
-	
+     u_zcfga01( 'BRFAT096' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
     @ 96,42 TO 323,505 DIALOG oDlg1 TITLE "Entradas de NF Rem Simbólica"
 

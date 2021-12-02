@@ -14,5 +14,6 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function BRPCP043()
+     u_zcfga01( 'BRPCP043' ) //LGS#2021201 - Gravação de log de utilização da rotina
      U_EditaX5("03", "A9")
 Return

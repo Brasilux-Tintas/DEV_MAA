@@ -23,7 +23,7 @@ Local lSair := .f.
      Private nCol  := 30
      Private nLinMax := 2920
      Private nColMax := 2350
-
+     u_zcfga01( 'BRPCP002' ) //LGS#2021201 - Gravação de log de utilização da rotina
      
 	//ValidPerg(_cPerg) //LGS#20200206 - Adequação de release 12.1.25 e posteriores
 	

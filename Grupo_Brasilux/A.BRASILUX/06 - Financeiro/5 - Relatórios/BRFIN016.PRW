@@ -25,7 +25,7 @@ SetPrvt("nVl_C_Brt,nVl_C_Liq,nVl_D_Brt,nVl_D_Liq,nVl_I_Brt,nVl_I_Liq")
 SetPrvt("nVl_N_Brt,nVl_N_Liq,nVl_V_Brt,nVl_V_Liq") 
 SetPrvt("nPer_C_Brt,nPer_C_Liq,nPer_D_Brt,nPer_D_Liq,nPer_I_Brt,nPer_I_Liq")
 SetPrvt("nPer_N_Brt,nPer_N_Liq,nPer_V_Brt,nPer_V_Liq")
-
+     u_zcfga01( 'BRFIN016' ) //LGS#2021202 - Gravação de log de utilização da rotina
 
 //=//=//=//=//=//=//=//=//=//=//=//=//   
 //           PARAMETROS             //

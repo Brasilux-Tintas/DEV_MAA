@@ -32,7 +32,7 @@ User Function BRFAT053(_cTipo, cCliente, cProduto)
      Local cQuery   :=""
      Local _cFilial,cAuxFilial
      Local cTipoMov,cGrTrib,cGrProd,cUf,cSuframa,cTemSt,cCalcSuf,cInterUf,lIpizero,cMunZf
-     
+     u_zcfga01( 'BRFAT053' ) //LGS#2021201 - Gravação de log de utilização da rotina
      lIpizero := .f. //Chamado 007956=>Clientes Suframa fora dos mun. zona franca e com IPI zero tratar como venda normal
      cMunZf := "" //Conterá cód. município Zona Franca
      If !(_cTipo $ "D_B") 

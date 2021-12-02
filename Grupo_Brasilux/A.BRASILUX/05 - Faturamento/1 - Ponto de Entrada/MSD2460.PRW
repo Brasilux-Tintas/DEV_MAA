@@ -37,7 +37,7 @@ User Function MSD2460()
      Local lBloqueado := .f.
      Local lBloqueou  := .f.
      Local _cGrpEmp,cEnvVend,nRegD1,cEst,cAux,lPegaSF1,nRegD2,nImpNcm := 0
-
+     u_zcfga01( 'MSD2460' ) //LGS#2021201 - Gravação de log de utilização da rotina
 _cGrpEmp := ALLTRIM(FWGrpCompany())
 dbselectarea("SF4")
 dbsetorder(1)

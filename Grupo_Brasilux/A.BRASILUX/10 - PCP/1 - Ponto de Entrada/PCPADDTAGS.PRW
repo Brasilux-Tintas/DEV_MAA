@@ -19,7 +19,7 @@ User Function PCPADDTAGS()
      Local _nPesBru  := 0
      //Local _aPesoProd:= {}
      Local _aAuxZZA  := {}
-
+     u_zcfga01( 'PCPADDTAGS' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If UPPER( AllTrim( _cTransac ) ) == "ITEM" //Trafegando a mensagem de Produtos.
            If UPPER( AllTrim( _cEvent ) ) == "UPSERT" //Atualizando ou Incluindo um produto.

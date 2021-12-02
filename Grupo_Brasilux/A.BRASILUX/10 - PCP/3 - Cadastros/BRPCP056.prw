@@ -23,7 +23,7 @@
 User Function BRPCP056()
 
 	Local _oBrowse
-
+     u_zcfga01( 'BRPCP056' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	//Instanciamento da Classe de Browse
 	_oBrowse := FWMBrowse():New()
 

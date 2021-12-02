@@ -35,7 +35,7 @@ User Function BRPCPR01()
      Private nCol  := 30
      Private nLinMax := 2920
      Private nColMax := 2350
-
+     u_zcfga01( 'BRPCPR01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //                     NOME DA FONTE             NEG ESP          ITA    
      oFont1 := TFont():New("Courier New"        , 9, 19, .F., .F.,  5, .F., 5, .F., .F.)
      oFont2 := TFont():New("Courier New"        , 9, 14, .F., .F.,  5, .F., 5, .F., .F.)

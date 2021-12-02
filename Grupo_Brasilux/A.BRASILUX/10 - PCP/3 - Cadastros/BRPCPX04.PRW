@@ -50,7 +50,7 @@ User Function BRPCPX04()
         MSGBOX("Essa empresa não aceita cadastro de lotes de produção","ATENÇÃO...","STOP")
         Return nil
      Endif
-
+     u_zcfga01( 'BRPCPX04' ) //LGS#2021201 - Gravação de log de utilização da rotina
      // ABERTURA DO DICIONÁRIO SX3 - LGS#20200204 - Adequação para release 12.1.25
      OpenSXs( NIL, NIL, NIL, NIL, NIL, _cAliasSX3, "SX3", NIL, .F. )
      _lOpen := Select( _cAliasSX3 ) > 0

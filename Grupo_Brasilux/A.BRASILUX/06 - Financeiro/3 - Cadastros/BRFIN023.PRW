@@ -17,7 +17,7 @@ User Function BRFIN023()
      Local cVldAlt   := ".T." // Validacao para permitir a alteracao. Pode-se utilizar ExecBlock.
      Local cVldExc   := ".T." // Validacao para permitir a exclusao.  Pode-se utilizar ExecBlock.
      Private cString := "SZV"
-
+     u_zcfga01( 'BRFIN023' ) //LGS#2021202 - Gravação de log de utilização da rotina
      DbSelectArea("SZV")
      DbSetOrder(1)
 

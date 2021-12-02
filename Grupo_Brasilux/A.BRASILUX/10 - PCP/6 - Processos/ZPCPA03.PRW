@@ -10,7 +10,7 @@ Chamada principal do programa de Log de apontamentos
 /*/
 User Function ZPCPA03( )
      Local oBrowse
-
+     u_zcfga01( 'ZPCPA03' ) //LGS#2021201 - Gravação de log de utilização da rotina
      oBrowse := FWMBrowse():New()
      oBrowse:SetAlias("ZZA")
      oBrowse:Activate()

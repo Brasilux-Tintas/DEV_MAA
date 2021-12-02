@@ -45,7 +45,7 @@ User Function BRFISR01()
       MV_PAR05 := 1
       MV_PAR06 := 1
       MV_PAR07 := 1
-
+     u_zcfga01( 'BRFISR01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      fValPer() 
      Pergunte(cPerg, .F.)
 

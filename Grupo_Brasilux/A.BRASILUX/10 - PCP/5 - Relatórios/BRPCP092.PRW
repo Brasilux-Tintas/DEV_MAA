@@ -24,7 +24,7 @@ Local _cPerg:="BRPCP092"
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRPCP092' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //( _cPerg ) Chamada da Criação das perguntas  //LGS#20200204 - Adequação de release 12.1.25 e posteriores
 If !Pergunte( _cPerg ) 
         Return() //Se cancelar as perguntas sai do programa

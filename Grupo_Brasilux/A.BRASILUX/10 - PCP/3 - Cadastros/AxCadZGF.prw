@@ -33,7 +33,7 @@ Private aRotina   := { {"Pesquisar" 		,"AxPesqui"     , 0, 1},;
                        {"Excluir"   		,"AxDeleta"     , 0, 5} }
                        
 
-
+     u_zcfga01( 'AXCADZGF' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //AxCadastro("SA1", "Clientes", "U_DelOk()", "U_COK()", aRotAdic, bPre, bOK, bTTS, bNoTTS, , , aButtons, , )
 /*
 If !u_VldAcesso(funname())

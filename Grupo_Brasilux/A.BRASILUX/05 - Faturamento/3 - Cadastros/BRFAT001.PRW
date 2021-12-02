@@ -20,7 +20,7 @@ User Function BRFAT001()
      Local cVldExc   := ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
      Local _cUser
      Private cString := "SZ1"
-
+     u_zcfga01( 'BRFAT001' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	/* 
      _cUser := Alltrim(Upper(cUsername))
 	*/

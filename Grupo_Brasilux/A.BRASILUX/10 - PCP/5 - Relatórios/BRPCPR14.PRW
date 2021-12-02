@@ -60,7 +60,7 @@ User Function BRPCPR14()
          MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       	 return 
 	 endif 
-    
+     u_zcfga01( 'BRPCPR14' ) //LGS#2021201 - Gravação de log de utilização da rotina
      Pergunte(cPerg, .F.)   
 
      wnrel := SetPrint(cString, wnrel, cPerg, @Titulo, cDesc1, cDesc2, cDesc3, .F., aOrd, .f., Tamanho, ,.F.)

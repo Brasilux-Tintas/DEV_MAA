@@ -14,6 +14,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function M456FIL()
      Local _uRet := ""
+     u_zcfga01( 'M456FIL' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas do grupo BRASILUX.
         If MV_PAR02 == 2
            _uRet := "SC9->C9_BLCRED <> '09'"

@@ -133,7 +133,7 @@ User Function MTA410()
 	Local nVlrTot      := 0,nVlrFrete := 0,nPercFrete := 0 //,lCalcFrete := .t.
 	Local lMasterS     := .f. // Enviar pedido para MasterSales
 	Local oTempTable,lCampanha,cTabCampanha,nIcmCampanha,cCondCamp
-
+     u_zcfga01( 'MTA410' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	_cGrpEmp := alltrim(FWGrpCompany())
 	if empty(_cGrpEmp)
 		_cGrpEmp := "01"

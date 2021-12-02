@@ -15,6 +15,7 @@
 User Function F470ALLF()
      Local lRet := .t.
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
+     u_zcfga01( 'F470ALLF' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         lRet := .t.
      Endif

@@ -21,7 +21,7 @@ User Function BRFISR05()
 	Local lEmail  := .F.
 	Local cPara   := ""
 	Private cPerg := ""
-	
+     u_zcfga01( 'BRFISR05' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	//Cria as definições do relatório
 	oReport := fReportDef()
 	

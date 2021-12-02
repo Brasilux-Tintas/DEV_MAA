@@ -49,7 +49,7 @@ User Function GpeBras()
      Private aDepenIR:= {}
      Private aDepenSF:= {}
      Private nDepen  := 0
-
+     u_zcfga01( 'GPEBRAS' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //tratando os espacos do novo tamanho do X1_GRUPO
      //cPerg	:= cPerg + (Space( Len(SX1->X1_GRUPO)  - Len(cPerg) ) )
 
@@ -133,7 +133,7 @@ Static Function fWord_Imp()
        //Acerta o nome do arquivo a ser impresso
        cAuxArq := cArqSaida
        cNewArq := ""
-       cNewDir := ""
+       cNewDir := AllTrim( mv_par29 )
        While Len(cAuxArq) > 0
              nPosBar := At("\", cAuxArq)
              If nPosBar == 0
@@ -246,7 +246,7 @@ Static Function fWord_Imp()
                 dbSkip()
                 Loop
              EndIF
-	    
+             cArqSaida := Alltrim( SRA->RA_MAT )
              //	ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
              //	³Consiste Filiais e Acessos                                             ³
              //	ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -369,9 +369,9 @@ Static Function fWord_Imp()
                     OLE_PrintFile( oWord )
                 Next nX
              Else
-                cArqSaida := SubStr(cArqSaida, 1, 5) + StrZero(nArqSaida, 3)
-                nArqSaida += 1
-                OLE_SaveAsFile( oWord, cNewDir+Alltrim(cArqSaida) )
+                //cArqSaida := SubStr(cArqSaida, 1, 5) + StrZero(nArqSaida, 5)
+                //nArqSaida += 1
+                OLE_SaveAsFile( oWord, cNewDir + Alltrim( cArqSaida ) + '.docx' )
              EndIF
 
              dbSelectArea("SRA")                                               
@@ -405,16 +405,19 @@ Return( NIL )
 User Function fOpen_br()
      Local cSvAlias     := Alias()
      //Local lAchou       := .F.
-     Local cTipo        := "Modelo de Documentos(*.DOT) | *.DOT |"
+     Local cTipo        := "Modelo de Documentos(*.DOT?) | *.DOT? |"
      Local cNewPathArq  := cGetFile( cTipo , 'Selecione o arquivo *.DOT' )									
 
-     IF !Empty( cNewPathArq )
-        IF Upper( Subst( AllTrim( cNewPathArq), - 3 ) ) == Upper( AllTrim( 'dot' ) )
+        IF !Empty( cNewPathArq )
+        //IF Upper( Subst( AllTrim( cNewPathArq), - 3 ) ) == Upper( AllTrim( 'dot' ) )
+        IF Upper( Subst( AllTrim( cNewPathArq), - 3 ) ) $ 'DOT|OTX' //LGS#20211201 - Ajuste na lógica
 //------------ Inibido por Jose Uliana dia 02/12/2020 ---------------------- 
 //          Aviso( 'Arquivo Selecionado' , cNewPathArq , { 'OK' } )
 //--------------------------------------------------------------------------
 //---------- Mudado por Jose Uliana dia 02/12/2020  MessageBox -------------------------
           MessageBox( 'Arquivo Selecionado' + cNewPathArq, 'Aviso', 48 )
+          mv_par25 := cNewPathArq
+          aPergunta[25][8] := cNewPathArq
 //--------------------------------------------------------------------------
         Else
            MessageBox( 'Arquivo inválido', "Atenção", 48 )
@@ -435,11 +438,12 @@ User Function fOpen_br()
      /*DbSelectArea("SX1")  
      IF lAchou := ( SX1->( dbSeek( cPerg + "25" , .T. ) ) )
         RecLock("SX1", .F., .T.)
-           SX1->X1_CNT01 := Space( Len( SX1->X1_CNT01 ) )
+           SX1->X1_CNT01 := Space( Len( cNewPathArq ) )
            mv_par25 := cNewPathArq
+           aPergunta[25][8] := cNewPathArq
         MsUnLock()
-     EndIF*/	
-     dbSelectArea( cSvAlias )
+     EndIF	
+     dbSelectArea( cSvAlias )*/
 Return( .T. )
 
 

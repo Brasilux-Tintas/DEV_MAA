@@ -21,7 +21,7 @@ User Function BRFAT104()
 
      cVldAlt := 'ExecBlock("FAT104_1", .F., .F.)'       
      cVldExc := 'ExecBlock("FAT104_2", .F., .F.)'
-
+     u_zcfga01( 'BRFAT104' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("Z17")
      DbSetOrder(1)
 

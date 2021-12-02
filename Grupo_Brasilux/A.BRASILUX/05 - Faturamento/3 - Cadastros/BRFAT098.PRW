@@ -29,7 +29,7 @@ User Function BRFAT098()
 		MsgBox("Esta operação SOMENTE pode ser executada no depósito!", "Atenção!", "STOP")
 		return
 	endif 
-
+     u_zcfga01( 'BRFAT098' ) //LGS#2021201 - Gravação de log de utilização da rotina
      @ 96,42 TO 323,505 DIALOG oDlg1 TITLE "Entradas de NF Transferência"
 
 //     @ 91,139 BMPBUTTON TYPE 5 ACTION Pergunte(cPerg)

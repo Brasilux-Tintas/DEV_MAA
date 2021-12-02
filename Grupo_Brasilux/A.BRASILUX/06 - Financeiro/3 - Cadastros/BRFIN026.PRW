@@ -53,7 +53,7 @@ User Function BRFIN026
      //� Define o cabecalho da tela de baixas                         �
      //읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸
      Private cCadastro := OemToAnsi(STR0005) //"Aglutina뇙o de Titulos"
-
+     u_zcfga01( 'BRFIN026' ) //LGS#2021202 - Grava豫o de log de utiliza豫o da rotina
      DbSelectArea("SE2")
      DbSetOrder(1)
      DbGoTop()

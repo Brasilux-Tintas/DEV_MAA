@@ -17,7 +17,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function M460FIL()  
      Local  _cRet := ""
-     
+     u_zcfga01( 'M460FIL' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas DO GRUPO BRASILUX.
         Pergunte("MT461A",.F.)
         _cRet      := "(SC9->C9_APROVA = '"+iif(mv_par20 == 2,"9","1")+"')" 

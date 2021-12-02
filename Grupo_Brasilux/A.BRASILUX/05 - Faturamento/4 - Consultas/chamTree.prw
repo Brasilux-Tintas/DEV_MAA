@@ -4,7 +4,7 @@
 
 User Function chamTree()  
 Private oDlgs
-
+     u_zcfga01( 'CHAMTREE' ) //LGS#2021201 - Gravação de log de utilização da rotina
 DEFINE MSDIALOG oDlgs TITLE "Tela de BIPE" FROM 000, 000 TO 200, 300 PIXEL 
 
 TButton():New( 000, 000, "Consulta Bipe Pedido", oDlgs,{|| u_MyTree() },152,050,,,.F.,.T.,.F.,,.F.,,,.F. )

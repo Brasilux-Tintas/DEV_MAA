@@ -26,7 +26,7 @@ User Function A200GRVE()
      Private _xUmPai
      Private _TpPai
      Private _TotQtd
-
+     u_zcfga01( 'A200GRVE' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         aAdd( _aCampos, { "COMP"  , "C", 26, 0})
         aAdd( _aCampos, { "QTD"   , "N", 14, 6})

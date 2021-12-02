@@ -18,7 +18,7 @@ User Function BRFIN004()
      Local Exec, i
      Local cPerg := "FIN004"
      Private cFilSel := "", mv_par01, mv_par02, mv_par03
-
+     u_zcfga01( 'BRFIN004' ) //LGS#2021202 - Gravação de log de utilização da rotina
      ValidPerg(cPerg) 
      Pergunte(cPerg)
      cFilSel := " "

@@ -22,7 +22,7 @@ Private MV_PAR04:=MV_PAR06:=MV_PAR07 := MV_PAR09:=(ctod(space(8)))
       	  MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
     	  return 
   endif 
-
+     u_zcfga01( 'LIBFIS01' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
 CriaSX1(cPerg) //LGS#20200131 - Adequação de release 12.1.25 e posteriores
 Pergunte(cPerg,.F.)

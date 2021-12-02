@@ -21,6 +21,7 @@ Private MV_PAR01:=MV_PAR02:= ""
       	  MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
     	  return 
   endif 
+     u_zcfga01( 'LIBFIS02' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //CriaSX1(cPerg) //LGS#20200131 - Adequação de release 12.1.25 e posteriores
 Pergunte(cPerg,.F.)
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿

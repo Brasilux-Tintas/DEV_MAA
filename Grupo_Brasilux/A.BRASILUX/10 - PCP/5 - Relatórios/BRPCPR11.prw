@@ -19,7 +19,7 @@ User Function BRPCPR11()
      Private cPerg   := "PCPR11"
      Private nLinMax := 2920
      Private nColMax := 2350
-
+     u_zcfga01( 'BRPCPR11' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //VldPerg()  //LGS#20200131 - Adequação de release 12.1.25 e posteriores
      If !Pergunte(cPerg,.t.)
         Return

@@ -17,7 +17,7 @@
 User Function Arqsci()
      Private lCont, aRotina, dDataBkp, VerfParam
 VerfParam := .F.
-
+     u_zcfga01( 'ARQSCI' ) //LGS#2021201 - Gravação de log de utilização da rotina
 /*
 mv_par01 ==> Data inicio processamento
 mv_par02 ==> Data fim do processamento

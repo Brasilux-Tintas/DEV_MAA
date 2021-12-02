@@ -21,7 +21,7 @@ User Function BRFAT38C()
      Local nRecno := Recno()
      Local nIndex := IndexOrd()
      Local _cAlias, cUf, cTipoCons
-
+     u_zcfga01( 'BRFAT38C' ) //LGS#2021201 - Gravação de log de utilização da rotina
      M->C6_IEST := Space(20)
      If (M->C5_TIPO $ "D_B")
         _cAlias := "SA2"

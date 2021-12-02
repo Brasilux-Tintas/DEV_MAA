@@ -18,7 +18,7 @@ User Function BRFAT057()
      Local nRecno  := Recno()
      Local nIndex  := IndexOrd()
      Local cRedesp := Space(50)
-
+     u_zcfga01( 'BRFAT057' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SF2")
      DbSetOrder(1)
      DbSeek(xfilial("SF2")+M->ZD_NOTA, .F.)

@@ -14,6 +14,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function MTA420FI()
      Local lRet := .t.
+     u_zcfga01( 'MTA420FI' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If SubStr(SB1->B1_COD, 4, 2) $ "48_00"
            lRet := .f.

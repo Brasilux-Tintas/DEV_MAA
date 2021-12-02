@@ -15,7 +15,7 @@ Private _cPath     := '', _cFile  := ''
 Private _cEOL      := "CHR(13)+CHR(10)"
 Private _nTotCli   := 0 
 Private _nTotcRec  := 0
-
+     u_zcfga01( 'DSERASA' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //CriaSX1(_cPerg)  //LGS#20200131 - Adequação para release 12.1.25 e posteriores
 Pergunte(_cPerg,.F.)
 

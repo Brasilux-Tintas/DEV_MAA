@@ -23,7 +23,7 @@ User Function BRFIN020()
      Private nCol   := 0
      Private nCor   := 0
      Private oTempTbl01
-
+     u_zcfga01( 'BRFIN020' ) //LGS#2021202 - Gravação de log de utilização da rotina
      //cNomeArq := ""
      //aCampos  := {}
      nOpcA    := 0

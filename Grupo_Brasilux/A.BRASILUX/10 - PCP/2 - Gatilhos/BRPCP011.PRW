@@ -19,7 +19,7 @@ User Function BRPCP011()
      Local aAreaAnt := U_PegaArea({"SG1","SB1"})
      Local cQuery,cAlias,cQry
      //Local cArea
-
+     u_zcfga01( 'BRPCP011' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SG1")
      DbSetOrder(1)
 

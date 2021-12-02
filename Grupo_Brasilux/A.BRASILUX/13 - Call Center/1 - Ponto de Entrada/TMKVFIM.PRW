@@ -37,6 +37,7 @@ User Function TMKVFIM (cNumAtend,cNumPedido)
      SUA->(DbSetOrder(1))
      SUA->(DbSeek(xFilial("SUA") + cNumAtend))
      */
+     u_zcfga01( 'TMKVFIM' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         // ABERTURA DO DICIONÁRIO SX3 - LGS#20200204 - Adequação para release 12.1.25
         OpenSXs( NIL, NIL, NIL, NIL, NIL, _cAliasSX3, "SX3", NIL, .F. )

@@ -19,7 +19,7 @@ PRIVATE lExec    := .F.
 PRIVATE cIndexName := ''
 PRIVATE cIndexKey  := ''
 PRIVATE cFilter    := ''
-
+     u_zcfga01( 'BLTCDBAR' ) //LGS#2021202 - Gravação de log de utilização da rotina
 Tamanho  := "M"
 titulo   := "Impressao de Boleto com Codigo de Barras"
 cDesc1   := "Este programa destina-se a impressao do Boleto com Codigo de Barras."

@@ -47,6 +47,7 @@ User Function BRPCPR12()
      Private wnrel       := "BRPCPR12" // Coloque aqui o nome do arquivo usado para impressao em disco
      Private cString := "ZZA"
      Private oTempTbl01
+     u_zcfga01( 'BRPCPR12' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("ZZA")
      DbSetOrder(1)
      //fPerg()  //LGS#20200131 - Adequação de release 12.1.25 e posteriores

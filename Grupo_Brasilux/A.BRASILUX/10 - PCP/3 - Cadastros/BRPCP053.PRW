@@ -34,7 +34,7 @@ User Function BRPCP053()
      Private aCampos := { {"CÓDIGO","B1_COD","@!"} }
      Private cDelFunc := ".T." 
      Private cString := "SB1",cPerg,nPercInt
-
+     u_zcfga01( 'BRPCP053' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SB1")
      DbSetOrder(1)
 

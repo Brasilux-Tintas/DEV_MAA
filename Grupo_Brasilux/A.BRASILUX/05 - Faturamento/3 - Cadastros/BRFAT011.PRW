@@ -19,7 +19,7 @@ User Function BRFAT011()
      Local cVldExc   	:= ".T." // Validacao para permitir a exclusao. Pode-se utilizar ExecBlock.
      Private cString 	:= "SZ3"
      Private nomeprog   := "BRFAT011"
-     
+     u_zcfga01( 'BRFAT011' ) //LGS#2021201 - Gravação de log de utilização da rotina
      cVldAlt := 'ExecBlock("FAT011_1", .F., .F.)'
      cVldExc := 'ExecBlock("FAT011_2", .F., .F.)'
 

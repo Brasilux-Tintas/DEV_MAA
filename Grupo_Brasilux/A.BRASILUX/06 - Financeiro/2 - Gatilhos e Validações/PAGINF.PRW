@@ -15,7 +15,7 @@
 */
 User Function Paginf()
      Local _RETINF
-
+     u_zcfga01( 'PAGINF' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If SubStr(SEA->EA_MODELO, 1, 2) == "03"
         _RETINF := SE2->E2_TIPODOC+"00000001"+Space(31)
      ElseIf SubStr(SEA->EA_MODELO, 1, 2) == "31"

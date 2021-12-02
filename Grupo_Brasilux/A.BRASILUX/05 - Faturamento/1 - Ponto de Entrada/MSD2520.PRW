@@ -15,7 +15,7 @@
 User Function MSD2520() 
      Local _cArea := Alias()
      Local nRegD2
-
+     u_zcfga01( 'MSD2520' ) //LGS#2021201 - Gravação de log de utilização da rotina
 IF (SD2->(FieldPos("D2_X_SIM3G")) > 0)
    IF SD2->D2_X_SIM3G = "S"
       SD2->D2_X_SIM3G := "N"

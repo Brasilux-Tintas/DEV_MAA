@@ -14,6 +14,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function Pagban()
+     u_zcfga01( 'PAGBAN' ) //LGS#2021202 - Gravação de log de utilização da rotina
      _BANCO := "000"
      If SubStr(SE2->E2_CODBAR, 1, 3) <> "   "
         _BANCO := SubStr(SE2->E2_CODBAR, 1, 3)

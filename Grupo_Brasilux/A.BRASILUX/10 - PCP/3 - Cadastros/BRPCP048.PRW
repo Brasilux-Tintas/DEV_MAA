@@ -26,7 +26,7 @@ User Function BRPCP048()
      Private cDelFunc := ".T." // Validacao para a exclusao. Pode-se utilizar ExecBlock
      Private cString := "SB1"
      Private cTable   :=""
-     
+          u_zcfga01( 'BRPCP048' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SB1")
      DbSetOrder(1)
      mBrowse( 06, 01, 22, 75, cString, , )

@@ -28,7 +28,7 @@ if !u_VldAcesso(funname())
 	MsgAlert("Acesso não autorizado!---->"+funname())
 	return 
 endif 
-
+     u_zcfga01( 'LHINTEGR' ) //LGS#2021201 - Gravação de log de utilização da rotina
 cArqBloq := "LHINTEGR"+Substr(ALLTRIM(cNumEmp),3,6) //Cleber (14/02/20)  -> Reajuste da função  BloqProg
 aBloq := U_BloqProg(cArqBloq) //Retorna matriz com primeira coluna verdadeiro ou falso se tá bloqueado e segunda coluna com nome de quem está bloqueando ou nome da área de trabalho gerada
 

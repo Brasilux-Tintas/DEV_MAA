@@ -14,7 +14,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function MTA440C9()
      Local cArea := Alias()
-
+     u_zcfga01( 'MTA440C9' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
         DbSelectArea("SC9")
         If !Eof() .and. !Bof()

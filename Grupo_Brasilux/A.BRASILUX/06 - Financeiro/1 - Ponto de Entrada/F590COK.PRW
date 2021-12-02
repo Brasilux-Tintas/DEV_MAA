@@ -27,7 +27,7 @@ User Function F590COK()
     Local _lRet     := .F.
     Local _cTipo    := ParamIxb[ 01 ]           // identifica o tipo do cnab {P-Pagar;R-Receber}
     Local _cNumBor  := ParamIxb[ 02 ]           // identifica o código do borderô
-
+     u_zcfga01( 'F590COK' ) //LGS#2021202 - Gravação de log de utilização da rotina
     If FindFunction("U_BRFIN031")
         _lRet := U_BRFIN031( _cTipo, _cNumBor )
     EndIf

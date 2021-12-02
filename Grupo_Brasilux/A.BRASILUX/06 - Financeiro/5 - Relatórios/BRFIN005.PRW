@@ -47,7 +47,7 @@ Private wnrel      := "BRFIN005"
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-
+     u_zcfga01( 'BRFIN005' ) //LGS#2021202 - Gravação de log de utilização da rotina
 ValidPerg()
 Pergunte(cPerg,.F.)
 

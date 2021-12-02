@@ -17,7 +17,7 @@ User Function BRPCP017()
 Local lFiltro  := .f.
 Local cAuxUser := Alltrim(Upper(cUsername))
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
-     
+     u_zcfga01( 'BRPCP017' ) //LGS#2021201 - Gravação de log de utilização da rotina
 IF _cGrpEmp == "01" //Apenas empresas do Grupo 01 (TecPolpa e UnionSur não entram)
    If !(cAuxUser $ "CAIO_KELLY_MARQUINHOS")
         lFiltro := .t.

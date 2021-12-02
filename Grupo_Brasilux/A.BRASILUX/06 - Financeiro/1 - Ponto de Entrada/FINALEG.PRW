@@ -17,7 +17,7 @@ User Function FINALEG()
      Local uRetorno := {}
      Local nReg     := PARAMIXB[1]
      Local _cAlias  := PARAMIXB[2]
-
+     u_zcfga01( 'FINALEG' ) //LGS#2021202 - Gravação de log de utilização da rotina
 /*
 //Cleber(21/01/20) -> Unificando empresas
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).

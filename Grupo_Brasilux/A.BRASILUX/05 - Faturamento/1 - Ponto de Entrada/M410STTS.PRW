@@ -15,7 +15,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function M410STTS()
-
+     u_zcfga01( 'M410STTS' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
         If (INCLUI .OR. ALTERA)
            IF !EMPTY(M->C5_OBS)

@@ -13,7 +13,7 @@ Local cArea	:= Alias()
 Local nRegE1,aVetor,lRet,cNroNf,cSerie
 Private lMsErroAuto
 lRet := .t.
-
+     u_zcfga01( 'MT920TOK' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
 IF (cNumEmp = "01100101")
 	cNroNf := alltrim(SF2->F2_DOC)

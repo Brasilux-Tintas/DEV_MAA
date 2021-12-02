@@ -28,7 +28,7 @@ User Function BRPCP021()
         MsgBox("Nada a executar!", "Atenção", "INFO")
         Return
      Endif
-
+     u_zcfga01( 'BRPCP021' ) //LGS#2021201 - Gravação de log de utilização da rotina
      aAdd(aSays, "Este programa irá atualizar o Peso Especifico e  ")
      aAdd(aSays, "as quantidades de todo o cadastro de produtos    ")
      aAdd(aSays, "baseado nos pesos específicos das Materias Primas")

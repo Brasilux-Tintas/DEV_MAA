@@ -14,5 +14,6 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function PagCodBr()
+     u_zcfga01( 'PAGCODBR' ) //LGS#2021202 - Gravação de log de utilização da rotina
      _RETCODBR := SubStr(SE2->E2_CODBAR, 20, 25)+SubStr(SE2->E2_CODBAR, 5, 1)+SubStr(SE2->E2_CODBAR, 4, 1)+Space(13)
 Return(_RETCODBR)

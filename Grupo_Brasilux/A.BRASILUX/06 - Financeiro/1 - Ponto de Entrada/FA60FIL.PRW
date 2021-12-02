@@ -18,7 +18,7 @@
 //30/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function FA60FIL()
      Local cString := ".T." //(Cleber 21/01/20, coloquei o ".T.")
-     
+     u_zcfga01( 'F460FIL' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) = '01' //Empresas do grupo BRASILUX
         cString := " Iif(Empty(Alltrim(mv_par15)), !Empty(Alltrim(E1_BCO)) .and. ((E1_VENCTO - E1_EMISSAO) > 5) .and. Empty(Alltrim(E1_NUMBCO)), (Alltrim(E1_BCO) == mv_par15) .and. ((E1_VENCTO - E1_EMISSAO) > 5) .AND. Empty(Alltrim(E1_NUMBCO))) "
      Endif

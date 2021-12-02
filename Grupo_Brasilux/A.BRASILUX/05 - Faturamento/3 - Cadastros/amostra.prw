@@ -19,7 +19,7 @@ private aCores    :={{"Z04_ETAPA == '1'", "BR_MARROM"},;
       {"Z04_ETAPA == '4'", "BR_AZUL"},;       
       {"Z04_ETAPA == '5'", "BR_LARANJA"},;
       {"Z04_ETAPA == '6'", "BR_VERMELHO"}}
-
+     u_zcfga01( 'AMOSTRA' ) //LGS#2021201 - Gravação de log de utilização da rotina
 dbSelectArea("Z04")
 dbSetOrder(2)   
  

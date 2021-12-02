@@ -39,7 +39,7 @@ User Function BRQIEC01()
      Private nLigaPer   := 1
      Private cSay4IQF   := ""
      Private oTempTbl01
-     
+     u_zcfga01( 'BRQIEC01' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
      /*컴컴컴컴컴컴컨컴컴컴컴좔컴컴컨컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴袂�
      굇 Declara豫o de Variaveis Private dos Objetos                             굇
      袂굼컴컴컴컴컴컴컴좔컴컴컴컨컴컴컴좔컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/

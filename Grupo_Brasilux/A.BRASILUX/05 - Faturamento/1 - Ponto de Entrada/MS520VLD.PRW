@@ -14,7 +14,7 @@ User Function MS520VLD()
 Local _cArea := Alias()
 Local aAreaAnt := U_PegaArea({"SF1","SA1","SA2"})
 Local _cGrpEmp,_cFilial,_cFornec,lRet,cCgc,cFilDep,nTamDoc,cDoc
-
+     u_zcfga01( 'MS520VLD' ) //LGS#2021201 - Gravação de log de utilização da rotina
 lRet := .t.
 _cGrpEmp := alltrim(FWGrpCompany())
 _cFilial := alltrim(FWCodFil())

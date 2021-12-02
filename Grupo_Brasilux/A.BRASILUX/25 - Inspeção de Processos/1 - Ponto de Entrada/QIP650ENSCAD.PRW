@@ -5,7 +5,7 @@
 //30/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function QIP650ENSCAD()
      Local _lRet := .T.
-
+     u_zcfga01( 'QIP650ENSCAD' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         _lRet := .F.
      Endif

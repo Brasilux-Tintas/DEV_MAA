@@ -14,7 +14,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function MTA440L()
      Local nRet := 0
-     
+     u_zcfga01( 'MTA440L' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
         If !GetMV("MV_XHABBOR") 
 	       If (cNumEmp != "01010106") .and. (cNumEmp != "01010107")

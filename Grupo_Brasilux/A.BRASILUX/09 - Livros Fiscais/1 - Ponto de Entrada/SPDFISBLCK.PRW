@@ -38,7 +38,7 @@ Local cAliasK300 :=''
 Local cAliasK301 :=''
 Local cAliasK302 :=''
 Local cQuery,_cGrpEmp,_cFilial,_cNumEmp,_cData,nMes,nAno,nQtde
-
+     u_zcfga01( 'SPDFISBLCK' ) //LGS#2021201 - Gravação de log de utilização da rotina
 	_cGrpEmp := FWGrpCompany()
 	_cFilial := alltrim(FWCodFil())
 	_cNumEmp := alltrim(_cGrpEmp)+_cFilial

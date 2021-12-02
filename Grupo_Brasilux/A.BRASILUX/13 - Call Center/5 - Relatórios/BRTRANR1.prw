@@ -31,7 +31,7 @@ PRIVATE cPerg2  :="BRTRANR2"
 PRIVATE recd
    
 Private oDlg, oButton, cEnc :=space(200), oEnc, cAvlCham, oAvlCham
-
+     u_zcfga01( 'BRTRANR1' ) //LGS#2021201 - Gravação de log de utilização da rotina
 cAvlCham := ""
 
 DEFINE MSDIALOG oDlg TITLE "Estilo de relatorio" FROM 000, 000 TO 150, 250 PIXEL   

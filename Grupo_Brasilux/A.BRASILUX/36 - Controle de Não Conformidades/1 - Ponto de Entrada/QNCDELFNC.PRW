@@ -15,7 +15,7 @@ User Function QNCDELFNC()
      Local lRet  := .T.
      Local cQry  := ""
      Local aArea := GetArea()
-     
+     u_zcfga01( 'QNCDELFNC' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         cQry := "SELECT SZQ.ZQ_NUM "
         cQry += "FROM "+RetSqlName("SZQ")+" SZQ "

@@ -15,7 +15,7 @@
 User Function MTA456I()
      Local lBloqueado
      Local cArea := Alias()
-
+     u_zcfga01( 'MTA456I' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
         DbSelectArea("SC9")
         lBloqueado = U_EstaBloqueado("SC9", RecNo())

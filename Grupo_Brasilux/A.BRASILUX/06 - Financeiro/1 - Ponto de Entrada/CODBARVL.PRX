@@ -27,7 +27,7 @@ User Function Codbarvl()
      Local nMult   := 0
      Local nModulo := 0
      Local cChar   := ""
-
+     u_zcfga01( 'CODBARVL' ) //LGS#2021202 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         SetPrvt("CDIGITO, CDV1, CDV2, CDV3, CCAMPO1, CCAMPO2")
         SetPrvt("CCAMPO3, NVAL, NCALC_DV1, NCALC_DV2, NCALC_DV3, NREST")

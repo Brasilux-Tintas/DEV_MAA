@@ -41,7 +41,7 @@ User Function BRPCPR03()
      Private m_pag       := 01
      Private wnrel       := "BRPCPR03" // Coloque aqui o nome do arquivo usado para impressao em disco
      Private cString     := "SC2"
-
+     u_zcfga01( 'BRPCPR03' ) //LGS#2021201 - Gravação de log de utilização da rotina
      DbSelectArea("SC2")
      DbSetOrder(1)
      

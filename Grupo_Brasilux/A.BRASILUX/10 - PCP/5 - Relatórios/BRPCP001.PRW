@@ -29,7 +29,7 @@ User Function BRPCP001()
      //Local nSomaOp,nSomaQtde, cUm
      Private tamanho, limite, titulo, cDesc1, cDesc2, cDesc3, cCabec, cCabPro
      Private cNatureza, aReturn, nomeprog, cPerg, nLastKey, lContinua, nLin, nCol, wnrel, nTipo, m_pag, nTamNf, cString
-
+     u_zcfga01( 'BRPCP001' ) //LGS#2021201 - Gravação de log de utilização da rotina
      CbTxt     := ""
      CbCont    := 0
      nOrdem    := 0

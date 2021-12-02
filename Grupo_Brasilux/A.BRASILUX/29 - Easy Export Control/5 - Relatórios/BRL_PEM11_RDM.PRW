@@ -65,7 +65,7 @@ Private aHeader := {}, aCAMPOS := ARRAY(0)
 Private lUnidade:=.f.,cUnQtde,cUnPeso,cUnPreco,nPesLiq:=0,nPesBru:=0
 
 Private lPesoManual := EasyGParam("MV_AVG0004",,.F.) // - Não Recalcular os pesos quando o parametro MV_AVG0004 for true.
-
+     u_zcfga01( 'BRL_PEM11_RDM' ) //LGS#2021201 - Gravação de log de utilização da rotina
 Begin Sequence
    
    EE9->(dbSeek(xFilial()+EEC->EEC_PREEMB))

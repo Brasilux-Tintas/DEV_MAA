@@ -29,7 +29,7 @@ User Function BRFIN031( _cParam01, _cParam02 )
     Local _lRet     := .F.
     Local _cTipo    := _cParam01
     Local _cNumBor  := _cParam02
-
+     u_zcfga01( 'BRFIN031' ) //LGS#2021202 - Gravação de log de utilização da rotina
     // Efetua a chamada somente se for Borderô Pagamento
     If _cTipo = "P"
         If MsgYesNo("Deseja retirar do Borderô : " + _cNumBor + ", o título abaixo ?"   + CRLF + CRLF +;

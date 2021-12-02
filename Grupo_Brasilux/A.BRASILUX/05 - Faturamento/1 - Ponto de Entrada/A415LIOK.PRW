@@ -22,7 +22,7 @@ User Function A415LIOK()
      Local aAreaTMP1
      Local cCodPro   := ""
      Local lRet      := .t.
-
+     u_zcfga01( 'A415LIOK' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If !TMP1->CK_FLAG //Verifica se não é registro deletado         
            cCodPro := TMP1->CK_PRODUTO

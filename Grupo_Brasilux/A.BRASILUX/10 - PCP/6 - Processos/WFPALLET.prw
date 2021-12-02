@@ -29,7 +29,7 @@ User Function WFPALLET()
 
     
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-
+     u_zcfga01( 'WFPALLET' ) //LGS#2021201 - Gravação de log de utilização da rotina
     cQuery := ""
     cQuery += " SELECT DISTINCT ZZJ_CODIGO AS 'PALLET', ZG_CODIGO AS 'BORDERO', " 
     cQuery += " CASE WHEN ZF_TIPOBOR ='1' THEN '1 - ) AGLUTINADO'      ELSE " 

@@ -10,7 +10,7 @@ Private cCadastro := "Transferencia de acesso"
 PRIVATE cPerg   :="validusr"
 Private x := 1 
 PRIVATE aAux := {}
-
+     u_zcfga01( 'VALIDUSR' ) //LGS#2021202 - Gravação de log de utilização da rotina
 //CriaSX1(cPerg)  //LGS#20200207 - Adequação de release 12.1.25 e posteriores
 Pergunte(cPerg,.T.)
   

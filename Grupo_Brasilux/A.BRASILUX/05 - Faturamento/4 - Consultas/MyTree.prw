@@ -21,7 +21,7 @@ Private oPedEx
 Private cPedEx
 
 SetPrvt("oFont")
-
+     u_zcfga01( 'MYTREE' ) //LGS#2021201 - Gravação de log de utilização da rotina
 //oFont   := TFont():New( "MS Sans Serif", 0, -12, , .T., 0, , 700, .F., .F., , , , , , )
 oFont   := TFont():New( 'Courier new', 0, -12, , .T., 0, , 700, .F., .F., , , , , , )
 

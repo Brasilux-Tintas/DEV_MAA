@@ -14,7 +14,7 @@ User Function MTI650LOTE()
      Local _cPont := PARAMIXB //Ponteiro para recuperar as informações da SC2. Utilização: &(cPont+"(C2_QUANT)")
      Local _cLote := ""
      Local _aArea := GetArea()
-
+     u_zcfga01( 'MTI650LOTE' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         _cLote := &(_cPont+"(C2_LOTE)")
      Endif

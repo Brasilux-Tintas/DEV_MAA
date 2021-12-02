@@ -33,7 +33,7 @@ User Function BRFATC01()
      Private dGet1Con   := CtoD(" ")
      Private dGet2Con   := dDataBase
      Private nCBox1Co  
-
+     u_zcfga01( 'BRFATC01' ) //LGS#2021201 - Grava豫o de log de utiliza豫o da rotina
      /*컴컴컴컴컴컴컨컴컴컴컴좔컴컴컨컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴袂�
      굇 Declara豫o de Variaveis Private dos Objetos                             굇
      袂굼컴컴컴컴컴컴컴좔컴컴컴컨컴컴컴좔컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/

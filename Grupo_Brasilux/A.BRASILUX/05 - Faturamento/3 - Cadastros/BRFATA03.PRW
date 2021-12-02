@@ -31,7 +31,7 @@ User Function BRFATA03()
                             { OemToAnsi('&Alterar'				)      , 'u_FATA03_1("A")', 0, 4 },;
                             { OemToAnsi('&Excluir'				)      , 'u_FATA03_1("E")', 0, 5 },;
 				     		{ OemToAnsi("Atualiza Status"	    )	   , 'u_FATA02_9()   ', 0, 6 }}
-
+     u_zcfga01( 'BRFATA03' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If GETMV("MV_QUALCON") == 1
         aadd(aRotina,    { OemToAnsi('&Consultar')    , 'u_FATA03_3("M")', 0, 9 } )
      ElseIf GETMV("MV_QUALCON") == 2

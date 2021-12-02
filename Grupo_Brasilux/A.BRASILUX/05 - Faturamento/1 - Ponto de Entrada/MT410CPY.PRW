@@ -21,7 +21,7 @@ User Function MT410CPY()
      Local nPosQTDVEN := GDFIELDPOS("C6_QTDVEN")
      Local nPosTOTAL  := GDFIELDPOS("C6_VALOR")
      Local nx
-
+     u_zcfga01( 'MT410CPY' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         M->C5_CAD     := cUsername
         M->DT_CAD     := date()

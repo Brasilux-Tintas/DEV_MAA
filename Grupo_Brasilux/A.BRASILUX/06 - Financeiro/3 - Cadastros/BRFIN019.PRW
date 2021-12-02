@@ -19,7 +19,7 @@ User Function BRFIN019()
      //Local aMarked := {}       
      Private oTempTbl01
      SetPrvt("Exec, cPerg, aCampos, cDuplic, cInstCobr, cPrefixo, cNumBor")
-
+     u_zcfga01( 'BRFIN019' ) //LGS#2021202 - Gravação de log de utilização da rotina
      //cNomeArq := ""
      //aCampos  := {}
      nOpcA    := 0

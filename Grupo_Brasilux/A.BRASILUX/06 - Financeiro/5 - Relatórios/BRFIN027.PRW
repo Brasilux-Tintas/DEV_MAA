@@ -41,7 +41,7 @@ User Function BRFIN027()
      Private m_pag       := 01
      Private wnrel       := "BRFIN027" // Coloque aqui o nome do arquivo usado para impressao em disco
      Private cString     := "SA1"
-
+     u_zcfga01( 'BRFIN027' ) //LGS#2021202 - Gravação de log de utilização da rotina
      DbSelectArea("SA1")
      DbSetOrder(1)
 
