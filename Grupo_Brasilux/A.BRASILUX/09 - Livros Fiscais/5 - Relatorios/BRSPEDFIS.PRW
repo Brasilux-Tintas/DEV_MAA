@@ -19482,7 +19482,7 @@ DbSelectArea (cAliasSFT)
 			FROM 
 				%Table:SFT% SFT				
 				/*
-				//здддддддддддддддддддддддддддддддддддддддддддддддддддд■∙VD©
+				//здддддддддддддддддддддддддддддддддддддддддддддддддддд■∙VD©
 				//ЁInserida condicao para desconsiderar itens de notas Ё
 				//Ёconjugadas que possuam o campo observacao           Ё
 				//Ёigual a NOTA DE SERVICO que se enquadram            Ё
@@ -19509,7 +19509,7 @@ DbSelectArea (cAliasSFT)
 				//Ёdeve ser desconsiderado na geracao do SpedFiscal    Ё
 				//Ёpois sua inclusao recorria em valores duplicados    Ё
 				//Ёno arquivo                                          Ё
-				//юдддддддддддддддддддддддддддддддддддддддддддддддддддд■∙VDы
+				//юдддддддддддддддддддддддддддддддддддддддддддддддддддд■∙VDы
 				*/								
 				LEFT JOIN %Table:SF3% SF3 ON(SF3.F3_FILIAL=%xFilial:SF3%  AND %Exp:cJoinF3% AND SF3.F3_SERIE=SFT.FT_SERIE AND SF3.F3_NFISCAL=SFT.FT_NFISCAL AND SF3.F3_CLIEFOR=SFT.FT_CLIEFOR AND SF3.F3_LOJA=SFT.FT_LOJA AND SF3.F3_IDENTFT=SFT.FT_IDENTF3 AND SF3.F3_ENTRADA=SFT.FT_ENTRADA AND SF3.F3_OBSERV NOT LIKE('NOTA FISCAL DE SERVICO%') AND SF3.%NotDel%)
 				%Exp:cJoinD1D2%
