@@ -19592,10 +19592,10 @@ DbSelectArea (cAliasSFT)
 	Endif
 #ENDIF
 
-//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 //ЁTratamento para quando nao for um SELECT de registros, retornar ZERO Ё
 //Ё  quando nao tiver movimento no periodo, e UM para quando tiver.     Ё
-//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 If nOpc<>1 .And. !(cAliasSFT)->(Eof())
 	nRecCount	:=	1
 EndIf
