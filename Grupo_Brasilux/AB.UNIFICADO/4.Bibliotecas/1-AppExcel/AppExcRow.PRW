@@ -201,5 +201,5 @@ METHOD Destroy() CLASS AppExcRow
 		::aCells[nX][CELL_OBJ]:Destroy()
 	Next
 	
-	FreeObj(self)
+	FreeObj(::self)
 RETURN 

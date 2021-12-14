@@ -321,7 +321,7 @@ METHOD Make( _lSched ) CLASS APPEXCEL
     //Worksheets
  	For nX := 1 to len(::aSheets)        
 		 	
- 		FWrite(nHandle,'   <Worksheet ss:Name="'+ StaticCall(AppExcCellProperties,NoExpChar,::aSheets[nX]:GetName()) +'">' + CRLF)
+ 		FWrite(nHandle,'   <Worksheet ss:Name="' + 'Relatorio' /*StaticCall(AppExcCellProperties,NoExpChar,::aSheets[nX]:GetName())*/ + '">' + CRLF)
   		FWrite(nHandle,'      <Table ss:ExpandedColumnCount="'+ cValToChar(::aSheets[nX]:GetColumnCount()) +'" ss:ExpandedRowCount="'+cValToChar(::aSheets[nX]:GetRowCount())+'">' + CRLF)
                        
 		::aSheets[nX]:OrderSheet()
@@ -454,6 +454,6 @@ METHOD Destroy() CLASS APPEXCEL
 		::aCellStyle[nX]:Destroy()
 	Next	
 	       
-	FreeObj(self)	       
+	FreeObj(::self)	       
 	       
 RETURN

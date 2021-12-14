@@ -340,7 +340,7 @@ Método destrutor do objeto, responsável pela desalocação da memória
 @type method
 /*/
 METHOD Destroy() CLASS AppExcCellProperties                  
-	FreeObj(self)
+	FreeObj(::self)
 RETURN 
       
 

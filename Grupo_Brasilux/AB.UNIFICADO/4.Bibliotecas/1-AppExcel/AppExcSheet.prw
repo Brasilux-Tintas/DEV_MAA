@@ -375,5 +375,5 @@ METHOD Destroy() CLASS AppExcSheet
 	
 	::oSheetOptions:Destroy()
 	  
-	FreeObj(self)
+	FreeObj(::self)
 Return

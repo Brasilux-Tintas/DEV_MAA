@@ -749,5 +749,5 @@ METHOD Destroy() CLASS AppExcCell
 		::oFont:Destroy()
 	EndIf	
                                                            
-	FreeObj(self)                                
+	FreeObj(::self)                                
 RETURN                                          

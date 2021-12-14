@@ -156,7 +156,7 @@ Método destrutor do objeto, responsável pela desalocação da memória
 @type method
 /*/
 METHOD Destroy() CLASS AppExcCellAlign          
-	FreeObj(self)
+	FreeObj(::self)
 RETURN 
             
 

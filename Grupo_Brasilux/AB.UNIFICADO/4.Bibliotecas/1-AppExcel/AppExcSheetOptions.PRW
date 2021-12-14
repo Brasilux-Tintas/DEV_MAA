@@ -181,5 +181,5 @@ Método destrutor do objeto, responsável pela desalocação da memória
 @type method
 /*/
 METHOD Destroy() CLASS AppExcSheetOptions        
-	FreeObj(self)
+	FreeObj(::self)
 RETURN 
