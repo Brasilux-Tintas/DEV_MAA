@@ -133,7 +133,7 @@ User Function MTA410()
 	Local nVlrTot      := 0,nVlrFrete := 0,nPercFrete := 0 //,lCalcFrete := .t.
 	Local lMasterS     := .f. // Enviar pedido para MasterSales
 	Local oTempTable,lCampanha,cTabCampanha,nIcmCampanha,cCondCamp
-     u_zcfga01( 'MTA410' ) //LGS#2021201 - Gravação de log de utilização da rotina
+     u_zcfga01( 'MTA410' ) //LGS#2021214 - Gravação de log de utilização da rotina
 	_cGrpEmp := alltrim(FWGrpCompany())
 	if empty(_cGrpEmp)
 		_cGrpEmp := "01"
@@ -249,7 +249,10 @@ User Function MTA410()
 				ENDIF
 
 				//*****************
-
+				//Chamado 024692, compatibilizar a data de entrega do cabeçalho com a data de entrega de SC6
+				if !empty(M->C5_FECENT) .AND. (M->C5_FECENT != aCols[_x][nPosENTREG])
+					aCols[_x][nPosENTREG] :=  M->C5_FECENT
+				endif 
 			Endif
 		Next
 		// Zerar Descontos para não aparecer valor maior em Valor Contabil em SF3
@@ -469,9 +472,12 @@ User Function MTA410()
 				cCodCid := SA1->A1_CODCID
 				cCnpj := alltrim(SA1->A1_CGC)
 				//Chamado 020971, campanha pra revenda
+				//Chamado 024742-> Extender campanha pra TODOS os segmentos
+				/*
 				if !(ALLTRIM(SA1->A1_CLAS) == "V")
 					lCampanha := .f.
 				endif 
+				*/
 			Endif
 		Endif
 		cDeposito := ALLTRIM(M->C5_DEPOSI)
@@ -559,6 +565,7 @@ User Function MTA410()
 		if lCampanha .and. empty(cTabCampanha)
 			lCampanha := .f.
 		endif 
+		cTabCampanha := padr(cTabCampanha, TamSX3("C5_TABELA")[1]," ")
 
 		DbSelectArea("SZ5")
 		DbSetOrder(1)
@@ -1391,8 +1398,12 @@ User Function MTA410()
 						if !found()
 							lCampanha := .f.
 						else 
-							if !(noround(aCols[_x][nPosPRCVEN],1) == noround(DA1->DA1_PRCVEN,1)) 
+							if (aCols[_x][nPosPRCVEN] == 0.0) .or. (DA1->DA1_PRCVEN == 0.0)
 								lCampanha := .f.
+							else 
+								if abs((aCols[_x][nPosPRCVEN] - DA1->DA1_PRCVEN)*100/DA1->DA1_PRCVEN) > 0.5
+									lCampanha := .f.
+								endif 
 							endif 
 						endif 
 					endif 
@@ -1632,15 +1643,24 @@ User Function MTA410()
 			lSisRev       := .f.
 		else
 			If !(M->C5_TIPO $ "D_B") // .AND. (SA1->A1_CLAS == "V")
-				DbSelectArea("SA3")
-				DbSeek(xFilial("SA3")+Iif(Empty(M->C5_VEND1), SA1->A1_VEND, M->C5_VEND1))
-				If Found() .and. (SA3->A3_SISREV == "S") // Se o representante aderiu à política de revenda, 5% fixos de comissão
-					M->C5_COMPENS := "N" // Não participa de compensação de comissão!
-					lSisRev       := .t.
-					if lCampanha // Chamado 020971, campanha de venda
-						lSisRev := .f.
-					endif 
-				Endif
+				IF Empty(M->C5_VEND1) .AND. !EMPTY(SA1->A1_VEND)
+					M->C5_VEND1 := SA1->A1_VEND
+				ENDIF 
+				IF !EMPTY(M->C5_VEND1)
+					DbSelectArea("SA3")
+					DbSeek(xFilial("SA3")+M->C5_VEND1)
+					If Found() 
+						IF (SA3->A3_SISREV == "S") .AND. !lCampanha .AND. (SA3->A3_COMIS <= 0.0) // Se o representante aderiu à política de revenda, 5% fixos de comissão.  Chamado 020971, verificar campanha de venda. Chamado 024740, verificar comissão fixa
+							M->C5_COMPENS := "S" // Participa de compensação de comissão!
+							lSisRev       := .t.
+						ENDIF 
+						//Chamado 024740, definir comissão fixa. Combinado que quando o cadastro do representante contiver percentual de comissão então a mesma será fixa
+						IF !lSoSolventes .AND. (SA3->A3_COMIS > 0.0)  //Pedidos de solventes não participam de comissão fixa
+							M->C5_XCONF := .T. //Comissão fixa
+							lSisRev := .f.
+						ENDIF 
+					Endif
+				ENDIF
 			Endif
 		endif
 
@@ -1664,7 +1684,7 @@ User Function MTA410()
 
 		//Política padrão de comissionamento
 		If lSisRev .and. lRet .and. (M->C5_TIPO =  "N")
-			cQry1 := "SELECT SUM(C6_VALOR/(CASE WHEN C5_ESPECI4 > '' THEN 0.7 ELSE 1 END)) AS SALDO "+;
+			cQry1 := "SELECT SUM(C6_VALOR/(CASE WHEN C5_ESPECI4 > '' THEN 0.7 ELSE 1.0 END)) AS SALDO "+;
 			"FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "+;
 			"LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND (C6_FILIAL = C5_FILIAL) AND (C6_NUM = C5_NUM) "+;
 			"LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH (NOLOCK) ON (SF4.D_E_L_E_T_ <> '*') AND (F4_FILIAL = '"+xFilial("SF4")+"') AND (F4_CODIGO = C6_TES) "+;
@@ -1820,13 +1840,20 @@ User Function MTA410()
 				_nComisCal := 1 //Por precaução colocar 1% que é a comissão mínima
 			endif 
 			M->C5_XCONF := .T. //Comissão fixa
-			_nMedComiss := _nComisCal //Fixar comissão padrão igual à comissão de campanha
+		endif 
+		//Chamado 024740, definir comissão fixa. Combinado que quando o cadastro do representante contiver percentual de comissão então a mesma será fixa
+		if !lCampanha .and. M->C5_XCONF 
+			_nComisCal := SA3->A3_COMIS
+		endif 
+		IF M->C5_XCONF
+			_nMedComiss := _nComisCal //Fixar comissão padrão igual à comissão de campanha ou igual à cadastrada em SA3
 			if _nVlrTotDup > 0
 				_nLucroCal := ((_nValReal - (((_nComisCal + M->C5_COMIS2) * _nVlrTotDup) / 100)) / _nVlrTotDup) * 100
 			else
 				_nLucroCal := 0
 			endif
-		endif 
+		ENDIF 
+
 		dbselectarea("DA0")
 		dbgotop()
 		/*
@@ -1856,7 +1883,10 @@ User Function MTA410()
 		ENDIF
 
 		// Recalcula comissao.
-		_nPorcComiss := _nComisCal
+		IF _nVlrTotDup == 0 //Se o pedido não tiver financeiro zerar comissão
+			_nComisCal := 0
+		ENDIF 
+		_nPorcComiss := _nComisCal //Se o pedido não tiver financeiro zerar comissão
 		M->C5_PORCOM  := _nPorcComiss //Cleber(03/08/21)->Eliana pediu para mostrar a comissão realizada para poder ter parâmetros de aprovação. Como foi acertado no MasterSales para passar a mostrar C5_COMIS1 então estou deixando C5_PORCOM como informativo apenas
 		if (M->C5_TIPO = "N") .AND. (_nVlrTotDup > 0) .AND. (_nComisCal < 1)
 			_nComisCal := 1.0 //Nova política de comissionamento, não deverá ser menor que 1%
@@ -1869,6 +1899,9 @@ User Function MTA410()
 		_nVlrLucro   := _nVlrTotDup * _nLucroCal * Iif(!Empty(Alltrim(M->C5_ESPECI4)), 0.7, 1) / 100
 		_nPorcLucro  := _nLucroCal
 		//Atualiza variaveis do pedido.
+		IF _nVlrTotDup == 0
+			_nPorcComiss := 0
+		ENDIF 
 		M->C5_COMIS1  := _nPorcComiss
 		M->C5_VLRCOM  := _nVlrComiss
 		M->C5_LUCRO   := _nPorcLucro

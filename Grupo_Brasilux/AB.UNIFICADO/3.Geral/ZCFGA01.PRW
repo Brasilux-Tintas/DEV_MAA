@@ -30,5 +30,6 @@ User Function ZCFGA01( _cRotina )
            ZA4->ZA4_MODULO := StrZero( nModulo, 2 )
         Endif
      Endif
+     ZA4->( MsUnlock() )
      RestArea( _aArea )
 Return

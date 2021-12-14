@@ -73,7 +73,7 @@ cString  := "SE3"
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-     u_zcfga01( 'BRFAT060' ) //LGS#2021201 - Gravação de log de utilização da rotina
+
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Envia controle para a funcao SETPRINT                        ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -137,7 +137,7 @@ Private _nTotCampanha,nVlrCampanha,nTotDistrib,nVlrDistrib,nSomaBase,nTotVariave
 
 SetRegua(val(mv_par02) - val(mv_par01))
 
-  cQuery = "SELECT ISNULL(X5_DESCRI,'N') AS SOLV,ISNULL(C5_XCONF,'F') AS CAMPANHA,ISNULL(A1_CLAS,'X') AS TIPOCLI,"+;
+  cQuery = "SELECT ISNULL(X5_DESCRI,'N') AS SOLV,CASE WHEN ISNULL(C5_TABELA,'') > '' THEN ISNULL(C5_XCONF,'F') ELSE 'F' END AS CAMPANHA,ISNULL(A1_CLAS,'X') AS TIPOCLI,"+;
   "ORDEM = CASE WHEN (E3_FILIAL = '060101') AND (E3_PREFIXO = 'IMP') THEN '0' ELSE '1' END,"+;
   "E3_VEND,E3_PREFIXO,E3_EMISSAO,E3_NUM,E3_PARCELA,E3_BASE,E3_COMP,"+;
   "E3_PORC,E3_PORCANT,E3_CODCLI "+;

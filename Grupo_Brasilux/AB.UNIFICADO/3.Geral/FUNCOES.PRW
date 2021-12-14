@@ -217,7 +217,7 @@ User Function CalcComis(_cCliente, _cTes, _cProd, _nPreco, _cCond)
      Local aAreaAnt := U_PegaArea({"SE4","SB5","SB1","SF4","SA1"})
      Local aVenctos, aPrazos,cUf, nPrazoMedio, lProdEstoque, nLc1, nLc2, nPerInt, nValTab, _nPercIcms,;
            _nBaseIcms, nJuros, nValorHoje, nQtdeParc, i, nAux, _nLucroItem, nAuxLucro, _nMedLucro,  ;
-           _nLucroCal, _nComisCal, nRet
+           _nLucroCal, _nComisCal, nRet, nDec
      Local _nPosSC6 := n  //LGS#20191121 - Adequação para release 12.1.25
      Local _nPosTES := aScan(aHeader, { |x| Alltrim( x[2] ) == "C6_TES"     } )  //LGS#20191121 - Adequação para release 12.1.25
      Local _nPosPRO := aScan(aHeader, { |x| Alltrim( x[2] ) == "C6_PRODUTO" } )  //LGS#20191121 - Adequação para release 12.1.25
@@ -346,7 +346,11 @@ User Function CalcComis(_cCliente, _cTes, _cProd, _nPreco, _cCond)
                     _nLucroCal   := _nMedLucro
                     _nComisCal   := ((_nLucroItem - ((_nLucroCal * _nPreco) / 100)) / _nPreco) * 100
                  Endif
-                 nRet = Round(_nComisCal, 2)
+                  IF SF4->F4_DUPLIC = "N" //Zerar comissão pra quando não houver financeiro
+                     _nComisCal := 0
+                  ENDIF
+                  nDec := TamSx3("C6_COMIS1")[2] 
+                  nRet = Round(_nComisCal, nDec)
               Endif 		
            Endif 
         Endif 

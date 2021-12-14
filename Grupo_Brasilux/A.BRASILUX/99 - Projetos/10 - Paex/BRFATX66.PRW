@@ -49,7 +49,7 @@ User Function BRFATX66()
   	 Private cCodUsr    := RetCodUsr()
   	 Private cAcessos   := Posicione("SZW", 4, xFilial("SZW")+cRotina+__cUserID+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")
   	 Private oTempTbl1
-  
+       u_zcfga01( 'BRFATX66' ) //LGS#2021214 - Gravação de log de utilização da rotina
      /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de Variaveis Private dos Objetos                             ±±
      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
@@ -578,6 +578,13 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
     Local dDtValida := ""
     Local _nXVALESP := GetMv("MV_XVALESP") //100  //LGS#20200210 - Adequação de release 12.1.25 e posteriores
 	Local _nXVALIDA := GetMv("MV_XVALIDA") //180  //LGS#20200210 - Adequação de release 12.1.25 e posteriores
+
+
+	/* variaveis criadas por Nelieder em 12/11/2021 */
+	/* para impressão das etiquetas de volume pelo protheus */
+	Local cPedido   := ""
+	Local cProduto  := ""
+	Local _Etinew   := .F. /* variavel que habilita a nova impressão de etique pelo protheus */
     
     //Local lProdMist :=.f.
 
@@ -910,7 +917,23 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 						MsUnLock()
 					Endif
 					aadd(aGerEtq, {cGet8Mnt+' '+cGet1Mnt})
-					FGerEtq(aGerEtq)
+
+					//***********************************************************************************/
+					//*** BRASILUX
+					//*** 12/11/2021 - Nelieder Corneta - Adequação para impressão de Etiquetas de volume
+					//***								  pelo protheus (excluindo agente)							
+
+					cPedido = cGet8Mnt /* pega valor do pedido */
+					cProduto = cGet1Mnt /* pega valor do produto */
+
+					/* pega valor do paramentro para habilitar a impressão pelo protheus */
+					_Etinew := GETMV("ZP_PAR0033")
+					if _Etinew == .F.
+						FGerEtq(aGerEtq) /* usa impressão por agende */
+					else
+						U_BRPCP032(cPedido,cProduto) /* usa impressão pelo protheus */
+					Endif	
+					
    	   			End Transaction
    	   		Else
  				Messagebox("Tipo de produto inválido, bipe somente P A's!!!","Atenção...",48)

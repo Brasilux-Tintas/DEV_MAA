@@ -102,8 +102,8 @@ Private _lVerISN    //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTE
 Private _lVerIOri   //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTERIORES ***/
 Private _lVerICST   //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTERIORES ***/
 Private _lVerICSO   //LGS#20200129 ADEQUAÇÃO AO RELEASE PROTHEUS 12.1.25 E POSTERIORES ***/
-private _oBrwCodb
-     u_zcfga01( 'PRENOTAXML' ) //LGS#2021118 - Gravação de log de utilização da rotina
+private _oBrwCodb 
+     u_zcfga01( 'PRENOTAXML' ) //LGS#2021214 - Gravação de log de utilização da rotina
 _cGrpEmp := ALLTRIM(FWGrpCompany())
 _cFilial := alltrim(FWCodFil())
 _cNumEmp := _cGrpEmp+_cFilial
@@ -653,6 +653,7 @@ Do While .T.
 				@ C(046),C(080) MsGet oEdit2 Var nLidoKit picture "99999" Size C(020),C(007) COLOR CLR_HBLUE PIXEL OF _oDlg when .f.
 				@ C(004),C(194) Button "Continuar" Size C(037),C(012) PIXEL OF _oDlg Action(LeCodKit(2))
 				@ C(025),C(194) Button "Cancelar" Size C(037),C(012) PIXEL OF _oDlg Action(LeCodKit(3))
+				@ C(046),C(194) Button "Excluir" Size C(037),C(012) PIXEL OF _oDlg Action(LeCodKit(4))
 		
 				DbSelectArea('XCODBAR')
 		
@@ -1781,8 +1782,30 @@ Return
 
 Static Function LeCodKit(_nOpcao)
 Local lRet := .f.
-Local nAuxItens
+Local nAuxItens,cAuxCod
 DO CASE
+CASE _nOpcao == 4 //Excluir item bipado
+	dbselectarea("XCODBAR")
+	if !eof() .and. !bof()
+		cAuxCod := alltrim(XCODBAR->ZZD_CODBAR)
+		if MsgYesNo ("Exclui o código de barra "+cAuxCod+" ?")
+			dbselectarea("XCODBAR")
+			reclock("XCODBAR",.F.)
+			dbdelete()	
+			msunlock()
+			dbselectarea("ZZD")
+			MsSeek(xFilial("ZZD")+cChvNfe+cAuxCod,.t.)
+			if found()
+				reclock("ZZD",.F.)
+				dbdelete()	
+				msunlock()
+			endif 
+			nLidoKit--
+			oEdit2:Refresh()
+
+		endif 
+	endif 
+
 CASE _nOpcao == 3
 	lCancelar := .t.
 	lFimDlg := .T.
@@ -1804,6 +1827,7 @@ CASE _nOpcao == 2
 		lFimDlg := .t.
 		_oDlg:End()
 	endcase
+
 OTHERWISE 
 	if empty(alltrim(cCodBarKit)) .or. ((len(alltrim(cCodBarKit)) != 36) .and. (len(alltrim(cCodBarKit)) != 28))
 		lRet := .t.
@@ -1824,7 +1848,7 @@ OTHERWISE
 			ZZD->ZZD_CODBAR := cCodBarKit
 			msunlock()
 			dbselectarea("XCODBAR")
-			dbgobottom()
+			//dbgobottom()
 			_oBrwCodb := nil
 			@ 100,005 TO 190,200 BROWSE "XCODBAR" FIELDS aCampos3 Object _oBrwCodb
 

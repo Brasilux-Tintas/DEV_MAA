@@ -36,7 +36,7 @@ SetPrvt("NLASTKEY,LCONTINUA,NLIN,NCOL,WNREL,NTIPO")
 SetPrvt("M_PAG,CCABEC1,CCABEC2,CCABEC3,NTAMNF,CSTRING")
 SetPrvt("_TOTALG")
 SetPrvt("LIMPFIN,_DTGERAD,_NRAVAR,AREGS")
-     u_zcfga01( 'BRFATR97' ) //LGS#2021201 - Gravação de log de utilização da rotina
+
 CbTxt    :=""
 CbCont   :=0
 nOrdem   :=0
@@ -237,7 +237,7 @@ cQuery += "SELECT PEDIDO,MAX(EMISSAO) AS EMISSAO,CLIENTE,MAX(A1_NOME) AS A1_NOME
 		   		endif
 				nComis := SC5->C5_COMIS1 //SC5->C5_PORCOM 
 				IF (SC5->(FieldPos("C5_XCONF")) > 0) 
-					lCamp := SC5->C5_XCONF //Pedido originário de Campanha de Vendas
+					lCamp := IIF(!EMPTY(ALLTRIM(SC5->C5_TABELA)),SC5->C5_XCONF,.F.) //Pedido originário de Campanha de Vendas
 				ENDIF 
 			endif 
 

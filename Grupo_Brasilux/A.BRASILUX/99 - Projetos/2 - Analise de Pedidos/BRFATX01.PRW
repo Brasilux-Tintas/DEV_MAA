@@ -71,7 +71,7 @@ User Function BRFATX01()
      Private cOpcUsr   := ""
      Private oTempTable
      Private oTempTbl01
-	
+	     u_zcfga01( 'BRFATX01' ) //LGS#2021214 - Gravação de log de utilização da rotina
 	lAdmin := (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) = 0)
 			
 	if lAdmin
@@ -98,7 +98,7 @@ User Function BRFATX01()
 	lAcsCre := Iif(SubStr(cAcesso, 3, 1) == '*', .t., .f.) // Itens a serem liberados pelo crédito
 	lAcsDir := Iif(SubStr(cAcesso, 4, 1) == '*', .t., .f.) // Itens a serem liberados pela diretoria
 	lAcsOut := Iif(SubStr(cAcesso, 6, 1) == '*', .t., .f.) // Outros pedidos a serem Liberados.
-	
+     u_zcfga01( 'BRFATX01' ) //LGS#2021203 - Gravação de log de utilização da rotina
 	Private aRotina   := { { OemToAnsi("Pesquisar")        , 'AxPesqui'               , 0, 1   },; //Pesquisar
                           { OemToAnsi("Visualizar")       , 'A410Visual'             , 0, 2   },; //Visualizar
                           { OemToAnsi("Liberação")        , 'U_FATX01_1(1)'          , 0, 2   } } //Liberação nOpc = 1

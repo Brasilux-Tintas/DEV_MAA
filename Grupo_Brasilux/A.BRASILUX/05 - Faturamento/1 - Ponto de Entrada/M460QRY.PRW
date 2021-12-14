@@ -17,7 +17,7 @@ User Function M460QRY()
      Local _cSzg, cQuery
      Local mvpar19, mvpar20
      //Local _cUserId := RetCodUsr()
-     u_zcfga01( 'M460QRY' ) //LGS#2021201 - Gravação de log de utilização da rotina
+     u_zcfga01( 'M460QRY' ) //LGS#2021214 - Gravação de log de utilização da rotina
 
 	 If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
         //_cRet := Paramixb[1] 
@@ -45,7 +45,6 @@ User Function M460QRY()
            _cRet += " AND C9_PEDIDO IN(SELECT RIGHT(ZB_PEDIDO,6) FROM "+_cSzg+" WHERE (ZB_FILIAL = '"+;
 	       xFilial("SZB")+"') AND (ZB_CODIGO = '"+mv_par19+"') AND (D_E_L_E_T_ <> '*'))"
         Endif      
-        //_cRet += " AND (C5_XCONF = 'T')"
      Endif
 Return(_cRet)
 

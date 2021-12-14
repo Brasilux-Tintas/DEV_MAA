@@ -21,7 +21,7 @@ User Function BRPCP030()
    Local cPerg   := Padr("BRPCP030",10)
    Local xNome   := "Programação da Produção"
    Local Xdescri := "Programação da Produção baseada no bordero de pedidos"
-     u_zcfga01( 'BRPCP030' ) //LGS#2021201 - Gravação de log de utilização da rotina
+        u_zcfga01( 'BRPCP030' ) //LGS#2021214 - Gravação de log de utilização da rotina
    Pergunte(cPerg,.F.)              
    oReport := RptDef(cPerg,xNome,Xdescri)
    oReport:PrintDialog()
@@ -69,25 +69,31 @@ Static Function RptDef(xPergunta,xNome,Xdescri)
     Local oSection1:= Nil
     
     oReport := TReport():New(xPergunta,xNome,xPergunta,{|oReport| ReportPrint(oReport)},Xdescri)
+    
+    oReport:nfontbody:=7
+    oReport:cfontbody:="Arial"
+    
     oReport:SetPortrait(.F.) // retrato    
 	oReport:SetLandscape(.T.) // paisagem
     oReport:SetTotalInLine(.F.) // Define se os totalizadores serão impressos em linha ou coluna
+   
+    //oReport:SetPaperSize(9)
     
     oSection1:= TRSection():New(oReport,xNome,,, .F., .T.)
 
     /* campos para impressão do relatório */
-    TRCell():New(oSection1,"B1_COD"        ,"TMPP","Produto"          ,"@!",20)
-    TRCell():New(oSection1,"B1_DESC"  ,"TMPP","Descrição"    ,"@!",55)
-	TRCell():New(oSection1,"B2_LOCALIZ"  ,"TMPP","Localização"    ,"@!",30)
-	TRCell():New(oSection1,"B2_SALDO"  ,"TMPP","Saldo Atual"    ,"@E 99999,999",30, , ,"CENTER", , "CENTER")
-	TRCell():New(oSection1,"VR_LBC"  ,"TMPP","Lib Crédito"    ,"@E 99999,999",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_OPC"  ,"TMPP","OPs Colocadas"    ,"@!",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_PNL"  ,"TMPP","Ped Não Lib"    ,"@!",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_M3M"  ,"TMPP","Méd 3 m"    ,"@E 99999,999",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_MP3"  ,"TMPP","Méd P 3 m"    ,"@!",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_OP3"  ,"TMPP","OPs 3m"    ,"@!",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_CLI"  ,"TMPP","Clientes"    ,"@!",30, , ,"CENTER", , "CENTER")
-    TRCell():New(oSection1,"VR_SPU"  ,"TMPP","Sug Prod Ult Fat"    ,"@!",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"B1_COD"        ,"TMPP","Produto"  ,"@!",50, , ,"LEFT", , "LEFT")
+    TRCell():New(oSection1,"B1_DESC"  ,"TMPP","Descrição"    ,"@!",55, , ,"LEFT", , "LEFT")
+	TRCell():New(oSection1,"B2_LOCALIZ"  ,"TMPP","Localização"    ,"@!",30, , ,"CENTER", , "CENTER")
+	TRCell():New(oSection1,"B2_SALDO"  ,"TMPP","Saldo Atual"    ,"@E 999,999",30, , ,"CENTER", , "CENTER")
+	TRCell():New(oSection1,"VR_LBC"  ,"TMPP","Lib Crédito"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_OPC"  ,"TMPP","OPs Colocadas"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_PNL"  ,"TMPP","Ped Não Lib"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_M3M"  ,"TMPP","Méd 3 m"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_MP3"  ,"TMPP","Méd P 3 m"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_OP3"  ,"TMPP","OPs 3m"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_CLI"  ,"TMPP","Clientes"    ,"@E 999,999.99",30, , ,"CENTER", , "CENTER")
+    TRCell():New(oSection1,"VR_SPU"  ,"TMPP","Sug Prod Ult Fat"    ,"@E 999,999",30, , ,"CENTER", , "CENTER")
     TRCell():New(oSection1,"VR_FAT"  ,"TMPP","Fat"    ,"@!",30, , ,"CENTER", , "CENTER")
        
 Return(oReport)
@@ -104,131 +110,231 @@ Imprime Relatório
 /*/
 Static Function ReportPrint(oReport)
     Local oSection1 := oReport:Section(1)
-    Local cQuery    := ""        
+    Local cQuery1    := ""        
     Local xVarProd  := ""        
     Local xVarLib   := ""
     Local xOPsc     := 0
     Local X_VR_M3M  := 0
     Local X_VR_PNL  := 0
     Local cUsuario  := ""
+    Local conta     := 0
+    Local porc      := 0
+    Local V_PEDLIB  := 0
     
     IncProc()
     /* imprime regua progressão */
     oReport:SetMsgPrint("Aguarde selecionando Registros...")
 
     /* 021063 bordero teste de pedido */
+    
+    u_zcfga01("BRPCP030")
 
- 	cQuery := "    SELECT DISTINCT B1_COD, B1_DESC, B1_TIPO , B1_UM , B1_GRUPO,B2_LOCALIZ, "
-    cQuery += "    (SELECT SUM(B2_QATU) FROM "+RETSQLNAME("SB2")+" SB2 WHERE SB2.B2_COD = SB1.B1_COD  AND SB2.D_E_L_E_T_ = '')B2_SALDO "
-    cQuery += "    ,SB1.B1_UM AS UNIMED   "
-    cQuery += "    FROM "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK)  "
-    cQuery += "    LEFT JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL)   "
+    cQuery1 := ""
+    cQuery1 += " WITH SB2 AS (SELECT B2_COD,SUM(B2_QATU) AS SALDO "
+	cQuery1 += " FROM "+RETSQLNAME("SB2")+" WITH (NOLOCK)  "
+	cQuery1 += " WHERE (D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND " 
+	cQuery1 += " (B2_LOCAL NOT IN ('13','90')) AND (B2_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+
+    IF (mv_par13 == 1) //thisform.lEstoque.Value
+		cQuery1 += " AND (B2_LOCALIZ > '') "
+	ELSE 
+		IF (mv_par15 == 1) //thisform.lNaoestoque.Value
+			cQuery1 += " AND (B2_LOCALIZ = '') "
+		ENDIF 
+	ENDIF 
+	IF (mv_par10 == 1) //thisform.lEspeBord.Value
+		cQuery1 += " AND (B2_LOCALIZ = '') " 
+	ENDIF
+
+	cQuery1 += " GROUP BY B2_COD) "
+
+ 	cQuery1 += "    SELECT DISTINCT B1_COD, B1_DESC, B1_TIPO , B1_UM , B1_GRUPO,B2_LOCALIZ, "
+    cQuery1 += "    (SELECT SUM(B2_QATU) FROM "+RETSQLNAME("SB2")+" SB2 WHERE SB2.B2_COD = SB1.B1_COD  AND SB2.D_E_L_E_T_ = '')B2_SALDO "
+    cQuery1 += "    ,SB1.B1_UM AS UNIMED   "
+    cQuery1 += "    FROM "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK)  "
+    cQuery1 += "    LEFT JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL)   "
     
     
     
     /* puxa todos os especificos do bordero */
-    If (mv_par10 == 1)
-        cQuery += "    INNER JOIN "+RETSQLNAME("SZG")+" BORDPED WITH (NOLOCK) ON (BORDPED.D_E_L_E_T_ <> '*') AND (BORDPED.ZG_FILIAL = '"+xFilial("SZG")+"')   "
-        cQuery += "     AND (BORDPED.ZG_CODIGO BETWEEN '"+alltrim(mv_par08)+"' AND '"+alltrim(mv_par09)+"')  "
-        cQuery += "    INNER JOIN "+RETSQLNAME("SC6")+" SC6 WITH (NOLOCK) ON (SC6.D_E_L_E_T_ <> '*') AND  "
-        cQuery += "    (C6_FILIAL = '"+xFilial("SC6")+"') AND (SUBSTRING(BORDPED.ZG_PEDIDO,3,6) = C6_NUM) AND (SUBSTRING(C6_PRODUTO,1,10) = SUBSTRING(B1_COD,1,10)) "
-        
-    else
-        cQuery += "  INNER JOIN "+RETSQLNAME("ZZC")+" BORDPED WITH (NOLOCK) ON (BORDPED.D_E_L_E_T_ <> '*') AND (BORDPED.ZZC_FILIAL = '"+xFilial("ZZC")+"') AND (BORDPED.ZZC_BORDER BETWEEN '"+mv_par08+"' AND '"+mv_par09+"')   "
-        cQuery += "  AND ((ZZC_QUANTI - ZZC_RETIRA) > 0)  "
-        cQuery += "  AND (SUBSTRING(B1_COD,1,10) = SUBSTRING(BORDPED.ZZC_PRODUT,1,10))  "
-        
-    EndIf
+
+    cSC6 = .F.
+    //mv_par08 thisform.cBordero1.Value
+    //mv_par09 thisform.cBordero2.Value
+    if ( !empty( alltrim(mv_par08) ) .and. !empty( alltrim( (mv_par09) )) )
+
+            If (mv_par10 == 1) //thisform.lEspeBord.Value 
+                cQuery1 += "    INNER JOIN "+RETSQLNAME("SZG")+" BORDPED WITH (NOLOCK) ON (BORDPED.D_E_L_E_T_ <> '*') AND (BORDPED.ZG_FILIAL = '"+xFilial("SZG")+"')   "
+                cQuery1 += "     AND (BORDPED.ZG_CODIGO BETWEEN '"+alltrim(mv_par08)+"' AND '"+alltrim(mv_par09)+"')  "
+                cQuery1 += "    INNER JOIN "+RETSQLNAME("SC6")+" SC6 WITH (NOLOCK) ON (SC6.D_E_L_E_T_ <> '*') AND  "
+                cQuery1 += "    (C6_FILIAL = '"+xFilial("SC6")+"') AND (SUBSTRING(BORDPED.ZG_PEDIDO,3,6) = C6_NUM) AND (SUBSTRING(C6_PRODUTO,1,10) = SUBSTRING(B1_COD,1,10)) "
+                cSC6 = .T.
+                
+            else
+                cQuery1 += "  INNER JOIN "+RETSQLNAME("ZZC")+" BORDPED WITH (NOLOCK) ON (BORDPED.D_E_L_E_T_ <> '*') AND (BORDPED.ZZC_FILIAL = '"+xFilial("ZZC")+"') AND (BORDPED.ZZC_BORDER BETWEEN '"+mv_par08+"' AND '"+mv_par09+"')   "
+                cQuery1 += "  AND ((ZZC_QUANTI - ZZC_RETIRA) > 0)  "
+                cQuery1 += "  AND (SUBSTRING(B1_COD,1,10) = SUBSTRING(BORDPED.ZZC_PRODUT,1,10))  "
+
+               
+                
+            EndIf
+    endif    
+
+    IF !empty(alltrim(mv_par12)) .AND. cSC6 == .F.
+        /* filtra pedido de vendas */
+	    cQuery1 +=  "LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) ON (SC6.D_E_L_E_T_ <> '*') AND (C6_FILIAL = '"+xFilial("SC6")+"') AND (C6_NUM = '"+mv_par12+"') AND (SUBSTRING(C6_PRODUTO,1,10) = SUBSTRING(B1_COD,1,10)) "
+	ENDIF        
+    
     
     /* filtra bordero de despacho */
     If !empty(alltrim(mv_par11))
-        cQuery += "    LEFT OUTER JOIN "+RETSQLNAME("ZZC")+" BORDDESP WITH (NOLOCK) ON (BORDDESP.D_E_L_E_T_ <> '*') AND (BORDDESP.ZZC_FILIAL = '"+xFilial("ZZC")+"') AND (BORDDESP.ZZC_CARGA = '"+alltrim(mv_par11)+"') AND ((ZZC_QUANTI - ZZC_RETIRA) > 0) AND (SUBSTRING(B1_COD,1,10) = SUBSTRING(BORDDESP.ZZC_PRODUT,1,10)) "
+        cQuery1 += "    LEFT OUTER JOIN "+RETSQLNAME("ZZC")+" BORDDESP WITH (NOLOCK) ON (BORDDESP.D_E_L_E_T_ <> '*') AND (BORDDESP.ZZC_FILIAL = '"+xFilial("ZZC")+"') AND (BORDDESP.ZZC_CARGA = '"+alltrim(mv_par11)+"') AND ((ZZC_QUANTI - ZZC_RETIRA) > 0) AND (SUBSTRING(B1_COD,1,10) = SUBSTRING(BORDDESP.ZZC_PRODUT,1,10)) "
     ENDIF
 
-	cQuery += " WHERE SB1.D_E_L_E_T_ = '' AND B1_FILIAL = '"+xFilial("SB1")+"' "
-    cQuery += " AND B1_COD BETWEEN '"+alltrim(mv_par01)+"' AND '"+alltrim(mv_par02)+"'  "	
-    cQuery += " AND B1_TIPO BETWEEN '"+alltrim(mv_par03)+"' AND '"+alltrim(mv_par04)+"' "
-	cQuery += " AND B1_GRUPO BETWEEN '"+alltrim(mv_par05)+"' AND '"+alltrim(mv_par06)+"'  "		
+	cQuery1 += " WHERE SB1.D_E_L_E_T_ = '' AND B1_FILIAL = '"+xFilial("SB1")+"'  "
+
+    If !empty(alltrim(mv_par02)) 
+        cQuery1 += " AND (B1_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+    Endif
+
+    If !empty(alltrim(MV_PAR04)) 
+        cQuery1 += " AND (B1_TIPO BETWEEN '"+MV_PAR03+"' AND '"+MV_PAR04+"') "
+    Endif
+
+
+    If !empty(alltrim(MV_PAR06)) 
+        cQuery1 += " AND (B1_GRUPO BETWEEN '"+MV_PAR05+"' AND '"+MV_PAR06+"') "
+    Endif
     
-    
+
     If !empty(alltrim(mv_par07)) 
         /* apenas linha do produto */
-        cQuery += " AND (SUBSTRING(B1_COD,4,2)) = '"+alltrim(mv_par07)+"' "
+        cQuery1 += " AND (SUBSTRING(B1_COD,4,2)) = '"+alltrim(mv_par07)+"' "
     Endif 
+    
 
-    If (mv_par10 == 1)
+   // If (mv_par10 == 1)
         /* puxa todos os especificos dos bordero */
-         cQuery += " AND (B2_LOCALIZ = '')  "
-    Endif
+       //  cQuery += " AND (B2_LOCALIZ = '')  "
+    //Endif
 
     If !empty(alltrim(mv_par11))
     /* filtra bordero de despacho */
-		cQuery += " AND (BORDDESP.R_E_C_N_O_ IS NOT NULL) "
+		cQuery1 += " AND (BORDDESP.R_E_C_N_O_ IS NOT NULL) "
 	ENDIF
     
     If !empty((mv_par12)) 
         /* filtra pedido de venda */
-        cQuery += "    AND C6_NUM = '"+mv_par12+"' "    
+        cQuery1 += "    AND C6_NUM = '"+mv_par12+"' "    
     Endif   
 
     If (mv_par13 == 1)
         /* apenas itens estoque */
-        cQuery += " AND (SB2.B2_COD IS NOT NULL)     "
+        cQuery1 += " AND (SB2.B2_COD IS NOT NULL)     "
+        cQuery1 += " AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
     Endif 
 
-    If !empty(alltrim(mv_par14)) 
-        /* somento com liberação de crédito */
-        // cQuery += " AND C5_LIBCRE = 'T' "
-    Endif 
+    //If !empty(alltrim(mv_par14)) 
+
+       //  cQuery1 += " AND C5_LIBCRE = 'T' "
+   // Endif 
+
+    If mv_par14 == 1 
+    /* somento com liberação de crédito */
+     cQuery1 += "  AND ( "
+     cQuery1 += " SELECT SUM(C6.C6_QTDVEN ) AS QTDLIB  "
+     cQuery1 += " FROM "+RETSQLNAME("SC6")+" C6 WITH (NOLOCK) "
+     cQuery1 += " LEFT OUTER JOIN "+RETSQLNAME("SC5")+" C5 WITH (NOLOCK) ON (C5.D_E_L_E_T_ = '') AND (C6_FILIAL = C5.C5_FILIAL) AND (C6.C6_NUM = C5.C5_NUM)  "
+     cQuery1 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" B1 WITH (NOLOCK) ON (B1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1.B1_FILIAL) AND (C6.C6_PRODUTO = B1.B1_COD)  "
+
+        IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+            cQuery1 += " LEFT OUTER JOIN "+RETSQLNAME("SB2")+" B2 WITH (NOLOCK) ON (B2.D_E_L_E_T_ <> '*') AND (B1.B1_FILIAL = B2.B2_FILIAL) AND (B1.B1_COD = B2.B2_COD) "
+            cQuery1 += " AND (B1.B1_LOCPAD = B2.B2_LOCAL)  "
+        endif
+
+    cQuery1 += " WHERE (C6.D_E_L_E_T_ <> '*') AND (C6.C6_FILIAL = '"+xFilial("SC6")+"') AND "
+    cQuery1 += " (C6.C6_PRODUTO = SB1.B1_COD ) "
+    cQuery1 += " AND (C5.C5_APROVA <> '2') AND (C6.C6_NOTA = '') AND (C5.C5_LIBPED = 'T') AND (C5.C5_LIBCRE = 'T') "
+
+    If !empty((mv_par12)) 
+        /* filtra pedido de venda */
+        cQuery1 += "AND C6_NUM = '"+mv_par12+"' "    
+    Endif   
+
+    If !empty(alltrim(mv_par07)) 
+        /* linha */
+        cQuery1 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
+    ENDIF
+
+    IF  (mv_par16 <> 1)
+        /* zerados */
+        //cQuery3 += "AND (SB2.B2_QATU <> 0.0) "
+    ENDIF
+
+   	///IF thisform.lEstoque.Value
+    IF (mv_par13 == 1)   
+		cQuery1 += "AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
+	ENDIF
+
+
+    cQuery1 += " GROUP BY C6.C6_PRODUTO ) > 0 "
+
+
+    Endif
 
     If (mv_par15 == 1)
         /* apenas itens não estoque */
-        cQuery += " AND (B2_LOCALIZ = '')     "
+        cQuery1 += " AND (B2_LOCALIZ = '')     "
     Endif 
 
     If (mv_par16 == 1)
         /* lista itens zerados */
-        cQuery += "    AND (SB2.B2_QATU <> 0.0) "
+        cQuery1 += "    AND (SB2.B2_QATU <> 0.0) "
     Endif
 
     If (mv_par17 == 1)
         /* filtra fabrica 1*/
-        cQuery += " AND (B1_LOCPAD IN ('02','P1'))  "
+        cQuery1 += " AND (B1_LOCPAD IN ('02','P1'))  "
     Endif   
 
     If (mv_par18 == 1)
         /* filtra fabrica 2*/
-        cQuery += " AND (B1_LOCPAD IN ('20','P2'))   "
+        cQuery1 += " AND (B1_LOCPAD IN ('20','P2'))   "
     Endif 
   
-
-    /* ordena codigo do produto */
-    cQuery += "    ORDER BY B1_COD "
+      /* ordena codigo do produto */
+    cQuery1 += "    ORDER BY B1_COD "
 
     /* verifica quem é o usuário */
     cUsuario = PswChave(RetCodUsr())
     if (cUsuario == 'neliedercorneta') 
         /* gera log do script sql */
-        GravaSQL(cQuery)
+        GravaSQL(cQuery1)
     Endif
     
     /* verifica se arquivo está aberto e finaliza */
-    IF Select("TMPP") <> 0
-        DbSelectArea("TMPP")
+    IF Select("QCON") <> 0
+        DbSelectArea("QCON")
         DbCloseArea()
     ENDIF
     
-    TCQUERY cQuery NEW ALIAS "TMPP"  
+    //TMPP QCON
+    TCQUERY cQuery1 NEW ALIAS "QCON"  
     Count To nTotal 
     oReport:SetMsgPrint("Registros encontrados "+cValToChar(nTotal)) 
     
-    dbSelectArea("TMPP")
-    TMPP->(dbGoTop())
+    dbSelectArea("QCON")
+    QCON->(dbGoTop())
     
-    oReport:SetMeter(TMPP->(LastRec()))    
+    oReport:SetMeter(QCON->(LastRec()))    
     /* percorre registros */
-    While !TMPP->(eof())
+    conta := 0
+    porc  := 0
+    While !QCON->(eof())
         
+        conta++
+        porc = (conta/nTotal)*100
+        porc = round(porc,2) 
         If oReport:Cancel()
             Exit
         EndIf
@@ -238,49 +344,88 @@ Static Function ReportPrint(oReport)
         /* incrementa a regua do relatório */
         oReport:IncMeter()
 
-        oReport:SetMsgPrint("Analisando Produto "+cValToChar(alltrim(TMPP->B1_COD)))
+        oReport:SetMsgPrint("Registros encontrados " +cValToChar(conta)+ " de " +cValToChar(nTotal)+ " --> "+cValToChar(porc)+"%") 
 
-        xVarProd = SUBSTRING(alltrim(TMPP->B1_COD),1,10)
+        cCod = alltrim(QCON->B1_COD)
         
-        //imprimo a primeira seção                
-        oSection1:Cell("B1_COD"):SetValue(TMPP->B1_COD)
-        oSection1:Cell("B1_DESC"):SetValue(TMPP->B1_DESC)                
-		oSection1:Cell("B2_LOCALIZ"):SetValue(TMPP->B2_LOCALIZ)                
-		oSection1:Cell("B2_SALDO"):SetValue( ROUND(TMPP->B2_SALDO,2) )  
+        xVarProd = SUBSTRING(cCod,1,10)
+
+        //cCod = TRANSFORM(cCod, "@R XX 99.99.999-99") 
+        //cCod = AllTrim(cCod)
+        
+        
+        
+        //Produto
+        oSection1:Cell("B1_COD"):SetValue(AllTrim(cCod))
+        
+        //Descrição
+        oSection1:Cell("B1_DESC"):SetValue(AllTrim(QCON->B1_DESC))                
 		
-        xVarLib = F_VR_LBC(alltrim(TMPP->B1_COD))
-        
+        //Localização
+        oSection1:Cell("B2_LOCALIZ"):SetValue(AllTrim(QCON->B2_LOCALIZ))                
+		
+        //Saldo Atual
+        oSection1:Cell("B2_SALDO"):SetValue(QCON->B2_SALDO)  
+		
+        // Lib Credito
+        xVarLib = F_VR_LBC(alltrim(QCON->B1_COD))
         oSection1:Cell("VR_LBC"):SetValue(xVarLib)  
         
+        // OPs Colocadas
+        xOPsc = F_VR_OPC(QCON->B1_COD)
+        oSection1:Cell("VR_OPC"):SetValue(xOPsc)  
         
-        xOPsc = F_VR_OPC(alltrim(TMPP->B1_COD))
-        oSection1:Cell("VR_OPC"):SetValue(ROUND(xOPsc,2))  
+        // Ped Nao Lib
+        X_VR_PNL = F_VR_PNL(alltrim(QCON->B1_COD))
+        C_VR_PNL  = X_VR_PNL - xVarLib
+        oSection1:Cell("VR_PNL"):SetValue(C_VR_PNL)  
         
-        /* pedidos não liberados */
-        X_VR_PNL = F_VR_PNL(alltrim(TMPP->B1_COD))
-         
-        oSection1:Cell("VR_PNL"):SetValue(X_VR_PNL)  
-        
-
-        X_VR_M3M = F_VR_M3M(alltrim(TMPP->B1_COD))
+        // Méd 3 m
+        X_VR_M3M = F_VR_M3M(alltrim(QCON->B1_COD))
         oSection1:Cell("VR_M3M"):SetValue(X_VR_M3M)  
+        
+        // Méd P 3M
+        V_PEDLIB = F_PEDLIB(alltrim(QCON->B1_COD))
+        cMedP = V_PEDLIB
+        cMedP = (cMedP/3)
+        oSection1:Cell("VR_MP3"):SetValue(cMedP)  
 
-        oSection1:Cell("VR_MP3"):SetValue( F_VR_MP3(alltrim(TMPP->B1_COD),xVarLib,xOPsc,X_VR_M3M,X_VR_PNL) )  
-        oSection1:Cell("VR_OP3"):SetValue(F_VR_OP3(alltrim(TMPP->B1_COD)))  
-        oSection1:Cell("VR_CLI"):SetValue(F_VR_CLI(alltrim(TMPP->B1_COD)))  
-        oSection1:Cell("VR_SPU"):SetValue(F_VR_SUP(alltrim(TMPP->B1_COD)))  
-        oSection1:Cell("VR_FAT"):SetValue(F_VR_FAT(alltrim(TMPP->B1_COD)))  
+        //OPS 3m
+        nMedPro = F_VR_OP3(alltrim(QCON->B1_COD))
+        oSection1:Cell("VR_OP3"):SetValue(nMedPro)  
+
+        //Clientes
+        oSection1:Cell("VR_CLI"):SetValue(F_VR_CLI(alltrim(QCON->B1_COD)))  
+
+       nQtdPrd = xOPsc 
+       nQtdLib = C_VR_PNL
+       QTDATU = QCON->B2_SALDO
+       nMedPed = X_VR_M3M
+       nQTDPED = xVarLib
         
-               
-        
-        
+        /*/ F_VR_SUP(nQtdPrd,nQtdLib,QTDATU,nMedPed,nMedPro,nQTDPED,cProd)
+            @param nQtdPrd, numeric, ops colocadas -> xOPsc
+            @param nQTDLIB, numeric, Lib Crédito ->xVarLib
+            @param QTDATU, numeric, Saldo Atual ->QCON->B2_SALDO
+            @param nMedPed, numeric, Méd P 3 m -> cMedP 
+            @param nMedPro, numeric, Méd 3 m -> X_VR_M3M
+            @param nQTDPED, numeric, Ped Não Liberado -> C_VR_PNL
+            @param cProd, numeric, Codigo do Produto QCON->B1_COD
+        /*/
+        oSection1:Cell("VR_SPU"):SetValue( F_VR_SUP(xOPsc,xVarLib,QCON->B2_SALDO,cMedP,X_VR_M3M,C_VR_PNL,QCON->B1_COD) )  
+
+
+        // Ult Fat
+        oSection1:Cell("VR_FAT"):SetValue(F_VR_FAT(alltrim(QCON->B1_COD)))  
+
         oSection1:Printline()
-        TMPP->(dbSkip())
+       
+        QCON->(dbSkip())
 
-        //if SUBSTRING(alltrim(TMPP->B1_COD),1,10) <> xVarProd
+        if SUBSTRING(alltrim(QCON->B1_COD),1,10) <> xVarProd
             //linha horizontal
-            //oReport:ThinLine()
-        //EndIf    
+            oReport:ThinLine()
+        EndIf    
       
     Enddo
 	   //finalizo a primeira seção
@@ -299,27 +444,54 @@ Lib Credito, soma qtd produtos
 /*/
 Static Function F_VR_LBC(cProduto)
   Local return_var
-  Local cQuery1    := ""        
+  Local cQuery3    := ""        
   
-	cQuery1 := " SELECT C6_PRODUTO AS CODPRO,SUM(SC6.C6_QTDVEN ) AS QTDLIB "
-	cQuery1 += "FROM "+RETSQLNAME("SC6")+" SC6 WITH (NOLOCK) "
-	cQuery1 += "LEFT OUTER JOIN "+RETSQLNAME("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) "
-	cQuery1 += "LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) "
-	cQuery1 += "LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) "
-	cQuery1 += "WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL = '"+xFilial("SC6")+"') AND "
-	cQuery1 += "(SC6.C6_PRODUTO BETWEEN '"+cProduto+"' AND '"+cProduto+"') "
-	cQuery1 += "AND (C5_APROVA <> '2') AND (SC6.C6_NOTA = '') AND (C5_LIBPED = 'T') AND (C5_LIBCRE = 'T') "
-	cQuery1 += "GROUP BY C6_PRODUTO ORDER BY CODPRO "
+	cQuery3 := " SELECT C6_PRODUTO AS CODPRO,SUM(SC6.C6_QTDVEN ) AS QTDLIB "
+	cQuery3 += "FROM "+RETSQLNAME("SC6")+" SC6 WITH (NOLOCK) "
+	cQuery3 += "LEFT OUTER JOIN "+RETSQLNAME("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) "
+	cQuery3 += "LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) "
 
-    IF Select("TLIB") <> 0
-        DbSelectArea("TLIB")
+    //IF thisform.lEstoque.Value OR !thisform.lZerados.Value 
+	IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+    cQuery3 += "LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) "
+	endif
+
+    cQuery3 += "WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL = '"+xFilial("SC6")+"') AND "
+	cQuery3 += "(SC6.C6_PRODUTO BETWEEN '"+cProduto+"' AND '"+cProduto+"') "
+	cQuery3 += "AND (C5_APROVA <> '2') AND (SC6.C6_NOTA = '') AND (C5_LIBPED = 'T') AND (C5_LIBCRE = 'T') "
+
+    If !empty((mv_par12)) 
+        /* filtra pedido de venda */
+        cQuery3 += "AND C6_NUM = '"+mv_par12+"' "    
+    Endif   
+
+    If !empty(alltrim(mv_par07)) 
+        /* linha */
+        cQuery3 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
+    ENDIF
+
+    IF  (mv_par16 <> 1)
+        /* zerados */
+        //cQuery3 += "AND (SB2.B2_QATU <> 0.0) "
+    ENDIF
+
+   	///IF thisform.lEstoque.Value
+    IF (mv_par13 == 1)   
+		cQuery3 += "AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
+	ENDIF 
+    
+
+	cQuery3 += "GROUP BY C6_PRODUTO ORDER BY CODPRO "
+
+    IF Select("QCON3") <> 0
+        DbSelectArea("QCON3")
         DbCloseArea()
     ENDIF
 
-    TCQUERY cQuery1 NEW ALIAS "TLIB"    
+    TCQUERY cQuery3 NEW ALIAS "QCON3"    
     
-    dbSelectArea("TLIB")
-	return_var = TLIB->QTDLIB
+    dbSelectArea("QCON3")
+	return_var = QCON3->QTDLIB
 
 Return return_var
 
@@ -343,15 +515,15 @@ Static Function F_VR_OPC(cProduto)
     cQuery2 += " (SC2.C2_PRODUTO = '"+cProduto+"') AND (SC2.C2_DATRF = '') "
     cQuery2 += " AND (SC2.C2_QUANT > SC2.C2_QUJE) "
 
-    IF Select("TOPR") <> 0
-        DbSelectArea("TOPR")
+    IF Select("QCON2") <> 0
+        DbSelectArea("QCON2")
         DbCloseArea()
     ENDIF
 
-    TCQUERY cQuery2 NEW ALIAS "TOPR"    
+    TCQUERY cQuery2 NEW ALIAS "QCON2"    
     
-    dbSelectArea("TOPR")
-	return_var = ROUND(TOPR->QTDPRD,2)
+    dbSelectArea("QCON2")
+	return_var = ROUND(QCON2->QTDPRD,2)
 
 Return return_var
 
@@ -370,52 +542,56 @@ Static Function F_VR_PNL(cProduto)
    /* regra para calculo de pedidos não liberados */
    /* pega o resultado da query QCON3.QTDLIB
       soma com a variavel nQtdlib = nQtdlib + pedrelac.qtde */
-    Local cQuery2    := ""  
+    Local cQuery4    := ""  
 
-    cQuery2 := " SELECT C6_PRODUTO AS CODPRO,SUM(SC6.C6_QTDVEN ) AS QTDLIB "
-    cQuery2 += " FROM "+RETSQLNAME("SC6")+" SC6 WITH (NOLOCK) 
-    cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) 
-    cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) 
-
-	/*	IF thisform.lEstoque.Value OR !thisform.lZerados.Value */ 
-		cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) "
-	/*	ENDIF */ 
-    cQuery2 += " WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL = '"+xFilial("SC6")+"') AND (SC6.C6_PRODUTO BETWEEN '"+alltrim(mv_par08)+"' AND '"+alltrim(mv_par09)+"') "
-
-	cQuery2 += " AND (C5_APROVA <> '2') AND (SC6.C6_NOTA = '') AND (C5_LIBPED = 'T') AND (C5_LIBCRE = 'T') "
-
+    cQuery4 := " SELECT C6_PRODUTO AS CODPRO,SUM(SC6.C6_QTDVEN ) "
+    cQuery4 += " AS QTDPED " 
+    cQuery4 += " FROM SC6010 SC6 WITH (NOLOCK) " 
+    cQuery4 += " LEFT OUTER JOIN SC5010 SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) " 
+    cQuery4 += " LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) " 
+    
+    IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+        cQuery4 += " LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
+    Endif
+    
+    cQuery4 += " WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL = '"+xFilial("SC6")+"')AND (SC6.C6_PRODUTO BETWEEN '"+cProduto+"' AND '"+cProduto+"') " 
+    cQuery4 += " AND (SC6.C6_NOTA = '') AND (C5_LIBPED = 'T') AND (C5_APROVA <> 2) " 
+    
     If !empty((mv_par12)) 
-        /* filtra pedido*/
-		cQuery2 += " AND (C6_NUM = '') "
-	ENDIF 
+        /* filtra pedido de venda */
+        cQuery4 += "AND C6_NUM = '"+mv_par12+"' "    
+    Endif   
 
     If !empty(alltrim(mv_par07)) 
         /* linha */
-        cQuery2 += " AND (SUBSTRING(C6_PRODUTO,4,2) = '') "
+        cQuery4 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
-	If (mv_par16 == 1)
-		/* zerados */
-        cQuery2 += " AND (SB2.B2_QATU <> 0.0) "
-	ENDIF  
+    IF  (mv_par16 <> 1)
+        /* zerados */
+        //cQuery4 += "AND (SB2.B2_QATU <> 0.0) "
+    ENDIF
 
-	If (mv_par15 == 1)
-        /* apenas itens não estoque */
-        cQuery2 += " AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
+   	///IF thisform.lEstoque.Value
+    IF (mv_par13 == 1)   
+		cQuery4 += "AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
 	ENDIF 
-
-		cQuery2 += " GROUP BY C6_PRODUTO ORDER BY CODPRO  "    
+    
+    
+    
+    cQuery4 += " GROUP BY C6_PRODUTO ORDER BY CODPRO " 
+    
   
-	IF Select("TPNL") <> 0
-        DbSelectArea("TPNL")
+	IF Select("QCON4") <> 0
+        DbSelectArea("QCON4")
         DbCloseArea()
     ENDIF
 
-    TCQUERY cQuery2 NEW ALIAS "TPNL"    
+    TCQUERY cQuery4 NEW ALIAS "QCON4"    
     
-    dbSelectArea("TPNL")
+    dbSelectArea("QCON4")
 	
-    return_var = TPNL->QTDLIB
+    return_var = QCON4->QTDPED
 
 Return return_var
 
@@ -450,48 +626,27 @@ Static Function F_VR_M3M(cProduto)
 
 Return return_var
 
-/*/{Protheus.doc} F_VR_MP3
+/*/{Protheus.doc} F_VR_SUP
 Média de Pedidos os ultimos 3 meses
 @type function
 @version 12.1.25 
 @author neliedercorneta
 @since 29/10/2021
-@param cProduto, character, codigo do produto
-@param nQTDLIB, numeric, qtd pedidos liberados
-@param nQtdPrd, numeric, qtd de produtos
-@param nMedPro, numeric, media de produtos
-@param NQTDPED, numeric, qtd pedidos
+@param nQtdPrd, numeric, ops colocadas
+@param nQTDLIB, numeric, Lib Crédito
+@param QTDATU, numeric, Saldo Atual
+@param nMedPed, numeric, Méd P 3 m
+@param nMedPro, numeric, Méd 3 m
+@param nQTDPED, numeric, Ped Não Liberado
+@param cProd, numeric, Codigo do Produto
 /*/
-Static Function F_VR_MP3(cProduto,nQTDLIB,nQtdPrd,nMedPro,NQTDPED)
+Static Function F_VR_SUP(nQtdPrd,nQtdLib,QTDATU,nMedPed,nMedPro,nQTDPED,cProd)
 
-  Local return_var  := ""        
-  Local cQuery2     := ""        
-  Local nQTDSUG     := ""        
-  LOCAL nMedPed     := 0
-
-  /* nQTDPED pedidos não liberados */  
-
-    cQuery2 := " SELECT SUM(SB2.B2_QATU) AS QTDATU,  "
-    cQuery2 += " MAX(SB2.B2_LOCALIZ) AS LOCALIZ"
-    cQuery2 += " FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "
-    cQuery2 += " WHERE (SB2.D_E_L_E_T_ <> '*') "
-    cQuery2 += " AND (SB2.B2_FILIAL = '"+xFilial("SB2")+"') "
-    cQuery2 += " AND (SB2.B2_COD = '"+cProduto+"')"
-    cQuery2 += " AND (SB2.B2_LOCAL NOT IN ('13','90','98'))"
-
-     IF Select("TMP3") <> 0
-        DbSelectArea("TMP3")
-        DbCloseArea()
-    ENDIF
-
-    TCQUERY cQuery2 NEW ALIAS "TMP3"    
-    
-    dbSelectArea("TMP3")
-
-    /* pedidos liberados */ 
-    nMedPed = F_PEDLIB(cProduto)
+Local return_var  := ""        
+Local nQTDSUG     := ""        
         
-    nQTDSUG = nQTDLIB - TMP3->QTDATU - nQtdPrd
+
+	nQTDSUG = nQTDLIB - QTDATU - nQtdPrd
 		
 		IF nQTDSUG <= 0
 			nQTDSUG = 0
@@ -502,17 +657,9 @@ Static Function F_VR_MP3(cProduto,nQTDLIB,nQtdPrd,nMedPro,NQTDPED)
                 nQTDSUG = nQTDSUG + nMedPro * 2
             elseif (nMedPed >= 6)
                 nQTDSUG = nQTDSUG + nQTDPED + nMedPro * 3
-                nQTDSUG = 0
             Endif            
-            /*DO case
-			CASE nMedPed < 3
-				nQTDSUG = nQTDSUG
-			CASE (nMedPed >= 3) AND (nMedPed < 6)
-				nQTDSUG = nQTDSUG + nMedPro*2
-			CASE (nMedPed >= 6)
-				nQTDSUG = nQTDSUG + nQTDPED + nMedPro*3
-			ENDCASE */
 		ENDIF 			   
+
 
 return_var = nQTDSUG
 
@@ -535,9 +682,31 @@ Static Function F_VR_OP3(cProduto)
 	cQuery2 := " SELECT C2_PRODUTO AS CODPRO,COUNT(SC2.R_E_C_N_O_) AS QTDEOPS   "
     cQuery2 += " FROM "+RETSQLNAME("SC2")+" SC2 WITH (NOLOCK) "
     cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C2_FILIAL = B1_FILIAL) AND (C2_PRODUTO = B1_COD)  "
+
+    IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+        cQuery2 += " LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
+    Endif
+
+
     cQuery2 += " WHERE (SC2.D_E_L_E_T_ <> '*') AND (C2_FILIAL = '"+xFilial("SC2")+"')   "
     cQuery2 += " AND SC2.C2_PRODUTO = '"+cProduto+"'  "
     cQuery2 += " AND (C2_DATRF >= CONVERT(VARCHAR,GETDATE()-90,112))  "
+
+    If !empty(alltrim(mv_par07)) 
+        /* linha */
+        cQuery2 += "AND (SUBSTRING(C2_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
+    ENDIF
+
+    IF  (mv_par16 <> 1)
+        /* zerados */
+        //cQuery2 += "AND (SB2.B2_QATU <> 0.0) "
+    ENDIF
+    
+   	///IF thisform.lEstoque.Value
+    IF (mv_par13 == 1)   
+		cQuery2 += "AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
+	ENDIF 
+
     cQuery2 += " GROUP BY C2_PRODUTO ORDER BY CODPRO  "
     
 
@@ -587,13 +756,6 @@ Static Function F_VR_CLI(cProduto)
 
 Return return_var
 
-Static Function F_VR_SUP(cProduto)
-Local return_var
-
-return_var = ''
-Return return_var
-
-
 /*/{Protheus.doc} F_VR_FAT
 data do ultimo faturamento
 @type function
@@ -637,35 +799,64 @@ Static Function F_PEDLIB(cProduto)
 /* função que pega qtd de pedidos liberados */
 
 Local return_var := ""        
-Local cQuery2    := ""        
+Local cQuery    := ""        
 Local nMedPed    := 0
 
-    cQuery2 := " SELECT C9_PRODUTO AS CODPRO,COUNT(C9_PRODUTO) AS QTDE  "
-    cQuery2 += " FROM "+RetSqlName("SC9")+" SC9 WITH (NOLOCK) "
-    cQuery2 += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND (C9_FILIAL = C5_FILIAL) AND (C9_PEDIDO = C5_NUM) "
-    cQuery2 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) ON (SC6.D_E_L_E_T_ <> '*') AND (C6_FILIAL = C9_FILIAL) AND (C9_PEDIDO = C6_NUM) AND (C6_ITEM = C9_ITEM)  "
-    cQuery2 += " LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH (NOLOCK) ON (SF4.D_E_L_E_T_ <> '*') AND (F4_FILIAL = '"+xFilial("SF4")+"') AND (F4_CODIGO = C6_TES)  "
-    cQuery2 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C9_FILIAL = B1_FILIAL) AND (C9_PRODUTO = B1_COD) "
+    cQuery := " SELECT C9_PRODUTO AS CODPRO,COUNT(C9_PRODUTO) AS QTDE  "
+    cQuery += " FROM "+RetSqlName("SC9")+" SC9 WITH (NOLOCK) "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND (C9_FILIAL = C5_FILIAL) AND (C9_PEDIDO = C5_NUM) "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) ON (SC6.D_E_L_E_T_ <> '*') AND (C6_FILIAL = C9_FILIAL) AND (C9_PEDIDO = C6_NUM) AND (C6_ITEM = C9_ITEM)  "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH (NOLOCK) ON (SF4.D_E_L_E_T_ <> '*') AND (F4_FILIAL = '"+xFilial("SF4")+"') AND (F4_CODIGO = C6_TES)  "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C9_FILIAL = B1_FILIAL) AND (C9_PRODUTO = B1_COD) "
     /* AQUI TEM UM IF */
-    cQuery2 += " WHERE (SC9.D_E_L_E_T_ <> '*') AND (C9_FILIAL = '"+xFilial("SC9")+"') "
-    //cQuery2 += " AND (SC9.C9_PRODUTO BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
-    cQuery2 += " AND (SC9.C9_PRODUTO = '"+cProduto+"' ) "
-    cQuery2 += " AND (SC5.C5_TIPO = 'N') AND (SC5.C5_APROVA = '1') AND (F4_ESTOQUE <> 'N') AND (F4_DUPLIC <> 'N') "
-    /* AQUI TEM UM IF */
-    cQuery2 += " AND (C9_GRUPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"')   "
-    cQuery2 += " AND C6_PRODUTO =  '"+cProduto+"'  "
-    cQuery2 += " AND (C5_EMISSAO >= CONVERT(VARCHAR,GETDATE()-90,112))   "
-    cQuery2 += " GROUP BY C9_PRODUTO ORDER BY CODPRO  "
 
-    IF Select("PLIB") <> 0
-        DbSelectArea("PLIB")
+    IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+        cQuery += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) "
+    ENDIF
+
+    cQuery += " WHERE (SC9.D_E_L_E_T_ <> '*') AND (C9_FILIAL = '"+xFilial("SC9")+"') "
+    //cQuery2 += " AND (SC9.C9_PRODUTO BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+    cQuery += " AND (SC9.C9_PRODUTO = '"+cProduto+"' ) "
+    cQuery += " AND (SC5.C5_TIPO = 'N') AND (SC5.C5_APROVA = '1') AND (F4_ESTOQUE <> 'N') AND (F4_DUPLIC <> 'N') "
+    /* AQUI TEM UM IF */
+    cQuery += " AND (C9_GRUPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"')   "
+    cQuery += " AND C6_PRODUTO =  '"+cProduto+"'  "
+    cQuery += " AND (C5_EMISSAO >= CONVERT(VARCHAR,GETDATE()-90,112))   "
+
+
+    If !empty((mv_par12)) 
+        /* filtra pedido de venda */
+        cQuery += "AND C6_NUM = '"+mv_par12+"' "    
+    Endif   
+
+    If !empty(alltrim(mv_par07)) 
+        /* linha */
+        cQuery += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
+    ENDIF
+
+    IF  (mv_par16 <> 1)
+        /* zerados */
+        //cQuery += "AND (SB2.B2_QATU <> 0.0) "
+    ENDIF
+
+   	///IF thisform.lEstoque.Value
+    IF (mv_par13 == 1)   
+		cQuery += "AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
+	ENDIF 
+
+
+
+    cQuery += " GROUP BY C9_PRODUTO ORDER BY CODPRO  "
+
+    IF Select("QCON6") <> 0
+        DbSelectArea("QCON6")
         DbCloseArea()
     ENDIF
 
-    TCQUERY cQuery2 NEW ALIAS "PLIB"    
+    TCQUERY cQuery NEW ALIAS "QCON6"    
     
-    dbSelectArea("PLIB")
-    nMedPed = nMedPed + PLIB->QTDE
+    dbSelectArea("QCON6")
+    nMedPed = nMedPed + QCON6->QTDE
 	//nMedPed = ROUND(nMedPed/3,1)
     return_var = nMedPed
 

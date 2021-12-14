@@ -98,7 +98,7 @@ User Function BRPCPX01()
          MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
    		return(.f.)
    	endif
-
+     u_zcfga01( 'BRPCPX01' ) //LGS#2021203 - Gravação de log de utilização da rotina
 
      cRotina  := Stuff(cRotina, Len(cRotina)+1, 10 - Len(cRotina), space(10 - Len(cRotina)))
      cAcessos := Posicione("SZW", 4, xFilial("SZW")+cRotina+cCodUsr+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")    
