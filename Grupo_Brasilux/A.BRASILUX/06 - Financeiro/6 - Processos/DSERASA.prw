@@ -7,7 +7,6 @@ User Function DSERASA()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de Variaveis                                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Local cCgc := "",nValor,cBaixa,cAuxTit
 Private _cString   := "SA1"
 Private _cPerg     := "DSERASA"
 Private _oGeraTxt  
@@ -37,7 +36,8 @@ Activate Dialog _oGeraTxt Centered
 Return
 //-------------------------------------
 Static Function OkGeraTrb
-Local _cTipoMov,_cEmpr,_cFil,nTamFil
+Local _cTipoMov,_cEmpr,_cFil,nTamFil,cAuxTit,cBaixa,nValor
+Local cCgc := ""
 _cPath     := Alltrim( mv_par05 )
 _cFile     := alltrim(mv_par04)
 _cDataIni  := MV_PAR01
@@ -75,6 +75,7 @@ _cEmpr := FWCompany()
 _cFil := xFilial("SE1")
 nTamFil := FWSizeFilial()
 
+//Cleber(27/12/2021)-> Chamado 023233, filtrar CNPJ´s das empresas do grupo
 cQuery := "SELECT E1_FILIAL AS FILIAL,"+;
        "'TPREG'    = 'J',"+;
        "'CNPJ'     = A1_CGC,"+;
@@ -112,11 +113,13 @@ cQuery := "SELECT E1_FILIAL AS FILIAL,"+;
        "'REG'     = SE1.R_E_C_N_O_ "+;
  		"FROM "+RetSqlName("SE1")+" SE1 WITH (NOLOCK) "+;
 		"LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.D_E_L_E_T_ <> '*') AND (A1_FILIAL = '"+xFilial("SA1")+"') AND (E1_CLIENTE = A1_COD) AND (SA1.A1_LOJA = SE1.E1_LOJA) "+;
+		"LEFT OUTER JOIN SYS_COMPANY EMPRGRP WITH (NOLOCK) ON (EMPRGRP.D_E_L_E_T_ <> '*') AND (EMPRGRP.M0_CGC = SA1.A1_CGC) "+;
  		"WHERE (SE1.D_E_L_E_T_ <> '*') AND "+;
  		iif(nTamFil = 2,"(SE1.E1_FILIAL = '"+xFilial("SE1")+"') ",iif(!empty(alltrim(substr(_cFil,1,1))),"(SE1.E1_FILIAL LIKE '"+_cEmpr+"%')",""))+" AND "+;
  		"(SE1.E1_EMISSAO BETWEEN '"+dtos(mv_par01)+"' AND '"+dtos(mv_par02)+"') AND "+;
  		"(SE1.E1_FLAGFAT <> 'S') AND (SE1.E1_TIPO NOT IN('NCC','AB-','JP','RA')) AND "+; 
- 		"(SA1.A1_EST <> 'EX') AND (LEN(A1_CGC) = 14) "+;
+ 		"(SA1.A1_EST <> 'EX') AND (LEN(A1_CGC) = 14) AND "+;
+    "(EMPRGRP.R_E_C_N_O_ IS NULL) "+;
  		"ORDER BY CNPJ,DTVENDA "    
 /*
  		"((SE1.E1_EMISSAO BETWEEN '"+dtos(mv_par01)+"' AND '"+dtos(mv_par02)+"') "+;

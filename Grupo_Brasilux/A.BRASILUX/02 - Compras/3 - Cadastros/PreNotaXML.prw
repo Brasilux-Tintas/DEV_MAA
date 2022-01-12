@@ -1588,9 +1588,9 @@ Return(lOk)
 */
 //12/07/21->Nova versão, pegando direto das tabelas (Cleber)
 Static Function AchaFile(cArqLoc)
-Local cCaminho,cQuery,cPasta,cEnv,nQtdePastas,nPos
+Local cQuery,nPos
 Local lOk := .f.
-Local nHdl,aFiles,nArq,nTamFile,nBtLidos,cChave,i,lAchouBD,nVezes
+Local aFiles,nTamFile,cChave,i,lAchouBD
 aFiles := {}
 cChave := alltrim(cCodBar)
 If Empty(cChave)
@@ -1782,27 +1782,34 @@ Return
 
 Static Function LeCodKit(_nOpcao)
 Local lRet := .f.
-Local nAuxItens,cAuxCod
+Local cAuxCod
 DO CASE
 CASE _nOpcao == 4 //Excluir item bipado
 	dbselectarea("XCODBAR")
 	if !eof() .and. !bof()
 		cAuxCod := alltrim(XCODBAR->ZZD_CODBAR)
-		if MsgYesNo ("Exclui o código de barra "+cAuxCod+" ?")
-			dbselectarea("XCODBAR")
-			reclock("XCODBAR",.F.)
-			dbdelete()	
-			msunlock()
-			dbselectarea("ZZD")
-			MsSeek(xFilial("ZZD")+cChvNfe+cAuxCod,.t.)
-			if found()
-				reclock("ZZD",.F.)
+		if PodeIE(cAuxCod,2) //segundo parâmetro indica se pode excluir (2) ou incluir (1)
+			if MsgYesNo ("Exclui o código de barra "+cAuxCod+" ?")
+				dbselectarea("XCODBAR")
+				reclock("XCODBAR",.F.)
 				dbdelete()	
 				msunlock()
-			endif 
-			nLidoKit--
-			oEdit2:Refresh()
+				dbselectarea("ZZD")
+				MsSeek(xFilial("ZZD")+cChvNfe+cAuxCod,.t.)
+				if found()
+					reclock("ZZD",.F.)
+					dbdelete()	
+					msunlock()
+				endif 
+				nLidoKit--
+				nQtde := ExcluiFilhos(cAuxCod)
+				if nQtde > 0
+					nLidoKit -= nQtde
+					//oEdit2:Refresh()
+				endif 
+				oEdit2:Refresh()
 
+			endif 
 		endif 
 	endif 
 
@@ -1834,26 +1841,32 @@ OTHERWISE
 		//lFimDlg := .t.
 	else 
 		if ProcItemKit(cCodBarKit)
-			nLidoKit++
-			//Prosseguir com a leitura do kit
-			//cCodBars += ALLTRIM(cCodBarKit)+"|"
-			dbselectarea("XCODBAR")
-			reclock("XCODBAR",.T.)
-			XCODBAR->ZZD_CODBAR := cCodBarKit
-			msunlock()
-			dbselectarea("ZZD")
-			reclock("ZZD",.T.)
-			ZZD->ZZD_FILIAL := xFilial("ZZD")
-			ZZD->ZZD_CHVNFE := cChvNfe
-			ZZD->ZZD_CODBAR := cCodBarKit
-			msunlock()
-			dbselectarea("XCODBAR")
-			//dbgobottom()
-			_oBrwCodb := nil
-			@ 100,005 TO 190,200 BROWSE "XCODBAR" FIELDS aCampos3 Object _oBrwCodb
+			if PodeIE(cCodBarKit,1) // Segundo parametro determina se pode incluir (1) ou excluir(2)
+				nLidoKit++
+				//Prosseguir com a leitura do kit
+				//cCodBars += ALLTRIM(cCodBarKit)+"|"
+				dbselectarea("XCODBAR")
+				reclock("XCODBAR",.T.)
+				XCODBAR->ZZD_CODBAR := cCodBarKit
+				msunlock()
+				dbselectarea("ZZD")
+				reclock("ZZD",.T.)
+				ZZD->ZZD_FILIAL := xFilial("ZZD")
+				ZZD->ZZD_CHVNFE := cChvNfe
+				ZZD->ZZD_CODBAR := cCodBarKit
+				msunlock()
+				dbselectarea("XCODBAR")
+				//dbgobottom()
+				nQtde := CadFilhos(cCodBarKit)
+				if nQtde > 0
+					nLidoKit += nQtde
+					//oEdit2:Refresh()
+				endif 
+				_oBrwCodb := nil
+				@ 100,005 TO 190,200 BROWSE "XCODBAR" FIELDS aCampos3 Object _oBrwCodb
 
-			oEdit2:Refresh()
-			
+				oEdit2:Refresh()
+			endif 
 		endif 
 	endif 
 ENDCASE 
@@ -1867,7 +1880,7 @@ return(lRet)
 
 
 Static Function ProcItemKit(_cCod)
-Local nI,cAuxCod,_cCodPrf,cCodProtheus,lAchou
+Local cAuxCod,_cCodPrf,cCodProtheus,lAchou
 cAuxCod := alltrim(_cCod)
 lAchou := .f.
 if !empty(cAuxCod)
@@ -1884,7 +1897,7 @@ if !empty(cAuxCod)
 	if !empty(cCodProtheus)
 		dbselectarea("ZZD")
 		MsSeek(xFilial("ZZD")+cChvNfe+_cCod,.t.)
-		if !found() //É preciso ser código novo para contabilizar como adicional
+		if !found() //É preciso ser leitura nova para contabilizar como adicional
 			lAchou := .t.
 		endif 
 	endif 
@@ -1893,26 +1906,178 @@ endif
 
 return(lAchou)
 
+//Cleber -> Incluir automaticamente códigos filhos (20/12/21) 
+Static Function CadFilhos(_cCod)
+Local _cArea := Alias()
+Local nRet,cAuxCod,cQuery,_cCodPrf,cCodComp,i,nQtde,nFator 
+cAuxCod := alltrim(_cCod)
+nRet := 0
+if !empty(cAuxCod)
+	_cCodPrf := alltrim(substr(_cCod,4,7))
+	If Select("TMPCOMP") <> 0
+		TMPCOMP->(dbCloseArea())
+	endif 	
+	cQuery := "SELECT CODIGO,COMPON,QTDE FROM KITSCOCA WHERE (PAI = '"+_cCodPrf+"') ORDER BY COMPON"
+	TCQuery cQuery ALIAS "TMPCOMP" NEW
+	dbselectarea("TMPCOMP")
+	dbgotop()
+	do while !eof()
+		//Descobrir se estrutura possui itens com subestrutura repetidos
+		nFator := 1 
+		cQuery := "SELECT QTDE FROM KITSCOCA WHERE (CODIGO = '"+TMPCOMP->CODIGO+"') AND (COMPON = '"+_cCodPrf+"')"
+		TCQuery cQuery ALIAS "TMPPAI" NEW
+		dbselectarea("TMPPAI")
+		dbgotop()
+		if !eof() .and. !bof()
+			nFator := TMPPAI->QTDE
+		endif 
+		nQtde := ROUND(TMPCOMP->QTDE/nFator,0)
+		
+		for i = 1 to nQtde
+			cCodComp := substr(cAuxCod,1,3)+ALLTRIM(TMPCOMP->COMPON)+substr(cAuxCod,11,2)+substr(cAuxCod,13,10)+substr(cAuxCod,23,8)+U_NumSeqLot("ZZD", 6) 
+			dbselectarea("XCODBAR")
+			reclock("XCODBAR",.T.)
+			XCODBAR->ZZD_CODBAR := cCodComp
+			msunlock()
+			dbselectarea("ZZD")
+			reclock("ZZD",.T.)
+			ZZD->ZZD_FILIAL := xFilial("ZZD")
+			ZZD->ZZD_CHVNFE := cChvNfe
+			ZZD->ZZD_CODBAR := cCodComp
+			msunlock()
+			nRet++
+			dbselectarea("XCODBAR")
+		next
+		If Select("TMPPAI") <> 0
+			TMPPAI->(dbCloseArea())
+		endif 	
+
+		dbselectarea("TMPCOMP")
+		dbskip()
+	enddo 
+	If Select("TMPCOMP") <> 0
+		TMPCOMP->(dbCloseArea())
+	endif 	
+endif 
+if !empty(_cArea)
+   dbSelectArea(_cArea)
+endif 
+
+return(nRet)
+
+//Cleber -> Excluir automaticamente códigos filhos (20/12/21) 
+Static Function ExcluiFilhos(cAuxCod)
+Local _cArea := Alias()
+Local nRet,cQuery,_cCodPrf,cCodComp,nQtde,_cAux 
+nRet := 0
+if !empty(cAuxCod)
+	_cCodPrf := alltrim(substr(cAuxCod,4,7))
+	If Select("TMPCOMP") <> 0
+		TMPCOMP->(dbCloseArea())
+	endif 	
+	cQuery := "SELECT COMPON,QTDE FROM KITSCOCA WHERE (PAI = '"+_cCodPrf+"') ORDER BY COMPON"
+	TCQuery cQuery ALIAS "TMPCOMP" NEW
+	dbselectarea("TMPCOMP")
+	dbgotop()
+	do while !eof()
+		nQtde := TMPCOMP->QTDE
+		cCodComp := substr(cAuxCod,1,3)+ALLTRIM(TMPCOMP->COMPON)+substr(cAuxCod,11,2)+substr(cAuxCod,13,10)+substr(cAuxCod,23,8) //+U_NumSeqLot("ZZD", 6) 
+		dbselectarea("XCODBAR")
+		dbgotop()
+		LOCATE FOR SUBSTR(XCODBAR->ZZD_CODBAR,1,30) = cCodComp
+		do while !eof() .and. !bof() .and. (XCODBAR->ZZD_CODBAR = cCodComp)
+			nRet++
+			_cAux := alltrim(XCODBAR->ZZD_CODBAR)
+			reclock("XCODBAR",.F.)
+			dbdelete()	
+			msunlock()
+			dbselectarea("ZZD")
+			MsSeek(xFilial("ZZD")+cChvNfe+_cAux,.t.)
+			if found()
+				reclock("ZZD",.F.)
+				dbdelete()	
+				msunlock()
+			endif 
+			dbselectarea("XCODBAR")
+			dbskip()
+		enddo 
+
+		dbselectarea("TMPCOMP")
+		dbskip()
+	enddo 
+	If Select("TMPCOMP") <> 0
+		TMPCOMP->(dbCloseArea())
+	endif 	
+endif 
+if !empty(_cArea)
+   dbSelectArea(_cArea)
+endif 
+
+return(nRet)
+
+//Cleber -> Verificar se item não é produto filho, orientar a excluir ou incluir o produto pai
+Static Function PodeIE(_cCod,nOper)
+Local _cArea := Alias()
+Local lRet,cAuxCod,cQuery,_cCodPrf 
+/*
+PARAMETROS: 
+_cCod: Código de Barras Lido
+nOper: Qual operação? 1-Incluindo; 2-Excluindo
+*/
+lRet := .t.
+cAuxCod := alltrim(_cCod)
+if !empty(cAuxCod)
+	_cCodPrf := alltrim(substr(_cCod,4,7))
+	If Select("TMPCOMP") <> 0
+		TMPCOMP->(dbCloseArea())
+	endif 	
+	cQuery := "SELECT CODIGO FROM KITSCOCA WHERE (COMPON = '"+_cCodPrf+"') AND (PAI > '')"
+	TCQuery cQuery ALIAS "TMPCOMP" NEW
+	dbselectarea("TMPCOMP")
+	dbgotop()
+	if !eof() .and. !bof()
+		lRet := .f.
+		MsgAlert("Movimente o item PAI!")		
+	endif 
+	If Select("TMPCOMP") <> 0
+		TMPCOMP->(dbCloseArea())
+	endif 	
+endif 
+if !empty(_cArea)
+   dbSelectArea(_cArea)
+endif 
+
+return(lRet)
+
+
 Static Function ContCodKits()
 Local _cArea := Alias()
 Local _cChave := cChvNfe
-Local nLido
+Local nLido,cQuery
 
 nLido := 0
-dbselectarea("ZZD")
+If Select("TMPCOMP") <> 0
+	TMPCOMP->(dbCloseArea())
+endif 	
+cQuery := "SELECT ZZD_CODBAR FROM "+RetSqlName("ZZD")+" WHERE (D_E_L_E_T_ <> '*') AND (ZZD_FILIAL = '"+xFilial("ZZD")+"') AND (ZZD_CHVNFE = '"+_cChave+"') ORDER BY R_E_C_N_O_"
+TCQuery cQuery ALIAS "TMPCOMP" NEW
+dbselectarea("TMPCOMP")
 dbgotop()
-MsSeek(xFilial("ZZD")+cChvNfe,.t.)
-do while !eof() .and. (ZZD->ZZD_FILIAL == xFilial("ZZD")) .AND. (ZZD->ZZD_CHVNFE = cChvNfe)
-	if !empty(alltrim(ZZD->ZZD_CODBAR))
+
+do while !eof()
+	if !empty(alltrim(TMPCOMP->ZZD_CODBAR))
 		nLido++
 		dbselectarea("XCODBAR")
 		reclock("XCODBAR",.T.)
-		XCODBAR->ZZD_CODBAR := ZZD->ZZD_CODBAR
+		XCODBAR->ZZD_CODBAR := TMPCOMP->ZZD_CODBAR
 		msunlock()
 	endif 
-	dbselectarea("ZZD")
+	dbselectarea("TMPCOMP")
 	dbskip()
 enddo 
+If Select("TMPCOMP") <> 0
+	TMPCOMP->(dbCloseArea())
+endif 	
 
 if !empty(_cArea)
    dbSelectArea(_cArea)

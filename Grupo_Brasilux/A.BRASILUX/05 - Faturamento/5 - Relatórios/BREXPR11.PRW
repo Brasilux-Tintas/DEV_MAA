@@ -16,76 +16,94 @@ Função que cria um exemplo de FWMsExcel
 /----------------------------------------------------------------------*/
  
 User Function BREXPR11()
-//  jose ---------------------
-    Local Emissoo 
-    Local Horass
-	Local Hifemm
-//----------------------------
-    Local aArea := GetArea()
-    Local cQuery:= ""
-    Local oFWMsExcel
-    Local oExcel
-	Local _cPerg :="BREXPR11"
-    Local cArquivo:= GetTempPath()+'BREXPR11.xml'
-    u_zcfga01( 'BREXPR11' )
-//  jose ---------------------
-    Emissoo:=DATE()
-	Horass:=TIME()
-	Hifemm:=" -"
-//----------------------------
-     u_zcfga01( 'BREXPR11' ) //LGS#2021214 - Gravação de log de utilização da rotina
-//( _cPerg ) Chamada da Criação das perguntas  //LGS#20200204 - Adequação de release 12.1.25 e posteriores
-If !Pergunte( _cPerg ) 
-    Return() //Se cancelar as perguntas sai do programa
- Endif
+     //  jose ---------------------
+     Local Emissoo 
+     Local Horass
+	 Local Hifemm
+     //----------------------------
+     Local aArea := GetArea()
+     Local cQuery:= ""
+     Local oFWMsExcel
+     Local oExcel
+     Local _cPerg :="BREXPR11"
+     Local cArquivo:= GetTempPath()+'BREXPR11.xml'
 
-// BeginSql Alias _cAlias  // Começo da Consulta SQL =  Query   //Pegando os dados
+     //  jose ---------------------
+     Emissoo:=DATE()
+     Horass:=TIME()
+     Hifemm:=" -"
+     //----------------------------
 
-If MV_PAR01 == 1
-    cQuery :="SELECT ZZL_PRODUT AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', " + CHR(13) + CHR(10) 
-    cQuery +=" ZZL_LOCALI AS 'PROVISORIO','' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
-    cQuery +="FROM "+RetSqlName("ZZL")+" ZZL " + CHR(13) + CHR(10)
-    cQuery +="LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON SB1.B1_FILIAL = ZZL.ZZL_FILIAL " + CHR(13) + CHR(10)
-    cQuery +=" AND SB1.B1_COD = ZZL.ZZL_PRODUT AND SB1.D_E_L_E_T_ = '' " + CHR(13) + CHR(10)
-//  jose 03/12/2021 --------------------------------------------------------------------------------------------------
-    cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB2.B2_FILIAL = ZZL.ZZL_FILIAL " + CHR(13) + CHR(10)
-    cQuery +=" AND SB2.B2_COD = ZZL.ZZL_PRODUT AND SB2.D_E_L_E_T_ = '' AND SB2.B2_LOCALIZ <> '' " + CHR(13) + CHR(10)
-//--------------------------------------------------------------------------------------------------------------------
-    cQuery +="WHERE (ZZL_FILIAL='"+xFilial("ZZL")+"') AND (ZZL.D_E_L_E_T_='') AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
-    cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10) 
-    If !Empty(MV_PAR02) 
-        cQuery +="AND UPPER(SUBSTRING(ZZL_LOCALI,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
-    EndIf  
-    If MV_PAR05 == 1 
-        cQuery +="AND ZZL_LOCALI <> '' " + CHR(13) + CHR(10)
-    EndIf
-    cQuery +="ORDER BY ZZL_LOCALI" + CHR(13) + CHR(10)
-Else
-    cQuery :="SELECT B1_COD AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', ZZL_LOCALI AS 'PROVISORIO', " + CHR(13) + CHR(10)
-    cQuery +=" '' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
-    cQuery +="FROM "+RetSqlName("SB1")+" SB1 "
-    cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = '"+xFilial("SB2")+"' " + CHR(13) + CHR(10)
-    cQuery +=" AND B1_COD = B2_COD AND SB2.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
-    cQuery +="LEFT OUTER JOIN "+RetSqlName("ZZL")+" ZZL WITH (NOLOCK) ON ZZL_FILIAL = '"+xFilial("ZZL")+"' " + CHR(13) + CHR(10)
-    cQuery +=" AND B1_COD = ZZL_PRODUT AND ZZL.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
-    cQuery +="WHERE SB1.D_E_L_E_T_ ='' AND B1_FILIAL ='"+xFilial("SB1")+"' " + CHR(13) + CHR(10)
-    cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10)
-    cQuery +=" AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
-    If !Empty(MV_PAR02) 
-        cQuery +="AND UPPER(SUBSTRING(B2_LOCALIZ,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
-    EndIf                               
-    If MV_PAR05 == 1 
-        cQuery +="AND ZZL_LOCALI <> '' " + CHR(13) + CHR(10)
-    EndIf
-    cQuery +="ORDER BY B2_LOCALIZ" + CHR(13) + CHR(10)    
-EndIf                                       
+     //( _cPerg ) Chamada da Criação das perguntas  //LGS#20200204 - Adequação de release 12.1.25 e posteriores
+     If !Pergunte( _cPerg ) 
+        Return() //Se cancelar as perguntas sai do programa
+     Endif
 
-   TCQuery cQuery New Alias "QRYPRO"
+     // BeginSql Alias _cAlias  // Começo da Consulta SQL =  Query   //Pegando os dados
+
+     If MV_PAR01 == 1
+        cQuery :="SELECT ZZL_PRODUT AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', " + CHR(13) + CHR(10) 
+        cQuery +=" ZZL_LOCALI AS 'PROVISORIO','' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
+        cQuery +="FROM "+RetSqlName("ZZL")+" ZZL " + CHR(13) + CHR(10)
+        cQuery +="LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON SB1.B1_FILIAL = ZZL.ZZL_FILIAL " + CHR(13) + CHR(10)
+        cQuery +=" AND SB1.B1_COD = ZZL.ZZL_PRODUT AND SB1.D_E_L_E_T_ = '' " + CHR(13) + CHR(10)
+        //  jose 03/12/2021 --------------------------------------------------------------------------------------------------
+        cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB2.B2_FILIAL = ZZL.ZZL_FILIAL " + CHR(13) + CHR(10)
+        cQuery +=" AND SB2.B2_COD = ZZL.ZZL_PRODUT AND SB2.D_E_L_E_T_ = '' AND SB2.B2_LOCALIZ <> '' " + CHR(13) + CHR(10)
+        //--------------------------------------------------------------------------------------------------------------------
+        cQuery +="WHERE (ZZL_FILIAL='"+xFilial("ZZL")+"') AND (ZZL.D_E_L_E_T_='') AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
+        cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10) 
+        If !Empty(MV_PAR02) 
+           cQuery +="AND UPPER(SUBSTRING(ZZL_LOCALI,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
+        EndIf  
+        If MV_PAR05 == 1 
+           cQuery +="AND ZZL_LOCALI <> '' " + CHR(13) + CHR(10)
+        EndIf
+        cQuery +="ORDER BY ZZL_LOCALI" + CHR(13) + CHR(10)
+     Else
+        //  Jose 14/12/2021 ------------
+        If MV_PAR05 == 2 .OR. MV_PAR02 = 'X'
+           //-------------------------------
+           cQuery :="SELECT B1_COD AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', ZZL_LOCALI AS 'PROVISORIO', " + CHR(13) + CHR(10)
+           cQuery +=" '' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
+           cQuery +="FROM "+RetSqlName("SB1")+" SB1 "
+           cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = '"+xFilial("SB2")+"' " + CHR(13) + CHR(10)
+           cQuery +=" AND B1_COD = B2_COD AND SB2.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
+           cQuery +="LEFT OUTER JOIN "+RetSqlName("ZZL")+" ZZL WITH (NOLOCK) ON ZZL_FILIAL = '"+xFilial("ZZL")+"' " + CHR(13) + CHR(10)
+           cQuery +=" AND B1_COD = ZZL_PRODUT AND ZZL.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
+           cQuery +="WHERE SB1.D_E_L_E_T_ ='' AND B1_FILIAL ='"+xFilial("SB1")+"' " + CHR(13) + CHR(10)
+           cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10)
+           cQuery +=" AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
+           If !Empty(MV_PAR02) 
+              cQuery +="AND UPPER(SUBSTRING(B2_LOCALIZ,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
+           EndIf                               
+           If MV_PAR05 == 1 
+              cQuery +="AND ZZL_LOCALI <> '' " + CHR(13) + CHR(10)
+          EndIf
+          cQuery +="ORDER BY B2_LOCALIZ" + CHR(13) + CHR(10)    
+          // Jose  14/12/2021 -----------------------
+       Else
+          cQuery :="SELECT B1_COD AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', '' AS 'PROVISORIO', " + CHR(13) + CHR(10)
+          cQuery +=" '' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
+          cQuery +="FROM "+RetSqlName("SB1")+" SB1 "
+          cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = '"+xFilial("SB2")+"' " + CHR(13) + CHR(10)
+          cQuery +=" AND B1_COD = B2_COD AND SB2.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
+          cQuery +="WHERE SB1.D_E_L_E_T_ ='' AND B1_FILIAL ='"+xFilial("SB1")+"' " + CHR(13) + CHR(10)
+          cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10)
+          cQuery +=" AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
+          If !Empty(MV_PAR02) 
+             cQuery +="AND UPPER(SUBSTRING(B2_LOCALIZ,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
+          EndIf                               
+          cQuery +="ORDER BY B2_LOCALIZ" + CHR(13) + CHR(10)        
+          //----------------------------------------
+       EndIf                                       
+    Endif
+    TCQuery cQuery New Alias "QRYPRO"
      
     //Criando o objeto que irá gerar o conteúdo do Excel
     oFWMsExcel := FWMSExcel():New()
 
-/*------------- Inibido por Jose   03/12/2021    não é necessário esta ABA -----------------------     
+    /*------------- Inibido por Jose   03/12/2021    não é necessário esta ABA -----------------------     
     //Aba 01 - Teste
     oFWMsExcel:AddworkSheet("Aba 1 Teste") //Não utilizar número junto com sinal de menos. Ex.: 1-
         //Criando a Tabela
@@ -100,7 +118,7 @@ EndIf
         oFWMsExcel:AddRow("Aba 1 Teste","Titulo Tabela",{21,22,23,sToD('20140217')})
         oFWMsExcel:AddRow("Aba 1 Teste","Titulo Tabela",{31,32,33,sToD('20140117')})
         oFWMsExcel:AddRow("Aba 1 Teste","Titulo Tabela",{41,42,43,sToD('20131217')})
--------------------------------------------------------------------------------------------------*/         
+    -------------------------------------------------------------------------------------------------*/         
 
     //Aba 02 - Produtos
     oFWMsExcel:AddworkSheet("Relatório de Estoque por Localização")
@@ -115,20 +133,20 @@ EndIf
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização",Hifemm,1)
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização",Horass,1,4)
 
-       //Criando as Linhas... Enquanto não for fim da query
-       While !(QRYPRO->(EoF()))
-           oFWMsExcel:AddRow("Relatório de Estoque por Localização","Relatório de Estoque por Localização",{;
-                QRYPRO->PRODUTO,;
-                QRYPRO->DESCRICAO,;
-                QRYPRO->ESTOQUE,;
-                QRYPRO->PROVISORIO,;
-                QRYPRO->OBSERVACAO,Emissao,Hifem,Horas;
-				})
+    //Criando as Linhas... Enquanto não for fim da query
+    While !(QRYPRO->(EoF()))
+          oFWMsExcel:AddRow( "Relatório de Estoque por Localização","Relatório de Estoque por Localização",{;
+                     QRYPRO->PRODUTO,;
+                     QRYPRO->DESCRICAO,;
+                     QRYPRO->ESTOQUE,;
+                     QRYPRO->PROVISORIO,;
+                     QRYPRO->OBSERVACAO,Emissao,Hifem,Horas;
+				     } )
 
-            //Pulando Registro
+          //Pulando Registro
 
-            QRYPRO->(DbSkip())
-        EndDo
+          QRYPRO->(DbSkip())
+    EndDo
 
     //Ativando o arquivo e gerando o xml
     oFWMsExcel:Activate()

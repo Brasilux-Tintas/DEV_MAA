@@ -367,7 +367,7 @@ Return(nRet)
 /*** Autor: Luis Gustavo de Souza                                              ***/
 /*** Data : 14/09/05                                                           ***/
 /*********************************************************************************/
-User Function fHisPed(nOpc)
+User Function fHisPed( nOpc, _cPedido )
      Local oDlgHis, oGrp1, oLBXHis
      Local cLBXHis := ""
      Local cQry1   := ""
@@ -387,8 +387,10 @@ User Function fHisPed(nOpc)
      cQry1 += "  AND ZZB.D_E_L_E_T_ = '' "
      If nOpc == 1
         cQry1 += "  AND ZZB.ZZB_PEDIDO = '"+M->C5_NUM+"' "
-     Else
+     ElseIf nOpc == 2
         cQry1 += "  AND ZZB.ZZB_PEDIDO = '"+LPD->PEDIDO+"' "
+     ElseIf nOpc == 3
+            cQry1 += "  AND ZZB.ZZB_PEDIDO = '"+_cPedido+"' "
      Endif
      cQry1 += "  AND ZZB.ZZB_IDLOG NOT IN('001', '002', '003', '004', '005', '006', '007', '008', '009', '010') "
      cQry1 += "ORDER BY R_E_C_N_O_ DESC "
@@ -441,8 +443,8 @@ User Function fHisPed(nOpc)
      Endif
      DEFINE MSDIALOG oDlgHis TITLE OemToAnsi( "Histórico do Pedido" ) FROM 000,000 TO 020, 080 OF oMainWnd
             DEFINE FONT oFont1 NAME 'COURIER NEW' SIZE 6,0
-            @ 005,005 GROUP oGrp1 TO 146,312 LABEL OemToAnsi("Movimentos") COLOR CLR_HRED PIXEL OF oDlgHis
-            @ 010,007 LISTBOX oLBXHis VAR cLBXHis FIELDS HEADER OemToAnsi('Log'), OemToAnsi('Usuário'), OemToAnsi('Data'), OemToAnsi('Hora') SIZE 302,131 PIXEL OF oDlgHis
+            @ 001,005 GROUP oGrp1 TO 146,312 LABEL OemToAnsi("Movimentos") COLOR CLR_HRED PIXEL OF oDlgHis
+            @ 011,007 LISTBOX oLBXHis VAR cLBXHis FIELDS HEADER OemToAnsi('Log'), OemToAnsi('Usuário'), OemToAnsi('Data'), OemToAnsi('Hora') SIZE 302,131 PIXEL OF oDlgHis
              bHisLin := { || { aLog[oLBXHis:nAt][1], aLog[oLBXHis:nAt][2], aLog[oLBXHis:nAt][3], aLog[oLBXHis:nAt][4] } }
             oLBXHis:SetArray( aLog )
             oLBXHis:bLine  := bHisLin
@@ -4780,8 +4782,6 @@ return(lRet)
 @author Luis Gustavo
 @since 21/11/2019
 @version 1.0
-@return ${return}, ${return_description}
-
 @type function
 /*/
 User Function ZGATF01()

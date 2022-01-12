@@ -273,8 +273,10 @@ case _cGrpEmp == '01'
                          SB1->B1_CEST := "2400300"
                     CASE SB1->B1_POSIPI = "32050000"
                          SB1->B1_CEST := "2400300"
+                         /* Solicitação Priscila em 05/01/2021, excluir o CEST 2400200 para o NCM 32041700
                     CASE SB1->B1_POSIPI = "32041700"
                          SB1->B1_CEST := "2400200"
+                        */
                     CASE SB1->B1_POSIPI = "321000"
                          SB1->B1_CEST := "2400100"
                     CASE SB1->B1_POSIPI = "3212"

@@ -285,7 +285,7 @@ dbseek(xFilial("SC6"))
 			MsSeek(xFilial("DA1")+DA0->DA0_CODTAB+cProd) //+DA1_INDLOT+DA1_ITEM
 			if !found()
 				lSucesso = .f.
-				cAux := "Não encontrado o produto "+cProd+" na tabela de preços "+cDA0->DA0_CODTAB+", pedido "+aPlan[ni,1]
+				cAux := "Não encontrado o produto "+cProd+" na tabela de preços "+DA0->DA0_CODTAB+", pedido "+aPlan[ni,1]
 				if _nOpc == 1
 					MsgAlert(cAux)
 				else
