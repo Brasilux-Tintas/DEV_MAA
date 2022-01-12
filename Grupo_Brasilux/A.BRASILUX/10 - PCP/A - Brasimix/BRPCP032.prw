@@ -15,13 +15,13 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 
-User Function BRPCP032(cPedido,cProduto)
+User Function BRPCP032 (cPedido,cProduto)
 //User Function BRPCP032()
 
 //Local cPedido	:= '541683'
 //Local cProduto	:= 'BT 260901514'
 
-	u_zcfga01("BRPCP032")
+	//u_zcfga01("BRPCP032")
 	MsAguarde({|| Imprimir(cPedido,cProduto) },"Impressão de etiqueta","Aguarde...")
 
 Return
@@ -95,9 +95,6 @@ Local qtdevol	:= ''
 		MSCBCHKSTATUS(.F.)
 		MSCBBEGIN(1,6)
 
-		/* regras produto */
-		//iif(empty(b2_localiz),"*"," ")+allt(c9_produto)+"("+allt(str(c9_qtdlib))+"/"+allt(str(qtdevol))+")"
-		
 		if Empty(TMP->B2_LOCALIZ)
 			cEspe = '*'
 		else

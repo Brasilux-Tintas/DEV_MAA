@@ -21,7 +21,6 @@ User Function BRPCP030()
    Local cPerg   := Padr("BRPCP030",10)
    Local xNome   := "Programação da Produção"
    Local Xdescri := "Programação da Produção baseada no bordero de pedidos"
-        u_zcfga01( 'BRPCP030' ) //LGS#2021214 - Gravação de log de utilização da rotina
    Pergunte(cPerg,.F.)              
    oReport := RptDef(cPerg,xNome,Xdescri)
    oReport:PrintDialog()
@@ -127,7 +126,7 @@ Static Function ReportPrint(oReport)
 
     /* 021063 bordero teste de pedido */
     
-    u_zcfga01("BRPCP030")
+    //u_zcfga01("BRPCP030")
 
     cQuery1 := ""
     cQuery1 += " WITH SB2 AS (SELECT B2_COD,SUM(B2_QATU) AS SALDO "
@@ -247,7 +246,7 @@ Static Function ReportPrint(oReport)
      cQuery1 += " LEFT OUTER JOIN "+RETSQLNAME("SC5")+" C5 WITH (NOLOCK) ON (C5.D_E_L_E_T_ = '') AND (C6_FILIAL = C5.C5_FILIAL) AND (C6.C6_NUM = C5.C5_NUM)  "
      cQuery1 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" B1 WITH (NOLOCK) ON (B1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1.B1_FILIAL) AND (C6.C6_PRODUTO = B1.B1_COD)  "
 
-        IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+        IF (mv_par13 == 1) //.OR. (mv_par16 <> 1) 
             cQuery1 += " LEFT OUTER JOIN "+RETSQLNAME("SB2")+" B2 WITH (NOLOCK) ON (B2.D_E_L_E_T_ <> '*') AND (B1.B1_FILIAL = B2.B2_FILIAL) AND (B1.B1_COD = B2.B2_COD) "
             cQuery1 += " AND (B1.B1_LOCPAD = B2.B2_LOCAL)  "
         endif
@@ -266,10 +265,10 @@ Static Function ReportPrint(oReport)
         cQuery1 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
-    IF  (mv_par16 <> 1)
+    /*IF  (mv_par16 <> 1) */
         /* zerados */
         //cQuery3 += "AND (SB2.B2_QATU <> 0.0) "
-    ENDIF
+    /* ENDIF */
 
    	///IF thisform.lEstoque.Value
     IF (mv_par13 == 1)   
@@ -287,10 +286,10 @@ Static Function ReportPrint(oReport)
         cQuery1 += " AND (B2_LOCALIZ = '')     "
     Endif 
 
-    If (mv_par16 == 1)
+    /* If (mv_par16 == 1) */
         /* lista itens zerados */
-        cQuery1 += "    AND (SB2.B2_QATU <> 0.0) "
-    Endif
+        /* cQuery1 += "    AND (SB2.B2_QATU <> 0.0) " */
+    /* Endif */
 
     If (mv_par17 == 1)
         /* filtra fabrica 1*/
@@ -452,7 +451,7 @@ Static Function F_VR_LBC(cProduto)
 	cQuery3 += "LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) "
 
     //IF thisform.lEstoque.Value OR !thisform.lZerados.Value 
-	IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+	IF (mv_par13 == 1) /* .OR. (mv_par16 <> 1)  */
     cQuery3 += "LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) "
 	endif
 
@@ -470,10 +469,10 @@ Static Function F_VR_LBC(cProduto)
         cQuery3 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
-    IF  (mv_par16 <> 1)
+    /* IF  (mv_par16 <> 1)*/
         /* zerados */
         //cQuery3 += "AND (SB2.B2_QATU <> 0.0) "
-    ENDIF
+    /* ENDIF */
 
    	///IF thisform.lEstoque.Value
     IF (mv_par13 == 1)   
@@ -509,7 +508,7 @@ Static Function F_VR_OPC(cProduto)
   Local return_var
   Local cQuery2    := ""        
   
-	cQuery2 := " SELECT SUM(SC2.C2_QUANT) AS QTDPRD "
+	cQuery2 := " SELECT SUM(ROUND((SC2.C2_QUANT-SC2.C2_QUJE),2)) AS QTDPRD "
     cQuery2 += " FROM "+RETSQLNAME("SC2")+" SC2 WITH (NOLOCK) "
     cQuery2 += " WHERE (SC2.D_E_L_E_T_ <> '*') AND (SC2.C2_FILIAL  = '"+xFilial("SC2")+"') AND "
     cQuery2 += " (SC2.C2_PRODUTO = '"+cProduto+"') AND (SC2.C2_DATRF = '') "
@@ -550,7 +549,7 @@ Static Function F_VR_PNL(cProduto)
     cQuery4 += " LEFT OUTER JOIN SC5010 SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) " 
     cQuery4 += " LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) " 
     
-    IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+    IF (mv_par13 == 1) /*.OR. (mv_par16 <> 1) */
         cQuery4 += " LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
     Endif
     
@@ -567,10 +566,10 @@ Static Function F_VR_PNL(cProduto)
         cQuery4 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
-    IF  (mv_par16 <> 1)
+    /*IF  (mv_par16 <> 1)*/
         /* zerados */
         //cQuery4 += "AND (SB2.B2_QATU <> 0.0) "
-    ENDIF
+   /* ENDIF */
 
    	///IF thisform.lEstoque.Value
     IF (mv_par13 == 1)   
@@ -683,7 +682,7 @@ Static Function F_VR_OP3(cProduto)
     cQuery2 += " FROM "+RETSQLNAME("SC2")+" SC2 WITH (NOLOCK) "
     cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C2_FILIAL = B1_FILIAL) AND (C2_PRODUTO = B1_COD)  "
 
-    IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+    IF (mv_par13 == 1) /*.OR. (mv_par16 <> 1) */
         cQuery2 += " LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
     Endif
 
@@ -697,10 +696,10 @@ Static Function F_VR_OP3(cProduto)
         cQuery2 += "AND (SUBSTRING(C2_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
-    IF  (mv_par16 <> 1)
+    /* IF  (mv_par16 <> 1)*/
         /* zerados */
         //cQuery2 += "AND (SB2.B2_QATU <> 0.0) "
-    ENDIF
+    /* ENDIF */
     
    	///IF thisform.lEstoque.Value
     IF (mv_par13 == 1)   
@@ -810,7 +809,7 @@ Local nMedPed    := 0
     cQuery += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C9_FILIAL = B1_FILIAL) AND (C9_PRODUTO = B1_COD) "
     /* AQUI TEM UM IF */
 
-    IF (mv_par13 == 1) .OR. (mv_par16 <> 1) 
+    IF (mv_par13 == 1) /* .OR. (mv_par16 <> 1)  */
         cQuery += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) "
     ENDIF
 
@@ -834,10 +833,10 @@ Local nMedPed    := 0
         cQuery += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
-    IF  (mv_par16 <> 1)
+    /* IF  (mv_par16 <> 1)*/
         /* zerados */
         //cQuery += "AND (SB2.B2_QATU <> 0.0) "
-    ENDIF
+    /* ENDIF */
 
    	///IF thisform.lEstoque.Value
     IF (mv_par13 == 1)   

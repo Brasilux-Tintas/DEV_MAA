@@ -1,0 +1,1569 @@
+#Include "Protheus.ch"
+#Include "TopConn.ch"
+
+/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±…ÕÕÕÕÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÀÕÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÀÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÕÕÕª±±
+±±∫Programa  ≥ BRPCP037  ∫Autor  ≥ Nelieder Corneta  ∫ Data ≥  17/12/2021 ∫±±
+±±ÃÕÕÕÕÕÕÕÕÕÕÿÕÕÕÕÕÕÕÕÕÕ ÕÕÕÕÕÕÕœÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕ ÕÕÕÕÕÕœÕÕÕÕÕÕÕÕÕÕÕÕÕπ±±
+±±∫DescriÁ„o ≥ Estiquetas de volume Diferenciadas (Etiqueta de Produtos)   ±±
+±±∫          ≥                                                            ∫±±
+±±ÃÕÕÕÕÕÕÕÕÕÕÿÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕπ±±
+±±∫Uso       ≥ BRASILUX TINTAS T…CNICAS LTDA.                             ∫±±
+±±»ÕÕÕÕÕÕÕÕÕÕœÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕº±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+ 
+
+ 
+User Function  BRPCP038()
+
+Local nTipo       := 1
+
+//Fontes
+Private cFontUti  := "Tahoma"
+Private oFontAno  := TFont():New(cFontUti, , -38)
+Private oFontBtn  := TFont():New(cFontUti, , -14)
+Private oFontSub  := TFont():New(cFontUti, , -16)
+Private oFontSubN := TFont():New(cFontUti, , -20, , .T.)
+
+//Tamanho da Janela
+Private nJanLarg  := 730
+Private nJanAltu  := 335
+
+Private oOP
+Private cOP       := space(11)
+
+Private oLote
+Private cLote     := space(6)
+
+Private oQtde1
+Private cQtde1    := space(6)
+
+Private oQtde2
+Private cQtde2    := space(6)
+
+Private oObs
+Private cObs      := space(6)
+
+Private aBrowse   := {}
+Private lEditar   := .T.
+Private oBtnFech
+
+Private cFlag     := .F.
+
+Private oLPT,cLPT
+
+Private oEan
+Private cEan := space(12)
+
+Private oProduto,cProduto
+Private aProduto :={}
+
+Private oCodPro,cCodPro
+
+Private cDescPro,oDescPro
+
+Private oQtVol,cQtVol
+Private aQtVol :={}
+
+Private aLPT      :={}
+
+/* define padr„o de data */
+Set(_SET_DATEFORMAT, 'dd/mm/yy' )
+
+    
+DEFINE MSDIALOG oDlg TITLE "Estiquetas Identif. Volumes Diferenciados" FROM 000, 000 TO nJanAltu, nJanLarg COLORS 0, 16777215 PIXEL
+
+@ 004, 003 MSPANEL oPanel SIZE 260, 130 OF oDlg COLORS 0, 14215660 CENTERED RAISED
+
+//cLote          := '792129'
+@ 010, 010 SAY OemToAnsi("N∫ da OP.: ") SIZE 060,009 PIXEL OF oDlg FONT oFontBtn
+@ 008, 070 MSGET oOP VAR cOP PICTURE "@!" SIZE 070,010 COLOR CLR_BLUE F3 "SC2" PIXEL ON CHANGE PCP038_03() OF  oDlg FONT oFontBtn
+@ 010, 155 SAY OemToAnsi("N∫ do Lote.: ") SIZE 060,009 PIXEL OF oDlg FONT oFontBtn
+@ 008, 200 MSGET oLote VAR cLote PICTURE "@!" SIZE 040,010 COLOR  CLR_BLUE F3 "ZC2" ON CHANGE PCP038_01() PIXEL OF  oDlg FONT oFontBtn
+
+@ 030, 010 SAY OemToAnsi("Codigo EAN ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
+@ 028, 070 MSGET oEan VAR cEan PICTURE "9999999999999" SIZE 060,010 COLOR CLR_BLUE  ON CHANGE PCP038_04() PIXEL OF oDlg FONT oFontBtn
+
+@ 050, 010 SAY OemToAnsi("Codigo Prod..: ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
+@ 048, 070 MSGET oCodPro VAR cCodPro  SIZE 060,010 COLOR CLR_BLUE PIXEL OF oDlg FONT oFontBtn When .F.
+@ 048, 130 MSGET oDescPro VAR cDescPro  SIZE 100,010 COLOR CLR_BLUE PIXEL OF oDlg FONT oFontBtn
+
+@ 070, 010 SAY OemToAnsi("Produto ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
+@ 068, 068 MSCOMBOBOX oProduto VAR cProduto ITEMS aProduto SIZE 180, 007 OF oPanel COLORS 0, 16777215 PIXEL ON CHANGE PCP038_02(cProduto) FONT oFontBtn
+//@ 068, 068 MSCOMBOBOX oProduto VAR cProduto ITEMS aProduto SIZE 180, 007 OF oPanel COLORS 0, 16777215 PIXEL  FONT oFontBtn
+
+@ 090, 010 SAY OemToAnsi("Qtde Itens no Vol") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
+@ 088, 068 MSCOMBOBOX oQtVol VAR cQtVol ITEMS aQtVol SIZE 070, 007 OF oPanel COLORS 0, 16777215 PIXEL FONT oFontBtn
+
+@ 110, 010 SAY OemToAnsi("Qtde Etiq ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
+@ 108, 070 MSGET oQtde1 VAR cQtde1 PICTURE "999" SIZE 060,010 COLOR CLR_BLUE PIXEL OF oDlg FONT oFontBtn
+
+@ 004, 265 MSPANEL oPanel SIZE 100, 130 OF oDlg COLORS 0, 14215660 FONT oFontBtn CENTERED RAISED
+
+@ 004,004 RADIO oTipo VAR nTipo PROMPT "Zebra","26x15mm(Xarope)","44x15mm","75x35mm","100x69mm" OF oPanel PIXEL SIZE 75,20
+
+@ 060, 004 MSCOMBOBOX oLPT VAR cLPT ITEMS aLPT SIZE 050, 007 OF oPanel COLORS 0, 16777215 PIXEL FONT oFontBtn
+ListPort()
+
+@ 140,004 BUTTON oBtnFech PROMPT "Imprimir" SIZE 060, 018 OF oDlg ACTION PCP038_05(nTipo,cQtde1) FONT oFontBtn PIXEL
+@ 140,070 BUTTON oBtnFech PROMPT "Visualizar" SIZE 060, 018 OF oDlg ACTION ReportPrint(nTipo) FONT oFontBtn PIXEL
+@ 140,135 BUTTON oBtnFech PROMPT "Fechar" SIZE 060, 018 OF oDlg ACTION (oDlg:End()) FONT oFontBtn PIXEL
+
+
+oDlg:lEscClose := .T.
+
+ACTIVATE MSDIALOG oDlg CENTERED
+
+Return
+
+/* Busca Lote */
+Static Function PCP038_01()
+Local Index 
+
+    cQuery := " "
+    cQuery += " SELECT B1_DESC AS NOMEPROD,Z1_DESCR AS TEXTO,B1_DESCLIN AS TEXTO2,B1_PRVALID, "
+    cQuery += " Z1_VALIDAD,C2_PRODUTO AS CODIGO,C2_QUANT AS QTDE, "
+    cQuery += " C2_LOTE AS LOTE,C2_DATPRF AS PREVF,B1_CODBAR AS CODBARRA, "
+    cQuery += " B1_CATALIS,B1_RELCAT1,B1_XCODANT,dbo.DetVol(C2_FILIAL,C2_PRODUTO) AS RELVOL, "
+    cQuery += " ISNULL(Z5_VOLUME,0) AS VOLUME,ISNULL(Z5_UMEMB,'') AS UMEMB, "
+    cQuery += " C2_XIDVOL,SC2.R_E_C_N_O_ AS REG " 
+    cQuery += " FROM SC2010 SC2 WITH (NOLOCK) "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (C2_FILIAL = SB1.B1_FILIAL) AND (C2_PRODUTO = SB1.B1_COD) AND (SB1.D_E_L_E_T_ <> '*')  "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SZ1")+" SZ1 WITH (NOLOCK) ON (LEN(C2_PRODUTO) = 12) AND (SUBSTRING(C2_PRODUTO,4,2) = SZ1.Z1_LINHA) AND (SZ1.D_E_L_E_T_ <> '*') AND (Z1_FILIAL = '"+xFilial("SZ1")+"')  "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SZ5")+" SZ5 WITH (NOLOCK) ON (LEN(C2_PRODUTO) = 12) AND (SUBSTRING(C2_PRODUTO,11,2) = SZ5.Z5_EMB) AND (SZ5.D_E_L_E_T_ <> '*') AND (Z5_FILIAL = '"+xFilial("SZ5")+"')  "
+    cQuery += " WHERE (C2_FILIAL = '"+xFilial("SC2")+"') AND  "
+    cQuery += " (C2_LOTE = '"+cLote+"') AND (SB1.B1_TIPO IN ('PA','PI')) AND (SC2.D_E_L_E_T_ <> '*') "
+    cQuery += " ORDER BY LOTE,CODIGO "
+
+    IF Select("TMP") <> 0
+        DbSelectArea("TMP")
+        DbCloseArea()
+    ENDIF
+
+    TCQuery cQuery New Alias "TMP"
+
+	Count To nTotal 
+
+	If nTotal == 0
+		MsgStop('Nenhum Registro Localizado', 'Consulta')
+		return()
+	Endif
+
+	TMP->(dbGoTop())
+    aProduto := {}
+    aQtVol := {}
+
+    Index := 1
+    cCod := Alltrim(TMP->CODIGO)+'-'+Alltrim(TMP->NOMEPROD)+'-'+CValToChar(Index)
+    
+    While !TMP->(EoF())
+        cValor := Alltrim(TMP->CODIGO)+'-'+Alltrim(TMP->NOMEPROD)+'-'+CValToChar(Index)
+        aAdd(aProduto,cValor)
+        
+      aAdd(aBrowse, { ;
+		TMP->TEXTO,;
+		TMP->CODIGO,;
+		Padr(TMP->QTDE,3),;
+		TMP->TEXTO,;
+		RELVOL,;
+		Z1_VALIDAD,;
+		PREVF,;
+		Lote,;
+		CODBARRA,;
+		B1_PRVALID,;
+		TMP->NOMEPROD,;
+		TMP->c2_xidvol,;
+		TMP->VOLUME,;
+		TMP->UMEMB,;
+		TMP->B1_CATALIS,;
+		TMP->B1_RELCAT1;
+		})
+        
+        Index += 1
+	    TMP->(DbSkip())
+    EndDo
+
+    PCP038_02(cCod)
+    oProduto:SetItems(aProduto)
+    
+    
+    
+
+return
+
+/* Busca Itens Volume */
+Static Function PCP038_02(cProd)
+
+    aString := strtokarr (cProd, "-")
+    cProd := aString[1]
+    
+    cQuery := "SELECT dbo.DetVol('"+xFilial("SC2")+"','"+cProd+"') RELVOL "
+
+    IF Select("TEMP") <> 0
+        DbSelectArea("TEMP")
+        DbCloseArea()
+    ENDIF
+
+    TCQuery cQuery New Alias "TEMP"
+    aQtVol := {}
+    aAdd(aQtVol,Alltrim(TEMP->RELVOL))
+    oQtVol:SetItems(aQtVol)
+
+return
+
+/* busca OP */
+Static Function PCP038_03()
+
+
+cQuery := " SELECT C2_LOTE,C2_ITEM,C2_SEQUEN,C2_PRODUTO,C2_NUM+C2_ITEM+C2_SEQUEN "
+cQuery += " FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK)  "
+cQuery += " WHERE (C2_FILIAL = '"+xFilial("SC2")+"') AND " 
+cQuery += " (D_E_L_E_T_ <> '*') AND C2_NUM+C2_ITEM+C2_SEQUEN = '"+cOP+"' "
+cQuery += " ORDER BY C2_ITEM,C2_SEQUEN "
+
+    IF Select("TEMP") <> 0
+        DbSelectArea("TEMP")
+        DbCloseArea()
+    ENDIF
+
+    TCQuery cQuery New Alias "TEMP"
+
+    cLote := TEMP->C2_LOTE
+    oLote:Refresh()
+
+    PCP038_01()
+
+return
+
+/* busca EAN */
+Static Function PCP038_04()
+
+cQuery := " SELECT B1_CODBAR,B1_COD,B1_RESUMO,dbo.DetVol(B1_FILIAL,B1_COD) RELVOL "
+cQuery += " FROM "+RetSqlName("SB1")+" WHERE D_E_L_E_T_ = ''  "
+cQuery += " AND B1_FILIAL = '"+xFilial("SB1")+"' AND B1_CODBAR = '"+cEan+"'  "
+
+IF Select("TEMP") <> 0
+        DbSelectArea("TEMP")
+        DbCloseArea()
+ENDIF
+
+TCQuery cQuery New Alias "TEMP"
+
+aProduto := {}
+aQtVol := {}
+While !TEMP->(EoF())
+    cCodPro := TEMP->B1_COD
+    cDescPro := TEMP->B1_RESUMO
+
+    aAdd(aProduto,TEMP->B1_COD)
+    oProduto:SetItems(aProduto)
+
+    aAdd(aQtVol,Alltrim(TEMP->RELVOL))
+    oQtVol:SetItems(aQtVol)
+    
+    TEMP->(DbSkip())
+EndDo
+
+
+
+return
+
+
+Static Function PCP038_05(nTipo,qtd)
+Local i 
+Local aString
+Local linha
+
+aString := strtokarr (cProduto, "-")
+linha := val(aString[3])
+    
+	/* loop na qtd de etiquetas a ser impressa */
+		For i := 1 to val(qtd)
+
+			Do Case
+			Case nTipo == 1
+
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas Zembras #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+     			PCP037_05(linha,i)
+
+			Case nTipo == 2
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 26x15mm(xarope) #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+				if AllTrim(aBrowse[linha][1]) <> "**IDENTIF DE VOLUME**"
+					PCP037_11(linha,i)
+				Endif
+
+			Case nTipo == 3
+
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 44x15mm #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+				PCP037_06(linha,i)
+
+			Case nTipo == 4
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 75x35mm #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+				PCP037_07(linha,i)
+
+			Case nTipo == 5
+
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 100x69mm #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+				PCP037_09(linha,i)
+
+			EndCase
+		NEXT
+
+return
+
+
+/*/{Protheus.doc} PCP037_04
+Etiqueta Zebra de Produto
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd de produtos
+/*/
+Static Function PCP037_04(linha,qtd)
+	Local cModelo 	:= "ZEBRA"
+
+	Local Prod,ProdTxt,Cod,Unid,CodBar
+	Local Validade,Prevf,PrazoVali,Dias,cLote
+	Local DtVenc,cEmb
+	Local Volume,UMEMB
+
+	Local Catalis,RelCat1
+
+	
+	/*
+	aBrowse
+	1 -  Nome Produto
+	2 -  Codigo Produto
+	3 -  Qtd
+	4 -  ProdTexto
+	5 -  Unidade(RELVOL)
+	6 -  Validade(Z1_VALIDAD)
+	7 -  Prevf (Previs„o de FabricaÁ„o)
+	8 -  Lote
+	9 -  CodBar
+	10 - PrazoVali (Prazo de Validade) 
+	11 - Nome Produto Principal
+	12 - ProxNVol (Prox Nro VOL)
+	13 - VOLUME 
+	14 - UMEMB (Unidade de Medida do Produto)
+	15 - Catalis
+	16 - RelCat1
+	*/
+
+
+	Cod        := AllTrim(aBrowse[linha][2])
+	ProdTxt    := AllTrim(aBrowse[linha][4])
+	Unid       := SUBSTR(aBrowse[linha][5],1,2)
+	Unid       := AllTrim(Unid)
+	Unid       := StrZero(val(Unid),2)
+	Validade   := aBrowse[linha][6]
+	Prevf      := AllTrim(aBrowse[linha][7])
+	cLote      := AllTrim(aBrowse[linha][8])
+	CodBar     := AllTrim(aBrowse[linha][9])
+	PrazoVali  := AllTrim(aBrowse[linha][10])
+	Prod       := AllTrim(aBrowse[linha][11])
+
+	cXidvol    := AllTrim(aBrowse[linha][12])
+	cXidvol    := StrZero(val(cXidvol),4)
+	Volume     := CValToChar(aBrowse[linha][13])
+
+	if val(Volume) < 1
+		Volume := CValToChar (val(Volume) * 1000)
+		UMEMB 	   := "ml"
+	else
+		UMEMB 	   := CValToChar(aBrowse[linha][14])
+	endif
+	
+	
+	
+	Catalis	   := AllTrim(aBrowse[linha][15])	
+	RelCat1    := AllTrim(aBrowse[linha][16])
+
+	IF Empty(PrazoVali)
+		PrazoVali := 0
+		Dias := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade := 0
+	Endif
+
+	IF(PrazoVali > 0)
+		Dias := (PrazoVali * 30)
+		DtVenc := DaySum(STOD(Prevf), Dias  )
+	else
+		Dias := (Validade * 30)
+		DtVenc := DaySum(STOD(Prevf), Dias  )
+	Endif
+
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb := substr(Cod,11,2)
+	Endif
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(03,02   ,SUBSTR(Prod,1,27), "N", "0", "025,035") // negrito
+	MSCBSAY(70,02   ,cEmb, "N", "0", "025,035") // negrito
+	MSCBSAY(03,06   ,ProdTxt, "N", "0", "025,035") // negrito
+	
+	MSCBLineH(00,10,190,3,'B')
+	
+	MSCBSAY(03,11,"COD:", "N", "0", "025,022") // negrito
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(09,11,Cod, "N", "0", "025,022") 
+	
+	MSCBSAY(03,15,"LOT:", "N", "0", "020,022") // negrito
+	MSCBSAY(09,15,cLote, "N", "0", "020,022") 
+		
+	MSCBSAY(19,15,"Val.: "+CValToChar(DtVenc), "N", "0", "020,022") // negrito
+	
+	
+	if Empty(Catalis)
+		MSCBSAY(03,18,"CONTEUDO "+Volume+" "+UMEMB, "N", "0","068,068") // negrito
+		MSCBSAYBAR(50,11,CodBar,"N","MB04",5, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
+	else
+		MSCBSAY(03,21,"CONTEUDO "+Volume+" "+UMEMB, "N", "0","030,030") // negrito
+		Catalis = TRANSFORM(Catalis, "@R XX 99.99.999-99")
+		MSCBSAY(35,22,"CAT: "+Catalis+" ("+RelCat1+")", "N", "0","025,025") // negrito
+		MSCBSAYBAR(50,11,CodBar,"N","MB04",7, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
+	Endif	
+
+	
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+/*/{Protheus.doc} PCP037_05
+Etiqueta Zebra de Volume
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd produtos
+/*/
+Static Function PCP037_05(linha,qtd)
+
+Local cModelo := "ZEBRA"
+Local Prod,ProdTxt,Cod,Unid,CodBar
+Local Validade,Prevf,PrazoVali,Dias,cLote
+Local DtVenc,cEmb,UMEMB
+
+
+
+/*
+aBrowse
+1 - Nome Produto
+2 - Codigo Produto
+3 - Qtd
+4 - ProdTexto
+5 - Unidade(RELVOL)
+6 - Validade(Z1_VALIDAD)
+7 - Prevf (Previs„o de FabricaÁ„o)
+8 - Lote
+9 - CodBar
+10 - PrazoVali (Prazo de Validade)
+11 - Nome Produto Principal
+12 - ProxNVol (Prox Nro VOL)
+13 - VOLUME
+14 - UMEMB (Unidade de Medida do Produto)
+*/
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+
+	CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+	UMEMB         := UniMed(CodBar,Cod)
+
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(03,02 ,SUBSTR(Prod,1,27), "N", "0", "025,035") // negrito
+	MSCBSAY(70,02 ,cEmb, "N", "0", "025,035") // negrito
+	MSCBSAY(03,05 ,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *", "N", "0", "025,030") // negrito
+	
+	MSCBLineH(00,10,190,3, 'B' )
+	
+	MSCBSAY(03,11,"COD:", "N", "0", "025,022") // negrito
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(09,11,Cod, "N", "0", "025,022") // negrito
+	MSCBSAY(57,11, AllTrim(UMEMB), "N", "0", "026,026") // negrito
+	
+	MSCBSAYBAR(18, 15,CodBar,"N","MB01",6, .F., .T., .F., ,3,02, .F., .F., "1", .T.)
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+/*/{Protheus.doc} PCP037_06
+Etiqueta 44x15 mm
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd de produtos
+/*/
+Static Function PCP037_06(linha,qtd)
+	Local cModelo := "ZEBRA"
+
+	Local Prod,ProdTxt,Cod,Unid,CodBar
+	Local Validade,Prevf,PrazoVali,Dias,cLote
+	Local DtVenc,cEmb
+	Local Volume,UMEMB
+	Local cColuna := 0
+
+	
+	/*
+	aBrowse
+	1 - Nome Produto
+	2 - Codigo Produto
+	3 - Qtd
+	4 - ProdTexto
+	5 - Unidade(RELVOL)
+	6 - Validade(Z1_VALIDAD)
+	7 - Prevf (Previs„o de FabricaÁ„o)
+	8 - Lote
+	9 - CodBar
+	10 - PrazoVali (Prazo de Validade)
+	11 - Nome Produto Principal
+	12 - ProxNVol (Prox Nro VOL)
+	13 - VOLUME
+	14 - UMEMB (Unidade de Medida do Produto)
+	*/
+
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	CodBar        := AllTrim(aBrowse[linha][9])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+	Volume        := CValToChar(aBrowse[linha][13])
+	UMEMB         := CValToChar(aBrowse[linha][14])
+			  
+
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+	/* identifica etiqueta par */
+	if mod(qtd,2)==0
+		cColuna := 10
+	else
+		cColuna := 0
+	endif
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(02+cColuna,02,Prod,"N","0","020,020")
+	
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(02+cColuna,06,Cod, "N", "0", "018,018")
+	
+	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lot: "+cLote, "N", "0","018,018") // negrito
+	
+	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "018,018") // negrito
+	
+	if AllTrim(aBrowse[linha][1]) <> "**IDENTIF DE VOLUME**"
+		MSCBSAYBAR(23+cColuna,5,CodBar,"N","MB04",7, .F., .T., .F., ,1,1, .F., .F., "1", .T.)
+	Endif
+
+
+	/* impress„o da segunda coluna */
+
+	cColuna := 49
+
+	MSCBSAY(02+cColuna,02,Prod,"N","0","020,020")
+	
+	MSCBSAY(02+cColuna,06,Cod, "N", "0", "018,018")
+	
+	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lot: "+cLote, "N", "0","018,018") // negrito
+	
+	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "018,018") // negrito
+	
+	//if AllTrim(aBrowse[linha][1]) <> "**IDENTIF DE VOLUME**"
+		MSCBSAYBAR(23+cColuna,5,CodBar,"N","MB04",7, .F., .T., .F., ,1,1, .F., .F., "1", .T.)
+	//Endif
+
+
+	
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+
+/*/{Protheus.doc} PCP037_05
+Etiqueta Zebra de Volume
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd produtos
+/*/
+Static Function PCP037_07(linha,qtd)
+
+Local cModelo := "ZEBRA"
+Local Prod,ProdTxt,Cod,Unid,CodBar
+Local Validade,Prevf,PrazoVali,Dias,cLote
+Local DtVenc,cEmb,UMEMB
+
+
+
+/*
+aBrowse
+1 - Nome Produto
+2 - Codigo Produto
+3 - Qtd
+4 - ProdTexto
+5 - Unidade(RELVOL)
+6 - Validade(Z1_VALIDAD)
+7 - Prevf (Previs„o de FabricaÁ„o)
+8 - Lote
+9 - CodBar
+10 - PrazoVali (Prazo de Validade)
+11 - Nome Produto Principal
+12 - ProxNVol (Prox Nro VOL)
+13 - VOLUME
+14 - UMEMB (Unidade de Medida do Produto)
+*/
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+	CodBar  := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+	UMEMB   := UniMed(CodBar,Cod)
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(03,02 ,Prod, "N", "0", "025,035") // negrito
+	MSCBSAY(65,02 ,cEmb, "N", "0", "025,035") // negrito
+	MSCBSAY(03,05 ,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *", "N", "0", "025,030") // negrito
+	
+	MSCBLineH(00,10,190,3, 'B' )
+	
+	MSCBSAY(03,11,"COD:", "N", "0", "025,022") // negrito
+
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+
+	MSCBSAY(09,11,Cod, "N", "0", "025,025") // negrito
+	MSCBSAY(57,11, AllTrim(UMEMB), "N", "0", "026,026") // negrito
+	
+	MSCBSAYBAR(03,16,CodBar,"N","MB01",7, .F., .T., .F., ,3,3, .F., .F., "1", .T.)
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+
+/*/{Protheus.doc} PCP037_08
+Etiqueta Zebra de Produto
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd de produtos
+/*/
+Static Function PCP037_08(linha,qtd)
+	
+	Local cModelo 	:= "ZEBRA"
+
+	Local Prod,ProdTxt,Cod,Unid,CodBar
+	Local Validade,Prevf,PrazoVali,Dias,cLote
+	Local DtVenc,cEmb
+	Local Volume,UMEMB
+
+	Local Catalis,RelCat1
+
+	
+
+	/*
+	aBrowse
+	1 -  Nome Produto
+	2 -  Codigo Produto
+	3 -  Qtd
+	4 -  ProdTexto
+	5 -  Unidade(RELVOL)
+	6 -  Validade(Z1_VALIDAD)
+	7 -  Prevf (Previs„o de FabricaÁ„o)
+	8 -  Lote
+	9 -  CodBar
+	10 - PrazoVali (Prazo de Validade) 
+	11 - Nome Produto Principal
+	12 - ProxNVol (Prox Nro VOL)
+	13 - VOLUME 
+	14 - UMEMB (Unidade de Medida do Produto)
+	15 - Catalis
+	16 - RelCat1
+	*/
+
+
+	Cod        := AllTrim(aBrowse[linha][2])
+	ProdTxt    := AllTrim(aBrowse[linha][4])
+	Unid       := SUBSTR(aBrowse[linha][5],1,2)
+	Unid       := AllTrim(Unid)
+	Unid       := StrZero(val(Unid),2)
+	Validade   := aBrowse[linha][6]
+	Prevf      := AllTrim(aBrowse[linha][7])
+	cLote      := AllTrim(aBrowse[linha][8])
+	CodBar     := AllTrim(aBrowse[linha][9])
+	PrazoVali := AllTrim(aBrowse[linha][10])
+	Prod       := AllTrim(aBrowse[linha][11])
+
+	cXidvol    := AllTrim(aBrowse[linha][12])
+	cXidvol    := StrZero(val(cXidvol),4)
+	Volume     := CValToChar(aBrowse[linha][13])
+	UMEMB 	   := CValToChar(aBrowse[linha][14])
+
+	Catalis	   := AllTrim(aBrowse[linha][15])	
+	RelCat1    := AllTrim(aBrowse[linha][16])
+
+	if val(Volume) < 1
+		Volume := CValToChar (val(Volume) * 1000)
+		UMEMB 	   := "ml"
+	else
+		UMEMB 	   := CValToChar(aBrowse[linha][14])
+	endif
+
+
+	IF Empty(PrazoVali)
+		PrazoVali := 0
+		Dias := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade := 0
+	Endif
+
+	IF(PrazoVali > 0)
+		Dias := (PrazoVali * 30)
+		DtVenc := DaySum(STOD(Prevf), Dias  )
+	else
+		Dias := (Validade * 30)
+		DtVenc := DaySum(STOD(Prevf), Dias  )
+	Endif
+
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb := substr(Cod,11,2)
+	Endif
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(03,02   ,Prod, "N", "0", "025,035") // negrito
+	MSCBSAY(65,02   ,cEmb, "N", "0", "025,035") // negrito
+	MSCBSAY(03,06   ,ProdTxt, "N", "0", "025,035") // negrito
+	
+	MSCBLineH(00,10,190,3,'B')
+	
+	MSCBSAY(03,11,"COD:", "N", "0", "025,022") // negrito
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(09,11,Cod, "N", "0", "025,022") 
+	
+	MSCBSAY(03,15,"LOT:", "N", "0", "020,022") // negrito
+	MSCBSAY(09,15,cLote, "N", "0", "020,022") 
+		
+	MSCBSAY(19,15,"Val.: "+CValToChar(DtVenc), "N", "0", "020,022") // negrito
+	
+	
+	if Empty(Catalis)
+		MSCBSAY(03,23,"CONTEUDO "+Volume+" "+UMEMB, "N", "0","068,068") // negrito
+		MSCBSAYBAR(45,11,CodBar,"N","MB04",6, .F., .T., .F., ,03,03, .F., .F., "1", .T.)
+		MSCBSAY(45,20,cObs, "N", "0","022,022") // negrito
+	else
+		MSCBSAY(03,23,"CONTEUDO "+Volume+" "+UMEMB, "N", "0","068,068") // negrito
+		Catalis = TRANSFORM(Catalis, "@R XX 99.99.999-99")
+		MSCBSAY(03,19,"CAT: "+Catalis+" ("+RelCat1+")", "N", "0","022,022") // negrito
+		MSCBSAY(45,20,cObs, "N", "0","022,022") // negrito
+		MSCBSAYBAR(45,11,CodBar,"N","MB04",6, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
+	Endif	
+
+	
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+
+
+/*/{Protheus.doc} PCP037_09
+Etiqueta Zebra de Volume
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd produtos
+/*/
+Static Function PCP037_09(linha,qtd)
+
+Local cModelo := "ZEBRA"
+Local Prod,ProdTxt,Cod,Unid,CodBar
+Local Validade,Prevf,PrazoVali,Dias,cLote
+Local DtVenc,cEmb
+Local Volume,UMEMB,Catalis,RelCat1
+
+
+
+/*
+aBrowse
+1 - Nome Produto
+2 - Codigo Produto
+3 - Qtd
+4 - ProdTexto
+5 - Unidade(RELVOL)
+6 - Validade(Z1_VALIDAD)
+7 - Prevf (Previs„o de FabricaÁ„o)
+8 - Lote
+9 - CodBar
+10 - PrazoVali (Prazo de Validade)
+11 - Nome Produto Principal
+12 - ProxNVol (Prox Nro VOL)
+13 - VOLUME
+14 - UMEMB (Unidade de Medida do Produto)
+*/
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+
+	Volume     := CValToChar(aBrowse[linha][13])
+
+	UMEMB 	   := CValToChar(aBrowse[linha][14])
+
+	Catalis	   := AllTrim(aBrowse[linha][15])	
+	RelCat1    := AllTrim(aBrowse[linha][16])
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+	CodBar  := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+	UMEMB   := UniMed(CodBar,Cod)
+
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(04,06 ,substr(Prod,1,24),"N", "0", "045,055") // negrito
+	MSCBSAY(90,06 ,cEmb, "N", "0", "045,055") // negrito
+	MSCBSAY(04,16 ,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *", "N", "0", "045,055") // negrito
+	
+	MSCBLineH(00,22,190,3, 'B' )
+	MSCBSAY(04,26.5,"COD:", "N", "0", "035,035") // negrito
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(15,26,Cod, "N", "0", "050,060") // negrito
+	MSCBSAY(80,26,UMEMB, "N", "0", "040,040") // negrito
+	
+	MSCBSAYBAR(9,35,CodBar,"N","MB01",12, .F., .T., .F., ,5,5, .F., .F., "1", .T.)
+
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+
+
+
+
+
+
+/*/{Protheus.doc} PCP037_10
+Etiqueta Zebra de Produto
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd de produtos
+/*/
+Static Function PCP037_10(linha,qtd)
+	
+	Local cModelo := "ZEBRA"
+	Local Prod,ProdTxt,Cod,Unid,CodBar
+	Local Validade,Prevf,PrazoVali,Dias,cLote
+	Local DtVenc,cEmb
+	Local Volume,UMEMB
+
+	Local Catalis,RelCat1
+
+	
+
+	/*
+	aBrowse
+	1 - Nome Produto
+	2 - Codigo Produto
+	3 - Qtd
+	4 - ProdTexto
+	5 - Unidade(RELVOL)
+	6 - Validade(Z1_VALIDAD)
+	7 - Prevf (Previs„o de FabricaÁ„o)
+	8 - Lote
+	9 - CodBar
+	10 - PrazoVali (Prazo de Validade)
+	11 - Nome Produto Principal
+	12 - ProxNVol (Prox Nro VOL)
+	13 - VOLUME
+	14 - UMEMB (Unidade de Medida do Produto)
+	15 - Catalis
+	16 - RelCat1
+	*/
+
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	CodBar        := AllTrim(aBrowse[linha][9])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+	Volume        := CValToChar(aBrowse[linha][13])
+	UMEMB         := CValToChar(aBrowse[linha][14])
+
+	Catalis       := AllTrim(aBrowse[linha][15])
+	RelCat1       := AllTrim(aBrowse[linha][16])
+
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+	if val(Volume) < 1
+		Volume := CValToChar (val(Volume) * 1000)
+		UMEMB 	   := "ml"
+	else
+		UMEMB 	   := CValToChar(aBrowse[linha][14])
+	endif
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,6)
+
+	MSCBSAY(04,05 ,substr(Prod,1,24),"N", "0", "045,055") // negrito
+	MSCBSAY(90,05 ,cEmb, "N", "0", "045,055") // negrito
+	MSCBSAY(04,12 ,ProdTxt, "N", "0", "045,055") // negrito
+
+	MSCBLineH(00,17,190,3, 'B' )
+	MSCBSAY(04,20.5,"COD:", "N", "0", "035,035") // negrito
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(15,20,Cod, "N", "0", "050,060") // negrito
+
+	MSCBSAY(80,19,"Lote:", "N", "0", "030,030") // negrito
+	MSCBSAY(80,23,cLote, "N", "0", "040,040") // negrito
+
+	MSCBSAY(04,27,"DT FABR:", "N", "0", "030,030") // negrito
+	MSCBSAY(04,31,CValToChar(STOD(Prevf)), "N", "0", "040,040") // negrito
+
+	MSCBSAY(32,27,"VALIDADE:", "N", "0", "030,030") // negrito
+	MSCBSAY(32,31,CValToChar(DtVenc), "N", "0", "040,040") // negrito
+
+	MSCBSAY(04,38,"PESO LIQ.:", "N", "0", "040,040") // negrito
+	MSCBSAY(04,43,Volume+UMEMB, "N", "0", "060,065") // negrito
+
+	If !empty(AllTrim(Prod)) .and. (Val(Volume) > 0)
+		MSCBSAY(04,52,OemToAnsi("TEMPERATURA DE CURA: 200 ∫C - 10 Minutos"), "N", "0", "035,035") // negrito
+	Endif
+
+	CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+	MSCBSAYBAR(55,35,CodBar,"N","MB04",8, .F., .T., .F., ,3,3, .F., .F., "1", .T.)
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+	
+
+
+Return()
+
+
+/*/{Protheus.doc} PCP037_11
+Etiqueta Xarope
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd de produtos
+/*/
+Static Function PCP037_11(linha,qtd)
+	
+	Local cModelo := "ZEBRA"
+	Local Prod,ProdTxt,Cod,Unid,CodBar
+	Local Validade,Prevf,PrazoVali,Dias,cLote
+	Local DtVenc,cEmb
+	Local Volume,UMEMB
+
+	Local Catalis,RelCat1
+
+	
+	/*
+	aBrowse
+	1 - Nome Produto
+	2 - Codigo Produto
+	3 - Qtd
+	4 - ProdTexto
+	5 - Unidade(RELVOL)
+	6 - Validade(Z1_VALIDAD)
+	7 - Prevf (Previs„o de FabricaÁ„o)
+	8 - Lote
+	9 - CodBar
+	10 - PrazoVali (Prazo de Validade)
+	11 - Nome Produto Principal
+	12 - ProxNVol (Prox Nro VOL)
+	13 - VOLUME
+	14 - UMEMB (Unidade de Medida do Produto)
+	15 - Catalis
+	16 - RelCat1
+	*/
+
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	CodBar        := AllTrim(aBrowse[linha][9])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+	Volume        := CValToChar(aBrowse[linha][13])
+	UMEMB         := CValToChar(aBrowse[linha][14])
+
+	Catalis       := AllTrim(aBrowse[linha][15])
+	RelCat1       := AllTrim(aBrowse[linha][16])
+
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBBEGIN(1,6)
+	
+	MSCBSAY(05.5,03,"Lt "+cLote , "N", "0", "024,027") // negrito
+	MSCBSAY(05.5,07,"Fab "+CValToChar(STOD(Prevf)), "N", "0", "024,027") // negrito
+	MSCBSAY(05.5,11,"Val  "+CValToChar(DtVenc), "N", "0", "024,027") // negrito
+
+	MSCBSAY(32.5,03,"Lt "+cLote , "N", "0", "024,027") // negrito
+	MSCBSAY(32.5,07,"Fab "+CValToChar(STOD(Prevf)), "N", "0", "024,027") // negrito
+	MSCBSAY(32.5,11,"Val  "+CValToChar(DtVenc), "N", "0", "024,027") // negrito
+
+	MSCBSAY(58.5,03,"Lt "+cLote , "N", "0", "024,027") // negrito
+	MSCBSAY(58.5,07,"Fab "+CValToChar(STOD(Prevf)), "N", "0", "024,027") // negrito
+	MSCBSAY(58.5,11,"Val  "+CValToChar(DtVenc), "N", "0", "024,027") // negrito
+
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+
+Return()
+
+
+Static function UniMed(codbarra,codigo)
+local retorno
+
+if  (len( AllTrim(codbarra)) == 14)
+		retorno :=	substr(codbarra,9,2)
+
+		if (SUBSTR(codigo,11,2) == "99")
+			retorno :=	retorno + " Kg"
+		endif	
+			
+		if (SUBSTR(codigo,11,2) == "00")
+			retorno := retorno + " L"
+			else
+			retorno := retorno +  " Unid"
+		endif	
+
+endif
+/* funÁ„o no fox pro */
+//iif(len(allt(codbarra)) = 14,substr(codbarra,9,2)+IIF(SUBSTR(codigo,11,2) == "99"," Kg",IIF(SUBSTR(codigo,11,2) == "00"," L"," Unid")),"")
+
+return(retorno)
+
+Static Function ReportPrint(nTipo)
+
+//local n      := 1
+local i      := 1
+//local linhas := len(aBrowse)
+local qtd
+local Prevf,UMEMB,Volume
+Local Letiq := 0
+
+Private oPrint
+Private oFont10     := TFont():New('Arial',,10,,.F.,,,,.F.,.F.)
+Private oFont10n    := TFont():New('Arial',,10,,.T.,,,,.F.,.F.)
+
+Private oFont12     := TFont():New('Arial',,12,,.F.,,,,.F.,.F.)
+Private oFont12n    := TFont():New('Arial',,12,,.T.,,,,.F.,.F.)
+
+Private oFont15     := TFont():New('Arial',,15,,.F.,,,,.F.,.F.)
+Private oFont15n    := TFont():New('Arial',,15,,.T.,,,,.F.,.F.)
+
+Private oFont30     := TFont():New('Arial',,30,,.F.,,,,.F.,.F.)
+Private oFont30n    := TFont():New('Arial',,30,,.T.,,,,.F.,.F.)
+
+/*
+	aBrowse
+	1 - Nome Produto
+	2 - Codigo Produto
+	3 - Qtd
+	4 - ProdTexto
+	5 - Unidade(RELVOL)
+	6 - Validade(Z1_VALIDAD)
+	7 - Prevf (Previs„o de FabricaÁ„o)
+	8 - Lote
+	9 - CodBar
+	10 - PrazoVali (Prazo de Validade)
+	11 - Nome Produto Principal
+	12 - ProxNVol (Prox Nro VOL)
+	13 - VOLUME
+	14 - UMEMB (Unidade de Medida do Produto)
+	*/
+
+    oPrint := TMSPrinter():New(OemToAnsi('Etiqueta de produto'))
+    oPrint:SetPortrait()
+    
+    oPrint:StartPage()  
+    nLin  := 0050
+    nRow1 := 0
+    cPage := 0
+    cont := 0
+
+	aString := strtokarr (cProduto, "-")
+	linha := val(aString[3])
+
+	/* Loop nas linhas do Array */
+	//For n        := 1 to linhas
+
+	Cod           := AllTrim(aBrowse[linha][2])
+	Cod 		  := TRANSFORM(Cod, "@R XX 99.99.999-99")
+
+	ProdTxt       := AllTrim(aBrowse[linha][4])
+	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	Unid          := AllTrim(Unid)
+	Unid          := StrZero(val(Unid),2)
+	Validade      := aBrowse[linha][6]
+	Prevf         := AllTrim(aBrowse[linha][7])
+	cLote         := AllTrim(aBrowse[linha][8])
+	CodBar        := AllTrim(aBrowse[linha][9])
+	PrazoVali     := aBrowse[linha][10]
+	Prod          := AllTrim(aBrowse[linha][11])
+
+	cXidvol       := AllTrim(aBrowse[linha][12])
+	cXidvol       := StrZero(val(cXidvol),4)
+	Volume        := CValToChar(aBrowse[linha][13])
+	UMEMB         := CValToChar(aBrowse[linha][14])
+
+	Catalis	   := AllTrim(aBrowse[linha][15])	
+	RelCat1    := AllTrim(aBrowse[linha][16])
+
+
+	IF Empty(PrazoVali)
+		PrazoVali     := 0
+		Dias          := 0
+	Endif
+
+	IF Empty(Validade)
+		Validade      := 0
+	Endif
+
+
+	IF(PrazoVali > 0)
+		Dias          := (PrazoVali * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	else
+		Dias          := (Validade * 30)
+		DtVenc        := DaySum(STOD(Prevf), Dias )
+	Endif
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) >= 12
+		cEmb          := substr(Cod,11,2)
+	Endif
+
+		/* qtd de etiquetas a ser impressa */
+		qtd          := val(cQtde1)
+		
+
+		/* loop na qtd de etiquetas a ser impressa */
+		For i        := 1 to qtd
+		
+			Do Case
+			Case nTipo == 1
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas Zembras #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+
+					CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+					UMEMB         := UniMed(CodBar,Cod)
+
+					oPrint:Say(nLin,0050,OemToAnsi(Prod),oFont15n,,,,0)
+					oPrint:Say(nLin,0800,OemToAnsi(cEmb),oFont15n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *",oFont15n,,,,0)
+					nLin += 060
+					oPrint:Line (nLin,0010,nLin,850)
+					nLin  += 040
+					
+					oPrint:Say(nLin,0050,OemToAnsi("COD: "+Cod),oFont12n,,,,0)
+					oPrint:Say(nLin,0700,OemToAnsi(AllTrim(UMEMB)),oFont12n,,,,0)
+					nLin  += 050
+					CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+i , 4)
+					MSBAR3( 'CODE128', 2.2+Letiq , 2, CodBar, oPrint, .T.,10, .T., 0.030,1.2, .T.,,, .F. )
+					nLin  += 300
+					Letiq += 4.2 
+					
+					
+
+			Case nTipo == 2
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 26x15mm(xarope) #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+					oPrint:Say(nLin,0050,OemToAnsi("LT "+cLote),oFont12n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,OemToAnsi("Fab "+CValToChar(STOD(Prevf))),oFont12n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,OemToAnsi("Val "+CValToChar(DtVenc)),oFont12n,,,,0)
+					nLin  += 150
+
+			Case nTipo == 3
+
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 44x15mm #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+
+					oPrint:Say(nLin,0050,OemToAnsi(Prod),oFont12n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,OemToAnsi(Cod),oFont12n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,OemToAnsi(Volume+UMEMB+" Lot: "+cLote),oFont12n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,OemToAnsi("Val "+CValToChar(DtVenc)),oFont12n,,,,0)
+					CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+i , 4)
+					MSBAR3( 'CODE128', 0.8+Letiq , 3, CodBar, oPrint, .T.,8, .T., 0.022,0.85, .T.,,, .F. )
+					nLin  += 150
+					Letiq += 2.55
+
+
+			Case nTipo == 4
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 75x35mm #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+
+					CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+					UMEMB         := UniMed(CodBar,Cod)
+
+					oPrint:Say(nLin,0050,OemToAnsi(Prod),oFont15n,,,,0)
+					oPrint:Say(nLin,0800,OemToAnsi(cEmb),oFont15n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *",oFont15n,,,,0)
+					nLin += 060
+					oPrint:Line (nLin,0010,nLin,850)
+					nLin  += 040
+					
+					oPrint:Say(nLin,0050,OemToAnsi("COD: "+Cod),oFont12n,,,,0)
+					oPrint:Say(nLin,0700,OemToAnsi(AllTrim(UMEMB)),oFont12n,,,,0)
+					nLin  += 050
+					
+					MSBAR3( 'CODE128', 2.2+Letiq , 2, CodBar, oPrint, .T.,10, .T., 0.030,1.2, .T.,,, .F. )
+					nLin  += 300
+					Letiq += 4.2 
+
+			Case nTipo == 5
+
+				/*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+				# Impress„o de Etiquetas 100x69mm #
+				ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
+
+					CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+qtd , 4)
+					UMEMB         := UniMed(CodBar,Cod)
+
+					oPrint:Say(nLin,0050,OemToAnsi(Prod),oFont15n,,,,0)
+					oPrint:Say(nLin,0800,OemToAnsi(cEmb),oFont15n,,,,0)
+					nLin += 050
+					oPrint:Say(nLin,0050,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *",oFont15n,,,,0)
+					nLin += 060
+					oPrint:Line (nLin,0010,nLin,850)
+					nLin  += 040
+					
+					oPrint:Say(nLin,0050,OemToAnsi("COD: "+Cod),oFont15n,,,,0)
+					oPrint:Say(nLin,0700,OemToAnsi(AllTrim(UMEMB)),oFont15n,,,,0)
+					nLin  += 050
+
+					MSBAR3( 'CODE128', 2.2+Letiq , 2, CodBar, oPrint, .T.,10, .T., 0.030,1.2, .T.,,, .F. )
+					nLin  += 300
+					Letiq += 4.2 
+				
+			EndCase
+				if nLin >= 3200
+					oPrint:EndPage()
+					cPage := 0
+					nRow1 := 0
+					nLin  := 0050
+					Letiq := 0
+				endif 
+		NEXT
+
+	/*	 if nLin >= 3200
+            oPrint:EndPage()
+            cPage := 0
+            nRow1 := 0
+            nLin  := 0050
+			Letiq := 0
+        endif */
+
+	//NEXT
+    
+		
+                
+                  
+
+
+    oPrint:Preview()
+    oPrint:end()
+
+return
+
+/*/{Protheus.doc} ListPort
+Carrega Array com as portas disponiveis para impress„o
+@type function
+@author neliedercorneta
+@since 12/01/2022
+/*/
+Static function ListPort()
+local i
+local porta
+
+for i := 1 to 9
+	
+	porta := "LPT"+CValToChar(i)
+
+	if IsPrinter(Porta)
+		  aAdd(aLPT,Porta)
+		  oLPT:SetItems(aLPT)
+	endif  
+next
+
+return
