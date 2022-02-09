@@ -45,7 +45,7 @@ User Function M410SOLI()
 	Local _nBaseFCP := 0 // Base do FCP-ST
 	Local _nAliqFCP := 0 // Aliquota do FCP-ST
 	Local _nValFCP := 0 // Valor do FCP-ST
-     Local nPosTES, nMva, nMvaSist, cTpPedido, cCodTes, cCodPro, nQtdVen, nPrcVen, nVlrTot
+     Local nPosTES, nMva, nMvaSist, cTpPedido, cCodTes, cCodPro, nQtdVen, nPrcVen, nVlrTot,cCest
      u_zcfga01( 'M410SOLI' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Chamada via Webservice GetImposto.                    ³
@@ -72,6 +72,8 @@ User Function M410SOLI()
      //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
    If alltrim(FWGrpCompany()) == '01' //Empresas do grupo BRASILUX.
         cTpPedido := iif(lWebServ,_cTipoPed,M->C5_TIPO)     
+      cNcm := ""
+      cCest := ""
 
       If cTpPedido = "N" //Tipo de Pedido sempre de Vendas ("N") Normal  
            _nLinha := PARAMIXB[1]    
@@ -112,7 +114,10 @@ User Function M410SOLI()
               dbselectarea("SB1")
               dbsetorder(1)
               dbseek(xFilial("SB1")+cCodPro)  
-              cNcm := iif(found(),TRIM(SB1->B1_POSIPI),"") 
+            if found()
+               cNcm := ALLTRIM(SB1->B1_POSIPI)
+               cCest := ALLTRIM(SB1->B1_CEST)
+            endif 
               cCnae := alltrim(SA1->A1_CNAE)
               if empty(cCnae)
                  cCnae := "XXXX-X/XX"
@@ -217,6 +222,7 @@ User Function M410SOLI()
 
 				_nDec := TamSX3("D2_MARGEM")[2]
 				//(Cleber - 12/11/15 -> Nova aliquota de MVA para MG à partir de 01/12/15				
+            //(Cleber) - 01/02/2022->Chamado 025427, alteração pra SP
             do case
             case (SA1->A1_EST = "BA") .AND. !empty(cNcm) .AND. (cNcm = "32149000")
                nMargemRef := 1.45 //Renata (24/08/2021)
@@ -224,13 +230,21 @@ User Function M410SOLI()
 					nMargemRef := 1.64                	
                //11/03/2016->Solic Fernando Mauri excluir esses mvas					          	
                //21/11/2016->Reunião com Fernando, volta situação anterior com exceção de MG. Apresentado PDF da Sitivesp com NCMs
-            case (SA1->A1_EST = "MG") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3204.3206.3212") .OR. (cNcm = "32050000"))
+            case (SA1->A1_EST = "SP") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3208.3209") .OR. (cNcm = "321000"))
+					   nMargemRef := 1.53                	
+            case (SA1->A1_EST = "SP") .AND. !empty(cNcm) .AND. !(cNcm = "32061119") .AND. ((substr(cNcm,1,4) $ "2821.3206") .OR. ((cNcm = "32041700") .AND. (cCest = '2400200'))) //Chamado 025536, considerar CEST
+					   nMargemRef := 2.18                	
+            case (SA1->A1_EST $ "MG-SP") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3204.3206.3212") .OR. (cNcm = "32050000"))
                //11/04/2017 -> Chamado 006914, Fernando Mauri
+               if SA1->A1_EST = "MG"
 					nMargemRef := 1.6468                	
+               else 
+   					nMargemRef := 2.03                	
+               endif 
             case !(SA1->A1_EST $ "MG-AC-AM-TO-PE") .AND. ((substr(cNcm,1,4) $ "3204.3206.3212.2821") .OR. (cNcm = "32050000") )
                //À partir de 01/05/2019, chamado 013806
                do case
-               case SA1->A1_EST $ "SP-RS"
+               case SA1->A1_EST = "RS"
                   nMargemRef := 2.18
                case SA1->A1_EST = "PR"
                   nMargemRef := 1.53

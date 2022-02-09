@@ -47,7 +47,7 @@ User Function ZPCPA01( _cParam )
      /*+-----------------------------------------------------+
        | Abertura de Empresa                                 |
        +-----------------------------------------------------+*/
-     u_zcfga01( 'ZPCPA01' ) //LGS#2021201 - Gravação de log de utilização da rotina
+     //u_zcfga01( 'ZPCPA01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If Empty( _cParam )
         _cParam := '010101011'
      Endif
@@ -134,8 +134,10 @@ Static Function fVerOrdPro()
           _lRet := .f.
        else
           If Len( Alltrim( _cGet1Ord ) ) == 6
-             _cGet1Ord := _cGet1Ord + '01001'
+             _cGet1Ord := _cGet1Ord + '01001' + Space( TAMSX3( 'C2_OP' )[1] - Len( _cGet1Ord + '01001' ) )
              _oGet1Ord:Refresh()
+          Else
+             _cGet1Ord := _cGet1Ord + Space( TAMSX3( 'C2_OP' )[1] - Len( _cGet1Ord ) )
           Endif
        Endif 
        /* +--------------------------------------+

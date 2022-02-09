@@ -34,7 +34,7 @@ Static Function ModelDef()
        oStr2 := MontaCab( 3 )
        oStr3 := MontaCab( 5 )
 
-       oModel := MPFormModel():New( "LIBERA", , { |oModel| fPosValid( oModel ) }, { |oModel| FGrava(oModel) } )
+       oModel := MPFormModel():New( "LIBERA", , , { |oModel| FGrava(oModel) },  )
        oModel:SetDescription( "Liberação de Pedidos" )
        oModel:addFields( 'MASTERPED', , oStr1, , , { |oModel| FLCab( oModel ) } )
        oModel:getModel( 'MASTERPED' ):SetDescription( 'Pedido de Vendas' )
@@ -70,7 +70,7 @@ Static Function ViewDef()
        Private _oTable1 as Object
        Private _oTable2 as Object
        Private _oTable3 as Object
-       //Private bPesquisar := { |oView| FWMsgRun( , { || fPesPed(oView) }, "Aguarde...", "Pesquisando"           ) }
+
        bHistorico := { |oView| FWMsgRun( , { || fHisPed(oView) }, "Aguarde...", "Processando histórico" ) }
        bItensPedi := { |oView| FWMsgRun( , { || fItePed(oView) }, "Aguarde...", "Processando itens"     ) }
        bDadosPedi := { |oView| FWMsgRun( , { || fDadPed(oView) }, "Aguarde...", "Dados do pedido"       ) }
@@ -78,6 +78,9 @@ Static Function ViewDef()
        bTitAberto := { |oView| FWMsgRun( , { || fTAbFin(oView) }, "Aguarde...", "Consutando titulos"    ) }
        bTitRecebi := { |oView| FWMsgRun( , { || fTReFin(oView) }, "Aguarde...", "Consutando titulos"    ) }
        bDadosClie := { |oView| FWMsgRun( , { || fDadCli(oView) }, "Aguarde...", "Dados do Cliente"      ) }
+       
+       bObservPed := { |oView| FWMsgRun( , { || fObsPed(oView) }, "Aguarde...", "Observação Pedido"     ) }
+       bPesquisaP := { |oView| FWMsgRun( , { || fPesPed(oView) }, "Aguarde...", "Pesquisar"             ) }
 
        oModel := ModelDef()
        
@@ -89,14 +92,14 @@ Static Function ViewDef()
        oStr2:SetProperty( 'CONDICAO', MVC_VIEW_WIDTH, 200 )
        oStr2:SetProperty( 'VENDEDOR', MVC_VIEW_WIDTH, 350 )
        oStr2:SetProperty( 'TRANSPOR', MVC_VIEW_WIDTH, 350 )
-       oStr3:SetProperty( 'VALIPI', MVC_VIEW_WIDTH, 130 )
-       oStr3:SetProperty( 'VALSUB', MVC_VIEW_WIDTH, 130 )
-       oStr3:SetProperty( 'VALMAR', MVC_VIEW_WIDTH, 130 )
-       oStr3:SetProperty( 'PERMAR', MVC_VIEW_WIDTH, 090 )
-       oStr3:SetProperty( 'VALLUC', MVC_VIEW_WIDTH, 130 )
-       oStr3:SetProperty( 'PERLUC', MVC_VIEW_WIDTH, 090 )
-       oStr3:SetProperty( 'VALCOM', MVC_VIEW_WIDTH, 130 )
-       oStr3:SetProperty( 'PERCOM', MVC_VIEW_WIDTH, 090 )
+       oStr3:SetProperty( 'VALIPI'  , MVC_VIEW_WIDTH, 130 )
+       oStr3:SetProperty( 'VALSUB'  , MVC_VIEW_WIDTH, 130 )
+       oStr3:SetProperty( 'VALMAR'  , MVC_VIEW_WIDTH, 130 )
+       oStr3:SetProperty( 'PERMAR'  , MVC_VIEW_WIDTH, 090 )
+       oStr3:SetProperty( 'VALLUC'  , MVC_VIEW_WIDTH, 130 )
+       oStr3:SetProperty( 'PERLUC'  , MVC_VIEW_WIDTH, 090 )
+       oStr3:SetProperty( 'VALCOM'  , MVC_VIEW_WIDTH, 130 )
+       oStr3:SetProperty( 'PERCOM'  , MVC_VIEW_WIDTH, 090 )
        oView := FWFormView():New()
        oView:SetModel( oModel )
        
@@ -136,25 +139,27 @@ Static Function ViewDef()
 
        oView:SetViewProperty( 'VIEW_PED', "CHANGELINE", { { | _oView, _cAction, _aParam | fChangePED( _oView, _cAction, _aParam ) } } )
 
-       //oView:AddUserButton( "Pesquisar pedido - (F2)"   , 'PEDIDO', { |oView| FWMsgRun( , { || fPesPed(oView) }, "Aguarde...", "Pesquisando"           ) } )
-       oView:AddUserButton( "Histórico do Pedido - (F2)", 'PEDIDO', { |oView| FWMsgRun( , { || fHisPed(oView) }, "Aguarde...", "Processando histórico" ) } )
-       oView:AddUserButton( "Itens do Pedido - (F4)"    , 'PEDIDO', { |oView| FWMsgRun( , { || fItePed(oView) }, "Aguarde...", "Processando itens"     ) } )
-       oView:AddUserButton( "Dados do Pedido - (F5)"    , 'PEDIDO', { |oView| FWMsgRun( , { || fDadPed(oView) }, "Aguarde...", "Gerando consulta"      ) } )
-       oView:AddUserButton( "Planilha Financeira - (F6)", 'PEDIDO', { |oView| FWMsgRun( , { || fPlaFin(oView) }, "Aguarde...", "Montando planilha"     ) } )
-       oView:AddUserButton( "Titulos em aberto - (F7)"  , 'PEDIDO', { |oView| FWMsgRun( , { || fTAbFin(oView) }, "Aguarde...", "Consutando titulos"    ) } )
-       oView:AddUserButton( "Titulos recebidos - (F8)"  , 'PEDIDO', { |oView| FWMsgRun( , { || fTReFin(oView) }, "Aguarde...", "Consutando titulos"    ) } )
-       oView:AddUserButton( "Dados do Cliente - (F9)"   , 'PEDIDO', { |oView| FWMsgRun( , { || fDadCli(oView) }, "Aguarde...", "Consutando cliente"    ) } )
+       oView:AddUserButton( "Histórico do Pedido - (F2)"  , 'PEDIDO', { |oView| FWMsgRun( , { || fHisPed(oView) }, "Aguarde...", "Processando histórico" ) } )
+       oView:AddUserButton( "Itens do Pedido - (F4)"      , 'PEDIDO', { |oView| FWMsgRun( , { || fItePed(oView) }, "Aguarde...", "Processando itens"     ) } )
+       oView:AddUserButton( "Dados do Pedido - (F5)"      , 'PEDIDO', { |oView| FWMsgRun( , { || fDadPed(oView) }, "Aguarde...", "Gerando consulta"      ) } )
+       oView:AddUserButton( "Planilha Financeira - (F6)"  , 'PEDIDO', { |oView| FWMsgRun( , { || fPlaFin(oView) }, "Aguarde...", "Montando planilha"     ) } )
+       oView:AddUserButton( "Titulos em aberto - (F7)"    , 'PEDIDO', { |oView| FWMsgRun( , { || fTAbFin(oView) }, "Aguarde...", "Consutando titulos"    ) } )
+       oView:AddUserButton( "Titulos recebidos - (F8)"    , 'PEDIDO', { |oView| FWMsgRun( , { || fTReFin(oView) }, "Aguarde...", "Consutando titulos"    ) } )
+       oView:AddUserButton( "Dados do Cliente - (F9)"     , 'PEDIDO', { |oView| FWMsgRun( , { || fDadCli(oView) }, "Aguarde...", "Consutando cliente"    ) } )
+       oView:AddUserButton( "Observação do Pedido - (F10)", 'PEDIDO', { |oView| FWMsgRun( , { || fObsPed(oView) }, "Aguarde...", "Observação"            ) } )
+       oView:AddUserButton( "Pesquisar - (F11)"           , 'PEDIDO', { |oView| FWMsgRun( , { || fPesPed(oView) }, "Aguarde...", "Pesquisar"             ) } )
 
        oView:SetCloseOnOk( { || .F. } ) 
 
-       //SetKey( VK_F2, bPesquisar )
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F9, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
 Return oView
 
@@ -210,34 +215,40 @@ Static function MontaCab( _nOpc )
               aAdd( _aCampos, { 'APROVA'   , 'C',                       1 ,                       0 } )
               aAdd( _aCampos, { 'USRAPR'   , 'C',                      25 ,                       0 } )
               aAdd( _aCampos, { 'RESTRICAO', 'M',                      10 ,                       0 } )
+              aAdd( _aCampos, { 'VALATR'   , 'N',                      20 ,                       2 } )
+              aAdd( _aCampos, { 'TOTTIT'   , 'N',                      20 ,                       2 } )
+              aAdd( _aCampos, { 'TOTPAB'   , 'N',                      20 ,                       2 } )
               fMontaTMP( _aCampos, 'ITEPED', _oTable2 )
               oStruct:AddTable( 'CABPED', { 'PEDIDO'  }, 'Pedido de Vendas' )
-              oStruct:AddField( 'Pedido'      , 'Pedido de Vendas'   , 'PEDIDO'   , 'C', TamSx3("C5_NUM")[1]    , , , , ,    , , .T. )
-              oStruct:AddField( 'Emissão'     , 'Dt.Emissão'         , 'EMISSAO'  , 'D', TamSx3("C5_EMISSAO")[1], , , , ,    , , .T. )
-              oStruct:AddField( 'Alteração'   , 'Dt.Alteração'       , 'DTALTER'  , 'D', TamSx3("C5_EMISSAO")[1], , , , ,    , , .T. )
-              oStruct:AddField( 'Cliente'     , 'Cliente'            , 'CLIENTE'  , 'C',                      52, , , , ,    , , .T. )
-              oStruct:AddField( 'Cond.Pgto.'  , 'Condição Pgto.'     , 'CONDICAO' , 'C',                      40, , , , ,    , , .T. )
-              oStruct:AddField( 'Boleto?'     , 'Boleto?'            , 'BOLETO'   , 'C',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Vendedor'    , 'Vendedor'           , 'VENDEDOR' , 'C',                      50, , , , ,    , , .T. )
-              oStruct:AddField( 'Transp.'     , 'Transportadora'     , 'TRANSPOR' , 'C',                      50, , , , ,    , , .T. )
-              oStruct:AddField( 'Dt.Ult.Com.' , 'Dt. Ultima Comp.'   , 'DTULTCOM' , 'D', TamSx3("C5_EMISSAO")[1], , , , ,    , , .T. )
-              oStruct:AddField( 'Dt.Pri.Com.' , 'Dt.Primeira Com.'   , 'DTPRICOM' , 'D', TamSx3("C5_EMISSAO")[1], , , , ,    , , .T. )
-              oStruct:AddField( 'Risco'       , 'Risco do Cliente'   , 'RISCO'    , 'C',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Ultima Alt.' , 'Usuário Alteração'  , 'USRALT'   , 'C',                      25, , , , ,    , , .T. )
-              oStruct:AddField( 'Tipo Venda'  , 'Tipo de Venda'      , 'TPVENDA'  , 'C',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Observação'  , 'Observação'         , 'OBSPED'   , 'C',                       6, , , , ,    , , .T. )
-              oStruct:AddField( 'Obs'         , 'Obs.'               , 'OBSSC5'   , 'C',                       6, , , , ,    , , .T. )
-              oStruct:AddField( 'Libera Cad.' , 'Liberação Cadastro' , 'LIBCAD'   , 'L',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Usuário Cad.', 'Usuário Cadastro'   , 'USRCAD'   , 'C',                      25, , , , ,    , , .T. )
-              oStruct:AddField( 'Libera Ped.' , 'Liberação Pedido'   , 'LIBPED'   , 'L',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Usuário Ped.', 'Usuário Pedido'     , 'USRPED'   , 'C',                      25, , , , ,    , , .T. )
-              oStruct:AddField( 'Libera Cre.' , 'Liberação Credito'  , 'LIBCRE'   , 'L',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Usuário Cre.', 'Usuário Credito'    , 'USRCRE'   , 'C',                      25, , , , ,    , , .T. )
-              oStruct:AddField( 'Libera Dir.' , 'Liberação Diretoria', 'LIBDIR'   , 'L',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Usuário Dir.', 'Usuário Diretoria'  , 'USRDIR'   , 'C',                      25, , , , ,    , , .T. )
-              oStruct:AddField( 'Aprovado'    , 'Aprovado'           , 'APROVA'   , 'C',                       1, , , , ,    , , .T. )
-              oStruct:AddField( 'Usuário Apr.', 'Usuário Aprovador'  , 'USRAPR'   , 'C',                      25, , , , ,    , , .T. )
-              oStruct:AddField( 'Restricao'   , 'Restricao'          , 'RESTRICAO', 'M',                      10, , , , ,    , , .T. )
+              oStruct:AddField( 'Pedido'      , 'Pedido de Vendas'   , 'PEDIDO'   , 'C', TamSx3("C5_NUM")[1]    ,  , , , ,    , , .T. )
+              oStruct:AddField( 'Emissão'     , 'Dt.Emissão'         , 'EMISSAO'  , 'D', TamSx3("C5_EMISSAO")[1],  , , , ,    , , .T. )
+              oStruct:AddField( 'Alteração'   , 'Dt.Alteração'       , 'DTALTER'  , 'D', TamSx3("C5_EMISSAO")[1],  , , , ,    , , .T. )
+              oStruct:AddField( 'Cliente'     , 'Cliente'            , 'CLIENTE'  , 'C',                      52,  , , , ,    , , .T. )
+              oStruct:AddField( 'Cond.Pgto.'  , 'Condição Pgto.'     , 'CONDICAO' , 'C',                      40,  , , , ,    , , .T. )
+              oStruct:AddField( 'Boleto?'     , 'Boleto?'            , 'BOLETO'   , 'C',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Vendedor'    , 'Vendedor'           , 'VENDEDOR' , 'C',                      50,  , , , ,    , , .T. )
+              oStruct:AddField( 'Transp.'     , 'Transportadora'     , 'TRANSPOR' , 'C',                      50,  , , , ,    , , .T. )
+              oStruct:AddField( 'Dt.Ult.Com.' , 'Dt. Ultima Comp.'   , 'DTULTCOM' , 'D', TamSx3("C5_EMISSAO")[1],  , , , ,    , , .T. )
+              oStruct:AddField( 'Dt.Pri.Com.' , 'Dt.Primeira Com.'   , 'DTPRICOM' , 'D', TamSx3("C5_EMISSAO")[1],  , , , ,    , , .T. )
+              oStruct:AddField( 'Risco'       , 'Risco do Cliente'   , 'RISCO'    , 'C',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Ultima Alt.' , 'Usuário Alteração'  , 'USRALT'   , 'C',                      25,  , , , ,    , , .T. )
+              oStruct:AddField( 'Tipo Venda'  , 'Tipo de Venda'      , 'TPVENDA'  , 'C',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Observação'  , 'Observação'         , 'OBSPED'   , 'C',                       6,  , , , ,    , , .T. )
+              oStruct:AddField( 'Obs'         , 'Obs.'               , 'OBSSC5'   , 'C',                       6,  , , , ,    , , .T. )
+              oStruct:AddField( 'Libera Cad.' , 'Liberação Cadastro' , 'LIBCAD'   , 'L',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Usuário Cad.', 'Usuário Cadastro'   , 'USRCAD'   , 'C',                      25,  , , , ,    , , .T. )
+              oStruct:AddField( 'Libera Ped.' , 'Liberação Pedido'   , 'LIBPED'   , 'L',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Usuário Ped.', 'Usuário Pedido'     , 'USRPED'   , 'C',                      25,  , , , ,    , , .T. )
+              oStruct:AddField( 'Libera Cre.' , 'Liberação Credito'  , 'LIBCRE'   , 'L',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Usuário Cre.', 'Usuário Credito'    , 'USRCRE'   , 'C',                      25,  , , , ,    , , .T. )
+              oStruct:AddField( 'Libera Dir.' , 'Liberação Diretoria', 'LIBDIR'   , 'L',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Usuário Dir.', 'Usuário Diretoria'  , 'USRDIR'   , 'C',                      25,  , , , ,    , , .T. )
+              oStruct:AddField( 'Aprovado'    , 'Aprovado'           , 'APROVA'   , 'C',                       1,  , , , ,    , , .T. )
+              oStruct:AddField( 'Usuário Apr.', 'Usuário Aprovador'  , 'USRAPR'   , 'C',                      25,  , , , ,    , , .T. )
+              oStruct:AddField( 'Restricao'   , 'Restricao'          , 'RESTRICAO', 'M',                      10,  , , , ,    , , .T. )
+              oStruct:AddField( 'Valor Atraso', 'Valor Atraso'       , 'VALATR'   , 'N',                      15, 2, , , ,    , , .T. )
+              oStruct:AddField( 'Valor Titulo', 'Total Titulo'       , 'TOTTIT'   , 'N',                      15, 2, , , ,    , , .T. )
+              oStruct:AddField( 'Total Pedido', 'Total Pedido Aberto', 'TOTPAB'   , 'N',                      15, 2, , , ,    , , .T. )
        ElseIf _nOpc == 4
               oStruct := FWFormViewStruct():New()
               oStruct:AddField( 'PEDIDO'  , '02', 'Pedido'        , 'Pedido'         ,                , 'Get',    ,   ,    , .F. )
@@ -271,7 +282,7 @@ Static function MontaCab( _nOpc )
               oStruct:AddField( '% Lucro'   , '% Lucro'          , 'PERLUC' , 'N' , 10, 2 )
               oStruct:AddField( 'Comissão'  , 'Valor Comissão'   , 'VALCOM' , 'N' , 18, 2 )
               oStruct:AddField( '% Comissão', '% Comissão'       , 'PERCOM' , 'N' , 10, 2 )
-              oStruct:AddField( 'Margem R$' , 'Margem Bruta (R$)', 'VALMAR' , 'N' , 18, 2 )
+              oStruct:AddField( 'Margem Bruta R$' , 'Margem Bruta (R$)', 'VALMAR' , 'N' , 18, 2 )
               oStruct:AddField( 'Margem %'  , 'Margem Bruta (%)' , 'PERMAR' , 'N' , 18, 2 )
        ElseIf _nOpc == 6
               oStruct := FWFormViewStruct():New()
@@ -283,7 +294,7 @@ Static function MontaCab( _nOpc )
               oStruct:AddField( 'PERLUC' , '06', '% Lucro'   , '% Lucro'          , , 'Get', '@E 9,999.99'      ,   ,    , .F. )
               oStruct:AddField( 'VALCOM' , '07', 'Comissão'  , 'Valor Comissão'   , , 'Get', '@E 999,999.99'    ,   ,    , .F. )
               oStruct:AddField( 'PERCOM' , '08', '% Comissão', '% Comissão'       , , 'Get', '@E 9,999.99'      ,   ,    , .F. )
-              oStruct:AddField( 'VALMAR' , '09', 'Margem R$' , 'Margem Bruta'     , , 'Get', '@E 999,999.99'    ,   ,    , .F. )
+              oStruct:AddField( 'VALMAR' , '09', 'Margem Bruta R$' , 'Margem Bruta'     , , 'Get', '@E 999,999.99'    ,   ,    , .F. )
               oStruct:AddField( 'PERMAR' , '10', 'Margem %'  , 'Margem %'         , , 'Get', '@E 9,999.99'      ,   ,    , .F. )
        Endif
 Return oStruct
@@ -351,7 +362,7 @@ Static Function fLItem( oModelItem, _lCopy )
        Local _aItPed  := {}
        Local _aArea   := GetArea()
        Local _aAux    := {}
-       Local _cQry    := ""
+       Local _cPedido := ""
        Local _cTabSC5 := "TMPPED"
        Local _cWhere  := ""
        Local _cOrdem  := "%SC5.C5_NUM%"
@@ -364,8 +375,8 @@ Static Function fLItem( oModelItem, _lCopy )
        _cWhere += "AND SC5.C5_TIPO     = 'N' " + CHR(13) + CHR(10)
        _cWhere += "AND SC5.C5_NOTA     = ''  " + CHR(13) + CHR(10)
        _cWhere += "AND SC5.C5_APROVA   = '0' " + CHR(13) + CHR(10)
-       If lAcsCad .or. lAcsCre
-       _cWhere += "AND ( " + CHR(13) + CHR(10)
+       If lAcsVis .or. lAcsCad .or. lAcsPed .or. lAcsCre .or. lAcsDir
+          _cWhere += "AND ( " + CHR(13) + CHR(10)
        Endif
        If lAcsCad
           _cWhere += "      ( ( ( UPPER( SC5.C5_CAD ) = '" + UPPER( cUsername ) + "' ) " + CHR(13) + CHR(10)
@@ -374,6 +385,36 @@ Static Function fLItem( oModelItem, _lCopy )
           Endif 
           _cWhere += " ) "
           _cWhere += "  AND (SC5.C5_LIBCAD = 'F') ) " + CHR(13) + CHR(10)
+       Endif
+       If lAcsPed
+          _cWhere += " OR "
+          _cWhere += "( ( SC5.C5_LIBCAD = 'T' ) AND ( SC5.C5_LIBPED = 'F' ) )"
+       Endif
+       If lAcsCre
+          _cWhere += " OR "
+          _cWhere += "( ( SC5.C5_LIBCAD = 'T' ) AND ( SC5.C5_LIBCRE = 'F' ) )"
+       Endif
+       If lAcsDir
+          _cWhere += " OR "
+          _cWhere += "( ( SC5.C5_LIBCAD = 'T' ) AND ( SC5.C5_LIBDIR = 'F' ) )"
+       Endif
+       If lAcsVis .and. !lAcsCad .and. !lAcsPed .and. !lAcsCre .and. !lAcsDir //Acesso somente para visualização
+          //Cadastro
+          _cWhere += "      ( ( ( UPPER( SC5.C5_CAD ) = '" + UPPER( cUsername ) + "' ) " + CHR(13) + CHR(10)
+          If Alltrim( UPPER( cUsername ) ) $ Alltrim( UPPER( _cLibRep ) )
+             _cWhere += " OR ( SUBSTRING( SC5.C5_CAD, 1, 1 ) IN('0','1','2','3','4','5','6','7','8','9') ) " + CHR(13) + CHR(10)
+          Endif 
+          _cWhere += " ) "
+          _cWhere += "  AND (SC5.C5_LIBCAD = 'F') ) " + CHR(13) + CHR(10)
+          //Pedido
+          _cWhere += " OR "
+          _cWhere += "( ( SC5.C5_LIBCAD = 'T' ) AND ( SC5.C5_LIBPED = 'F' ) )"
+          //Crédito
+          _cWhere += " OR "
+          _cWhere += "( ( SC5.C5_LIBCAD = 'T' ) AND ( SC5.C5_LIBCRE = 'F' ) )"
+          //Diretoria
+          _cWhere += " OR "
+          _cWhere += "( ( SC5.C5_LIBCAD = 'T' ) AND ( SC5.C5_LIBDIR = 'F' ) )"
        Endif
        _cWhere += " ) "
        _cWhere += "%"
@@ -428,10 +469,12 @@ Static Function fLItem( oModelItem, _lCopy )
              aAdd( _aAux  , Iif( ( _cTabSC5 )->C5_APROVA <> '2', .F., .T. ) )
              aAdd( _aAux  , ( _cTabSC5 )->C5_USRAPR         )
              aAdd( _aAux  , ''                              )
+             aAdd( _aAux  , 0                               )
+             aAdd( _aAux  , 0                               )
+             aAdd( _aAux  , 0                               )
              aAdd( _aItPed, { 0 , _aAux } )
              aAdd( _aPedidos, { ( _cTabSC5 )->C5_NUM, _aAux, } )
              If Len( _aItPed ) == 1
-                //fCalImp( ( _cTabSC5 )->C5_NUM )
                 _cPedido := ( _cTabSC5 )->C5_NUM
              Endif
              
@@ -440,8 +483,9 @@ Static Function fLItem( oModelItem, _lCopy )
        EndDo
        DbSelectArea( _cTabSC5 )
        ( _cTabSC5 )->( DbCloseArea( ) )
-       
-       FWMsgRun( , { || fCalImp( _cPedido ) }, "Aguarde...", "Carregando informações..." )
+       If !Empty( _cPedido )
+          FWMsgRun( , { || fCalImp( _cPedido ) }, "Aguarde...", "Carregando informações..." )
+       Endif
        
        RestArea( _aArea )
 Return _aItPed
@@ -451,35 +495,45 @@ Static Function fLValor( _oModel, _lCopy )
        Local aArea     := GetArea()
        Local aAux      := {}
        Local _nY
-       Local _nValMerc := 0
        Local _nValIpi  := 0
        Local _nValSub  := 0
-
-       Local _cPedido  := Iif( Len( _aItens ) > 0, _aItens[1][1], "" )
+       Local _cPedido  := Iif( Len( _aPedidos ) > 0, _aPedidos[1][1], "" ) //Somente para carga dos valores do primeiro pedido
+       Local _aItePed  := _aPedidos[1][3] //Itens dos pedidos
        
        If ! Empty( _cPedido )
-          For _nY := 1 To Len( _aItens )
-              If _aItens[_nY][1] == _cPedido
-                 _nValMerc += _aItens[_nY][15]
-                 _nValIpi  += _aItens[_nY][27]
-                 _nValSub  += _aItens[_nY][32]
-              Endif
+          _nValMer := 0
+          _nValICM := 0
+          _nValIPI := 0
+          _nValCOF := 0
+          _nValPIS := 0
+          _nValSub := 0
+          _nValMar := 0
+          _nTotCus := 0
+          For _nY := 1 To Len( _aItePed )
+              _nValMer += _aItePed[_nY][13]
+              _nValICM += _aItePed[_nY][22]
+              _nValIpi += _aItePed[_nY][25]
+              _nValCOF += _aItePed[_nY][28]
+              _nValPIS += _aItePed[_nY][31]
+              _nValSub += _aItePed[_nY][32]
+              _nValMar += _aItePed[_nY][33]
+              _nTotCus += Round( _aItePed[_nY][36], 2 )
           Next
+          _nReqLiq := Round( _nValMer - _nValICM - _nValCOF - _nValPIS, 2 )
           DbSelectArea('SC5')
           SC5->( DbSetOrder( 1 ) )
           SC5->( DbSeek( xFilial("SC5") + _cPedido ) )
 
-          aAdd( aAux  , _nValMerc )      //Valor Mercadoria
-          aAdd( aAux  , _nValIpi  )      //Valor IPI
-          aAdd( aAux  , _nValSub  )      //Valor Subst. Tributária
-          aAdd( aAux  , _nValMerc + _nValIpi + _nValSub ) //Valor Total
-          aAdd( aAux  , 0              ) //Perc. Lucro
-          aAdd( aAux  , SC5->C5_LUCRO  ) //Valor Lucro
-          aAdd( aAux  , SC5->C5_PORCOM ) //Perc. Comissão
-          aAdd( aAux  , SC5->C5_VLRCOM ) //Valor Comissão
-          aAdd( aAux  , 0 )
-          aAdd( aAux  , 0 )
-          aAdd( aAux  , 0 )
+          aAdd( aAux  , _nValMer )                           //Valor Mercadoria
+          aAdd( aAux  , _nValIpi )                           //Valor IPI
+          aAdd( aAux  , _nValSub )                           //Valor Subst. Tributária
+          aAdd( aAux  , _nValMer + _nValIpi + _nValSub )    //Valor Total
+          aAdd( aAux  , _nValMer * ( SC5->C5_LUCRO / 100 ) ) //Valor Lucro
+          aAdd( aAux  , SC5->C5_LUCRO  )                     //Perc. Lucro
+          aAdd( aAux  , SC5->C5_VLRCOM )                     //Valor Comissão
+          aAdd( aAux  , SC5->C5_COMIS1 )                     //Perc. Comissão
+          aAdd( aAux  , _nValMar       )                     //Valor Margem
+          aAdd( aAux  , Round( ( 1 - ( _nTotCus / _nReqLiq ) ) * 100, 2 ) )  //Percentual Margem
           aAdd( aItPed, { 0 , aAux } )
        Endif
 
@@ -539,6 +593,8 @@ Static Function fChangePED( _oViewPED, _cAction, _aParam )
        If _aPedidos[aScan( _aPedidos, { |x| x[1] == _cPedido } )][3] == Nil
           FWMsgRun( , { || fCalImp( _cPedido ) }, "Aguarde...", "Carregando informações..." )
        Endif
+       _aItePed := _aPedidos[aScan( _aPedidos, { |x| x[1] == _cPedido } )][3]
+
        _oAltera:Refresh()
        _oVenda:Refresh()
        _oPriCom:Refresh()
@@ -565,23 +621,35 @@ Static Function fChangePED( _oViewPED, _cAction, _aParam )
        SC5->( DbSetOrder( 1 ) )
        SC5->( DbSeek( xFilial('SC5') + _oModelPed:aCols[_oModelPed:nLine][1] ) )
  
-       _nValMerc := 0
-       _nValIpi  := 0
-       _nValSub  := 0
-       For _nY := 1 To Len( _aItens )
-           If _aItens[_nY][1] == _oModelPed:aCols[_oModelPed:nLine][1]
-              _nValMerc += _aItens[_nY][15]
-              _nValIpi  += _aItens[_nY][27]
-              //_nValSub  += _aItens[_nY][15]
-           Endif
+       _nValMer := 0
+       _nValICM := 0
+       _nValIPI := 0
+       _nValCOF := 0
+       _nValPIS := 0
+       _nValSub := 0
+       _nValMar := 0
+       _nTotCus := 0
+       For _nY := 1 To Len( _aItePed )
+           _nValMer += _aItePed[_nY][13]
+           _nValICM += _aItePed[_nY][22]
+           _nValIpi += _aItePed[_nY][25]
+           _nValCOF += _aItePed[_nY][28]
+           _nValPIS += _aItePed[_nY][31]
+           _nValSub += _aItePed[_nY][32]
+           _nValMar += _aItePed[_nY][33]
+           _nTotCus += Round( _aItePed[_nY][36], 2)
        Next
-       _oModelVal:aCols[1][1] := _nValMerc
-       _oModelVal:aCols[1][2] := _nValIpi
-       _oModelVal:aCols[1][4] := _nValMerc + _nValIpi + _nValSub
-       _oModelVal:aCols[1][6] := SC5->C5_LUCRO
-       _oModelVal:aCols[1][8] := SC5->C5_VLRCOM
-       _oModelVal:aCols[1][7] := SC5->C5_PORCOM
-
+       _nReqLiq := Round( _nValMer - _nValICM - _nValCOF - _nValPIS, 2 )
+       _oModelVal:aCols[1][ 1] := _nValMer
+       _oModelVal:aCols[1][ 2] := _nValIPI
+       _oModelVal:aCols[1][ 3] := _nValSub
+       _oModelVal:aCols[1][ 4] := _nValMer + _nValIPI + _nValSub
+       _oModelVal:aCols[1][ 5] := _nValMer * ( SC5->C5_LUCRO / 100 )
+       _oModelVal:aCols[1][ 6] := SC5->C5_LUCRO
+       _oModelVal:aCols[1][ 7] := SC5->C5_VLRCOM
+       _oModelVal:aCols[1][ 8] := SC5->C5_COMIS1
+       _oModelVal:aCols[1][ 9] := _nValMar
+       _oModelVal:aCols[1][10] := Round( ( 1 - ( _nTotCus / _nReqLiq ) ) * 100, 2 )
        RestArea( aArea )
        _oView:Refresh( 'GRIDVALOR' )
 Return _lRet
@@ -599,23 +667,27 @@ Static Function fHisPed(oView)
        Local _oModel    := FwModelActive()
        Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
 
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        U_fHisPed( 3, _oModelPed:aCols[_oModelPed:nLine][1] )
 
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F9, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )
 Return
@@ -650,49 +722,28 @@ Static Function fItePed(oView)
        Local _bAction2  := { || .T. } 
        Local _cQuery    := ""
        Local _aHeaderAux:= {}
+       Local _aHeaderNew:= {}
        Local _aColsAux  := {}
-       Local _nQtdAnt   := 0 
-       //Local aFisGet
-       //Local aFisGetSC5
-       //Local _aRelImp   := MaFisRelImp( "MT100", { "SF2", "SD2" } )
-       Local _aNoFields := { "C6_UM"     , "C6_SEGUM"  , "C6_OPER"   , "C6_CATALIS", "C6_ENTRIME", "C6_QTDENT2",;
-                             "C6_QTDENT" , "C6_CLASFIS", "C6_QTDLIB" , "C6_QTDLIB2", "C6_LA"     , "C6_SLDALIB",;
-                             "C6_UNSVEN ", "C6_DATFAT" , "C6_CLI"    , "C6_LOJA"   , "C6_NOTA"   , "C6_SERIE"  ,;
-                             "C6_NUM"    , "C6_COMIS2" , "C6_COMIS3" , "C6_COMIS4" , "C6_COMIS5" , "C6_PEDCLI" ,;
-                             "C6_PRUNIT" , "C6_NFORI"  , "C6_BLOQUEI", "C6_RESERVA", "C6_IPIDEV" , "C6_IDENTB6",;
-                             "C6_BLQ"    , "C6_OP"     , "C6_OK"     , "C6_GRADE"  , "C6_ITEMGRD", "C6_LOTECTL",;
-                             "C6_NUMLOTE", "C6_SERIORI", "C6_NUMORC" , "C6_ITEMORI", "C6_OPC"    , "C6_LOCALIZ",;
-                             "C6_CODISS" , "C6_DTVALID", "C6_NUMSERI", "C6_NUMOP  ", "C6_ITEMOP ", "C6_CLASFIS",;
-                             "C6_CONTRAT", "C6_NUMOS"  , "C6_NUMOSFA", "C6_CODFAB" , "C6_LOJAFA" , "C6_ITEMCON",;
-                             "C6_TPOP"   , "C6_REVISAO", "C6_SERVIC" , "C6_ENDPAD" , "C6_TPESTR" , "C6_CONTRT" ,;
-                             "C6_TPCONTR", "C6_ITCONTR", "C6_GEROUPV", "C6_QTDEMP" , "C6_QTDEMP2", "C6_PROJPMS",;
-                             "C6_EDTPMS" , "C6_TASKPMS", "C6_TRT"    , "C6_PROJET" , "C6_MOPC"   , "C6_ITPROJ" ,;
-                             "C6_NUMSC"  , "C6_ITEMSC" , "C6_POTENCI", "C6_LICITA" , "C6_REGWMS" , "C6_NUMCP"  ,;
-                             "C6_SUGENTR", "C6_FUNRURA", "C6_FETAB"  , "C6_CODROM" , "C6_ITEMED" , "C6_TURNO"  ,;
-                             "C6_LOJDED" , "C6_ABSCINS", "C6_FORDED" , "C6_ITPC"   , "C6_PVCOMOP", "C6_ABATISS",;
-                             "C6_FILPED" , "C6_PEDCOM" , "C6_ABATMAT", "C6_TPDEDUZ", "C6_MOTDED" , "C6_VLDED"  ,;
-                             "C6_VLNFD"  , "C6_RATEIO" , "C6_SERDED" , "C6_PCDED"  , "C6_NFDED"  , "C6_ITLPRE" ,;
-                             "C6_D1SERIE", "C6_D1DOC"  , "C6_CODLPRE", "C6_D1ITEM" , "C6_PROGRAM", "C6_CODLAN ",;
-                             "C6_VDMOST ", "C6_VDOBS  ", "C6_ABATINS", "C6_IEST   ", "C6_USERLGI", "C6_USERLGA",;
-                             "C6_PALLET ", "C6_BASVEIC", "C6_TNATREC", "C6_CNATREC", "C6_GRPNATR", "C6_DTFIMNT",;
-                             "C6_VLIMPOR", "C6_FCICOD ", "C6_INFAD  ", "C6_CODINF ", "C6_CC     ", "C6_CONTA  ",; 
-                             "C6_ITEMCTA", "C6_CLVL   ", "C6_DATCPL ", "C6_HORCPL ", "C6_INTROT ", "C6_CATEG  ",; 
-                             "C6_CTVAR  ", "C6_PENE   ", "C6_GCPLT  ", "C6_GCPIT  ", "C6_ALMTERC", "C6_ITEMGAR",;
-                             "C6_ORCGAR ", "C6_HORENT ", "C6_CCUSTO ", "C6_SOLCOM ", "C6_PMSID  ", "C6_CULTRA ",;
-                             "C6_REVPROD", "C6_PRODFIN", "C6_PEDVINC", "C6_TPPROD ", "C6_SDOCORI", "C6_SDOC   ",;
-                             "C6_SDOCDED", "C6_SDOCSD1", "C6_CSTPIS ", "C6_NRSEQCQ", "C6_IPITRF ", "C6_TPREPAS",; 
-                             "C6_X_EXPO ", "C6_X_SIM3G", "C6_DATAEMB", "C6_XREGD1D", "C6_XESPECI" }
-       /***********************************************************************/
-       //Private aTransp  := {"",""}
+       Local _aColsNew  := {}
+       Local _nQtdAnt   := 0
+       Local _cCondPag  := SubStr( _oModelPed:aCols[_oModelPed:nLine][5], 1, 3 )
+       Local _dDiaFat   := dDataBase
+       Local _aPrazos   := {}
+       Local _aRetPrazo := {}
+       Local _nQtdePar  := 0
+       Local _nAuxCal   := 0
+       Local _nJuros    := GetMV( "MV_JUROS" )
+       Local _lProdEst
 
-       //FisGetInit(@aFisGet,@aFisGetSC5)
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        DbSelectArea('SA4')
        SA4->( DbSetOrder( 1 ) )
@@ -706,11 +757,15 @@ Static Function fItePed(oView)
        SA1->( DbSetOrder( 1 ) )
        SA1->( DbSeek( xFilial('SA1') + SC5->C5_CLIENTE + SC5->C5_LOJACLI ) )
 
+       _aRetPrazo := fCalcPrazo( _dDiaFat, _cCondPag )
+       _aPrazos   := _aRetPrazo[1]
+       _nQtdePar  := Len( _aPrazos )
+
        RegToMemory( 'SC5', .f. )
        Pergunte( _cPerg, .f. )
 
-       aCols    := {}
-       aHeader  := {}
+       //aCols    := {}
+       //aHeader  := {}
        _cSeek   := FwxFilial( "SC6" ) + _oModelPed:aCols[_oModelPed:nLine][1]
        _bWhile  := { || C6_FILIAL + C6_NUM }
        _cQuery  := "SELECT * "
@@ -720,115 +775,164 @@ Static Function fItePed(oView)
        _cQuery  += "  AND SC6.C6_NUM = 'ZZZZZZ' "
        _cQuery  += "ORDER BY " + SQLOrder( SC6->( IndexKey() ) )
    
-       FillGetDados( 2, 'SC6', 1, _cSeek, _bWhile, { { _bCond, _bAction1, _bAction2, } }, /*_aNoFields*/, /*_aYesFields*/, /*_lOnlyYes*/, _cQuery, /*_bMontCols*/, .F., /*_aHeaderAux*/, /*_aColsAux*/, , , , "SC6" )
-       _nQtdAnt := Len( aHeader )
-       aAdd( aHeader, { 'Margem(R$)', 'C6_X_VMAR', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Margem(%)' , 'C6_X_PMAR', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Bas.ICMS'  , 'C6_X_BICM', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Alq.ICMS'  , 'C6_X_AICM', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Val.ICMS'  , 'C6_X_VICM', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Bas.IPI'   , 'C6_X_BIPI', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Alq.IPI'   , 'C6_X_AIPI', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Val.IPI'   , 'C6_X_VIPI', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Bas.PIS'   , 'C6_X_BPIS', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Alq.PIS'   , 'C6_X_APIS', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Val.PIS'   , 'C6_X_VPIS', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Bas.COF.'  , 'C6_X_BCOF', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Alq.COF.'  , 'C6_X_ACOF', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Val.COF.'  , 'C6_X_VCOF', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
-       aAdd( aHeader, { 'Val.SUB'   , 'C6_X_VIRE', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       FillGetDados( 2, 'SC6', 1, _cSeek, _bWhile, { { _bCond, _bAction1, _bAction2, } }, /*_aNoFields*/, /*_aYesFields*/, /*_lOnlyYes*/, _cQuery, /*_bMontCols*/, .F., _aHeaderAux, _aColsAux, , , , "SC6" )
+       _nQtdAnt := Len( _aHeaderAux )
+       aAdd( _aHeaderAux, { 'Margem Bruta(R$)', 'C6_X_VMAR', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Margem(%)' , 'C6_X_PMAR', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Bas.ICMS'  , 'C6_X_BICM', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Alq.ICMS'  , 'C6_X_AICM', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.ICMS'  , 'C6_X_VICM', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Bas.IPI'   , 'C6_X_BIPI', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Alq.IPI'   , 'C6_X_AIPI', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.IPI'   , 'C6_X_VIPI', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Bas.PIS'   , 'C6_X_BPIS', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Alq.PIS'   , 'C6_X_APIS', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.PIS'   , 'C6_X_VPIS', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Bas.COF.'  , 'C6_X_BCOF', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Alq.COF.'  , 'C6_X_ACOF', '@E 999.99'        ,  6, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.COF.'  , 'C6_X_VCOF', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.SUB'   , 'C6_X_VIRE', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.SUB'   , 'C6_X_VIRE', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'A-Val.Hoje', 'C6_X_VHOJ', '@E 99,999.99'     ,  9, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'B-Par.Sim.', 'C6_X_PARS', '@E 99.99'         ,  5, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'C-Cus.Rep.', 'C6_X_CUSR', '@E 99.99'         ,  5, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'D-Luc.Item', 'C6_X_VLIT', '@E 99,999.9999'   , 11, 4, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Prod. Est.', 'C6_X_PRES', '@!'               ,  3, 0, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'C', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'E-Luc.Min.', 'C6_X_LMIN', '@E 99,999.9999'   , 11, 4, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+       aAdd( _aHeaderAux, { 'Val.Prod.' , 'C6_X_VLPR', '@E 999,999,999.99', 14, 2, '', 'x       x       x       x       x       x       x       x       x       x       x       x       x       x       x x     ', 'N', '      ', ' ' } )
+
        //Ajuste para mostrar somente campos necessários e ordena-los
        _aAuxH := {}
-       For _nY := 1 To Len( aHeader )
-           If Alltrim( aHeader[_nY][2] ) $ 'C6_ITEM.C6_PRODUTO.C6_DESCRI.C6_QTDVEN.C6_PRCVEN.C6_XPRUNIT.C6_ULPRECO.C6_VALOR.C6_COMIS1.C6_ENTREGA.C6_LUCRESP.C6_VLRLUCR.C6_X_VICM.C6_X_VIPI.C6_X_VPIS.C6_X_VCOF.C6_X_VMAR.C6_X_PMAR.C6_VIRE'
-              //C6_PICMRET.C6_ICMRET.C6_ICMSRET.C6_DESCONT.C6_VALDESC.C6_FCICOD
-              If Alltrim( aHeader[_ny][2] ) $ 'C6_ITEM'
-                 aAdd( _aAuxH, { '01', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_PRODUTO'
-                     aAdd( _aAuxH, { '02', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_DESCRI'
-                     aAdd( _aAuxH, { '03', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_QTDVEN'
-                     aAdd( _aAuxH, { '04', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_PRCVEN'
-                     aAdd( _aAuxH, { '05', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_VALOR'
-                     aAdd( _aAuxH, { '06', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_XPRUNIT'
-                     aAdd( _aAuxH, { '07', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_ULPRECO'
-                     aAdd( _aAuxH, { '08', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_COMIS1'
-                     aAdd( _aAuxH, { '11', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_VMAR'
-                     aAdd( _aAuxH, { '12', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_PMAR'
-                     aAdd( _aAuxH, { '13', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_VICM'
-                     aAdd( _aAuxH, { '16', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_VIPI'
-                     aAdd( _aAuxH, { '19', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_VPIS'
-                     aAdd( _aAuxH, { '22', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_VCOF'
-                     aAdd( _aAuxH, { '25', aHeader[_nY] } )
-              ElseIf Alltrim( aHeader[_ny][2] ) $ 'C6_X_VIRE'
-                     aAdd( _aAuxH, { '28', aHeader[_nY] } )
+       For _nY := 1 To Len( _aHeaderAux )
+           If Alltrim( _aHeaderAux[_nY][2] ) $ 'C6_ITEM.C6_PRODUTO.C6_DESCRI.C6_QTDVEN.C6_PRCVEN.C6_XPRUNIT.C6_ULPRECO.C6_VALOR.C6_COMIS1.C6_ENTREGA.C6_LUCRESP.'+;
+                                            'C6_VLRLUCR.C6_X_VICM.C6_X_VIPI.C6_X_VPIS.C6_X_VCOF.C6_X_VMAR.C6_X_PMAR.C6_X_VIRE.C6_X_VHOJ.C6_X_PARS.C6_X_VLIT'+;
+                                            'C6_X_CUSR.C6_X_PRES.C6_X_LMIN.C6_X_VLPR'
+              If Alltrim( _aHeaderAux[_ny][2] ) $ 'C6_ITEM'
+                 aAdd( _aAuxH, { '01', _aHeaderAux[_nY] } )
+              ElseIf Alltrim( _aHeaderAux[_ny][2] ) $ 'C6_PRODUTO'
+                     aAdd( _aAuxH, { '02', _aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_DESCRI'
+                     aAdd( _aAuxH, { '03',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_QTDVEN'
+                     aAdd( _aAuxH, { '04',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_PRCVEN'
+                     aAdd( _aAuxH, { '05',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_VALOR'
+                     aAdd( _aAuxH, { '06',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_XPRUNIT'
+                     aAdd( _aAuxH, { '07',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_ULPRECO'
+                     aAdd( _aAuxH, { '08',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_COMIS1'
+                     aAdd( _aAuxH, { '11',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VMAR'
+                     aAdd( _aAuxH, { '12',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_PMAR'
+                     aAdd( _aAuxH, { '13',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VICM'
+                     aAdd( _aAuxH, { '16',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VIPI'
+                     aAdd( _aAuxH, { '19',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VPIS'
+                     aAdd( _aAuxH, { '22',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VCOF'
+                     aAdd( _aAuxH, { '25',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VIRE'
+                     aAdd( _aAuxH, { '28',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VHOJ'
+                     aAdd( _aAuxH, { '29',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_PARS'
+                     aAdd( _aAuxH, { '30',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_CUSR'
+                     aAdd( _aAuxH, { '31',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VLIT'
+                     aAdd( _aAuxH, { '32',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_PRES'
+                     aAdd( _aAuxH, { '33',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_LMIN'
+                     aAdd( _aAuxH, { '34',_aHeaderAux[_nY] } )
+              ElseIf Alltrim(_aHeaderAux[_ny][2] ) $ 'C6_X_VLPR'
+                     aAdd( _aAuxH, { '35',_aHeaderAux[_nY] } )
               Else
-                 aAdd( _aAuxH, { '99', aHeader[_nY] } )
+                 aAdd( _aAuxH, { '99',_aHeaderAux[_nY] } )
               Endif
            Endif
        Next
        aSort( _aAuxH, , , { |x,y| x[1] < y[1] } )
        For _nY := 1 To Len( _aAuxH )
-           aAdd( _aHeaderAux, _aAuxH[_nY][2] )
+           aAdd( _aHeaderNew, _aAuxH[_nY][2] )
        Next
  
        _nColImp  := aScan( _aPedidos, { |x| x[1] == _cPedido } )
        _aColImp  := _aPedidos[_nColImp][3]
 
-       _nPosProd := aScan( _aHeaderAux, { |x| Alltrim( x[2] ) == "C6_PRODUTO" } )
-       _nPosItem := aScan( _aHeaderAux, { |x| Alltrim( x[2] ) == "C6_ITEM"    } )
-       _nPosUPrc := aScan( _aHeaderAux, { |x| Alltrim( x[2] ) == "C6_ULPRECO" } )
-       _nPosTPrc := aScan( _aHeaderAux, { |x| Alltrim( x[2] ) == "C6_XPRUNIT" } )
-       _nPosValo := aScan( _aHeaderAux, { |x| Alltrim( x[2] ) == "C6_VALOR"   } )
+       _nPosProd := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_PRODUTO" } )
+       _nPosQuan := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_QTDVEN"  } )
+       _nPosItem := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_ITEM"    } )
+       _nPosUPrc := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_ULPRECO" } )
+       _nPosTPrc := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_XPRUNIT" } )
+       _nPosValo := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_VALOR"   } )
+       _nPosVHoj := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_VHOJ"  } )
+       _nPosVIcm := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_VICM"  } )
+       _nPosVPis := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_VPIS"  } )
+       _nPosVCof := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_VCOF"  } )
+       _nPosParS := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_PARS"  } )
+       _nPosCusR := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_CUSR"  } )
+       _nPosVLIT := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_VLIT"  } )
+       _nPosPRES := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_PRES"  } )
+       _nPosLMin := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_LMIN"  } )
+       _nPosVLPr := aScan( _aHeaderNew, { |x| Alltrim( x[2] ) == "C6_X_VLPR"  } )
 
        DbSelectArea("SB1")
        SB1->( DbSetOrder( 1 ) )
        DbSelectArea("SB5")
        SB5->( DbSetOrder( 1 ) )
 
-       For _nY := 1 To Len( aCols )
-           aAdd( _aColsAux,  Array( Len( _aHeaderAux ) + 1 ) )
-           For _nX := 1 To Len( _aHeaderAux )
-               _nPosHead := aScan( aHeader, { |x| Alltrim( x[2] ) == Alltrim( _aHeaderAux[_nX][2] ) } )
+       For _nY := 1 To Len( _aColsAux )
+           aAdd( _aColsNew,  Array( Len( _aHeaderNew ) + 1 ) )
+           For _nX := 1 To Len( _aHeaderNew )
+               _nPosHead := aScan( _aHeaderAux, { |x| Alltrim( x[2] ) == Alltrim( _aHeaderNew[_nX][2] ) } )
                If _nPosHead < _nQtdAnt
-                  _aColsAux[_nY][_nX] := aCols[_nY][_nPosHead]
+                  _aColsNew[_nY][_nX] := _aColsAux[_nY][_nPosHead]
                Else
-                  _nPosIte := aScan( _aColImp, { |x| x[34] == _cPedido + _aColsAux[_nY][_nPosItem] } )
-                  If Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_VMAR'
-                         _aColsAux[_nY][_nX] := _aColsAux[_nY][_nPosValo] -_aColImp[_nPosIte][22] - _aColImp[_nPosIte][28] - _aColImp[_nPosIte][31]
-                  ElseIf Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_PMAR'
-                         _aColsAux[_nY][_nX] := 0
-                  ElseIf Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_VICM'
-                         _aColsAux[_nY][_nX] := _aColImp[_nPosIte][22]
-                  ElseIf Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_VIPI'
-                         _aColsAux[_nY][_nX] := _aColImp[_nPosIte][25]
-                  ElseIf Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_VPIS'
-                         _aColsAux[_nY][_nX] := _aColImp[_nPosIte][28]
-                  ElseIf Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_VCOF'
-                         _aColsAux[_nY][_nX] := _aColImp[_nPosIte][31]
-                  ElseIf Alltrim( aHeader[_nPosHead][2] ) == 'C6_X_VIRE'
-                         _aColsAux[_nY][_nX] := _aColImp[_nPosIte][31]
+                  _nPosIte := aScan( _aColImp, { |x| x[35] == _cPedido + _aColsNew[_nY][_nPosItem] } )
+                  If Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_VMAR'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][33]
+                  ElseIf Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_PMAR'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][34] 
+                  ElseIf Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_VICM'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][22]
+                  ElseIf Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_VIPI'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][25]
+                  ElseIf Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_VPIS'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][28]
+                  ElseIf Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_VCOF'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][31]
+                  ElseIf Alltrim(_aHeaderAux[_nPosHead][2] ) == 'C6_X_VIRE'
+                         _aColsNew[_nY][_nX] := _aColImp[_nPosIte][31]
                   Endif
                Endif
            Next
-           SB1->( DbSeek( xFilial( "SB1" ) + _aColsAux[_nY][ _nPosProd] ) )
-           SB5->( DbSeek( xFilial( "SB5" ) + _aColsAux[_nY][ _nPosProd] ) )
+           SB1->( DbSeek( xFilial( "SB1" ) + _aColsNew[_nY][ _nPosProd] ) )
+           SB5->( DbSeek( xFilial( "SB5" ) + _aColsNew[_nY][ _nPosProd] ) )
 
-           _aColsAux[_nY][_nPosUPrc]                := U_VERULPRECO( M->C5_CLIENTE, _aColsAux[_nY][ _nPosProd], M->C5_LOJACLI )
-           _aColsAux[_nY][_nPosTPrc]                := IIF( SB1->B1_ESTOQUE <> "S", SB5->B5_PRV2, SB1->B1_PRV1 )
-           _aColsAux[_nY][ Len( _aHeaderAux ) + 1 ] := .F.
+           _aColsNew[_nY][_nPosUPrc]                := U_VERULPRECO( M->C5_CLIENTE, _aColsNew[_nY][ _nPosProd], M->C5_LOJACLI )
+           _aColsNew[_nY][_nPosTPrc]                := IIF( SB1->B1_ESTOQUE <> "S", SB5->B5_PRV2, SB1->B1_PRV1 )
+           _aColsNew[_nY][ Len( _aHeaderNew ) + 1 ] := .F.
+           //Calculo da retirada dos juros (adicionado no simulado do preço) para trazer o valor presente
+           _nAuxCal := 0
+           For _nX := 1 To Len( _aPrazos )
+               _nAuxCal += ( _aColsNew[_nY][_nPosValo] * _aPrazos[_nX][ 2 ] ) / ( ( 1 + ( _nJuros / 100 ) ) ^ ( ( 12 * _aPrazos[_nX][1] ) / 365 ) )
+           Next
+           _aColsNew[_nY][_nPosVHoj] := Round( _nAuxCal, 2 ) //Calculo do Valor de vendas hoje
+           _aColsNew[_nY][_nPosParS] := SB1->B1_PERINT       //Parametros do ultimo simulado que atualizou a Tabela de Preços
+           _aColsNew[_nY][_nPosCusR] := SB1->B1_CUSTOR       //Custo de Reposição da ultima atualização da Tabela de preço
+           _aColsNew[_nY][_nPosVLIT] := _aColsNew[_nY][_nPosVHoj] - ( _aColsNew[_nY][_nPosVALO] * ( _aColsNew[_nY][_nPosParS] / 100 ) ) - ( _aColsNew[_nY][_nPosCusR] * _aColsNew[_nY][_nPosQuan] ) - _aColsNew[_nY][_nPosVIcm] - _aColsNew[_nY][_nPosVPis] - _aColsNew[_nY][_nPosVCof]
+           _lProdEst := Iif( SB1->B1_ESTOQUE == 'S', .t., .f. )
+           _aColsNew[_nY][_nPosPRES] := Iif( _lProdEst, 'Sim', 'Não' )
+           _nAuxLucr := Iif( _lProdEst, SB1->B1_LCRMIN, SB1->B1_LUCROM2 )
+           
+           _nVlrItem := _aColsNew[_nY][_nPosVALO]
        Next
 
        oModal := FWDialogModal():New()
@@ -843,19 +947,32 @@ Static Function fItePed(oView)
        oContainer := TPanel():New( ,,, oModal:getPanelMain() ) 
        oContainer:Align := CONTROL_ALIGN_ALLCLIENT
 
-       _oGetD := MsNewGetDados():New( 004, 004, 214, 594, 0, /*_cLinhaOk*/, /*_cTudoOk*/, "", /*_aAlter*/, 1, 999, /*_cFieldOk*/, /*_cSuperDel*/, /*_cDelOK*/, oContainer, _aHeaderAux, _aColsAux)
+       _oGetD := MsNewGetDados():New( 004, 004, 214, 594, 0, /*_cLinhaOk*/, /*_cTudoOk*/, "", /*_aAlter*/, 1, 999, /*_cFieldOk*/, /*_cSuperDel*/, /*_cDelOK*/, oContainer, _aHeaderNew, _aColsNew )
        oModal:Activate()
 
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F9, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )
 Return
+
+Static Function fBusCus( _cProduto )
+       Local _dDatFec := GETMV( "MV_ULMES" )
+       Local _nCusPro := 0
+
+       DbSelectArea("Z99")
+       DbSetOrder(1)
+       If DbSeek( xFilial('Z99') + _cProduto + dToS( _dDatFec ) )
+          _nCusPro := ( Z99->Z99_GGFCON + Z99->Z99_MOCONS + Z99->Z99_REQCON )
+       Endif
+Return _nCusPro
 
 /*/{Protheus.doc} fDadPed
 Consulta pedido de vendas
@@ -875,13 +992,15 @@ Static Function fDadPed(oView)
        Private cCadastro := "Pedido de Vendas"        //obrigatoriamente preciso definir com private a variável cCadastro
        Private aRotina   := {}                        //obrigatoriamente preciso definir a variavel aRotina como private
 
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        DbSelectArea('SC5')
        SC5->( DbSetOrder( 1 ) )
@@ -895,13 +1014,15 @@ Static Function fDadPed(oView)
        Else
           MATA410( Nil, Nil, Nil, Nil, "A410Visual" ) //executo a função padrão MatA410
        Endif
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F9, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )   
 Return
@@ -935,13 +1056,15 @@ Static Function fPlaFin(oView)
        /***********************************************************************/
        Private aTransp  := {"",""}
 
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        RegToMemory( 'SC5', .f. )
        Pergunte( _cPerg, .f. )
@@ -969,13 +1092,15 @@ Static Function fPlaFin(oView)
 
        Ma410Impos( 2, .F., @_aRentab)
 
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F5, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )   
 Return
@@ -1002,13 +1127,15 @@ Static Function fTAbFin(oView)
 	Private aSelFil  := {}
 	Private aTmpFil  := {}
 
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        If Pergunte("FIC010",.t.)
           aadd(aParam, MV_PAR01) ; aadd(aParam, MV_PAR02) ; aadd(aParam, MV_PAR03)
@@ -1027,13 +1154,15 @@ Static Function fTAbFin(oView)
           Endif
        Endif
 
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F5, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )
 Return
@@ -1060,13 +1189,15 @@ Static Function fTReFin(oView)
        Private aSelFil  := {}
        Private aTmpFil  := {}
 
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        If Pergunte("FIC010",.t.)
           aadd(aParam, MV_PAR01) ; aadd(aParam, MV_PAR02) ; aadd(aParam, MV_PAR03)
@@ -1085,13 +1216,15 @@ Static Function fTReFin(oView)
           Endif
        Endif
 
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F9, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )
 Return
@@ -1128,13 +1261,15 @@ Static Function fDadCli(oView)
                     { "Alterar"   , "A030Altera" , 0 , 4, 143  , NIL },;
                     { "Excluir"   , "A030Deleta" , 0 , 5, 144  , NIL } }
 
-       SetKey( VK_F2, {||} )
-       SetKey( VK_F4, {||} )
-       SetKey( VK_F5, {||} )
-       SetKey( VK_F6, {||} )
-       SetKey( VK_F7, {||} )
-       SetKey( VK_F8, {||} )
-       SetKey( VK_F9, {||} )
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
 
        DbSelectArea("SA1")
        SA1->( DbSetOrder( 1 ) )
@@ -1149,13 +1284,15 @@ Static Function fDadCli(oView)
           Endif
        Endif
 
-       SetKey( VK_F2, bHistorico )
-       SetKey( VK_F4, bItensPedi )
-       SetKey( VK_F5, bDadosPedi )
-       SetKey( VK_F6, bPlanilhaF )
-       SetKey( VK_F7, bTitAberto )
-       SetKey( VK_F8, bTitRecebi )
-       SetKey( VK_F9, bDadosClie )
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
 
        RestArea( aArea )
 Return
@@ -1190,7 +1327,7 @@ Static Function fAprova( _oPanel )
        _lLibCre := _oModelPed:aCols[_oModelPed:nLine][_nPosLCr]
        _cUsrCre := _oModelPed:aCols[_oModelPed:nLine][_nPosUCr]
        _lLibDir := _oModelPed:aCols[_oModelPed:nLine][_nPosLDi]
-       _cUsrDIR := _oModelPed:aCols[_oModelPed:nLine][_nPosUDi]
+       _cUsrDir := _oModelPed:aCols[_oModelPed:nLine][_nPosUDi]
        _lLibRec := _oModelPed:aCols[_oModelPed:nLine][_nPosLAp]
        _cUsrRec := _oModelPed:aCols[_oModelPed:nLine][_nPosUAp]
 
@@ -1204,14 +1341,26 @@ Static Function fAprova( _oPanel )
        @ 075,070 SAY      _oUsrDir VAR _cUsrDir PICTURE '@!' COLOR CLR_BLUE    SIZE 130,09  PIXEL OF _oPanel FONT _oFont4
        @ 095,005 CHECKBOX _oLibRec VAR _lLibRec PROMPT OemToAnsi("Recusar:")   SIZE 060,10 FONT _oFont4 PIXEL OF _oPanel
        @ 095,070 SAY      _oUsrRec VAR _cUsrRec PICTURE '@!' COLOR CLR_BLUE    SIZE 130,09  PIXEL OF _oPanel FONT _oFont4
-       _oLibCad:bLClicked := { || fMRCCad() } ; _oLibPed:bLClicked := { || fMRCPed() }
-       _oLibCre:bLClicked := { || fMRCCre() } ; _oLibDir:bLClicked := { || fMRCDir() }
+       _oLibCad:bLClicked := { || fLibCad() } ; _oLibPed:bLClicked := { || fLibPed() }
+       _oLibCre:bLClicked := { || fLibCre() } ; _oLibDir:bLClicked := { || fLibDir() }
        _oLibRec:bLClicked := { || fMRCRec() }
+       _oLibCad:bWhen := { || .F. }
+       _oLibPed:bWhen := { || .F. }
+       _oLibCre:bWhen := { || .F. }
+       _oLibDir:bWhen := { || .F. }
+       _oLibRec:bWhen := { || .F. }
+
        If lAcsCad
-          _oLibPed:bWhen := { || .F. }
-          _oLibCre:bWhen := { || .F. }
-          _oLibDir:bWhen := { || .F. }
-          _oLibRec:bWhen := { || .F. }
+          _oLibCad:bWhen := { || .T. }
+       Endif
+       If lAcsPed
+          _oLibPed:bWhen := { || .T. }
+       Endif
+       If lAcsCre
+          _oLibCre:bWhen := { || .T. }
+       Endif
+       If lAcsDir
+          _oLibDir:bWhen := { || .T. }
        Endif
 Return .T.
 
@@ -1252,6 +1401,9 @@ Static Function fDadRes( )
        Local _oModel    := FwModelActive()
        Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
        Local _nPosRes   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'RESTRICAO' } )
+       Local _nPosVat   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'VALATR' } )
+       Local _nPosTTI   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'TOTTIT' } )
+       Local _nPosTAB   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'TOTPAB' } )
 
        DbSelectArea("SA1")
        SA1->( DbSetOrder( 1 ) )
@@ -1360,7 +1512,11 @@ Static Function fDadRes( )
        
        _nTotPAb := fAcuPed( Iif( SC5->C5_TIPO $ 'D.B', { 'SA2', SC5->C5_CLIENTE }, { 'SA1', SC5->C5_CLIENTE } ), 0/*nPercSubst*/, 0/*nPerIcm*/, 0/*nAliqSol*/, _oModelPed:aCols[_oModelPed:nLine][1] )
 
+
       _oModelPed:aCols[_oModelPed:nline][_nPosRes] := _cRestri
+      _oModelPed:aCols[_oModelPed:nline][_nPosVat] := _nTotAtr
+      _oModelPed:aCols[_oModelPed:nline][_nPosTTI] := _nTotTit
+      _oModelPed:aCols[_oModelPed:nline][_nPosTAB] := _nTotPAb
 Return
 
 /*/{Protheus.doc} fObserv
@@ -1385,28 +1541,647 @@ Static Function fObserv( _oPanel )
 
 Return .T.
 
-Static Function fMRCCad()
-       _cUsrCad := Iif(_lLibCad, cUsername, space(25) )
+/*/{Protheus.doc} fLibCad
+Função que marca e desmarca liberação do cadastro do pedido de vendas
+@type function
+@version  v2022.01
+@author Luis Gustavo de Souza
+@since 25/01/2022
+/*/
+Static Function fLibCad()
+       Local _oModel    := FwModelActive()
+       Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
+       Local _oModelVal := _oModel:GetModel( 'GRIDVALOR' )
+       Local _nPosPed   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'PEDIDO'   } )
+       Local _nPosLCa   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBCAD'   } )
+       Local _nPosUCa   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRCAD'   } )
+       Local _nPosVat   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'VALATR'   } )
+       Local _nPosTTI   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'TOTTIT'   } )
+       Local _nPosTAB   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'TOTPAB'   } )
+       Local _nPosCon   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'CONDICAO' } )
+       Local _nPosCli   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'CLIENTE'  } )
+       Local _nValTOT   := aScan( _oModelVal:aHeader, { |x| Alltrim( x[2] ) == 'VALTOT'   } )
+       Local _nPosLCr   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBCRE'   } )
+       Local _nPosUCr   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRCRE'   } )
+       Local _nPosLDi   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBDIR'   } )
+       Local _nPosUDi   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRDIR'   } )
+       Local _nPosOPe   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'OBSPED'   } )
+       Local _nPosOC5   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'OBSSC5'   } )
+       Local _ZPPAR0018 := GetMV( "ZP_PAR0018" ) //Habilita/desabilita regra para aprovacao automatica de credito e diretoria na analise de pedidos.
+       Local _ZPPAR0019 := GetMV( "ZP_PAR0019" ) //Valor limite para liberacao automatica de credito e diretoria.
+       Local _lAutCre   := .f.
+       Local _lAutDir   := .f.
+
+       _lLibCad := Iif( ValType( _lLibCad ) == 'L', _lLibCad, Iif( _lLibCad $ 'F', .F., .T. ) )
+
+       If _lLibCad
+          _cUsrCad := cUsername
+          _oModelPed:aCols[_oModelPed:nLine][_nPosLCa] := .T.
+          _oModelPed:aCols[_oModelPed:nLine][_nPosUCa] := cUsername
+          //Grava no pedido de Vendas
+          DbSelectArea( 'SC5' )
+          SC5->( DbSetOrder( 1 ) )
+          If SC5->( DbSeek( xFilial( 'SC5' ) + _oModelPed:aCols[_oModelPed:nLine][_nPosPed] ) )
+             RecLock( 'SC5', .F. )
+                SC5->C5_USRCAD := cUsername
+                SC5->C5_LIBCAD := 'T'
+             SC5->( MsUnLock() )
+             //Grava o Log de Liberação
+             RecLock("ZZB", .t.)
+                ZZB->ZZB_FILIAL := xFilial("ZZB")
+                ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                ZZB->ZZB_IDLOG  := 'LCA'
+                ZZB->ZZB_USRLOG := cUsername
+                ZZB->ZZB_DATLOG := dDataBase
+                ZZB->ZZB_HORLOG := Time()
+             ZZB->( MsUnLock() )
+
+             //Regra para liberação automática de Crédito
+             /********************************************************************************************************************/
+             //** ANALISE DE CREDITO PARA LIBERAÇÃO AUTOMÁTICA - Criada e solicitada por Sérgio Duó em 08/2020.
+             //** 1º) SEM TITULOS EM ATRASO
+             //** 2º) CONDIÇÃO DE PAGAMENTO DIFERENTE DE 001 (A VISTA)
+             //** 3º) SALDO DE TITULOS EM ABERTO (SE1) + SALDO ATUAL + PEDIDO ATUAL (VALORES COM IMPOSTOS) < = A1_LC  DO CLIENTE
+             //** 4º) PEDIDOS ATÉ R$ 100.000,00 (LIBERA CRÉDITO + LIBERA DIRETORIA) >= R$ 100.000,00 (LIBERA CRÉDITO)
+             /********************************************************************************************************************/
+             DbSelectArea('SA1')
+             SA1->( DbSetOrder(1) )
+             SA1->( DbSeek( xFilial('SA1') + SubString( _oModelPed:aCols[_oModelPed:nLine][_nPosCli], 1, 6 ) + SubString( _oModelPed:aCols[_oModelPed:nLine][_nPosCli], 8, 2 ) ) )
+             If _ZPPAR0018 //Habilita utilização da regra
+                _cRegra := ""
+                _cRegra += "Pedido: " + _oModelPed:aCols[_oModelPed:nLine][_nPosPed] + CHR(13) + CHR(10)
+                _cIncon := ""
+                If _oModelPed:aCols[_oModelPed:nLine][_nPosVat] <= 0 //Regra 1 - Titulos em atraso
+                   _cRegra += "Valor atraso em R$ " + DTOC( dDataBase ) + ": " + Transform( _oModelPed:aCols[_oModelPed:nLine][_nPosVat], "@E 999,999,999.99" ) + " OK" + CHR(13) + CHR(10)
+                   If SubStr( _oModelPed:aCols[_oModelPed:nLine][_nPosCon], 1, 3 ) <> '001' //Regra 2 - Condição de pagamento a vista
+                      _cRegra += "Condição: " + Alltrim( _oModelPed:aCols[_oModelPed:nLine][_nPosCon] ) + " OK" + CHR(13) + CHR(10)
+                      If ( _oModelPed:aCols[_oModelPed:nLine][_nPosTTI] + _oModelPed:aCols[_oModelPed:nLine][_nPosTAB] + _oModelVal:aCols[_oModelVal:nLine][_nValTOT] ) < SA1->A1_LC //Regra 3 - ( TITULOS EM ABERTO + SALDO ATUAL + PEDIDO ATUAL ) < LIMITE CREDITO
+                         _cRegra += "Titulos: R$ " + Alltrim( Transform( _oModelPed:aCols[_oModelPed:nLine][_nPosTTI], "@E 999,999,999.99" ) ) + " + Ped. em Aberto: R$ " + Alltrim( Transform( _oModelPed:aCols[_oModelPed:nLine][_nPosTAB], "@E 999,999,999.99" ) ) + " + Ped. Atual: R$ " + Alltrim( Transform( _oModelVal:aCols[_oModelVal:nLine][_nValTOT], "@E 999,999,999.99" ) ) +;
+                                    " = " + Alltrim( Transform( ( _oModelPed:aCols[_oModelPed:nLine][_nPosTTI] + _oModelPed:aCols[_oModelPed:nLine][_nPosTAB] + _oModelVal:aCols[_oModelVal:nLine][_nValTOT] ), "@E 999,999,999.99" ) ) + " OK" + CHR(13) + CHR(10)
+                         _cRegra += "Limite de Crédito: R$ " + Alltrim( Transform( ( SA1->A1_LC ), "@E 999,999,999.99" ) ) + CHR(13) + CHR(10)
+                         If _oModelVal:aCols[_oModelVal:nLine][_nValTOT] <= _ZPPAR0019
+                            _cRegra += "Valor do Pedido: R$ " + Alltrim( Transform( ( _oModelVal:aCols[_oModelVal:nLine][_nValTOT] ), "@E 999,999,999.99" ) ) + " OK" + CHR(13) + CHR(10)
+                            _cRegra += "LIBERADO AUTOMATICO CREDITO E DIRETORIA"
+                            _lAutCre := .t. //Liberação do crédito
+                            _lAutDir := .t. //Liberação da diretoria
+                         else
+                            _cRegra += "Valor do Pedido: R$ " + Alltrim( Transform( ( _oModelVal:aCols[_oModelVal:nLine][_nValTOT] ), "@E 999,999,999.99" ) ) + " OK" + CHR(13) + CHR(10)
+                            _cRegra += "LIBERADO AUTOMATICO CREDITO"
+                            _lAutCre := .t. //Liberação do crédito
+                         Endif
+                      Else
+                         _cRegra += "Titulos: R$ " + Alltrim( Transform( _oModelPed:aCols[_oModelPed:nLine][_nPosTTI], "@E 999,999,999.99" ) ) + " + Ped. em Aberto: R$ " + Alltrim( Transform( _oModelPed:aCols[_oModelPed:nLine][_nPosTAB], "@E 999,999,999.99" ) ) + " + Ped. Atual: R$ " + Alltrim( Transform( _oModelVal:aCols[_oModelVal:nLine][_nValTOT], "@E 999,999,999.99" ) ) +;
+                                    " = R$ " + Alltrim( Transform( ( _oModelPed:aCols[_oModelPed:nLine][_nPosTTI] + _oModelPed:aCols[_oModelPed:nLine][_nPosTAB] + _oModelVal:aCols[_oModelVal:nLine][_nValTOT] ), "@E 999,999,999.99" ) ) + " NÃO LIBERADO" + CHR(13) + CHR(10)
+                         _cRegra += "Limite de Crédito: R$ " + Alltrim( Transform( ( SA1->A1_LC ), "@E 999,999,999.99" ) ) + CHR(13) + CHR(10)
+                         _cIncon := "INCONSISTÊNCIA: LIMITE DE CRÉDITO"
+                      Endif
+                   else
+                      _cRegra += "Condição: " + Alltrim( _oModelPed:aCols[_oModelPed:nLine][_nPosCon] ) + " NÃO LIBERADO"
+                      _cIncon := "INCONSISTÊNCIA: CONDIÇÃO DE PAGAMENTO A VISTA"
+                   Endif
+                else
+                   _cRegra += "Valor atraso em R$ " + DTOC( dDataBase ) + ": " + Transform( _oModelPed:aCols[_oModelPed:nLine][_nPosVat], "@E 999,999,999.99" ) + " NÃO LIBERADO" + CHR(13) + CHR(10)
+                   _cIncon := "INCONSISTÊNCIA: TITULOS EM ATRASO"
+                Endif
+                _cNomArq := xFilial("SC5") + '_' + _oModelPed:aCols[_oModelPed:nLine][_nPosPed] + "_" + Iif( _lAutCre .and. _lAutDir, 'LI', Iif( _lAutCre .and. !_lAutDir, 'CR', 'BL' ) ) + '_' + StrTran( Time(), ":", "" )
+                MEMOWRITE( "\dirdoc\comercial\libped\" + _cNomArq + '.log', _cRegra )
+                /**** LIBERAÇÃO DE CRÉDITO / DIRETORIA AUTOMÁTICOS ****/
+                If !_lAutCre .or. !_lAutDir
+                   _cObsAtu := MSMM( SC5->C5_OBSSC5 )
+                   If !( 'AGUARDANDO LIBERAÇÃO' $ _cObsAtu )
+                      _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
+                      _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
+                      _cObsAtu += 'AGUARDANDO LIBERAÇÃO'
+                      _nCodMsg := MSMM( SC5->C5_OBSSC5,      , , _cObsAtu   , 1, , , "SC5", 'C5_OBSSC5' )
+                      _oModelPed:aCols[_oModelPed:nLine][_nPosOC5] := _nCodMsg
+                      _cObserv := _cObsAtu
+                   Endif
+                   If !Empty( Alltrim( _cIncon ) )
+                      _cObsLib := DTOC(dDataBase) + '-' + Time() + ': ' + _cIncon
+                      _cObsLib += Iif( Empty( Alltrim( MSMM( SC5->C5_OBSPED ) ) ), '', CHR(13) + CHR(10) + Alltrim( MSMM( SC5->C5_OBSPED ) ) )
+                      _nCodMsg := MSMM( SC5->C5_OBSPED,      , , _cObsLib   , 1, , , "SC5", 'C5_OBSPED' )
+                      _oModelPed:aCols[_oModelPed:nLine][_nPosOPe] := _nCodMsg
+                      _cObsMsg := _cObsLib
+                   Endif
+                Endif
+                //Liberação Automatica de Crédito pela regra.
+                If _lAutCre
+                   _cUsrCre := 'BR_Automatico'
+                   _lLibCre := .T.
+                   _oModelPed:aCols[_oModelPed:nLine][_nPosLCr] := .T.
+                   _oModelPed:aCols[_oModelPed:nLine][_nPosUCr] := 'BR_Automatico'
+                   RecLock( 'SC5', .F. )
+                      SC5->C5_USRCRE := 'BR_Automatico'
+                      SC5->C5_LIBCRE := 'T'
+                   SC5->( MsUnLock() )
+                   //Grava o Log de Liberação de Crédito
+                   RecLock("ZZB", .t.)
+                      ZZB->ZZB_FILIAL := xFilial("ZZB")
+                      ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                      ZZB->ZZB_IDLOG  := 'LCR'
+                      ZZB->ZZB_USRLOG := 'BR_Automatico'
+                      ZZB->ZZB_DATLOG := dDataBase
+                      ZZB->ZZB_HORLOG := Time()
+                   ZZB->( MsUnLock() )
+                Endif
+                //Liberação Automatica de Diretoria pela regra.
+                //CONFORME ANOTAÇÃO DO PROGRAMA ANTIGO BRFATX01.PRW
+                //(04/08/2017)Chamado 007850 => Kelly pediu para liberar automaticamente pedidos abaixo de R$ 50 mil com lucratividade maior ou igual a 6%
+                If _lAutCre .AND. !( SC5->C5_LIBDIR == "T" ) .AND. SC5->C5_VLRDUP < 50000 .AND. SC5->C5_LUCRO >= 6.0
+                   _cUsrDir := 'BR_Automatico'
+                   _lLibDir := .T.
+                   _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] := .T.
+                   _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] := 'BR_Automatico'
+                   RecLock( 'SC5', .F. )
+                      SC5->C5_USRDIR := 'BR_Automatico'
+                      SC5->C5_LIBDIR := 'T'
+                   SC5->( MsUnLock() )
+                   //Grava o Log de Liberação de Diretoria
+                   RecLock("ZZB", .t.)
+                      ZZB->ZZB_FILIAL := xFilial("ZZB")
+                      ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                      ZZB->ZZB_IDLOG  := 'LDI'
+                      ZZB->ZZB_USRLOG := 'BR_Automatico'
+                      ZZB->ZZB_DATLOG := dDataBase
+                      ZZB->ZZB_HORLOG := Time()
+                   MsUnLock()
+                Endif
+             Endif
+             //Verificação final se todos as etapas estão aprovadas
+             fLibera()
+          Endif
+       Else //Desmarca em tempo de execução
+          _cUsrCad := space(25)
+          _oModelPed:aCols[_oModelPed:nLine][_nPosLCa] := .F.
+          _oModelPed:aCols[_oModelPed:nLine][_nPosUCa] := space(25)
+          If Alltrim( _oModelPed:aCols[_oModelPed:nLine][_nPosUCr] ) == 'BR_Automatico' .and. _oModelPed:aCols[_oModelPed:nLine][_nPosLCr] == .T.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLCr] := .F.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUCr] := space(25)
+          Endif
+          If Alltrim( _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] ) == 'BR_Automatico' .and. _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] == .T.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] := .F.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] := space(25)
+          Endif
+          _lEstCre := .F.
+          _lEstDir := .F.
+          DbSelectArea( 'SC5' )
+          SC5->( DbSetOrder( 1 ) )
+          If SC5->( DbSeek( xFilial( 'SC5' ) +  _oModelPed:aCols[_oModelPed:nLine][_nPosPed] ) )
+             fCancela() //Antes de retornar o status verifica se o pedido foi aprovado
+             RecLock( 'SC5', .F. )
+                SC5->C5_USRCAD := space(25)
+                SC5->C5_LIBCAD := 'F'
+                If Alltrim( SC5->C5_USRCRE ) == 'BR_Automatico' .and. SC5->C5_LIBCRE == 'T'
+                   SC5->C5_USRCRE := space(25)
+                   SC5->C5_LIBCRE := 'F'
+                   _lEstCre := .T.
+                Endif
+                If Alltrim( SC5->C5_USRDIR ) == 'BR_Automatico' .and. SC5->C5_LIBDIR == 'T'
+                   SC5->C5_USRDIR := space(25)
+                   SC5->C5_LIBDIR := 'F'
+                   _lEstDir := .T.
+                Endif
+             SC5->( MsUnLock() )
+             DbSelectArea( 'ZZB' )
+             ZZB->( DbSetOrder( 1 ) )
+             If ZZB->( DbSeek( xFilial( 'ZZB' ) + SC5->C5_NUM ) )
+                While !Eof() .and. ZZB->ZZB_PEDIDO == SC5->C5_NUM
+                      If ZZB->ZZB_IDLOG == 'LCA' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == Alltrim( cUsername )
+                         RecLock( 'ZZB', .F. )
+                            DBDelete()
+                         ZZB->( MsUnLock( ) )
+                      Endif
+                      If _lEstCre
+                         If ZZB->ZZB_IDLOG == 'LCR' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == 'BR_Automatico' 
+                            RecLock( 'ZZB', .F. )
+                               DBDelete()
+                            ZZB->( MsUnLock( ) )
+                         Endif
+                      EndIf
+                      If _lEstDir
+                         If ZZB->ZZB_IDLOG == 'LDI' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == 'BR_Automatico'
+                            RecLock( 'ZZB', .F. )
+                               DBDelete()
+                            ZZB->( MsUnLock( ) )
+                         Endif 
+                      Endif
+                      ZZB->( DbSkip( ) )
+                EndDo
+             Endif
+          Endif
+          If _lEstCre
+             _cUsrCre := space(25)
+             _lLibCre := .f.
+          Endif
+          If _lEstDir
+             _cUsrDir := space(25)
+             _lLibDir := .f.
+          Endif
+       Endif
        _oUsrCad:SetText(_cUsrCad)
        _oUsrCad:Refresh()
-Return
-
-Static Function fMRCPed()
-                _cUsrPed := Iif( _lLibPed, cUsername, space(25) )
-                _oUsrPed:SetText(_cUsrPed)
-                _oUsrPed:Refresh()
-Return
-
-Static Function fMRCCre()
-       _cUsrCre := Iif( _lLibCre, cUsername, space(25) )
-       _oUsrCre:SetText( _cUsrCre )
+       _oUsrCre:SetText(_cUsrCre)
        _oUsrCre:Refresh()
-Return
-
-Static Function fMRCDir()
-       _cUsrDir := Iif( _lLibDir, cUsername, space(25) )
+       _oLibCre:Refresh()
        _oUsrDir:SetText(_cUsrDir)
        _oUsrDir:Refresh()
+       _oLibDir:Refresh()
+       _oObsMsg:Refresh()
+       _oObserv:Refresh()
+Return
+
+/*/{Protheus.doc} fCancela
+Função para verificar se o pedido foi aprovando em tela e alguma etapa está sendo desmarcada.
+@type function
+@version  v.2022.01
+@author Luís Gustavo Souza
+@since 31/01/2022
+/*/
+Static Function fCancela()
+       If SC5->C5_LIBCAD == 'T' .AND. SC5->C5_LIBPED == 'T' .AND. SC5->C5_LIBCRE == 'T' .AND. SC5->C5_LIBDIR == 'T' .AND. SC5->C5_APROVA <> '2'
+          DbSelectArea("SC9")
+          SC9->( DbSetOrder(1) )
+          If SC9->( DbSeek(xFilial("SC9") + SC5->C5_NUM, .t. ) )
+             While !Eof() .and. SC9->C9_FILIAL = xFilial("SC9") .and. SC9->C9_PEDIDO = SC5->C5_NUM
+                   RecLock("SC9", .f.)
+                      SC9->C9_LIBPOR  := space(25)
+                      SC9->C9_DTLCRED := ctod('  /  /    ')
+                   SC9->( MsUnLock() )
+                   SC9->( DbSkip() )
+             Enddo
+          Endif
+          RecLock( 'SC5', .F. )
+             SC5->C5_APROVA := '0'
+             SC5->C5_USRAPR := space(25) //(Cleber, 16/01/14) LPD->USRAPR
+             SC5->C5_DTAPR  := ctod('  /  /    ') //(Cleber, 27/04/16) -> Data de Aprovação do Pedido
+             SC5->C5_SUGENT := ctod('  /  /    ')
+             SC5->C5_X_EXPO := " "
+          SC5->( MsUnLock() )
+          DbSelectArea( 'ZZB' )
+          ZZB->( DbSetOrder( 1 ) )
+          If ZZB->( DbSeek( xFilial( 'ZZB' ) + SC5->C5_NUM ) )
+             While !Eof() .and. ZZB->ZZB_PEDIDO == SC5->C5_NUM
+                   If ZZB->ZZB_IDLOG == 'APR' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == Alltrim( cUsername )
+                      RecLock( 'ZZB', .F. )
+                         DBDelete()
+                      ZZB->( MsUnLock( ) )
+                   Endif
+                   ZZB->( DbSkip( ) )
+             EndDo
+          Endif
+       Endif
+Return
+
+/*/{Protheus.doc} fLibera
+Função final da liberação que verifica se todos as etapas foram liberadas
+@type function
+@version  v.2022.01
+@author Luís Gustavo de Souza
+@since 31/01/2022
+/*/
+Static Function fLibera()
+       Local _lCif := .f.
+
+       If SC5->C5_LIBCAD == 'T' .AND. SC5->C5_LIBPED == 'T' .AND. SC5->C5_LIBCRE == 'T' .AND. SC5->C5_LIBDIR == 'T' .AND. SC5->C5_APROVA <> '2'
+          //Antiga chamada de função fCreLib() - 31/01/2022
+          DbSelectArea("SC9")
+          SC9->( DbSetOrder(1) )
+          If SC9->( DbSeek(xFilial("SC9") + SC5->C5_NUM, .t. ) )
+             While !Eof() .and. SC9->C9_FILIAL = xFilial("SC9") .and. SC9->C9_PEDIDO = SC5->C5_NUM
+                   RecLock("SC9", .f.)
+                      SC9->C9_LIBPOR  := cUsername
+                      SC9->C9_DTLCRED := dDataBase
+                   SC9->( MsUnLock() )
+                   SC9->( DbSkip() )
+             Enddo
+          Endif
+          If SC5->C5_TPFRETE = "C" .AND. SC5->C5_XVLRFRE > 0.0 .AND. SC5->C5_TIPO = "N"
+             _lCif := .t.
+          Endif
+          //Determinar data de entrega
+          dAux := Iif( !Empty( SC5->C5_PEDPROG ), SC5->C5_PEDPROG, U_ProxDiaUtil( dDataBase, SC5->C5_ENTREGA ) )
+
+          nDesc1 := SC5->C5_DESCON1
+          nDesc2 := SC5->C5_DESCON2
+          nDesc3 := SC5->C5_DESCON3
+          nDesc4 := SC5->C5_DESCON4
+
+          RecLock( 'SC5', .F. )
+             SC5->C5_APROVA := '1'
+             SC5->C5_USRAPR := Iif( lCif, "#*#CIF#*#", cUserName ) //(Cleber, 16/01/14) LPD->USRAPR
+             SC5->C5_DTAPR  := dDataBase //(Cleber, 27/04/16) -> Data de Aprovação do Pedido
+             SC5->C5_SUGENT := dAux
+             SC5->C5_X_EXPO := " "
+             If lCif // Se for CIF, zerar descontos antes de alterar valores dos itens para evitar problemas de se colocar valor de tabela descontado
+                SC5->C5_DESCON1 := 0
+                SC5->C5_DESCON2 := 0
+                SC5->C5_DESCON3 := 0
+                SC5->C5_DESCON4 := 0
+             Endif
+          SC5->( MsUnLock() )
+          lSucesso := .t.
+          DbSelectArea("ZZB")
+          RecLock("ZZB", .t.)
+             ZZB->ZZB_FILIAL := xFilial("ZZB")
+             ZZB->ZZB_PEDIDO := SC5->C5_NUM
+             ZZB->ZZB_IDLOG  := 'APR'
+             ZZB->ZZB_USRLOG := cUsername
+             ZZB->ZZB_DATLOG := dDataBase
+             ZZB->ZZB_HORLOG := Time()
+          ZZB->( MsUnLock() )
+          If lCif
+             lSucesso := XSomaCIF(SC5->C5_NUM)
+             If lSucesso
+                lSucesso := U_LiberaPed(SC5->C5_NUM)
+             Endif
+             DbSelectArea("SC5")
+             RecLock("SC5",.f.)
+                SC5->C5_USRAPR  := cUserName
+                SC5->C5_DESCON1 := nDesc1
+                SC5->C5_DESCON2 := nDesc2
+                SC5->C5_DESCON3 := nDesc3
+                SC5->C5_DESCON4 := nDesc4
+             MsUnLock()
+          Endif
+          If !lSucesso
+             U_fMosAvs( "Atenção", "O pedido: "+LPD->PEDIDO+" teve problemas ao tentar AGREGAR O FRETE CIF!!!."+chr(10)+char(13)+;
+                                   "Contate o Administrador do SISTEMA!", {"Continua"}, 2)
+          Endif 
+       EndIf
+Return
+
+/*/{Protheus.doc} fLibPed
+Marca/Desmarca liberação de pedidos de vendas 
+@type function
+@version  v2022.01
+@author Luís Gustavo de Souza
+@since 31/01/2022
+/*/
+Static Function fLibPed()
+       Local _oModel    := FwModelActive()
+       Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
+       Local _nPosPed   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'PEDIDO'   } )
+       Local _nPosLPe   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBPED'   } )
+       Local _nPosUPe   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRPED'   } )
+
+       _lLibPed := Iif( ValType( _lLibPed ) == 'L', _lLibPed, Iif( _lLibPed $ 'F', .F., .T. ) )
+
+       DbSelectArea("SC5")
+       SC5->( DbSetOrder( 1 ) )
+       If _lLibPed
+          If SC5->( DbSeek( xFilial("SC5") + _oModelPed:aCols[_oModelPed:nLine][_nPosPed], .t. ) )
+             If SC5->C5_NAOCONF $ 'S'
+                MessageBox( "Atenção, pedido não conforme com a Politica de Vendas.", "Atenção...", 48 )
+                _lLibPed := .F.
+                _cUsrPed := space(25)
+             Else
+                _cUsrPed := cUsername
+                FwMsgRun( NIL, { |oSay| U_fPedLib(oSay) }, "Processando", "Liberando pedido " + SC5->C5_NUM )
+                RecLock( 'SC5', .f. )
+                   SC5->C5_LIBPED := 'T'
+                   SC5->C5_USRPED := cUsername
+                SC5->( MsUnLock() )
+                RecLock("ZZB", .t.)
+                   ZZB->ZZB_FILIAL := xFilial("ZZB")
+                   ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                   ZZB->ZZB_IDLOG  := 'LVE'
+                   ZZB->ZZB_USRLOG := cUsername
+                   ZZB->ZZB_DATLOG := dDataBase
+                   ZZB->ZZB_HORLOG := Time()
+                MsUnLock()
+                _oModelPed:aCols[_oModelPed:nLine][_nPosLPe] := .T.
+                _oModelPed:aCols[_oModelPed:nLine][_nPosUPe] := cUsername
+             Endif
+             //Verificação final se todos as etapas estão aprovadas
+             fLibera()
+          Endif
+       Else
+          _lLibPed := .F.
+          _cUsrPed := space(25)
+          If SC5->( DbSeek( xFilial("SC5") + _oModelPed:aCols[_oModelPed:nLine][_nPosPed], .t. ) )
+             fCancela() //Antes de retornar o status verifica se o pedido foi aprovado
+             RecLock( 'SC5', .f. )
+                SC5->C5_LIBPED := 'F'
+                SC5->C5_USRPED := cUsername
+             SC5->( MsUnLock() )
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLPe] := .F.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUPe] := ''
+             _aCabec := {}
+             _aItens := {}
+             _aLinha := {}
+             aAdd( _aCabec, { "C5_NUM", SC5->C5_NUM, Nil } )
+             DbSelectArea("SC6")
+             SC6->( DbSetOrder(1) )
+             If SC6->( DbSeek( xFilial("SC6") + SC5->C5_NUM ) )
+                While !Eof() .and. SC6->C6_NUM == SC5->C5_NUM
+                      _aLinha := {}
+                      aAdd( _aLinha, { "C6_NUM"    , SC6->C6_NUM    , Nil } )
+                      aAdd( _aLinha, { "C6_ITEM"   , SC6->C6_ITEM   , Nil } )
+                      aAdd( _aLinha, { "C6_PRODUTO", SC6->C6_PRODUTO, Nil } )
+                      aadd( _aItens, _aLinha )
+                      SC6->( DbSkip() )
+                EndDo
+             Endif
+             _lRet := MSExecAuto( { |x,y,z| Mata410( x, y, z ) }, _aCabec, _aItens, 4 )
+           Endif
+           DbSelectArea( 'ZZB' )
+           ZZB->( DbSetOrder( 1 ) )
+           If ZZB->( DbSeek( xFilial( 'ZZB' ) + SC5->C5_NUM ) )
+              While !Eof() .and. ZZB->ZZB_PEDIDO == SC5->C5_NUM
+                    If ZZB->ZZB_IDLOG == 'LVE' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == Alltrim( cUsuario )
+                       RecLock( 'ZZB', .F. )
+                          DBDelete()
+                       ZZB->( MsUnLock( ) )
+                    Endif
+                    ZZB->( DbSkip( ) )
+              EndDo
+           Endif
+       Endif
+       _oUsrPed:SetText(_cUsrPed)
+       _oUsrPed:Refresh()
+       _oLibPed:Refresh()
+Return
+
+/*/{Protheus.doc} fLibCre
+Marca/Desmarca liberação de pedidos de vendas área de crédito e automático diretoria dentro das regras
+Liberado Crédito e Não Liberado Diretoria e Valor Financeiro menor que R$ 50.000,00 e Lucro maior ou igual a 6.0
+@type function
+@version  v.2022.01
+@author Luís Gustavo de Souza
+@since 31/01/2022
+/*/
+Static Function fLibCre()
+       Local _oModel    := FwModelActive()
+       Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
+       Local _nPosPed   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'PEDIDO'   } )
+       Local _nPosLCr   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBCRE'   } )
+       Local _nPosUCr   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRCRE'   } )
+       Local _nPosLDi   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBDIR'   } )
+       Local _nPosUDi   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRDIR'   } )
+
+       _lLibCre := Iif( ValType( _lLibCre ) == 'L', _lLibCre, Iif( _lLibCre $ 'F', .F., .T. ) )
+
+       DbSelectArea("SC5")
+       SC5->( DbSetOrder( 1 ) )
+       If _lLibCre
+          If SC5->( DbSeek( xFilial("SC5") + _oModelPed:aCols[_oModelPed:nLine][_nPosPed], .t. ) )
+             _cUsrCre := cUsername
+             RecLock( 'SC5', .f. )
+                SC5->C5_LIBPED := 'T'
+                SC5->C5_USRPED := cUsername
+             SC5->( MsUnLock() )
+             RecLock("ZZB", .t.)
+                ZZB->ZZB_FILIAL := xFilial("ZZB")
+                ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                ZZB->ZZB_IDLOG  := 'LCR'
+                ZZB->ZZB_USRLOG := cUsername
+                ZZB->ZZB_DATLOG := dDataBase
+                ZZB->ZZB_HORLOG := Time()
+             ZZB->( MsUnLock() )
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLCr] := .T.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUCr] := cUsername
+             //(04/08/2017)Chamado 007850 => Kelly pediu para liberar automaticamente pedidos abaixo de R$ 50 mil com lucratividade maior ou igual a 6%
+             If SC5->C5_LIBCRE == 'T'.AND. SC5->C5_LIBDIR == "F" .AND. SC5->C5_VLRDUP < 50000  .AND. SC5->C5_LUCRO >= 6.0
+                _lLibDir := .T.
+                _cUsrCre := "BR_Automatico"
+                RecLock( "SC5", .F. )
+                   SC5->C5_LIBDIR := "T"
+                   SC5->C5_USRDIR := "BR_Automatico"
+                SC5->( MsUnLock( ) )
+                RecLock("ZZB", .t.)
+                   ZZB->ZZB_FILIAL := xFilial("ZZB")
+                   ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                   ZZB->ZZB_IDLOG  := 'LDI'
+                   ZZB->ZZB_USRLOG := 'BR_Automatico'
+                   ZZB->ZZB_DATLOG := dDataBase
+                   ZZB->ZZB_HORLOG := Time()
+                ZZB->( MsUnLock() )
+                _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] := .T.
+                _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] := "BR_Automatico"
+             Endif
+             //Verificação final se todos as etapas estão aprovadas
+             fLibera()
+          Endif
+       Else
+          _lLibCre := .F.
+          _cUsrCre := space(25)
+          If SC5->( DbSeek( xFilial("SC5") + _oModelPed:aCols[_oModelPed:nLine][_nPosPed], .t. ) )
+             fCancela() //Antes de retornar o status verifica se o pedido foi aprovado
+             RecLock( 'SC5', .f. )
+                SC5->C5_LIBCRE := 'F'
+                SC5->C5_USRCRE := space(25)
+             SC5->( MsUnLock() )
+             DbSelectArea( 'ZZB' )
+             ZZB->( DbSetOrder( 1 ) )
+             If ZZB->( DbSeek( xFilial( 'ZZB' ) + SC5->C5_NUM ) )
+                While !Eof() .and. ZZB->ZZB_PEDIDO == SC5->C5_NUM
+                      If ZZB->ZZB_IDLOG == 'LCR' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == Alltrim( cUsuario )
+                         RecLock( 'ZZB', .F. )
+                            DBDelete()
+                         ZZB->( MsUnLock( ) )
+                      Endif
+                      ZZB->( DbSkip( ) )
+                EndDo
+             Endif
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLCr] := .F.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUCr] := space(25)
+             If SC5->C5_LIBCRE == 'F' .AND. Alltrim( SC5->C5_USRDIR ) == 'BR_Automatico' .AND. SC5->C5_LIBDIR == "T" .AND. SC5->C5_VLRDUP < 50000  .AND. SC5->C5_LUCRO >= 6.0
+                _lLibDir := .F.
+                _cUsrCre := Space(25)
+                RecLock( "SC5", .F. )
+                   SC5->C5_LIBDIR := "F"
+                   SC5->C5_USRDIR := Space(25)
+                SC5->( MsUnLock( ) )
+                DbSelectArea( 'ZZB' )
+                ZZB->( DbSetOrder( 1 ) )
+                If ZZB->( DbSeek( xFilial( 'ZZB' ) + SC5->C5_NUM ) )
+                   While !Eof() .and. ZZB->ZZB_PEDIDO == SC5->C5_NUM
+                         If ZZB->ZZB_IDLOG == 'LDI' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == 'BR_Automatico'
+                            RecLock( 'ZZB', .F. )
+                               DBDelete()
+                            ZZB->( MsUnLock( ) )
+                         Endif
+                         ZZB->( DbSkip( ) )
+                   EndDo
+                Endif
+                _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] := .F.
+                _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] := space(25)
+             Endif
+          Endif
+       Endif
+       _oUsrCre:SetText( _cUsrCre )
+       _oUsrCre:Refresh()
+       _oLibCre:Refresh()
+       _oUsrDir:SetText( _cUsrDir )
+       _oUsrDir:Refresh()
+       _oLibDir:Refresh()
+Return
+
+/*/{Protheus.doc} fLibDir
+Marca/Desmarca para liberação da etapa diretoria.
+@type function
+@version  v.2022.021
+@author Luís Gustavo de Souza
+@since 31/01/2022
+/*/
+Static Function fLibDir()
+       Local _oModel    := FwModelActive()
+       Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
+       Local _nPosLDi   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'LIBDIR'   } )
+       Local _nPosUDi   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'USRDIR'   } )
+
+       _lLibDir := Iif( ValType( _lLibDir ) == 'L', _lLibDir, Iif( _lLibDir $ 'F', .F., .T. ) )
+
+       DbSelectArea("SC5")
+       SC5->( DbSetOrder( 1 ) )
+       If _lLibDir
+          If SC5->( DbSeek( xFilial("SC5") + _oModelPed:aCols[_oModelPed:nLine][_nPosDir], .t. ) )
+             _cUsrDir := cUsername
+             RecLock( 'SC5', .f. )
+                SC5->C5_LIBDIR := 'T'
+                SC5->C5_USRDIR := cUsername
+             SC5->( MsUnLock() )
+             RecLock("ZZB", .t.)
+                ZZB->ZZB_FILIAL := xFilial("ZZB")
+                ZZB->ZZB_PEDIDO := SC5->C5_NUM
+                ZZB->ZZB_IDLOG  := 'LDI'
+                ZZB->ZZB_USRLOG := cUsername
+                ZZB->ZZB_DATLOG := dDataBase
+                ZZB->ZZB_HORLOG := Time()
+             ZZB->( MsUnLock() )
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] := .T.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] := cUsername
+             //Verificação final se todos as etapas estão aprovadas
+             fLibera()
+          Endif
+       Else
+          If SC5->( DbSeek( xFilial("SC5") + _oModelPed:aCols[_oModelPed:nLine][_nPosDir], .t. ) )
+             fCancela() //Antes de retornar o status verifica se o pedido foi aprovado
+             _lLibDir := .f.
+             _cUsrDir := space( 25 )
+             RecLock( 'SC5', .f. )
+                SC5->C5_LIBDIR := 'F'
+                SC5->C5_USRDIR := space(25)
+             SC5->( MsUnLock() )
+             DbSelectArea( 'ZZB' )
+             ZZB->( DbSetOrder( 1 ) )
+             If ZZB->( DbSeek( xFilial( 'ZZB' ) + SC5->C5_NUM ) )
+                While !Eof() .and. ZZB->ZZB_PEDIDO == SC5->C5_NUM
+                      If ZZB->ZZB_IDLOG == 'LDI' .and. ZZB->ZZB_DATLOG == dDataBase .and. Alltrim( ZZB->ZZB_USRLOG ) == 'BR_Automatico'
+                         RecLock( 'ZZB', .F. )
+                            DBDelete()
+                         ZZB->( MsUnLock( ) )
+                      Endif
+                      ZZB->( DbSkip( ) )
+                EndDo
+             Endif
+             _oModelPed:aCols[_oModelPed:nLine][_nPosLDi] := .F.
+             _oModelPed:aCols[_oModelPed:nLine][_nPosUDi] := space(25)
+          Endif
+       Endif
+       _oUsrDir:SetText(_cUsrDir)
+       _oUsrDir:Refresh()
+       _oLibDir:Refresh()
 Return
 
 Static Function fMRCRec()
@@ -1420,6 +2195,19 @@ Static Function fMRCRec()
           _oUsrPed:Refresh() ; _oUsrCre:Refresh() ; _oUsrDir:Refresh() ; _oUsrRec:Refresh()
 Return
 
+/*/{Protheus.doc} fAcuPed
+description
+@type function
+@version  
+@author gustavosouza
+@since 25/01/2022
+@param aCliente, array, Array com dados do cliente
+@param nPercSubst, numeric, param_description
+@param nPerIcm, numeric, param_description
+@param nAliqSol, numeric, param_description
+@param _NumPedAtu, variant, param_description
+@return variant, return_description
+/*/
 Static Function fAcuPed( aCliente, nPercSubst, nPerIcm, nAliqSol, _NumPedAtu )
        Local cQuery  := ""
        Local nAcumul := 0
@@ -1489,8 +2277,8 @@ Static Function fComple( _oPanel )
        @ 004,332 SAY _oAltera VAR _cAltera        PICTURE '@!' COLOR CLR_BLUE SIZE 125,09 PIXEL OF _oPanel FONT _oFont4
 
        //Teclas de atalho das funcionalidades
-       @ 001,440 SAY OemToAnsi('F2-Hist. pedido | F5-Dados pedido | F7-Tit. em aberto | F9-Dados Cliente')    COLOR CLR_RED  SIZE 300,06 PIXEL OF _oPanel FONT _oFont3
-       @ 008,440 SAY OemToAnsi('F4-Itens pedido | F6-Plan. Finan. | F8-Tit. recebidos | F10-Ped.Cliente' )    COLOR CLR_RED  SIZE 300,06 PIXEL OF _oPanel FONT _oFont3
+       @ 001,440 SAY OemToAnsi('F2-Hist. ped. | F5-Dados ped. | F7-Tit. aberto | F9-Dados Cli. | F11-Pesquisa' ) COLOR CLR_RED  SIZE 300,06 PIXEL OF _oPanel FONT _oFont3
+       @ 008,440 SAY OemToAnsi('F4-Itens ped. | F6-Plan. Fin. | F8-Tit. receb. | F10-Observ.   | '             ) COLOR CLR_RED  SIZE 300,06 PIXEL OF _oPanel FONT _oFont3
 Return .T.
 
 /*/{Protheus.doc} fCalImp
@@ -1510,7 +2298,6 @@ Static Function fCalImp( _cPedido )
        Local _cAliasSC5
        Local _cAliasSC6
        Local _cCliEnt
-       Local _aItemPed   := {}
        Local _aValMerc   := {}
        Local _cNfOri     := Nil
        Local _cSeriOri   := Nil
@@ -1602,6 +2389,7 @@ Static Function fCalImp( _cPedido )
               Endif	
            EndIf
        Next _nY
+       aHeader := {}
        fMonHead()
        _nItem := 0
        While !( ( _cAliasSC6 )->( Eof() ) ) .And. xFilial("SC6") == ( _cAliasSC6 )->C6_FILIAL .And. ( _cAliasSC6 )->C6_NUM == _cPedido
@@ -1674,9 +2462,12 @@ Static Function fCalImp( _cPedido )
                             ( _cAliasSC6)->C6_QTDEMP ,;
                             ( _cAliasSC6)->C6_QTDLIB ,;
                             ( _cAliasSC6)->C6_QTDENT ,;
-                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ( _cAliasSC6)->C6_NUM+( _cAliasSC6)->C6_ITEM;
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ( _cAliasSC6)->C6_NUM+( _cAliasSC6)->C6_ITEM, 0;
                           } ;
-                 )
+                 ) 
+                 //Posições da Matriz
+                 //     20       21       22      23      24      25      26      27      28      29      30      31       32         33       34
+                 //BS.ICMS  AL.ICMS  VL.ICMS  BS.IPI  AL.IPI  VL.IPI  BS.COF  AL.COF  VL.COF  BS.PIS  AL.PIS  VL.PIS  VL.IRET  VL.MARGEM  VL.PMAR
              //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
              //³Forca os valores de impostos que foram informados no SC6.              ³
              //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -1721,26 +2512,33 @@ Static Function fCalImp( _cPedido )
              aCols[Len(aCols)][23] := MaFisRet( _nItem, 'IT_BASEIPI' )
              aCols[Len(aCols)][24] := MaFisRet( _nItem, 'IT_ALIQIPI' )
              aCols[Len(aCols)][25] := MaFisRet( _nItem, 'IT_VALIPI'  )
-             aCols[Len(aCols)][26] := MaFisRet( _nItem, 'IT_BASECOF' )
+             aCols[Len(aCols)][26] := MaFisRet( _nItem, 'IT_BASECOF' ) //( _cAliasSC6)->C6_VALOR - aCols[Len(aCols)][22]         //MaFisRet( _nItem, 'IT_BASECOF' )
              aCols[Len(aCols)][27] := MaFisRet( _nItem, 'IT_ALIQCOF' )
-             aCols[Len(aCols)][28] := MaFisRet( _nItem, 'IT_VALCOF'  )
-             aCols[Len(aCols)][29] := MaFisRet( _nItem, 'IT_BASEPIS' )
+             aCols[Len(aCols)][28] := MaFisRet( _nItem, 'IT_VALCOF'  ) //aCols[Len(aCols)][26] * ( aCols[Len(aCols)][27] / 100 ) //MaFisRet( _nItem, 'IT_VALCOF'  )
+             aCols[Len(aCols)][29] := MaFisRet( _nItem, 'IT_BASEPIS' ) //( _cAliasSC6)->C6_VALOR - aCols[Len(aCols)][22]         //MaFisRet( _nItem, 'IT_BASEPIS' )
              aCols[Len(aCols)][30] := MaFisRet( _nItem, 'IT_ALIQPIS' )
-             aCols[Len(aCols)][31] := MaFisRet( _nItem, 'IT_VALPIS'  )
+             aCols[Len(aCols)][31] := MaFisRet( _nItem, 'IT_VALPIS'  ) //aCols[Len(aCols)][29] * ( aCols[Len(aCols)][30] / 100 ) //MaFisRet( _nItem, 'IT_VALPIS'  )
              
              _aSolid      := ExecBlock( "M410SOLI", .f., .f., { _nItem } )
              aCols[Len(aCols)][32] := Iif( Len(_aSolid) > 0, _aSolid[3] + _aSolid[7], 0 ) //Valor do ICMS Solidario + Valor do FECP-ST
 
+             _nCusPro := fBusCus( ( _cAliasSC6 )->C6_PRODUTO )
+             _nRecLiq := ( ( _cAliasSC6)->C6_VALOR - aCols[Len(aCols)][22] - aCols[Len(aCols)][28] - aCols[Len(aCols)][31] )
+             //          ( Valor Mercadoria        - Valor ICMS            - Valor COFINS          - Valor PIS             )
+
+             aCols[Len(aCols)][33] := ( _nRecLiq - ( ( _cAliasSC6 )->C6_QTDVEN * _nCusPro ) )
+             aCols[Len(aCols)][34] := ( 1 - ( ( _cAliasSC6 )->C6_QTDVEN * _nCusPro   ) / _nRecLiq ) * 100 //Percentual Margem
+             aCols[Len(aCols)][36] := ( _cAliasSC6 )->C6_QTDVEN * _nCusPro
              ( _cAliasSC6 )->( dbSkip() )
 	EndDo
        _aPedidos[aScan( _aPedidos, { |x| x[1] == _cPedido } )][3] := aCols
-       For _nY := 1 To Len( aCols )
-           //                            1,              2,              3,              4,              5,              6,              7,              8,              9,      
-           aAdd( _aItens, { _cPedido      , aCols[_nY][01], aCols[_nY][34], aCols[_nY][02], aCols[_nY][03], aCols[_nY][04], aCols[_nY][05], aCols[_nY][06], aCols[_nY][07],;
-                            aCols[_nY][08], aCols[_nY][09], aCols[_nY][10], aCols[_nY][11], aCols[_nY][12], aCols[_nY][13], aCols[_nY][14], aCols[_nY][15], aCols[_nY][16],;
-                            aCols[_nY][17], aCols[_nY][18], aCols[_nY][19], aCols[_nY][20], aCols[_nY][21], aCols[_nY][22], aCols[_nY][23], aCols[_nY][24], aCols[_nY][25],;
-                            aCols[_nY][26], aCols[_nY][27], aCols[_nY][28], aCols[_nY][29], aCols[_nY][30], aCols[_nY][31], aCols[_nY][32], aCols[_nY][33] } )
-       Next
+       /*For _nY := 1 To Len( aCols )
+           //                            1,              2,              3,              4,              5,              6,              7,              8,              9,             10
+           aAdd( _aItens, { _cPedido      , aCols[_nY][01], aCols[_nY][35], aCols[_nY][02], aCols[_nY][03], aCols[_nY][04], aCols[_nY][05], aCols[_nY][06], aCols[_nY][07], aCols[_nY][08],; 
+                            aCols[_nY][09], aCols[_nY][10], aCols[_nY][11], aCols[_nY][12], aCols[_nY][13], aCols[_nY][14], aCols[_nY][15], aCols[_nY][16], aCols[_nY][17], aCols[_nY][18],;
+                            aCols[_nY][19], aCols[_nY][20], aCols[_nY][21], aCols[_nY][22], aCols[_nY][23], aCols[_nY][24], aCols[_nY][25], aCols[_nY][26], aCols[_nY][27], aCols[_nY][28],; 
+                            aCols[_nY][29], aCols[_nY][30], aCols[_nY][31], aCols[_nY][32], aCols[_nY][33] } )
+       Next */
 Return
 
 Static Function FisGetInit( aFisGet, aFisGetSC5 )
@@ -1839,3 +2637,333 @@ Static Function fMonHead()
        SX3->( DbSeek("C6_QTDENT" ) )
        aAdd( aHeader , { SX3->X3_TITULO, SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL, SX3->X3_VALID, SX3->X3_USADO, SX3->X3_TIPO, SX3->X3_F3 } )
 Return
+
+/*/{Protheus.doc} fCalcPrazo
+Calcula prazos de pagamentos - Desenvolvida a partir do MTA410, regras de negócios comerciais (Politica de Vendas Brasilux/Dissoltex)
+@type function
+@version  v.2022,01
+@author Luis Gustavo de Souza
+@since 19/01/2022
+@param _dDiaFat, variant, Data que o pedido será faturado
+@param _cCondPag, variant, Condição de pagamento do pedido
+@return array, Array contendo três parâmetros array com os prazos, prazo médio, array contendo vencimentos
+/*/
+Static Function fCalcPrazo( _dDiaFat, _cCondPag )
+       Local _aVenctos := {}
+       Local _nQtdePar := 0
+       Local _nPrazoMd := 0
+       Local _nTotTp9  := 0
+       Local _nY
+       Local _cCampo   := ""
+       Local _aPrazos  := {}
+       
+       DbSelectArea('SE4')
+       SE4->( DbSetOrder( 1 ) )
+       If SE4->( DbSeek( xFilial('SE4') + _cCondPag ) )
+          If SE4->E4_TIPO == "9"
+             For _nY := 1 to 4
+                 _cCampo := "M->C5_DATA" + Alltrim( Str( _nY ) )
+                 If !Empty( &_cCampo )
+                    aAdd( _aVenctos, { &_cCampo, 0 } )
+                    _cCampo  := "M->C5_PARC" + Alltrim (Str( _nY ) )
+                    _nTotTp9 += &_cCampo
+                    _aVenctos[_nY][2] := &_cCampo
+                    _nQtdePar++
+                 Endif
+             Next
+             If _nQtdePar == 0
+                _nQtdePar := 1
+                _nTotTp9  := 1
+                aAdd( _aVenctos, { dDataBase, 1 } )
+             Endif
+          Else
+             //Verifica se a condição é a vista ( menor igual a 7 dias ) e considera a condição 001
+             If ( SE4->E4_TIPO == "1" ) .AND. LEN( ( ALLTRIM( SE4->E4_COND ) ) ) == 1
+                If Val( Alltrim( SE4->E4_COND ) ) <= 7
+                   _cCondPag := "001"
+                Endif
+             Endif
+             _aVenctos := Condicao( 100, _cCondPag, 0.00, _dDiaFat, 0.00 )
+          Endif
+       Else
+          _nTotTp9  := 1
+          _aVenctos := {}
+          aAdd( aVenctos, { dDataBase, 1 } )
+       Endif
+       If ( _nTotTp9 > 0 )
+          If !Empty( M->C5_PEDPROG )
+             _dDiaFat := M->C5_PEDPROG //Considerar dia do Faturamento data do pedido programado para o caso de datas fixas de vencimento (Chamado 014805)
+          Endif
+       Endif
+       //Monta vetor com prazos em dias + % de cada parcela sobre total e cálculo do prazo médio
+       _nPrazoMd := 0
+       For _nY := 1 To Len( _aVenctos )
+           aAdd( _aPrazos, { _aVenctos[_nY][1] - _dDiaFat + 1, Iif( _nTotTp9 > 0, _aVenctos[_nY][2] / _nTotTp9, 1 / Len( _aVenctos ) ) } )
+           _nPrazoMd += _aPrazos[_nY][1]
+       Next
+       If Len( _aVenctos ) > 0
+          _nPrazoMd := _nPrazoMd / Len( _aVenctos )
+       Endif
+Return { _aPrazos, _nPrazoMd, _aVenctos }
+
+
+Static Function fObsPed(oView)
+       Local aArea      := GetArea()                 //Irei gravar a area atual
+       Local _oModel    := FwModelActive()
+       Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
+       Local _aButtons  := {}
+       Local _cPedido   := _oModelPed:aCols[_oModelPed:nLine][1]
+       Local _cObsPed   := ''
+       Local _nOpcAju   := 0
+       Local _nPosOPe   := aScan( _oModelPed:aHeader, { |x| Alltrim( x[2] ) == 'OBSPED'   } )
+
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
+
+       DbSelectArea('SC5')
+       SC5->( DbSetOrder( 1 ) )
+       SC5->( DbSeek( xFilial('SC5') + _cPedido ) )
+
+       oModal := FWDialogModal():New()
+       oModal:SetEscClose( .F. )
+       oModal:setTitle( "Observação do pedido de Vendas" )
+       oModal:setSize( 141, 268 )
+       oModal:createDialog()
+
+       aAdd( _aButtons, { "", 'Cancela' , {|| _nOpcAju := 0, oModal:DeActivate() }, , , .T., .F. } )
+       aAdd( _aButtons, { "", 'Confirma', {|| _nOpcAju := 1, oModal:DeActivate() }, , , .T., .F. } )
+       oModal:addButtons( _aButtons )
+
+       oContainer := TPanel():New( ,,, oModal:getPanelMain() ) 
+       oContainer:Align := CONTROL_ALIGN_ALLCLIENT
+
+       _oGetDObs    := tMultiGet():new( 002, 002, {| u | If( pCount() > 0, _cObsPed := u, _cObsPed ) }, oContainer, 260,  92, , , , , , .T. )
+       oModal:Activate()
+
+       If _nOpcAju == 1
+            _cAuxObs := MSMM( _oModelPed:aCols[_oModelPed:nLine][_nPosOPe], , , , 3 )
+            _cObsMsg := Alltrim( cUsername ) + " (" + dToc( dDataBase ) + " " + Time() + "):" + Chr(13) + chr(10)
+            _cObsMsg += Upper( _cObsPed) + Chr(13) + chr(10) + Chr(13) + chr(10)
+            _cObsMsg += _cAuxObs
+
+            _nCodMsg := MSMM(SC5->C5_OBSPED, , , _cObsMsg, 1, , , "SC5", "C5_OBSPED")
+            If Empty( _cAuxMsg )
+               _oModelPed:aCols[_oModelPed:nLine][_nPosOPe] := _nCodMsg
+            Endif
+            _oObsMsg:Refresh()
+       Endif
+
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
+
+       RestArea( aArea )
+Return
+
+Static Function fPesPed( oView )
+       Local aArea      := GetArea()                 //Irei gravar a area atual
+       Local _oModel    := FwModelActive()
+       Local _oModelPed := _oModel:GetModel( 'GRIDPEDIDO' )
+       Local _aButtons  := {}
+       Local _aOrdPes   := {}
+       Local _cOrdPes
+       Local _oCbxPes
+       Local _oBigGet
+       Local _cCampo    := Space( 6 )
+       Local _oScroll
+       Local _nOrdPes   := 1
+
+       SetKey( VK_F2 , {||} )
+       SetKey( VK_F4 , {||} )
+       SetKey( VK_F5 , {||} )
+       SetKey( VK_F6 , {||} )
+       SetKey( VK_F7 , {||} )
+       SetKey( VK_F8 , {||} )
+       SetKey( VK_F9 , {||} )
+       SetKey( VK_F10, {||} )
+       SetKey( VK_F11, {||} )
+
+       aadd( _aOrdPes, OemToAnsi( "Pedido"            ) )
+       aadd( _aOrdPes, OemToAnsi( "Código do Cliente" ) )
+       aadd( _aOrdPes, OemToAnsi( "Nome do Cliente"   ) )
+
+       oModal := FWDialogModal():New()
+       oModal:SetEscClose( .F. )
+       oModal:setTitle( "Observação do pedido de Vendas" )
+       oModal:setSize( 85, 220 )
+       oModal:createDialog()
+
+       oContainer := TPanel():New( ,,, oModal:getPanelMain() ) 
+       oContainer:Align := CONTROL_ALIGN_ALLCLIENT
+
+       @ 005, 005 COMBOBOX  _oCbxPes VAR _cOrdPes ITEMS _aOrdPes SIZE 206,36 PIXEL OF oContainer
+       @ 022, 005 MSGET     _oBigGet VAR _cCampo                 SIZE 206,10 PIXEL OF oContainer
+       @ 022, 005 SCROLLBOX _oScroll VERTICAL                    SIZE 84,205       OF oContainer BORDER
+       _oScroll:Hide()
+       _oCbxPes:bChange := { || _nOrdPes := _oCbxPes:nAt, _cCampo := Iif( _oCbxPes:nAt == 1, Space(6), Iif( _oCbxPes:nAt == 2, Space(6), Space(40) ) ) }
+
+       aAdd( _aButtons, { "", 'Pesquisa' , {|| oModal:DeActivate() }, , , .T., .F. } )
+       oModal:addButtons( _aButtons )
+
+       oModal:Activate()
+
+       _nOldOrd := _oModelPed:nLine
+       If _nOrdPes == 1
+          _oModelPed:nLine := aScan( _oModelPed:aCols, {|x| x[1] == _cCampo } )
+       ElseIf _nOrdPes == 2
+              _oModelPed:nLine := aScan( _oModelPed:aCols, {|x| SubString( x[4], 1, 6 ) == _cCampo } )
+       ElseIf _nOrdPes == 3
+              If !Empty( _cCampo )
+                 _oModelPed:nLine := aScan( _oModelPed:aCols, {|x| Substring( x[4], 13, Len( Alltrim( _cCampo ) ) ) == SubStr( _cCampo, 1, Len( Alltrim( _cCampo ) ) ) } ) 
+              Endif
+       Endif
+       If _oModelPed:nLine == 0
+          MessageBox( 'Informação não encontrada, verifique chave de pesquisa.', 'Pesquisa...', 48 )
+          _oModelPed:nLine := _nOldOrd
+       Else
+          fChangePED( oView, 'GRIDPEDIDO',  )
+          oView:Refresh( 'GRIDPEDIDO' )
+       Endif
+
+       SetKey( VK_F2 , bHistorico )
+       SetKey( VK_F4 , bItensPedi )
+       SetKey( VK_F5 , bDadosPedi )
+       SetKey( VK_F6 , bPlanilhaF )
+       SetKey( VK_F7 , bTitAberto )
+       SetKey( VK_F8 , bTitRecebi )
+       SetKey( VK_F9 , bDadosClie )
+       SetKey( VK_F10, bObservPed )
+       SetKey( VK_F11, bPesquisaP )
+
+       RestArea( aArea )
+Return
+
+
+
+Static Function XSomaCIF(_cPed)
+       Local lRet := .t.
+       Local aCabec := {}
+       Local aItens := {}
+       Local aLinha := {}
+       Local nTam1,nTam2,nVlrFrete,nVlrProd,nSaldo,nFreteItem,nVlrUnit,nQtde,nPos,nVlrUnAnt,_nVlrTotDup,nComis,cAux,_cAlias
+       //Local nTam3,nValor
+       Local _lOpen        := .F. //LGS#20200210 - Adequação para release 12.1.25
+       Local _cAliasSX3 := GetNextAlias() //LGS#20200210 - Adequação para release 12.1.25
+       Private lMsErroAuto := .f.
+       Private lMsHelpAuto := .f.
+
+       // ABERTURA DO DICIONÁRIO SX3 - LGS#20200210 - Adequação para release 12.1.25
+       OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
+       _lOpen := Select( _cAliasSX3 ) > 0
+       If !_lOpen //LGS#20200210 - Adequação para release 12.1.25
+          MessageBox( "Não foi possível abrir dicionário de dados.", "Atenção", 16 )
+          Return
+       Endif
+
+       nVlrFrete := SC5->C5_XVLRFRE
+       nSaldo := nVlrFrete
+
+       dbselectarea("SF4")
+	   dbsetorder(1)
+
+       aItens := {}
+       dbselectarea("SC6")
+       dbsetorder(1)
+       nVlrProd := 0.0
+       nQtde = 0
+       dbseek(xFilial("SC6")+SC5->C5_NUM)
+       DO WHILE !eof() .and. (SC6->C6_FILIAL == xFilial("SC6")) .and. (SC6->C6_NUM == SC5->C5_NUM)
+          nVlrProd += (SC6->C6_QTDVEN*SC6->C6_PRCVEN)
+          nQtde++
+          dbskip()
+       ENDDO
+       nTam1 := TamSX3("C6_PRCVEN")[2]
+       nTam2 := TamSX3("C6_XVLRFRE")[2]
+       nPos := 0
+       _nVlrTotDup := 0.0 // Valor total financeiro novo sem ipi+st
+       dbseek(xFilial("SC6")+SC5->C5_NUM)
+       DO WHILE !eof() .and. (SC6->C6_FILIAL == xFilial("SC6")) .and. (SC6->C6_NUM == SC5->C5_NUM)
+		nPos++
+		if nPos == nQtde
+			nFreteItem := nSaldo
+		else 
+			nFreteItem := round(nVlrFrete*(SC6->C6_QTDVEN*SC6->C6_PRCVEN)/nVlrProd,nTam2)
+		endif 
+		nVlrUnAnt := SC6->C6_PRCVEN
+		nVlrUnit := round(((SC6->C6_QTDVEN*SC6->C6_PRCVEN)+nFreteItem)/SC6->C6_QTDVEN,nTam1)
+		nSaldo := nSaldo - nFreteItem
+		dbselectarea("SF4")
+		dbseek(xFilial("SF4")+SC6->C6_TES)
+		if found()
+            If (SF4->F4_DUPLIC = "S") .OR. (SF4->F4_CODIGO = "519")
+				_nVlrTotDup := _nVlrTotDup + (nVlrUnit*SC6->C6_QTDVEN)
+			Endif
+		endif
+		aLinha := U_DetCposTab("SC6","C6_XVLRFRE-C6_PRCVEN-C6_PRUNIT-C6_FILIAL-C6_ITEM-C6_NUM-C6_BLOQUEI-C6_BLQ-C6_GEROUPV-C6_QTDEMP-C6_QTDEMP2-C6_QTDENT-C6_QTDENT2-C6_QTDLIB-C6_QTDLIB2-C6_QTDRESE-C6_SLDALIB-C6_SUGENTR-C6_TRT")
+		aadd(aLinha,{"LINPOS","C6_ITEM",SC6->C6_ITEM})		
+		aadd(aLinha,{"AUTDELETA","N",Nil})
+		aadd(aLinha,{"C6_PRCVEN",nVlrUnit,Nil})		
+		aadd(aLinha,{"C6_PRUNIT",nVlrUnit,Nil})		
+		aadd(aLinha,{"C6_XVLRFRE",nVlrUnAnt,Nil})		
+		aadd(aItens,aLinha)
+		      
+		dbselectarea("SC6")
+		dbskip()
+	enddo 
+	if _nVlrTotDup > 0.0
+		nComis := round(SC5->C5_VLRCOM*100/_nVlrTotDup,TamSX3("C5_COMIS1")[2])
+	else
+		nComis := SC5->C5_COMIS1
+	endif
+	_nVlrTotDup := ROUND(_nVlrTotDup,TamSX3("C5_VLRDUP")[2])
+       _cAlias := "SC5"	
+       aCabec := {} 	
+
+       dbSelectArea( _cAliasSX3 )
+       ( _cAliasSX3 )->( dbSetOrder(1) )
+       ( _cAliasSX3 )->( dbSeek("SC5") )
+       While !EOF() .And. ( _cAliasSX3 )->( X3_ARQUIVO ) = _cAlias
+             If ( X3Uso( ( _cAliasSX3 )->( X3_USADO ) ) .AND. !( ( _cAliasSX3 )->( X3_CONTEXT ) = "V") .and. !( ALLTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "C5_FILIAL")) .OR. ( ( ALLTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "C5_COMIS1") .OR. ( ALLTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "C5_VLRDUP" ) )
+                cAux := alltrim(_cAlias)+"->"+( _cAliasSX3 )->( X3_CAMPO )
+                do case
+                   case ALLTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "C5_COMIS1"
+                        xValor := nComis
+                   case ALLTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "C5_VLRDUP"
+                        xValor := _nVlrTotDup
+                   otherwise
+                        xValor := &cAux
+                endcase
+                if !empty(xValor)
+                   aadd( aCabec, { ( _cAliasSX3 )->( X3_CAMPO ), xValor, .F. } )
+                endif
+             Endif
+             dbSelectArea( _cAliasSX3 )
+             ( _cAliasSX3 )->( dbSkip() )
+       End
+       DbSelectArea("SC5")
+       MsgRun("Frete CIF...", "Aguarde", {|| MsExecAuto( { |x, y, z| MATA410(x, y, z) }, aCabec, aItens, 4 ) } )
+       If lMsErroAuto
+          lRet := !lMsErroAuto
+          MostraErro()
+       ENDIF
+
+       DbSelectArea( _cAliasSX3 )
+       DbCloseArea()
+
+       DbSelectArea("SC5")
+       dbsetorder(1)
+       dbseek(xFilial("SC5")+_cPed)
+Return(lRet)

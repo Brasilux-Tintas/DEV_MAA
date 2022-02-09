@@ -1271,7 +1271,7 @@ User Function fGerTXTOps(aGerTxt)
               //Endif
            	  nOutFile := FCreate(cArqMes) //Arquivo para Fabrica II
            	  If nOutFile == -1
-               	  MsgAlert("O arquivo de nome "+cArqMes+" nao pode ser gravado para Fabrica II!", "Atencao!")
+               	  //MsgAlert("O arquivo de nome "+cArqMes+" nao pode ser gravado para Fabrica II!", "Atencao!")
            	  Endif
               /******************************************************************/
               /*** MONTAGEM DO ARQUIVO TEXTO                                  ***/

@@ -72,7 +72,7 @@ User Function BRFATX01()
      Private oTempTable
      Private oTempTbl01
 	     u_zcfga01( 'BRFATX01' ) //LGS#2021214 - Gravação de log de utilização da rotina
-	lAdmin := (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) = 0)
+	//lAdmin := (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) = 0)
 			
 	if lAdmin
 		cAcesso := '*****   * '		
@@ -1106,7 +1106,7 @@ Static Function fAprPed(nOpc, oDlg, bOk, bCancel)
           oBar:addBtnImage( "CANCEL.PNG"    , "Sair..."                 , { | | oDlg:End()           }, , .T., CONTROL_ALIGN_LEFT )
        Else
           oBar:addBtnImage( "S4WB010N.PNG"     , "Impressão..."            , { | | u_FATX01_h()         }, , .T., CONTROL_ALIGN_LEFT )
-          oBar:addBtnImage( "NOVACELULA.PNG"   , "Pesquisa..."                 , { | | FATX01_F(2, "TMP")   }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "NOVACELULA.PNG"   , "Pesquisa..."             , { | | FATX01_F(2, "TMP")   }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "CANCEL.PNG"       , "Sair..."                 , { | | DbSelectArea("TMP"), DbCloseArea(), oTempTbl01:Delete(), oDlg:End() }, , .T., CONTROL_ALIGN_LEFT )
        Endif
        //DEFINE BUTTONBAR oBar SIZE 25,25 3D TOP OF oDlg
@@ -1643,11 +1643,11 @@ Static Function FATX01_8()
                             ZZB->ZZB_DATLOG := dDataBase
                             ZZB->ZZB_HORLOG := Time()
                          MsUnLock()
-                         Else
-                            lSucesso := .f.
-                            U_fMosAvs("Atenção", "O pedido: "+LPD->PEDIDO+" não foi liberado pelo cadastro, por estar travado por outro usuário."+chr(10)+char(13)+;
+                      Else
+                         lSucesso := .f.
+                         U_fMosAvs("Atenção", "O pedido: "+LPD->PEDIDO+" não foi liberado pelo cadastro, por estar travado por outro usuário."+chr(10)+char(13)+;
                                    "Tente novamente mais tarde.", {"Continua"}, 2)
-                         Endif
+                      Endif
                          /********************************************************************************************************************/
                          //** ANALISE DE CREDITO PARA LIBERAÇÃO AUTOMÁTICA - 
                          //** 1º) SEM TITULOS EM ATRASO
@@ -1933,7 +1933,7 @@ Static Function FATX01_8()
                          		ENDIF 
                          	
 						Endif
-                   	ElseIf LPD->APROVA == '2'
+               ElseIf LPD->APROVA == '2'
 	 					DbSelectArea("SC5")
 	      				lSucesso := !U_EstaBloqueado("SC5", RecNo()) 
     	      			If lSucesso

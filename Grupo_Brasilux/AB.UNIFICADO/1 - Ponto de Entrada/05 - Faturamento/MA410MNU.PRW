@@ -6,8 +6,10 @@
 #INCLUDE "RWMAKE.CH"
 
 User Function MA410MNU()
-Local _cGrpEmp := alltrim(FWGrpCompany())
-If _cGrpEmp <> '11'
+     Local _aArea   := GetArea()
+     Local _cGrpEmp := Alltrim( FWGrpCompany() )
+
+     If _cGrpEmp <> '11'
         /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
         ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
         ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -23,10 +25,10 @@ If _cGrpEmp <> '11'
         aAdd( aRotina, { 'Divide Ped'     , 'U_DividePed(SC5->C5_NUM)', 0, 3, 0, NIL } )
         aAdd( aRotina, { 'Estorna Div Ped', 'U_EstDivPed(SC5->C5_NUM)', 0, 3, 0, NIL } )
         aAdd( aRotina, { 'Posicao Estoque', 'U_BRFATC02(SC5->C5_NUM)' , 0, 3, 0, NIL } )
-Else
+     Else
         AADD( aRotina, { 'Mens. Padrão'   , 'U_MENU410'               , 0, 0, 0, .F. } )
-Endif
-
+     Endif
+     RestArea( _aArea )
 	/*ONDE:Parametros do array a Rotina:
 	1. Nome a aparecer no cabecalho
 	2. Nome da Rotina associada
@@ -40,7 +42,7 @@ Endif
 	5. Nivel de acesso
 	6. Habilita Menu Funcional
 	*/
-Return Nil
+Return
 
 /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±À
 Function    ³ DividePed

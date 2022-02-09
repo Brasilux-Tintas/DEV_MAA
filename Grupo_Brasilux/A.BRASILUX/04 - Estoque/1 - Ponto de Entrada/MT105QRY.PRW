@@ -27,7 +27,7 @@ User Function MT105QRY()
      Local nArea := Alias()                
      Local xLoc                                                                                      
 
-     If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
+     If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         u_zcfga01( 'MT150QRY' ) //LGS#2021119 - Gravação de log de utilização da rotina
         dbselectarea("ZZN")
         dbsetorder(1)  //xFilial("ZZN")+RetCodUsr()+"R"

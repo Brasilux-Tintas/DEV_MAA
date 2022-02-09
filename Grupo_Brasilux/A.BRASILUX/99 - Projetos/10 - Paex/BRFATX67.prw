@@ -148,8 +148,7 @@ Local cAuxMens  := ""
 Local cQry      := ""
 Local cQry1     := ""
 Local cCodCARGA := ""
-Local nW, nZ, nX, nI, nE
-
+Local nW, nZ, nX, nI, nE, _nY
 Private lMsHelpAuto := .T.
 Private lMsErroAuto := .F.
 //Private lCancelaTran:= .F.
@@ -168,7 +167,7 @@ Private lMsErroAuto := .F.
 
     cPallets := "('"
     cObs     :=	"REMESSA ENTRE MATRIZ -> DEPÓSITO SP (PALLETS BIPADOS) "
-
+    
 	DbSelectArea("TMPTRANS")
 	DbGotop()
 	While (TMPTRANS->(!Eof()))
@@ -207,7 +206,6 @@ Private lMsErroAuto := .F.
 	cQry1 += " AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
 	cQry1 += " GROUP BY ZZK_PRODUT, B1_MSBLQL, B1_VEND, B1_TIPO, B2_CM1, B1_PRV1 " //, B1_DESC" //, B1_UM "  
 	cQry1 += " ORDER BY SUBSTRING(ZZK_PRODUT,4,2), ZZK_PRODUT "
-
 
 
 	TCQuery cQry1 ALIAS "TCQ" NEW
@@ -277,7 +275,20 @@ Private lMsErroAuto := .F.
     	   	aAdd(aCabec,{"C5_OBS"        ,		cObs      												,Nil})
 			aAdd(aCabec,{"C5_OBSNF"      , 		"Transferência de Mercadorias para DEPÓSITO FECHADO!!"	,NIL})
 
-	    	//cNPedidos += _cNumPed+" / " 
+			DbSelectArea("SX3")
+			SX3->( DbSetOrder(1) )
+			SX3->( DbSeek( "SX5" ) )
+			While !Eof() .and. SX3->X3_ARQUIVO == 'SC5'
+			      If Alltrim( SX3->X3_CAMPO ) != 'C5_NUM'
+				     _wVar := "M->" + SX3->X3_CAMPO
+					 &wVar := CriaVar( SX3->X3_CAMPO )
+				  Endif
+			      SX3->( DbSkip( ) )
+			EndDo
+			For _nY := 1 To Len( aCabec )
+			    Private &( "M->" + aCabec[_nY][1] ) := aCabec[_nY][2]
+			Next
+			//cNPedidos += _cNumPed+" / " 
 	    			//  (Limite definido para quebra dos pedidos de transferência)   
 			For nI:= (nDe + 1) To Iif((150 + nDe) <= Len(aTrPallet), (150 + nDe), Len(aTrPallet))
 
@@ -343,8 +354,8 @@ Private lMsErroAuto := .F.
 	        DbSelectArea("SC5")
     	    DbSetOrder(1)
 
-            MsgRun("Gerando pedido de transferência por Pallets !!", "Aguarde", {|| MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3) } )
-
+            //MsgRun("Gerando pedido de transferência por Pallets !!", "Aguarde", {|| MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3) } )
+MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3)
     	   	If lMsErroAuto
 	            DisarmTransaction()
         	    MostraErro()

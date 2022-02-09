@@ -49,7 +49,7 @@ User Function BRFATX66()
   	 Private cCodUsr    := RetCodUsr()
   	 Private cAcessos   := Posicione("SZW", 4, xFilial("SZW")+cRotina+__cUserID+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")
   	 Private oTempTbl1
-       u_zcfga01( 'BRFATX66' ) //LGS#2021214 - Grava豫o de log de utiliza豫o da rotina
+  
      /*컴컴컴컴컴컴컨컴컴컴컴좔컴컴컨컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴袂�
      굇 Declara豫o de Variaveis Private dos Objetos                             굇
      袂굼컴컴컴컴컴컴컴좔컴컴컴컨컴컴컴좔컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/

@@ -2041,146 +2041,168 @@ Local nArea
     
 return(nPreco)
 
-User Function PrcMinimo(nValorTab,cGrupoVenda,nPercIcm,lIcmsIpi,cCondPgto)   
-Local nDesc1,nDesc2,nDesc3,nDesc4,nDesc5,nDesc6     
-Local aPrecos := {}
+/*/{Protheus.doc} PrcMinimo
+Função para calculo do preço minimo de vendas
+@type function
+@version  
+@author Cleber Orati
+@since 18/01/2022
+@param nValorTab, numeric, Valor da tabela de preços do produto
+@param cGrupoVenda, character, Grupo de vendas 2 do cadastro de produtos
+@param nPercIcm, numeric, Percentual de ICMS
+@param lIcmsIpi, logical, Calcula IPI
+@param cCondPgto, character, Condição de pagamento do pedido
+@return array, Preço minimo dos produtos
+/*/
+User Function PrcMinimo( nValorTab, cGrupoVenda, nPercIcm, lIcmsIpi, cCondPgto )
+     Local nDesc1, nDesc2, nDesc3, nDesc4, nDesc5, nDesc6
+     Local aPrecos := {}
+     Local _nZPPAR39 := 1 - GETMV( "ZP_PAR0039" ) //LGS#20220201 - Parametro do Percentual de desconto adicional para pagamento a vista - POLITICA COMERCIAL BRASILUX
 
-	nDesc1 := 0
-	nDesc2 := 0
-	nDesc3 := 0
-	nDesc4 := 0
-	nDesc5 := 0
-	nDesc6 := 0
+     nDesc1 := 0
+     nDesc2 := 0
+     nDesc3 := 0
+     nDesc4 := 0
+     nDesc5 := 0
+     nDesc6 := 0
 
-if (nPercIcm >= 18) .and. lIcmsIpi
-			nDesc1 := 5
-			nDesc2 := 6
-			nDesc3 := 7
-			nDesc4 := 8
-			nDesc5 := 9
-			nDesc6 := 10
-else 
-	do case
-	case nPercIcm <= 7
-		do case
-		case cGrupoVenda = "1"
-			nDesc1 := 26
-			nDesc2 := 27
-			nDesc3 := 29
-			nDesc4 := 30
-			nDesc5 := 31
-			nDesc6 := 32
-		case cGrupoVenda = "2"
-			nDesc1 := 26
-			nDesc2 := 27
-			nDesc3 := 29
-			nDesc4 := 30
-			nDesc5 := 31
-			nDesc6 := 32
-		case cGrupoVenda = "3"
-			nDesc1 := 27
-			nDesc2 := 28
-			nDesc3 := 30
-			nDesc4 := 31
-			nDesc5 := 32
-			nDesc6 := 33
-		endcase 
-	case nPercIcm <= 12
-		do case
-		case cGrupoVenda = "1"
-			nDesc1 := 17
-			nDesc2 := 19
-			nDesc3 := 21
-			nDesc4 := 23
-			nDesc5 := 23
-			nDesc6 := 24
-		case cGrupoVenda = "2"
-			nDesc1 := 17
-			nDesc2 := 19
-			nDesc3 := 21
-			nDesc4 := 23
-			nDesc5 := 23
-			nDesc6 := 24
-		case cGrupoVenda = "3"
-			nDesc1 := 18
-			nDesc2 := 20
-			nDesc3 := 22
-			nDesc4 := 23
-			nDesc5 := 24
-			nDesc6 := 25
-		endcase 
-	otherwise
-		do case
-		case cGrupoVenda = "1"
-			nDesc1 := 6
-			nDesc2 := 8
-			nDesc3 := 10
-			nDesc4 := 12
-			nDesc5 := 13
-			nDesc6 := 14
-		case cGrupoVenda = "2"
-			nDesc1 := 6
-			nDesc2 := 8
-			nDesc3 := 10
-			nDesc4 := 12
-			nDesc5 := 13
-			nDesc6 := 14
-		case cGrupoVenda = "3"
-			nDesc1 := 7
-			nDesc2 := 9
-			nDesc3 := 11
-			nDesc4 := 13
-			nDesc5 := 14
-			nDesc6 := 15
-		endcase 
-	endcase
-endif  
+     If ( nPercIcm >= 18) .and. lIcmsIpi //Consumidor Final
+        nDesc1 := 5
+        nDesc2 := 6
+        nDesc3 := 7
+        nDesc4 := 8
+        nDesc5 := 9
+        nDesc6 := 10
+     Else
+        Do Case
+           Case nPercIcm <= 7
+                Do Case
+                   Case cGrupoVenda = "1"
+                        nDesc1 := 26
+                        nDesc2 := 27
+                        nDesc3 := 29
+                        nDesc4 := 30
+                        nDesc5 := 31
+                        nDesc6 := 32
+                   Case cGrupoVenda = "2"
+                        nDesc1 := 26
+                        nDesc2 := 27
+                        nDesc3 := 29
+                        nDesc4 := 30
+                        nDesc5 := 31
+                        nDesc6 := 32
+                   Case cGrupoVenda = "3"
+                        nDesc1 := 27
+                        nDesc2 := 28
+                        nDesc3 := 30
+                        nDesc4 := 31
+                        nDesc5 := 32
+                        nDesc6 := 33
+                EndCase 
+           Case nPercIcm <= 12
+                Do Case
+                   Case cGrupoVenda = "1"
+                        nDesc1 := 17
+                        nDesc2 := 19
+                        nDesc3 := 21
+                        nDesc4 := 23
+                        nDesc5 := 23
+                        nDesc6 := 24
+                   Case cGrupoVenda = "2"
+                        nDesc1 := 17
+                        nDesc2 := 19
+                        nDesc3 := 21
+                        nDesc4 := 23
+                        nDesc5 := 23
+                        nDesc6 := 24
+                   Case cGrupoVenda = "3"
+                        nDesc1 := 18
+                        nDesc2 := 20
+                        nDesc3 := 22
+                        nDesc4 := 23
+                        nDesc5 := 24
+                        nDesc6 := 25
+                EndCase 
+           Otherwise
+                Do Case
+                   Case cGrupoVenda = "1"
+                        nDesc1 := 6
+                        nDesc2 := 8
+                        nDesc3 := 10
+                        nDesc4 := 12
+                        nDesc5 := 13
+                        nDesc6 := 14
+                   Case cGrupoVenda = "2"
+                        nDesc1 := 6
+                        nDesc2 := 8
+                        nDesc3 := 10
+                        nDesc4 := 12
+                        nDesc5 := 13
+                        nDesc6 := 14
+                   Case cGrupoVenda = "3"
+                        nDesc1 := 7
+                        nDesc2 := 9
+                        nDesc3 := 11
+                        nDesc4 := 13
+                        nDesc5 := 14
+                        nDesc6 := 15
+                EndCase
+        EndCase
+     Endif  
 
-if (cGrupoVenda != "3") .and. (cGrupoVenda != "2") .and. (cGrupoVenda != "1")
-	nDesc1 := 0
-	nDesc2 := 0
-	nDesc3 := 0
-	nDesc4 := 0
-	nDesc5 := 0
-	nDesc6 := 0
-endif 
+     If (cGrupoVenda != "3") .and. (cGrupoVenda != "2") .and. (cGrupoVenda != "1")
+        nDesc1 := 0
+        nDesc2 := 0
+        nDesc3 := 0
+        nDesc4 := 0
+        nDesc5 := 0
+        nDesc6 := 0
+     Endif 
 
-if cCondPgto == "001" // Se for venda a vista, desc. adic. de 5% => Desconto da política + aplicação de desconto adicional de 5% sobre o valor com desconto (fórmula => D1 = 5 + 0.95D
-//Chamado 017308->Mudar desconto adicional de 5% para 3%
-//Chamado 021202->Mudar desconto adicional de 3% para 1,5%
+     If cCondPgto == "001" // Se for venda a vista, desc. adic. de 5% => Desconto da política + aplicação de desconto adicional de 5% sobre o valor com desconto (fórmula => D1 = 5 + 0.95D
+                           //Chamado 017308->Mudar desconto adicional de 5% para 3%
+                           //Chamado 021202->Mudar desconto adicional de 3% para 1,5%
+        
+		//LGS#20220201 - Substituiçã do valor fixo por parâmetro para facilitar em ajustes futuros
+		nDesc1 := 100 * ( 1 - ( _nZPPAR39 * ( 1 - ( nDesc1 / 100 ) ) ) )
+        nDesc2 := 100 * ( 1 - ( _nZPPAR39 * ( 1 - ( nDesc2 / 100 ) ) ) )
+        nDesc3 := 100 * ( 1 - ( _nZPPAR39 * ( 1 - ( nDesc3 / 100 ) ) ) )
+        nDesc4 := 100 * ( 1 - ( _nZPPAR39 * ( 1 - ( nDesc4 / 100 ) ) ) )
+        nDesc5 := 100 * ( 1 - ( _nZPPAR39 * ( 1 - ( nDesc5 / 100 ) ) ) )
+        nDesc6 := 100 * ( 1 - ( _nZPPAR39 * ( 1 - ( nDesc6 / 100 ) ) ) )
 
-	nDesc1 := 100*(1 - (0.985*(1-(nDesc1/100))))
-	nDesc2 := 100*(1 - (0.985*(1-(nDesc2/100))))
-	nDesc3 := 100*(1 - (0.985*(1-(nDesc3/100))))
-	nDesc4 := 100*(1 - (0.985*(1-(nDesc4/100))))
-	nDesc5 := 100*(1 - (0.985*(1-(nDesc5/100))))
-	nDesc6 := 100*(1 - (0.985*(1-(nDesc6/100))))
-
-/*
-	nDesc1 := 100*(1 - (0.97*(1-(nDesc1/100))))
-	nDesc2 := 100*(1 - (0.97*(1-(nDesc2/100))))
-	nDesc3 := 100*(1 - (0.97*(1-(nDesc3/100))))
-	nDesc4 := 100*(1 - (0.97*(1-(nDesc4/100))))
-	nDesc5 := 100*(1 - (0.97*(1-(nDesc5/100))))
-	nDesc6 := 100*(1 - (0.97*(1-(nDesc6/100))))
-*/   
-/*
-	nDesc1 = 5 + (0.95*nDesc1)
-	nDesc2 = 5 + (0.95*nDesc2)
-	nDesc3 = 5 + (0.95*nDesc3)
-	nDesc4 = 5 + (0.95*nDesc4)
-	nDesc5 = 5 + (0.95*nDesc5)
-	nDesc6 = 5 + (0.95*nDesc6)
-	*/
-endif 
-aadd(aPrecos,nValorTab*(1-(nDesc1/100)))
-aadd(aPrecos,nValorTab*(1-(nDesc2/100)))
-aadd(aPrecos,nValorTab*(1-(nDesc3/100)))
-aadd(aPrecos,nValorTab*(1-(nDesc4/100)))
-aadd(aPrecos,nValorTab*(1-(nDesc5/100)))
-aadd(aPrecos,nValorTab*(1-(nDesc6/100)))
-    
-return(aPrecos)   
+		/* 
+		nDesc1 := 100 * ( 1 - ( 0.985 * ( 1 - ( nDesc1 / 100 ) ) ) )
+        nDesc2 := 100 * ( 1 - ( 0.985 * ( 1 - ( nDesc2 / 100 ) ) ) )
+        nDesc3 := 100 * ( 1 - ( 0.985 * ( 1 - ( nDesc3 / 100 ) ) ) )
+        nDesc4 := 100 * ( 1 - ( 0.985 * ( 1 - ( nDesc4 / 100 ) ) ) )
+        nDesc5 := 100 * ( 1 - ( 0.985 * ( 1 - ( nDesc5 / 100 ) ) ) )
+        nDesc6 := 100 * ( 1 - ( 0.985 * ( 1 - ( nDesc6 / 100 ) ) ) )
+        */
+        /*
+        nDesc1 := 100*(1 - (0.97*(1-(nDesc1/100))))
+        nDesc2 := 100*(1 - (0.97*(1-(nDesc2/100))))
+        nDesc3 := 100*(1 - (0.97*(1-(nDesc3/100))))
+        nDesc4 := 100*(1 - (0.97*(1-(nDesc4/100))))
+        nDesc5 := 100*(1 - (0.97*(1-(nDesc5/100))))
+        nDesc6 := 100*(1 - (0.97*(1-(nDesc6/100))))
+        */
+        /*
+        nDesc1 = 5 + (0.95*nDesc1)
+        nDesc2 = 5 + (0.95*nDesc2)
+        nDesc3 = 5 + (0.95*nDesc3)
+        nDesc4 = 5 + (0.95*nDesc4)
+        nDesc5 = 5 + (0.95*nDesc5)
+        nDesc6 = 5 + (0.95*nDesc6)
+        */
+     Endif
+     aAdd( aPrecos, nValorTab * ( 1 - ( nDesc1 / 100 ) ) )
+     aAdd( aPrecos, nValorTab * ( 1 - ( nDesc2 / 100 ) ) )
+     aAdd( aPrecos, nValorTab * ( 1 - ( nDesc3 / 100 ) ) )
+     aAdd( aPrecos, nValorTab * ( 1 - ( nDesc4 / 100 ) ) )
+     aAdd( aPrecos, nValorTab * ( 1 - ( nDesc5 / 100 ) ) )
+     aAdd( aPrecos, nValorTab * ( 1 - ( nDesc6 / 100 ) ) )
+Return( aPrecos )
 
 User Function Sodig(_cString)
 local cRet,i,cDig
@@ -2896,54 +2918,51 @@ endif
 
 return(nSaldo)
 
-User Function LiberaPed(_cNum)
-Local aArea := getarea()
-Local lRet := .t.,_cFilial := xFilial("SC6"),_lAchou
-Local nRegC5,lRegC5,nOrdC5,nRegC6,lRegC6,nOrdC6,nQtdLib,;
-nRegC9,lRegC9,nOrdC9
+User Function LiberaPed( _cNum )
+     Local aArea := getarea()
+     Local lRet  := .t., _cFilial := xFilial("SC6"), _lAchou
+     Local nRegC5, lRegC5, nOrdC5, nRegC6, lRegC6, nOrdC6, nQtdLib, nRegC9, lRegC9, nOrdC9
 
-dbselectarea("SC9")
-nOrdC9 := IndexOrd()
-if !eof() .and. !bof()	 
-	lRegC9 = .t.
-   	nRegC9 = recno()
-else
-	lRegC9 = .f.
-endif 
+     DbSelectArea("SC9")
+     nOrdC9 := IndexOrd()
+     If !eof() .and. !bof()	 
+        lRegC9 = .t.
+        nRegC9 = recno()
+     Else
+        lRegC9 = .f.
+     Endif 
 
-dbselectarea("SC5")
-nOrdC5 := IndexOrd()
-if !eof() .and. !bof()	 
-	lRegC5 = .t.
-   	nRegC5 = recno()
-else
-	lRegC5 = .f.
-endif 
+     dbselectarea("SC5")
+     nOrdC5 := IndexOrd()
+     if !eof() .and. !bof()	 
+        lRegC5 = .t.
+        nRegC5 = recno()
+     else
+        lRegC5 = .f.
+     endif 
 
-dbselectarea("SC6")
-nOrdC6 := IndexOrd()
-if !eof() .and. !bof()	 
-	lRegC6 = .t.
-   	nRegC6 = recno()
-else
-	lRegC6 = .f.
-endif 
+     dbselectarea("SC6")
+     nOrdC6 := IndexOrd()
+     if !eof() .and. !bof()	 
+        lRegC6 = .t.
+        nRegC6 = recno()
+     else
+        lRegC6 = .f.
+     endif 
 
+     dbselectarea("SC5")
+     DbSetorder(1)
+     dbseek(xFilial("SC5")+_cNum) 
+     if !found()
+        lRet := .f.
+     endif 
 
-dbselectarea("SC5")
-DbSetorder(1)
-dbseek(xFilial("SC5")+_cNum) 
-if !found()
-	lRet := .f.
-endif 
-
-
-dbselectarea("SC6")
-dbsetorder(1)
-dbseek(xFilial("SC6")+_cNum,.t.)
-if !found()
-	lRet := .f.
-endif
+     dbselectarea("SC6")
+     dbsetorder(1)
+     dbseek(xFilial("SC6")+_cNum,.t.)
+     If !found()
+        lRet := .f.
+     Endif
 While lRet .and. !EOF() .And. (SC6->C6_FILIAL = _cFilial) .and. (SC6->C6_NUM == _cNum)
      
      If RecLock("SC5")
@@ -3168,218 +3187,213 @@ enddo
 	
 return(cRet)
 
-//Função para liberar pedido.
-//ATENÇAO! O SC5 deverá estar posicionado no pedido a liberar
+/*/{Protheus.doc} fPedLib
+Função para liberar pedido de vendas
+ATENÇAO! O SC5 deverá estar posicionado no pedido a liberar
+@type function
+@version  v.2022.01
+@author Luís Gustavo de Souza
+@since 31/01/2022
+@return Logical, Retorna sempre verdadeiro
+/*/
 User Function fPedLib()
-Local cArea := alias()
-Local aArea := U_PegaArea({"SA3","SA2","SA1","SB2","SB5","SC5","SD1","SF1","SF4","SG1","SZ1","SZ5","ZZO","SC6","SC9"})
-Local nQtdLib := 0
-Local _cNum := SC5->C5_NUM
-Local _cFilial := xFilial("SC6")
-Local _lAchou,lTransf
-Local aRegistros:= {}
-LOCAL lMVXHABBOR := GETMV("MV_XHABBOR")
+     Local cArea      := Alias()
+     Local aArea      := U_PegaArea({"SA3","SA2","SA1","SB2","SB5","SC5","SD1","SF1","SF4","SG1","SZ1","SZ5","ZZO","SC6","SC9"})
+     Local nQtdLib    := 0
+     Local _cNum      := SC5->C5_NUM
+     Local _cFilial   := xFilial("SC6")
+     Local _lAchou, lTransf
+     Local aRegistros := {}
+     LOCAL lMVXHABBOR := GETMV("MV_XHABBOR")
 
-//***06/06/212
+     //***06/06/2012
 
-if SC5->C5_LIBEROK = "S"
-	if !empty(cArea)
-		dbselectarea(cArea)
-	endif 
-	return .t.
-endif 
-	DbSelectarea("SA3")
-	DbSetOrder(1)
-	DbSelectarea("SA2")
-	DbSetOrder(1)
-	DbSelectArea("SA1")
-	DbSetOrder(1)
-	DbSelectArea("SB2")
-	DbSetOrder(1)
-    DbSelectArea("SB5")
-    DbSetOrder(1)
-	DbSelectArea("SC5")
-	DbSetOrder(1)
-	DbSelectArea("SD1")
-	DbSetOrder(1)
-	DbSelectArea("SF1")
-	DbSetOrder(1)
-	DbSelectArea("SF4")
-	DbSetOrder(1)
-    DbSelectArea("SG1")
-	DbSetOrder(1)
-	DbSelectArea("SZ1")
-	DbSetOrder(1)
-	DbSelectArea("SZ5")
-	DbSetOrder(1)
-	DbSelectArea("ZZO")
-	DbSetOrder(1)
+     If SC5->C5_LIBEROK = "S"
+        If !Empty( cArea )
+           DbSelectArea( cArea )
+        Endif
+        Return .t.
+     Endif 
+     DbSelectarea("SA3")
+     DbSetOrder(1)
+     DbSelectarea("SA2")
+     DbSetOrder(1)
+     DbSelectArea("SA1")
+     DbSetOrder(1)
+     DbSelectArea("SB2")
+     DbSetOrder(1)
+     DbSelectArea("SB5")
+     DbSetOrder(1)
+     DbSelectArea("SC5")
+     DbSetOrder(1)
+     DbSelectArea("SD1")
+     DbSetOrder(1)
+     DbSelectArea("SF1")
+     DbSetOrder(1)
+     DbSelectArea("SF4")
+     DbSetOrder(1)
+     DbSelectArea("SG1")
+     DbSetOrder(1)
+     DbSelectArea("SZ1")
+     DbSetOrder(1)
+     DbSelectArea("SZ5")
+     DbSetOrder(1)
+     DbSelectArea("ZZO")
+     DbSetOrder(1)
+     DbSelectArea("SC6")
+     DbSetOrder(1)
 
-	DbSelectArea("SC6")
-	DbSetOrder(1)
+     DbSelectArea("SC6")
+     DbSeek( _cFilial + _cNum, .f. )
 
+     If RecLock("SC5")
+        While !Eof() .and. ( SC6->C6_FILIAL == _cFilial ) .and. ( SC6->C6_NUM == _cNum )
+              nQtdLib := SC6->C6_QTDVEN
+              //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+              //³Recalcula a Quantidade Liberada                                         ³
+              //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+              RecLock("SC6") //Forca a atualizacao do Buffer no Top
+                 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                 //³Libera por Item de Pedido                                               ³
+                 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+                 Begin Transaction
+                       /*
+                       ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+                       ±±³Funcao    ³MaLibDoFat³ Autor ³Eduardo Riera          ³ Data ³09.03.99 ³±±
+                       ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+                       ±±³Descri?.o ³Liberacao dos Itens de Pedido de Venda                      ³±±
+                       ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+                       ±±³Retorno   ³ExpN1: Quantidade Liberada                                  ³±±
+                       ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+                       ±±³Transacao ³Nao possui controle de Transacao a rotina chamadora deve    ³±±
+                       ±±³          ³controlar a Transacao e os Locks                            ³±±
+                       ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+                       ±±³Parametros³ExpN1: Registro do SC6                                      ³±±
+                       ±±³          ³ExpN2: Quantidade a Liberar                                 ³±±
+                       ±±³          ³ExpL3: Bloqueio de Credito                                  ³±±
+                       ±±³          ³ExpL4: Bloqueio de Estoque                                  ³±±
+                       ±±³          ³ExpL5: Avaliacao de Credito                                 ³±±
+                       ±±³          ³ExpL6: Avaliacao de Estoque                                 ³±±
+                       ±±³          ³ExpL7: Permite Liberacao Parcial                            ³±±
+                       ±±³          ³ExpL8: Tranfere Locais automaticamente                      ³±±
+                       ±±³          ³ExpA9: Empenhos ( Caso seja informado nao efetua a gravacao ³±±
+                       ±±³          ³       apenas avalia ).                                    ³±±
+                       ±±³          ³ExpbA: CodBlock a ser avaliado na gravacao do SC9           ³±±
+                       ±±³          ³ExpAB: Array com Empenhos previamente escolhidos            ³±±
+                       ±±³          ³       (impede selecao dos empenhos pelas rotinas)          ³±±
+                       ±±³          ³ExpLC: Indica se apenas esta trocando lotes do SC9          ³±±
+                       ±±³          ³ExpND: Valor a ser adicionado ao limite de credito          ³±±
+                       ±±³          ³ExpNE: Quantidade a Liberar - segunda UM                    ³±±
+                       */
+                       lTransf := iif(!lMVXHABBOR .OR. (SC5->C5_TIPO <> 'N'),.F.,.T.)
+                       dbselectarea("SC9")
+                       dbsetorder(1)
+                       dbseek(xFilial("SC9")+SC6->C6_NUM+SC6->C6_ITEM)
+                       _lAchou := found()
+                       If !_lAchou .or. (_lAchou .and. !(SC6->C6_PRODUTO == SC9->C9_PRODUTO))
+                          If ( SC5->C5_TIPLIB == "1" )
+                             If !lMVXHABBOR .OR. (SC5->C5_TIPO <> 'N')  // liberação credito e estoque se parametro desativado, liberação somente credito se parametro ativado
+                                MaLibDoFat(SC6->(RecNo()),@nQtdLib           ,.T.                 ,.F.                ,.T.                 ,.T.                 ,.F.                      ,lTransf)  
+                             Else
+                                // LIBERA CREDITO - BLOQUEIA ESTOQUE
+                                MaLibDoFat(SC6->(RecNo()),@nQtdLib           ,.T.                 ,.F.                ,.T.                 ,.F.                 ,.F.                      ,lTransf,,,,,,0,)
+                                //MaLibDoFat(Registro do SC6 ,Quantidade a Liberar,Bloqueio de Credito ,Bloqueio de Estoque,Avaliacao de Credito,Avaliacao de Estoque,Permite Liberacao Parcial,Tranfere Locais automaticamente )
+                             Endif
+                          Else
+                             //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                             //³Libera por Pedido                                                       ³
+                             //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ			
+                             Begin Transaction
+                                   RecLock("SC6",.f.)
+                                      SC6->C6_QTDLIB := nQtdLib
+                                   MsUnLock()
+                                   aAdd( aRegistros, SC6->( RecNo() ) )
+                             End Transaction
+                          EndIf
+                       Endif
+                 End Transaction
+              SC6->(MsUnLock())
+              DbSelectArea("SC6")
+              DbSkip()
+        EndDo
+     EndIf
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³Libera por Total de Pedido                                              ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     If ( Len(aRegistros) > 0 )
+        Begin Transaction
+              SC6->(MaAvLibPed(_cNum,.F.,lTransf,.F.,aRegistros,Nil,Nil,Nil,!lTransf))
+        End Transaction
+     EndIf
 
-dbselectarea("SC6")
-dbseek(_cFilial+_cNum,.f.)
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³Atualiza o Flag do Pedido de Venda                                      ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     Begin Transaction
+           SC6->( MaLiberOk( { _cNum }, .F. ) )
+     End Transaction
 
-If RecLock("SC5")
-	While !EOF() .And. (SC6->C6_FILIAL = _cFilial) .and. (SC6->C6_NUM == _cNum)
-     
-          nQtdLib := SC6->C6_QTDVEN
-          //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-          //³Recalcula a Quantidade Liberada                                         ³
-          //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-          RecLock("SC6") //Forca a atualizacao do Buffer no Top
-          //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-          //³Libera por Item de Pedido                                               ³
-          //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-          Begin Transaction
-          /*
-          ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-          ±±³Funcao    ³MaLibDoFat³ Autor ³Eduardo Riera          ³ Data ³09.03.99 ³±±
-          ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-          ±±³Descri?.o ³Liberacao dos Itens de Pedido de Venda                      ³±±
-          ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-          ±±³Retorno   ³ExpN1: Quantidade Liberada                                  ³±±
-          ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-          ±±³Transacao ³Nao possui controle de Transacao a rotina chamadora deve    ³±±
-          ±±³          ³controlar a Transacao e os Locks                            ³±±
-          ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-          ±±³Parametros³ExpN1: Registro do SC6                                      ³±±
-          ±±³          ³ExpN2: Quantidade a Liberar                                 ³±±
-          ±±³          ³ExpL3: Bloqueio de Credito                                  ³±±
-          ±±³          ³ExpL4: Bloqueio de Estoque                                  ³±±
-          ±±³          ³ExpL5: Avaliacao de Credito                                 ³±±
-          ±±³          ³ExpL6: Avaliacao de Estoque                                 ³±±
-          ±±³          ³ExpL7: Permite Liberacao Parcial                            ³±±
-          ±±³          ³ExpL8: Tranfere Locais automaticamente                      ³±±
-          ±±³          ³ExpA9: Empenhos ( Caso seja informado nao efetua a gravacao ³±±
-          ±±³          ³       apenas avalia ).                                    ³±±
-          ±±³          ³ExpbA: CodBlock a ser avaliado na gravacao do SC9           ³±±
-          ±±³          ³ExpAB: Array com Empenhos previamente escolhidos            ³±±
-          ±±³          ³       (impede selecao dos empenhos pelas rotinas)          ³±±
-          ±±³          ³ExpLC: Indica se apenas esta trocando lotes do SC9          ³±±
-          ±±³          ³ExpND: Valor a ser adicionado ao limite de credito          ³±±
-          ±±³          ³ExpNE: Quantidade a Liberar - segunda UM                    ³±±
-          */
-          	lTransf := iif(!lMVXHABBOR .OR. (SC5->C5_TIPO <> 'N'),.F.,.T.)
-			dbselectarea("SC9")
-			dbsetorder(1)
-			dbseek(xFilial("SC9")+SC6->C6_NUM+SC6->C6_ITEM)
-			_lAchou := found()
-			if !_lAchou .or. (_lAchou .and. !(SC6->C6_PRODUTO == SC9->C9_PRODUTO))
-				If ( SC5->C5_TIPLIB == "1" )
-					If !lMVXHABBOR .OR. (SC5->C5_TIPO <> 'N')  // liberação credito e estoque se parametro desativado, liberação somente credito se parametro ativado
-						MaLibDoFat(SC6->(RecNo()),@nQtdLib           ,.T.                 ,.F.                ,.T.                 ,.T.                 ,.F.                      ,lTransf)  
-					Else
-						// LIBERA CREDITO - BLOQUEIA ESTOQUE
-						MaLibDoFat(SC6->(RecNo()),@nQtdLib           ,.T.                 ,.F.                ,.T.                 ,.F.                 ,.F.                      ,lTransf,,,,,,0,)
-						//MaLibDoFat(Registro do SC6 ,Quantidade a Liberar,Bloqueio de Credito ,Bloqueio de Estoque,Avaliacao de Credito,Avaliacao de Estoque,Permite Liberacao Parcial,Tranfere Locais automaticamente )
-					Endif
-				Else
-					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-					//³Libera por Pedido                                                       ³
-					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ			
-					Begin Transaction
-					RecLock("SC6",.f.)
-					SC6->C6_QTDLIB := nQtdLib
-					MsUnLock()
-					aadd(aRegistros,SC6->(RecNo()))
-					End Transaction
-				EndIf
-	  		endif
-          End Transaction
-          SC6->(MsUnLock())
-     
-          dbSelectArea("SC6")
-          dbSkip()
-     EndDo
-EndIf
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Libera por Total de Pedido                                              ³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If ( Len(aRegistros) > 0 )
-	Begin Transaction
-	SC6->(MaAvLibPed(_cNum,.F.,lTransf,.F.,aRegistros,Nil,Nil,Nil,!lTransf))
-	End Transaction
-EndIf
+     SC5->( MsUnLock( ) )
+     SC6->( dbCloseArea( ) )
+     //*****06/06/2012
 
- //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Atualiza o Flag do Pedido de Venda                                      ³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Begin Transaction
-SC6->(MaLiberOk({_cNum},.F.))
-End Transaction
+     /*Local aArea := GetArea() 
+     private INCLUI := .f.
+     private ALTERA := .t.
+     private lSugere := .f.
+     private aCols , aHeadGrade, aColsGrade, aHeader
+     DbSelectarea("SA3")
+     DbSetOrder(1)
+     DbSelectarea("SA2")
+     DbSetOrder(1)
+     DbSelectArea("SA1")
+     DbSetOrder(1)
+     DbSelectArea("SB2")
+     DbSetOrder(1)
+     DbSelectArea("SB5")
+     DbSetOrder(1)
+     DbSelectArea("SC5")
+     DbSetOrder(1)
+     DbSelectArea("SD1")
+     DbSetOrder(1)
+     DbSelectArea("SF1")
+     DbSetOrder(1)
+     DbSelectArea("SF4")
+     DbSetOrder(1)
+     DbSelectArea("SG1")
+     DbSetOrder(1)
+     DbSelectArea("SZ1")
+     DbSetOrder(1)
+     DbSelectArea("SZ5")
+     DbSetOrder(1)
+     DbSelectArea("ZZO")
+     DbSetOrder(1)
+     DbSelectArea("SC6")
+     DbSetOrder(1)
 
-SC5->(MsUnLock())
-SC6->(dbCloseArea())
+     dbselectarea("SC6")
+     dbseek(xFilial("SC6")+SC5->C5_NUM,.f.)
+     dbselectarea("SC5")
 
-//*****06/06/2012
+     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+     //³ Inicializa desta forma para criar uma nova instancia de variaveis private ³
+     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+     RegToMemory( "SC5", .F., .F. )
+     aHeadGrade := {}
+     aColsGrade := {}
+     aHeader := {}
+     aCols := MontaCols()
+     Begin Transaction
+           A440Grava(.f.,.f.)
+           EvalTrigger()
+     End Transaction       
+     RestArea(aArea)*/
 
-/*Local aArea := GetArea() 
- private INCLUI := .f.
- private ALTERA := .t.
- private lSugere := .f.
- private aCols , aHeadGrade, aColsGrade, aHeader
- 
-
-
-       DbSelectarea("SA3")
-       DbSetOrder(1)
-       DbSelectarea("SA2")
-       DbSetOrder(1)
-       DbSelectArea("SA1")
-       DbSetOrder(1)
-       DbSelectArea("SB2")
-       DbSetOrder(1)
-       DbSelectArea("SB5")
-       DbSetOrder(1)
-       DbSelectArea("SC5")
-       DbSetOrder(1)
-       DbSelectArea("SD1")
-       DbSetOrder(1)
-       DbSelectArea("SF1")
-       DbSetOrder(1)
-       DbSelectArea("SF4")
-       DbSetOrder(1)
-       DbSelectArea("SG1")
-       DbSetOrder(1)
-       DbSelectArea("SZ1")
-       DbSetOrder(1)
-       DbSelectArea("SZ5")
-       DbSetOrder(1)
-       DbSelectArea("ZZO")
-       DbSetOrder(1)
-
-       DbSelectArea("SC6")
-       DbSetOrder(1)
-
-
-	dbselectarea("SC6")
-	dbseek(xFilial("SC6")+SC5->C5_NUM,.f.)
-	dbselectarea("SC5")
-		
-		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-		//³ Inicializa desta forma para criar uma nova instancia de variaveis private ³
-		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		RegToMemory( "SC5", .F., .F. )
-
-		aHeadGrade := {}
-		aColsGrade := {}
-		aHeader := {}
-		aCols := MontaCols()
-		Begin Transaction
-			A440Grava(.f.,.f.)
-			EvalTrigger()
-		End Transaction       
-
-RestArea(aArea)*/
-U_VoltaArea(aArea)
-if !empty(cArea)
-	dbselectarea(cArea)
-endif 
-
-return(.t.)     
+     U_VoltaArea(aArea)
+     If !Empty(cArea)
+        DbSelectArea(cArea)
+     Endif 
+Return(.t.) 
 
 User Function ParamSql(cCampo,cParam)
 Local cRet,i,cChar,j,cCond

@@ -222,7 +222,7 @@ dbseek(xFilial("SC6"))
 				do case 
 				case cUf == "SP"
 					cTab := "CC1"
-				case cUf == "MG"
+				case cUf $ "MG-RJ-SC-PR-RS"
 					cTab := "CC2"
 				case cUf $ "RN-AC-AL-BA-CE-DF-ES-GO-MA-MS"
 					cTab := "CC3"

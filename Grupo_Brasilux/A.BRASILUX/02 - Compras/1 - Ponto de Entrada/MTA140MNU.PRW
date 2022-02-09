@@ -17,7 +17,7 @@
 //25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function MTA140MNU()
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
-        u_zcfga01( 'MTA140MNU' ) //LGS#2021118 - Gravação de log de utilização da rotina
+        //u_zcfga01( 'MTA140MNU' ) //LGS#2021118 - Gravação de log de utilização da rotina
         aAdd(aRotina,{"Importar XML","U_COMMI010" ,0,2,0,.F.})
      Endif
 Return

@@ -212,7 +212,7 @@ case _cGrpEmp == '01' //Empresas do grupo BRASILUX.
          Endif
 
         // Alteração para verificação dos locais padrão considerando na Matriz Fab1 e Fab2
-        If (SB1->B1_TIPO == 'MP') .AND. IIF(!(_cNumEmp == "01010101"), (!SB1->B1_LOCPAD $ '01'), (!SB1->B1_LOCPAD $ '01.10.R1.R2') )  
+        If (SB1->B1_TIPO == 'MP') .AND. IIF(!(_cNumEmp $ "01010101.01010104"), (!SB1->B1_LOCPAD $ '01'), (!SB1->B1_LOCPAD $ '01.10.R1.R2') )         
            Dbselectarea("SB1")  
            If !lBloqueouB1
               Reclock("SB1",.F.)
@@ -221,7 +221,7 @@ case _cGrpEmp == '01' //Empresas do grupo BRASILUX.
            SB1->B1_LOCPAD := '01'
         Endif
 
-        If (SB1->B1_TIPO == 'PI') .AND. IIF(!(_cNumEmp == "01010101"), (!SB1->B1_LOCPAD $ '02'), (!SB1->B1_LOCPAD $ '02.20.R1.R2') )  
+        If (SB1->B1_TIPO == 'PI') .AND. IIF(!(_cNumEmp $ "01010101.01010104"), (!SB1->B1_LOCPAD $ '02'), (!SB1->B1_LOCPAD $ '02.20.R1.R2') )  
            Dbselectarea("SB1")  
            If !lBloqueouB1
               Reclock("SB1",.F.)

@@ -30,243 +30,250 @@
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function MTA410()
-	//////////////////////////////////////////////////////
-	// Calculo da comissao de acordo com o lucro minimo //
-	//////////////////////////////////////////////////////
-	// aCols[2] : Cod.Produto                           //
-	// aCols[5] : qtde na 1a. unidade de medida         //
-	// aCols[6] : Preco de venda unitario               //
-	// aCols[8] : Preco de venda total                  //
-	// aCols[19]: comissao %                            //
-	// aCols[9] : TES                                   //
-	// aCols[10] : CFOP                                 //
-	//////////////////////////////////////////////////////
-	Local cArea := Alias()
-	Local aVenctos       := {}  //Vetor com prazos de pagamentos
-	Local aPrazos        := {}  //Vetor com prazos em dias
-	Local aAuxEmba       := {}
-	//Local aPedGOP        := {}  //Matriz com Pedidos que irão gerar
-	Local aPrecos		  := {}  //Vetor que receberá os precos minimos para um item de produto de acordo com as 6 faixas de desconto definidas
-	Local aPrcMin   	  := {0,0,0,0,0,0}  //Vetor com a soma dos preços mínimos a serem praticados de acordo com a politica de venda
-	Local cUf            := ""  //Estado do Cliente ou Fornecedor
-	Local cInscr         := ""  //Inscrição Estadual do Cliente ou Fornecedor
-	Local cComp,lVolJunto,_x
-	Local cMensErro      := ""
-	Local nPrazoMedio    := 0   //Prazo médio em dias da venda
-	Local _nVlrTotPed    := 0   //Valor total do pedido
-	Local _nVlrTotDup    := 0   //Valor total que gera FINANCEIRO!
-	Local _nVlrTotMin    := 0   //Valor total mínimo para entrar dentro da Política de Vendas!
-	Local nSomaVlrTab    := 0   //Valor total do pedido (apenas itens que GERAM FINANCEIRO!) pelo valor de tabela
-	Local nPesoBrut      := 0
-	Local nQtdeMinEst    := 0   //Quantidade mínima para entrar na tabela 1
-	Local nPerInt        := 0   //Soma de percentuais internos na formação de preços, exceto lucro e comissão
-	Local nLc1           := 0   //Lucro + Comissão na tabela 1
-	Local nLc2           := 0   //Lucro + Comissão na tabela 2
-	Local nValTab        := 0   //Valor total de tabela do item
-	Local nValUnTab      := 0   //Valor unitário de tabela do item
-	Local nVlrProd       := 0   //Valor total do produto do item
-	Local nVolTotal      := 0
-	Local nPesoLiquTotal := 0
-	Local nPesoBrutTotal := 0
-	Local _nPercIcms     := 0 //GETMV("MV_ICMPAD")
-	Local nValorHoje     := 0
-	Local nQtdeParc      := 0
-	Local nSaldoVend     := 0 //Saldo de vendas do mês para o cliente
-	Local _nLucroItem    := 0
-	Local _nValReal      := 0 //Total de LUCRO+COMISSAO
-	Local _nMedComiss    := 0 // Comissão de referência ponderada, cadastrada nos produtos
-	Local _nMedLucro     := 0 // Lucro mínimo de referência, pré-definido nos produtos
-	Local _nVlrCDesc     := 0
-	Local _nVlrComiss    := 0
-	Local _nVlrLucro     := 0
-	Local _nPorcComiss 
-	Local nJuros         := GETMV("MV_JUROS")
-	Local nTxPIS         := GETMV("MV_TXPIS")
-	Local nTxCofin       := GETMV("MV_TXCOFIN")
-	Local cEstado        := GETMV("MV_ESTADO")
-	Local nICMPAD        := GETMV("MV_ICMPAD")
-	//Local lXHABBOR       := GETMV("MV_XHABBOR")
-	Local lXHABBOR		 := .F.   
-	Local lGeraDup       := .f. //Verifica se gera duplicata ou não
-	Local lMisturado 	  := .f. //Informa se há itens de estoque misturados c/ itens Não Estoque!
-	Local lMudouEst := .f. // Identifica se mudou item de estoque p/ não estoque ou vice versa para verificar se existe itens misturados
-	Local cDeposito      := "" //Auxiliar para determinar se pedido é remessa pra depósito ou não.
-	Local cCodCid		  := "" //Código da Cidade do Cliente
-	Local lRet           := .t. //Variavel lógica que retorna a validação geral do ponto de entrada, se aceita(.t.) ou nao(.f.)
-	Local lProdEstoque   := .f. //Verifica se é produto de estoque
-	Local nEntrega		  := 5 //Prazo de entrega em dias a ser contado à partir da data de liberação do pedido
-	Local lSisRev        := .f. //Participa de política de venda p/ Comércio/Revenda? Caso positivo, verificar se o pedido atende à regra.
-	Local lProblPrazo    := .f. //Bloquear pedido caso prazo médio não seja respeitado, independente de qualquer coisa
-	Local lDescOk,cCnpj
-	Local lRegB1
-	Local lEmbaemG1,nContItens,lAux,_cGrpEmp,_cNumEmp
-	Local nPosPRUNIT     := aScan(aHeader, {|x| Trim(x[2]) == "C6_PRUNIT" }) //Posicionamento do campo C6_PRUNIT  no aHeader
-	Local nPosDESCONT    := aScan(aHeader, {|x| Trim(x[2]) == "C6_DESCONT"}) //Posicionamento do campo C6_DESCONT no aHeader
-	Local nPosVALDESC    := aScan(aHeader, {|x| Trim(x[2]) == "C6_VALDESC"}) //Posicionamento do campo C6_VALDESC no aHeader
-	Local nPosPRODUTO    := aScan(aHeader, {|x| Trim(x[2]) == "C6_PRODUTO"}) //Posicionamento do campo C6_PRODUTO no aHeader
-	Local nPosQTDVEN     := aScan(aHeader, {|x| Trim(x[2]) == "C6_QTDVEN" }) //Posicionamento do campo C6_QTDVEN no aHeader
-	Local nPosTES        := aScan(aHeader, {|x| Trim(x[2]) == "C6_TES"    }) //Posicionamento do campo C6_TES no aHeader
-	Local nPosCF         := aScan(aHeader, {|x| Trim(x[2]) == "C6_CF"     }) //Posicionamento do campo C6_CF no aHeader
-	Local nPosVALOR      := aScan(aHeader, {|x| Trim(x[2]) == "C6_VALOR"  }) //Posicionamento do campo C6_VALOR no aHeader
-	Local nPosPRCVEN     := aScan(aHeader, {|x| Trim(x[2]) == "C6_PRCVEN" }) //Posicionamento do campo C6_PRCVEN no aHeader
-	Local nPosVolItem    := aScan(aHeader, {|x| Trim(x[2]) == "C6_VOLITEM"}) //Posicionamento do campo C6_VOLITEM no aHeader
-	Local nPosVlrLucr    := aScan(aHeader, {|x| Trim(x[2]) == "C6_VLRLUCR"}) //Posicionamento do campo C6_VLRLUCR no aHeader
-	Local nPosLucrEsp    := aScan(aHeader, {|x| Trim(x[2]) == "C6_LUCRESP"}) //Posicionamento do campo C6_LUCRESP no aHeader
-	Local nPosCst        := aScan(aHeader, {|x| Trim(x[2]) == "C6_CLASFIS"}) //Posicionamento do campo C6_CLASFIS no aHeader
-	Local nPosFCI        := aScan(aHeader, {|x| Trim(x[2]) == "C6_FCICOD"}) //Posicionamento do campo C6_FCICOD no aHeader
-	Local nPosC6_LOCAL   := aScan(aHeader, {|x| Trim(x[2]) == "C6_LOCAL"}) //Posicionamento do campo C6_LOCAL no aHeader
-	Local nPosENTREG     := aScan(aHeader, {|x| Trim(x[2]) == "C6_ENTREG"}) //Posicionamento do campo C6_ENTREG no aHeader
-	Local nPosC6SIM3G    := aScan(aHeader, {|x| Trim(x[2]) == "C6_X_SIM3G"}) //Posicionamento do campo C6_X_SIM3G no aHeader
-	//Local nPosC6XVLRFRE  := aScan(aHeader, {|x| Trim(x[2]) == "C6_XVLRFRE"}) //Posicionamento do campo C6_XVLRFRE no aHeader
+     //////////////////////////////////////////////////////
+     // Calculo da comissao de acordo com o lucro minimo //
+     //////////////////////////////////////////////////////
+     // aCols[2] : Cod.Produto                           //
+     // aCols[5] : qtde na 1a. unidade de medida         //
+     // aCols[6] : Preco de venda unitario               //
+     // aCols[8] : Preco de venda total                  //
+     // aCols[19]: comissao %                            //
+     // aCols[9] : TES                                   //
+     // aCols[10] : CFOP                                 //
+     //////////////////////////////////////////////////////
+     Local cArea := Alias()
+     Local aVenctos       := {}  //Vetor com prazos de pagamentos
+     Local aPrazos        := {}  //Vetor com prazos em dias
+     Local aAuxEmba       := {}
+     //Local aPedGOP        := {}  //Matriz com Pedidos que irão gerar
+     Local aPrecos		  := {}  //Vetor que receberá os precos minimos para um item de produto de acordo com as 6 faixas de desconto definidas
+     Local aPrcMin   	  := {0,0,0,0,0,0}  //Vetor com a soma dos preços mínimos a serem praticados de acordo com a politica de venda
+     Local cUf            := ""  //Estado do Cliente ou Fornecedor
+     Local cInscr         := ""  //Inscrição Estadual do Cliente ou Fornecedor
+     Local cComp,lVolJunto,_x
+     Local cMensErro      := ""
+     Local nPrazoMedio    := 0   //Prazo médio em dias da venda
+     Local _nVlrTotPed    := 0   //Valor total do pedido
+     Local _nVlrTotDup    := 0   //Valor total que gera FINANCEIRO!
+     Local _nVlrTotMin    := 0   //Valor total mínimo para entrar dentro da Política de Vendas!
+     Local nSomaVlrTab    := 0   //Valor total do pedido (apenas itens que GERAM FINANCEIRO!) pelo valor de tabela
+     Local nPesoBrut      := 0
+     Local nQtdeMinEst    := 0   //Quantidade mínima para entrar na tabela 1
+     Local nPerInt        := 0   //Soma de percentuais internos na formação de preços, exceto lucro e comissão
+     Local nLc1           := 0   //Lucro + Comissão na tabela 1
+     Local nLc2           := 0   //Lucro + Comissão na tabela 2
+     Local nValTab        := 0   //Valor total de tabela do item
+     Local nValUnTab      := 0   //Valor unitário de tabela do item
+     Local nVlrProd       := 0   //Valor total do produto do item
+     Local nVolTotal      := 0
+     Local nPesoLiquTotal := 0
+     Local nPesoBrutTotal := 0
+     Local _nPercIcms     := 0 //GETMV("MV_ICMPAD")
+     Local nValorHoje     := 0
+     Local nQtdeParc      := 0
+     Local nSaldoVend     := 0 //Saldo de vendas do mês para o cliente
+     Local _nLucroItem    := 0
+     Local _nValReal      := 0 //Total de LUCRO+COMISSAO
+     Local _nMedComiss    := 0 // Comissão de referência ponderada, cadastrada nos produtos
+     Local _nMedLucro     := 0 // Lucro mínimo de referência, pré-definido nos produtos
+     Local _nVlrCDesc     := 0
+     Local _nVlrComiss    := 0
+     Local _nVlrLucro     := 0
+     Local _nPorcComiss 
+     Local nJuros         := GETMV("MV_JUROS")
+     Local nTxPIS         := GETMV("MV_TXPIS")
+     Local nTxCofin       := GETMV("MV_TXCOFIN")
+     Local cEstado        := GETMV("MV_ESTADO")
+     Local nICMPAD        := GETMV("MV_ICMPAD")
+     //Local lXHABBOR       := GETMV("MV_XHABBOR")
+     Local lXHABBOR		 := .F.   
+     Local lGeraDup       := .f. //Verifica se gera duplicata ou não
+     Local lMisturado 	  := .f. //Informa se há itens de estoque misturados c/ itens Não Estoque!
+     Local lMudouEst := .f. // Identifica se mudou item de estoque p/ não estoque ou vice versa para verificar se existe itens misturados
+     Local cDeposito      := "" //Auxiliar para determinar se pedido é remessa pra depósito ou não.
+     Local cCodCid		  := "" //Código da Cidade do Cliente
+     Local lRet           := .t. //Variavel lógica que retorna a validação geral do ponto de entrada, se aceita(.t.) ou nao(.f.)
+     Local lProdEstoque   := .f. //Verifica se é produto de estoque
+     Local nEntrega		  := 5 //Prazo de entrega em dias a ser contado à partir da data de liberação do pedido
+     Local lSisRev        := .f. //Participa de política de venda p/ Comércio/Revenda? Caso positivo, verificar se o pedido atende à regra.
+     Local lProblPrazo    := .f. //Bloquear pedido caso prazo médio não seja respeitado, independente de qualquer coisa
+     Local lDescOk,cCnpj
+     Local lRegB1
+     Local lEmbaemG1,nContItens,lAux,_cGrpEmp,_cNumEmp
+     Local nPosPRUNIT     := aScan(aHeader, {|x| Trim(x[2]) == "C6_PRUNIT" }) //Posicionamento do campo C6_PRUNIT  no aHeader
+     Local nPosDESCONT    := aScan(aHeader, {|x| Trim(x[2]) == "C6_DESCONT"}) //Posicionamento do campo C6_DESCONT no aHeader
+     Local nPosVALDESC    := aScan(aHeader, {|x| Trim(x[2]) == "C6_VALDESC"}) //Posicionamento do campo C6_VALDESC no aHeader
+     Local nPosPRODUTO    := aScan(aHeader, {|x| Trim(x[2]) == "C6_PRODUTO"}) //Posicionamento do campo C6_PRODUTO no aHeader
+     Local nPosQTDVEN     := aScan(aHeader, {|x| Trim(x[2]) == "C6_QTDVEN" }) //Posicionamento do campo C6_QTDVEN no aHeader
+     Local nPosTES        := aScan(aHeader, {|x| Trim(x[2]) == "C6_TES"    }) //Posicionamento do campo C6_TES no aHeader
+     Local nPosCF         := aScan(aHeader, {|x| Trim(x[2]) == "C6_CF"     }) //Posicionamento do campo C6_CF no aHeader
+     Local nPosVALOR      := aScan(aHeader, {|x| Trim(x[2]) == "C6_VALOR"  }) //Posicionamento do campo C6_VALOR no aHeader
+     Local nPosPRCVEN     := aScan(aHeader, {|x| Trim(x[2]) == "C6_PRCVEN" }) //Posicionamento do campo C6_PRCVEN no aHeader
+     Local nPosVolItem    := aScan(aHeader, {|x| Trim(x[2]) == "C6_VOLITEM"}) //Posicionamento do campo C6_VOLITEM no aHeader
+     Local nPosVlrLucr    := aScan(aHeader, {|x| Trim(x[2]) == "C6_VLRLUCR"}) //Posicionamento do campo C6_VLRLUCR no aHeader
+     Local nPosLucrEsp    := aScan(aHeader, {|x| Trim(x[2]) == "C6_LUCRESP"}) //Posicionamento do campo C6_LUCRESP no aHeader
+     Local nPosCst        := aScan(aHeader, {|x| Trim(x[2]) == "C6_CLASFIS"}) //Posicionamento do campo C6_CLASFIS no aHeader
+     Local nPosFCI        := aScan(aHeader, {|x| Trim(x[2]) == "C6_FCICOD"}) //Posicionamento do campo C6_FCICOD no aHeader
+     Local nPosC6_LOCAL   := aScan(aHeader, {|x| Trim(x[2]) == "C6_LOCAL"}) //Posicionamento do campo C6_LOCAL no aHeader
+     Local nPosENTREG     := aScan(aHeader, {|x| Trim(x[2]) == "C6_ENTREG"}) //Posicionamento do campo C6_ENTREG no aHeader
+     Local nPosC6SIM3G    := aScan(aHeader, {|x| Trim(x[2]) == "C6_X_SIM3G"}) //Posicionamento do campo C6_X_SIM3G no aHeader
+     //Local nPosC6XVLRFRE  := aScan(aHeader, {|x| Trim(x[2]) == "C6_XVLRFRE"}) //Posicionamento do campo C6_XVLRFRE no aHeader
 
-	Local nQtdComp,cCst,cObs,cCondPag,nDescPerm,nPos1,nPos2
-	Local nVar, nAux, cAux, i,nAuxQtde,nAuxLucro,nAuxVol,nQtdeVol,_cFilial
-	Local nInd, nIndAnt, cTipoCons,_nComisCal,cTrpBrz
-	Local nDesc1, nDesc2, _nPisCof,cPerCal,cPerVen,nMes,nAno,nTolerancia
-	//Local nIndA, nIndB, nIndC, nIndD, nIndE, nIndF, nIndG
-	Local aStrut := {},cCursorTemp, nTotalTipo9,j,cAuxMens,dDiaFat
-	Local aEmba := {}  //Tipos de Embalagens utilizada, Colunas: 1-Cód Emba; 2-Qtde de Embal; 3-Qtde p/ Juntar Vol; 4-Qtde Vol. produtos que não juntam vol; 5-Qtde BL p/ verif. se fecham vol; 6-Rel. Volume
-	Local lCalcVol     := .t. // Det. se vai incluir a relação de volume, auxiliar para prevenir probl. de numeração de pedido
-	Local lSoSolventes := .t. // determina se o pedido é exclusivo de solventes para poder entrar na política de desconto extra para esse tipo de prod(20/03/2012)
-	Local aArea,lVolQuebr,cProdsVolQuebr,nCubagem,nRegB1,lIpiZeroM,nIpiAnt
-//	Local cProdEsp     := "" //Enviar e-mail para pessoal de Materias caso haja item específico sendo que existe alternativa de estoque
-	Local nVlrTot      := 0,nVlrFrete := 0,nPercFrete := 0 //,lCalcFrete := .t.
-	Local lMasterS     := .f. // Enviar pedido para MasterSales
-	Local oTempTable,lCampanha,cTabCampanha,nIcmCampanha,cCondCamp
+     Local nQtdComp,cCst,cObs,cCondPag,nDescPerm,nPos1,nPos2
+     Local nVar, nAux, cAux, i,nAuxQtde,nAuxLucro,nAuxVol,nQtdeVol,_cFilial
+     Local nInd, nIndAnt, cTipoCons,_nComisCal,cTrpBrz
+     Local nDesc1, nDesc2, _nPisCof,cPerCal,cPerVen,nMes,nAno,nTolerancia
+     //Local nIndA, nIndB, nIndC, nIndD, nIndE, nIndF, nIndG
+     Local aStrut       := {},cCursorTemp, nTotalTipo9,j,cAuxMens,dDiaFat
+     Local aEmba        := {}  //Tipos de Embalagens utilizada, Colunas: 1-Cód Emba; 2-Qtde de Embal; 3-Qtde p/ Juntar Vol; 4-Qtde Vol. produtos que não juntam vol; 5-Qtde BL p/ verif. se fecham vol; 6-Rel. Volume
+     Local lCalcVol     := .t. // Det. se vai incluir a relação de volume, auxiliar para prevenir probl. de numeração de pedido
+     Local lSoSolventes := .t. // determina se o pedido é exclusivo de solventes para poder entrar na política de desconto extra para esse tipo de prod(20/03/2012)
+     Local aArea,lVolQuebr,cProdsVolQuebr,nCubagem,nRegB1,lIpiZeroM,nIpiAnt
+     //Local cProdEsp   := "" //Enviar e-mail para pessoal de Materias caso haja item específico sendo que existe alternativa de estoque
+     Local nVlrTot      := 0,nVlrFrete := 0,nPercFrete := 0 //,lCalcFrete := .t.
+     Local lMasterS     := .f. // Enviar pedido para MasterSales
+     Local oTempTable,lCampanha,cTabCampanha,nIcmCampanha,cCondCamp
+	 Local _nZPPAR37    := GETMV( "ZP_PAR0037" )  //LGS#20220201 - Parametro do Valor Total Minimo do Pedido de Vendas - POLITICA COMERCIAL BRASILUX
+     Local _nZPPAR38    := GETMV( "ZP_PAR0038" )  //LGS#20220201 - Parametro do Prazo Médio de Pagamento - POLITICA COMERCIAL BRASILUX 
+     Local _cZPPAR40    := GETMV( "ZP_PAR0040" )  //LGS#20220201 - Parametro que indica empresas do grupo com liberação automatica de pedidos 
+	 
      u_zcfga01( 'MTA410' ) //LGS#2021214 - Gravação de log de utilização da rotina
-	_cGrpEmp := alltrim(FWGrpCompany())
-	if empty(_cGrpEmp)
-		_cGrpEmp := "01"
-	endif 
-	_cFilial := alltrim(FWCodFil())
-	if empty(_cFilial)
-		_cFilial := "010101" //Alguns Pedidos MasterSales não identificam filial!!
-	endif 
-	_cNumEmp := alltrim(_cGrpEmp)+alltrim(_cFilial)
 
+     _cGrpEmp := Alltrim( FWGrpCompany( ) )
+     If empty(_cGrpEmp)
+        _cGrpEmp := "01"
+     Endif
+     _cFilial := Alltrim( FWCodFil( ) )
+     If Empty( _cFilial )
+        _cFilial := "010101" //Alguns Pedidos MasterSales não identificam filial!!
+     Endif 
+     _cNumEmp := Alltrim( _cGrpEmp ) + Alltrim( _cFilial )
 
-	//(Cleber 23/09/20) -> Caso a origem do pedido for do Gestão de Contratos desconsiderar customizações Brasilux
-	IF (SC5->(FieldPos("C5_APROVA")) > 0)
-		IF !EMPTY(M->C5_MDCONTR) .OR. !EMPTY(M->C5_MDNUMED) .OR. !EMPTY(M->C5_MDPLANI)
-			M->C5_APROVA := "1" //Considerar pedido aprovado(na aprovação customizada) caso venha do módulo Gestão de Contratos
-		ENDIF
-	Endif
+     //(Cleber 23/09/20) -> Caso a origem do pedido for do Gestão de Contratos desconsiderar customizações Brasilux
+     If ( SC5->( FieldPos( "C5_APROVA" ) ) > 0 )
+        If !Empty( M->C5_MDCONTR ) .OR. !Empty( M->C5_MDNUMED ) .OR. !Empty( M->C5_MDPLANI )
+           M->C5_APROVA := "1" //Considerar pedido aprovado(na aprovação customizada) caso venha do módulo Gestão de Contratos
+		Endif
+        If _cFilial $ Alltrim( _cZPPAR40 ) //Enlarge, venda de lenha para tecpolpa e Resina - liberação automática
+           M->C5_APROVA := "1"
+        Endif
+     Endif
 
-	//Se estiver nas empresas de Gestão Imobiliária não executar
-	IF (_cGrpEmp = "01") .and. (SUBSTR(_cFilial,1,2) >= "07")
-		return(.t.)
-	endif
+     //Se estiver nas empresas de Gestão Imobiliária não executar
+     If ( _cGrpEmp = "01" ) .and. ( SubStr( _cFilial, 1, 2 ) >= "07" )
+        Return( .T. )
+     Endif
 
-	//(Cleber 24/07/19) -> Marcador quando estiver em aprovação de pedido frete CIF, não passar pelo ponto de entrada!
-	IF (SC5->(FieldPos("C5_USRAPR")) > 0)
-	 	if (M->C5_USRAPR = "#*#CIF#*#")
-	 		Return(.t.)
-	 	endif
-	Endif
+     //(Cleber 24/07/19) -> Marcador quando estiver em aprovação de pedido frete CIF, não passar pelo ponto de entrada!
+     If SC5->( FieldPos( "C5_USRAPR" ) ) > 0
+        If M->C5_USRAPR = "#*#CIF#*#"
+           Return( .T. )
+        Endif
+     Endif
 
-	//Marcar, em princípio, para não enviar pedido para MasterSales
-	IF (SC5->(FieldPos("C5_X_SIM3G")) > 0)
-		M->C5_X_SIM3G := "N"
-		M->C5_X_EXPO := " "
-	ENDIF
+     //Marcar, em princípio, para não enviar pedido para MasterSales
+     If SC5->( FieldPos( "C5_X_SIM3G" ) ) > 0
+        M->C5_X_SIM3G := "N"
+        M->C5_X_EXPO  := " "
+     Endif
 
-	//Marcar, em princípio, comissão variável, pode inclusive participar de compensação de comissão
-	
-	IF (SC5->(FieldPos("C5_XCONF")) > 0)
-		M->C5_XCONF := .F. //Comissão fixa
-	ENDIF 
-	
-	aArea := U_PegaArea({"SB9","CFD","SB1","SB2","SF4","SA1","SE4","SA2","SA3","SB5","SZ5","SZ7","ZZO","SA4","SX5"})
+     //Marcar, em princípio, comissão variável, pode inclusive participar de compensação de comissão
+     If SC5->( FieldPos( "C5_XCONF" ) ) > 0
+        M->C5_XCONF := .F. //Comissão Variavel (.F.) Comissão Fixa (.T.)
+     Endif
 
-	DbSelectArea("SA1")  //Clientes
-	DbSetOrder(1)
+     aArea := U_PegaArea( { "SB9", "CFD", "SB1", "SB2", "SF4", "SA1", "SE4", "SA2", "SA3", "SB5", "SZ5", "SZ7", "ZZO", "SA4", "SX5" } )
 
-	DbSelectArea("SF4")  //Tipos de Entradas e Saídas
-	DbSetOrder(1)
+     DbSelectArea("SA1")  //Clientes
+     DbSetOrder(1)
 
-	lCampanha := .t. //Chamado 020971, criar política de campanhas. Em princípio considerar verdadeiro que pedido é participante de campanha, validar em seguida
+     DbSelectArea("SF4")  //Tipos de Entradas e Saídas
+     DbSetOrder(1)
 
-	If (_cGrpEmp = "11")  //Empresas que  são do grupo 11(Tecpolpa).
-		lCampanha := .f. //TecPolpa não participa de campanha até o momento
-		IF (M->C5_TIPO = "N")
-			DbSelectArea("SA1")
-			DbSeek(xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI)
-			IF FOUND()
-				IF !EMPTY(M->C5_X_PVSIM)
-					M->C5_X_SIM3G := "S"
-					If INCLUI 
-						M->C5_VEND1 := SA1->A1_VEND
-						M->C5_EMISSAO := DATE()
-						M->C5_FRETE := 0.0
-						M->C5_SEGURO := 0.0
-						//Cleber(07/01/21) -> Descobri que desde outubro/2020 não está gravando banco
-						IF !EMPTY(SA1->A1_BCO1) .AND. EMPTY(M->C5_BANCO)
-							M->C5_BANCO := SA1->A1_BCO1
-						ENDIF 
-					Endif
-				ENDIF 
-				IF empty(M->C5_VEND1)
-					M->C5_VEND1 := SA1->A1_VEND
-				ENDIF 
-			ENDIF 
-		ENDIF 
-		For _x := 1 to Len(aCols)
-			If !aCols[_x][Len(aHeader)+1] //Se não for registro deletado
-				// Zerar Descontos para não aparecer valor maior em Valor Contabil em SF3
-				nAux := TamSX3("C6_PRCVEN")[2]
-				aCols[_x][nPosPRUNIT]  := aCols[_x][nPosPRCVEN]
-				aCols[_x][nPosDESCONT] := 0
-				aCols[_x][nPosVALDESC] := 0
-				nAux := TamSX3("C6_VALOR")[2]
-				IF M->C5_TIPO = "N"
-					aCols[_x][nPosValor] := round(aCols[_x][nPosPRCVEN]*aCols[_x][nPosQTDVEN],nAux)
-				ENDIF
-				//*****************
-				// Checar consistências
-				DbSelectArea("SF4") //Tipo de Entrada e Saída
-				DbSeek(xFilial("SF4")+aCols[_x][nPosTES])
-				If !Found()
-					lRet := .f.
-					cAuxMens := "Não encontrado o TES "+aCols[_x,nPosTES]+" no cadastro. Contacte o Adm. do Sistema!"
-					If (ValAtrib("l410Auto") <> "U" .and. l410Auto) //release 12.1.25 if ( Type("l410Auto") <> "U" .And. l410Auto )
-						//ConOut(cAuxMens)
-						FwLogMSG( "WARN", , 'SIGAFAT', funname(), '', '01', cAuxMens, 0 )
-					else
-						MsgBox(cAuxMens, "Atenção", "STOP")
-					endif
-					exit
-				endif
+     lCampanha := .t. //Chamado 020971, criar política de campanhas. Em princípio considerar verdadeiro que pedido é participante de campanha, validar em seguida
 
-				If (SF4->F4_DUPLIC $ 'S ') 
-					lGeraDup := .t.
-				Endif
+     If ( _cGrpEmp = "11" ) //Empresas que  são do grupo 11(Tecpolpa).
+        /**********************************************************************************************************************************/
+		/***                                                   VALIDAÇÕES DA TECPOLPA                                                   ***/
+		/**********************************************************************************************************************************/
+		lCampanha := .f.    //TecPolpa não participa de campanha até o momento
+        If M->C5_TIPO = "N"
+           DbSelectArea("SA1")
+           DbSeek( xFilial("SA1") + M->C5_CLIENTE + M->C5_LOJACLI )
+           If Found()
+              If !Empty( M->C5_X_PVSIM )
+                 M->C5_X_SIM3G := "S"
+                 If INCLUI 
+                    M->C5_VEND1 := SA1->A1_VEND
+                    M->C5_EMISSAO := DATE()
+                    M->C5_FRETE := 0.0
+                    M->C5_SEGURO := 0.0
+                    //Cleber(07/01/21) -> Descobri que desde outubro/2020 não está gravando banco
+                    If !Empty( SA1->A1_BCO1 ) .AND. Empty( M->C5_BANCO )
+                       M->C5_BANCO := SA1->A1_BCO1
+                    Endif 
+				 Endif
+              Endif 
+              If Empty( M->C5_VEND1 )
+                 M->C5_VEND1 := SA1->A1_VEND
+              Endif 
+           Endif 
+        Endif 
+        For _x := 1 to Len(aCols)
+            If !aCols[_x][Len(aHeader)+1] //Se não for registro deletado
+               // Zerar Descontos para não aparecer valor maior em Valor Contabil em SF3
+               nAux := TamSX3("C6_PRCVEN")[2]
+               aCols[_x][nPosPRUNIT]  := aCols[_x][nPosPRCVEN]
+               aCols[_x][nPosDESCONT] := 0
+               aCols[_x][nPosVALDESC] := 0
+               nAux := TamSX3("C6_VALOR")[2]
+               IF M->C5_TIPO = "N"
+                  aCols[_x][nPosValor] := round(aCols[_x][nPosPRCVEN]*aCols[_x][nPosQTDVEN],nAux)
+               ENDIF
+               //*****************
+               // Checar consistências
+               DbSelectArea("SF4") //Tipo de Entrada e Saída
+               DbSeek(xFilial("SF4")+aCols[_x][nPosTES])
+               If !Found()
+                  lRet := .f.
+                  cAuxMens := "Não encontrado o TES "+aCols[_x,nPosTES]+" no cadastro. Contacte o Adm. do Sistema!"
+                  If (ValAtrib("l410Auto") <> "U" .and. l410Auto) //release 12.1.25 if ( Type("l410Auto") <> "U" .And. l410Auto )
+                     //ConOut(cAuxMens)
+                     FwLogMSG( "WARN", , 'SIGAFAT', funname(), '', '01', cAuxMens, 0 )
+                  Else
+                     MsgBox(cAuxMens, "Atenção", "STOP")
+                  Endif
+                  exit
+               Endif
+               If ( SF4->F4_DUPLIC $ 'S ' ) 
+                  lGeraDup := .t.
+               Endif
 
-				//Enviar pedido p/ MasterSales
-				IF (M->C5_X_SIM3G = "S") .AND. lGeraDup
-					aCols[_x,nPosC6SIM3G] := "S"
-				ELSE
-					aCols[_x,nPosC6SIM3G] := "N"
-				ENDIF
+               //Enviar pedido p/ MasterSales
+               If M->C5_X_SIM3G = "S" .AND. lGeraDup
+                  aCols[_x,nPosC6SIM3G] := "S"
+               Else
+                  aCols[_x,nPosC6SIM3G] := "N"
+               Endif
 
-				//*****************
-				//Chamado 024692, compatibilizar a data de entrega do cabeçalho com a data de entrega de SC6
-				if !empty(M->C5_FECENT) .AND. (M->C5_FECENT != aCols[_x][nPosENTREG])
-					aCols[_x][nPosENTREG] :=  M->C5_FECENT
-				endif 
-			Endif
-		Next
-		// Zerar Descontos para não aparecer valor maior em Valor Contabil em SF3
-		M->C5_DESC1 := 0
-		M->C5_DESC2 := 0
-		M->C5_DESC3 := 0
-		M->C5_DESC4 := 0
-		
-		
-
-	Else // if _cGrpEmp = "11"
-
-
-		cProdsVolQuebr := "" //Solic. Cleiton em 15/10/14, relacionar produtos vendidos com volume quebrado na Dissoltex e enviar por e-mail.
+               //*****************
+               //Chamado 024692, compatibilizar a data de entrega do cabeçalho com a data de entrega de SC6
+               If !Empty( M->C5_FECENT ) .AND. ( M->C5_FECENT != aCols[_x][nPosENTREG] )
+                  aCols[_x][nPosENTREG] :=  M->C5_FECENT
+               Endif 
+            Endif
+        Next
+        // Zerar Descontos para não aparecer valor maior em Valor Contabil em SF3
+        M->C5_DESC1 := 0
+        M->C5_DESC2 := 0
+        M->C5_DESC3 := 0
+        M->C5_DESC4 := 0
+        /**********************************************************************************************************************************/
+     Else // if _cGrpEmp = "11"
+        /**********************************************************************************************************************************/
+		/***                                                   VALIDAÇÕES DA BRASILUX                                                   ***/
+		/**********************************************************************************************************************************/
+        cProdsVolQuebr := "" //Solic. Cleiton em 15/10/14, relacionar produtos vendidos com volume quebrado na Dissoltex e enviar por e-mail.
 		cObs := alltrim(M->C5_OBS)
 		//Itens de IPI Zero Misturados com itens de IPI maior que zero. Chamado 007956
 		lIpiZeroM := .f.
@@ -569,7 +576,10 @@ User Function MTA410()
 
 		DbSelectArea("SZ5")
 		DbSetOrder(1)
-		For _x := 1 to Len(aCols)
+		/**********************************************/
+		/*** COMEÇA A VARREDURA DOS ITENS DO PEDIDO ***/
+		/**********************************************/
+		For _x := 1 to Len( aCols )
 			If !aCols[_x][Len(aHeader)+1] //Se não for registro deletado
 				nContItens ++
 				aCols[_x][nPosVolItem] := 0
@@ -1265,7 +1275,7 @@ User Function MTA410()
 				nVlrProd := (aCols[_x][nPosVALOR]/Iif(!Empty(Alltrim(M->C5_ESPECI4)), 0.7, 1)) // * Iif(!Empty(Alltrim(M->C5_ESPECI4)), 2, 1)
 				_nVlrTotPed := _nVlrTotPed + nVlrProd
 
-				if (SF4->F4_DUPLIC = "S") .OR. (SF4->F4_CODIGO = "519")
+				if (SF4->F4_DUPLIC = "S") .OR. (SF4->F4_CODIGO = "519") //B6
 					_nVlrTotDup := _nVlrTotDup + nVlrProd
 
 					//Somar em aCl os valores minimos do item para depois definir o valor minimo do pedido permitido de acordo com a pol. vendas
@@ -1303,7 +1313,7 @@ User Function MTA410()
 					aadd(aPrecos,nAux*aCols[_x][nPosQTDVEN])
 					aadd(aPrecos,nAux*aCols[_x][nPosQTDVEN])
 					ELSE */
-					aPrecos := U_PrcMinimo(nValTab,iif(len(alltrim(SB1->B1_COD)) == 12,SUBSTR(SB1->B1_GRUPO2,2,1),"X"),_nPercIcms,IIF(SF4->F4_INCIDE == "S",.T.,.F.),cCondPag)
+					aPrecos := U_PrcMinimo( nValTab, iif( len( alltrim( SB1->B1_COD ) ) == 12, SUBSTR( SB1->B1_GRUPO2, 2, 1 ), "X" ), _nPercIcms, IIF(SF4->F4_INCIDE == "S",.T.,.F.),cCondPag)
 
 					aPrcMin[1] += noround(aPrecos[1],2)
 					aPrcMin[2] += noround(aPrecos[2],2)
@@ -1320,7 +1330,7 @@ User Function MTA410()
 					Next
 
 					//Valor do lucro+comissao da empresa no preco praticado do pedido.
-					_nLucroItem := nValorHoje - ((aCols[_x][nPosVALOR]/Iif(!Empty(Alltrim(M->C5_ESPECI4)), 0.7, 1)) * (SB1->B1_PERINT / 100)) - (SB1->B1_CUSTOR * aCols[_x][nPosQTDVEN] ) - (_nBaseIcms * _nPercIcms / 100) - _nPisCof //* Iif(!Empty(Alltrim(M->C5_ESPECI4)), 2, 1)
+					_nLucroItem := nValorHoje - ( ( aCols[_x][nPosVALOR] / Iif( !Empty( Alltrim( M->C5_ESPECI4 ) ), 0.7, 1 ) ) * ( SB1->B1_PERINT / 100 ) ) - ( SB1->B1_CUSTOR * aCols[_x][nPosQTDVEN] ) - ( _nBaseIcms * _nPercIcms / 100) - _nPisCof //* Iif(!Empty(Alltrim(M->C5_ESPECI4)), 2, 1)
 					aCols[_x][nPosVlrLucr] := _nLucroItem*Iif(!Empty(Alltrim(M->C5_ESPECI4)), 0.7, 1) // Valor do Lucro + Comissão, p/ posterior apuração de lucro obtido por linha de prod
 
 					_nValReal   := _nValReal + _nLucroItem
@@ -1421,7 +1431,9 @@ User Function MTA410()
 
 			Endif
 		Next
-
+        /**********************************/
+		/*** FIM DA VARREDURA DOS ITENS ***/
+		/**********************************/
 		//Chamado 020971, campanha de vendas. Verificar se foi estabelecido valor mínimo de venda
 		if lCampanha .AND. (DA0->DA0_PEDMIN > 0) .AND. (_nVlrTotDup < DA0->DA0_PEDMIN)
 			lCampanha := .f.
@@ -1666,7 +1678,7 @@ User Function MTA410()
 
 
 		// Gravar desconto aplicado sobre o geral de tabela. Solic. Eliana em Fev/2008
-		M->C5_DESCON4 := IIF(nSomaVlrTab > 0,ROUND((1-(_nVlrTotDup/nSomaVlrTab))*100,2),0)
+		M->C5_DESCON4 := IIF( nSomaVlrTab > 0, ROUND( ( 1 - ( _nVlrTotDup / nSomaVlrTab ) ) * 100, 2 ), 0 )
 
 		// Se o lucro da empresa praticado no preco do pedido for menor que o Lucro Minimo
 		// abate esta diferenca da comissao do representante.
@@ -1704,16 +1716,18 @@ User Function MTA410()
 			DBSELECTAREA("TCQSLD")
 			dbclosearea()
 			nSaldoVend += _nVlrTotDup
-			_nVlrTotMin := 750 // Fev/2017 mudou de 450 para 750
+			//_nVlrTotMin := 750       // Fev/2017 mudou de 450 para 750
+            _nVlrTotMin := _nZPPAR37 //LGS#20220201 - Alterado valor fixo para parâmetros facilitando ajustes futuros
 
 			IF  (M->C5_TIPO = 'N')
-				If (nPrazoMedio > 75) .and. (_nComisCal < _nMedComiss) // Prazo máximo 60 dias porém coloquei 65 como forma de tolerância para vencimentos reais maiores. (10/09/21)-> Caio pediu pra colocar 75 dias em off!!
+				//If (nPrazoMedio > 75) .and. (_nComisCal < _nMedComiss) // Prazo máximo 60 dias porém coloquei 65 como forma de tolerância para vencimentos reais maiores. (10/09/21)-> Caio pediu pra colocar 75 dias em off!!
+				If nPrazoMedio > _nZPPAR38 .and. _nComisCal < _nMedComiss //LGS#20220201 - Alterado valor fixo para parâmetros facilitando ajustes futuros
 					lProblPrazo := .t. //Não respeita prazo mínimo!!
 					lDescOk := .f.
 				else
 					nTolerancia := 0.005
 					do case
-						case nSaldoVend < 750
+						case nSaldoVend < _nVlrTotMin //750
 						lDescOk := .f.
 						case nSaldoVend <= 3000
 						_nVlrTotMin := aPrcMin[1]
@@ -1764,7 +1778,7 @@ User Function MTA410()
 				//Chamado 004437(Eliana) em que solicita que se aplique desconto máximo independente do valor vendido
 				_nVlrTotMin := aPrcMin[6]
 				if _nVlrTotMin <= _nVlrTotDup
-					_nComisCal := 5
+					_nComisCal := 5      //Se atingir o valor minimo comissão de 5
 					lDescOk := .t.
 				else 
 					nAux := _nVlrTotMin*0.95

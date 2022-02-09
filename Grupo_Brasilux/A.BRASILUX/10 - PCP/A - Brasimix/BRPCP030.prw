@@ -21,6 +21,9 @@ User Function BRPCP030()
    Local cPerg   := Padr("BRPCP030",10)
    Local xNome   := "Programação da Produção"
    Local Xdescri := "Programação da Produção baseada no bordero de pedidos"
+
+   Private cQuery1    := ""        
+
    Pergunte(cPerg,.F.)              
    oReport := RptDef(cPerg,xNome,Xdescri)
    oReport:PrintDialog()
@@ -45,6 +48,7 @@ User Function BRPCP030()
     //³ mv_par16		 // Lista itens zerados           						³
     //³ mv_par17		 // Trazer somente Frabrica 1     						³
     //³ mv_par18		 // Trazer somente Frabrica 2     						³
+    //³ mv_par19		 // filtrar estoques             						³
     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
@@ -109,7 +113,6 @@ Imprime Relatório
 /*/
 Static Function ReportPrint(oReport)
     Local oSection1 := oReport:Section(1)
-    Local cQuery1    := ""        
     Local xVarProd  := ""        
     Local xVarLib   := ""
     Local xOPsc     := 0
@@ -119,6 +122,9 @@ Static Function ReportPrint(oReport)
     Local conta     := 0
     Local porc      := 0
     Local V_PEDLIB  := 0
+
+
+    
     
     IncProc()
     /* imprime regua progressão */
@@ -133,6 +139,11 @@ Static Function ReportPrint(oReport)
 	cQuery1 += " FROM "+RETSQLNAME("SB2")+" WITH (NOLOCK)  "
 	cQuery1 += " WHERE (D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND " 
 	cQuery1 += " (B2_LOCAL NOT IN ('13','90')) AND (B2_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+
+    if !empty(alltrim(mv_par19))
+        cQuery1 += " AND (B2_LOCAL IN "+FilEst()+" )  "
+    endif    
+    
 
     IF (mv_par13 == 1) //thisform.lEstoque.Value
 		cQuery1 += " AND (B2_LOCALIZ > '') "
@@ -300,6 +311,13 @@ Static Function ReportPrint(oReport)
         /* filtra fabrica 2*/
         cQuery1 += " AND (B1_LOCPAD IN ('20','P2'))   "
     Endif 
+
+
+    /* filtra estoques */
+
+    if !empty(alltrim(mv_par19))
+        cQuery1 += " AND (B1_LOCPAD IN "+FilEst()+" )  "
+    endif
   
       /* ordena codigo do produto */
     cQuery1 += "    ORDER BY B1_COD "
@@ -469,6 +487,12 @@ Static Function F_VR_LBC(cProduto)
         cQuery3 += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
+    if !empty(alltrim(mv_par19))
+        cQuery1 += " AND (B1_LOCPAD IN "+FilEst()+" )  "
+    endif
+
+    
+
     /* IF  (mv_par16 <> 1)*/
         /* zerados */
         //cQuery3 += "AND (SB2.B2_QATU <> 0.0) "
@@ -545,12 +569,12 @@ Static Function F_VR_PNL(cProduto)
 
     cQuery4 := " SELECT C6_PRODUTO AS CODPRO,SUM(SC6.C6_QTDVEN ) "
     cQuery4 += " AS QTDPED " 
-    cQuery4 += " FROM SC6010 SC6 WITH (NOLOCK) " 
-    cQuery4 += " LEFT OUTER JOIN SC5010 SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) " 
-    cQuery4 += " LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) " 
+    cQuery4 += " FROM "+RETSQLNAME("SC6")+" SC6 WITH (NOLOCK) " 
+    cQuery4 += " LEFT OUTER JOIN "+RETSQLNAME("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ = '') AND (C6_FILIAL = SC5.C5_FILIAL) AND (C6_NUM = SC5.C5_NUM) " 
+    cQuery4 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ = '') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) " 
     
     IF (mv_par13 == 1) /*.OR. (mv_par16 <> 1) */
-        cQuery4 += " LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
+        cQuery4 += " LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
     Endif
     
     cQuery4 += " WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL = '"+xFilial("SC6")+"')AND (SC6.C6_PRODUTO BETWEEN '"+cProduto+"' AND '"+cProduto+"') " 
@@ -575,6 +599,10 @@ Static Function F_VR_PNL(cProduto)
     IF (mv_par13 == 1)   
 		cQuery4 += "AND (ISNULL(SB2.B2_LOCALIZ,'') > '') "
 	ENDIF 
+
+    if !empty(alltrim(mv_par19))
+        cQuery1 += " AND (B1_LOCPAD IN "+FilEst()+" )  "
+    endif
     
     
     
@@ -683,7 +711,7 @@ Static Function F_VR_OP3(cProduto)
     cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C2_FILIAL = B1_FILIAL) AND (C2_PRODUTO = B1_COD)  "
 
     IF (mv_par13 == 1) /*.OR. (mv_par16 <> 1) */
-        cQuery2 += " LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
+        cQuery2 += " LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) " 
     Endif
 
 
@@ -833,6 +861,10 @@ Local nMedPed    := 0
         cQuery += "AND (SUBSTRING(C6_PRODUTO,4,2) = '"+alltrim(mv_par07)+"') "
     ENDIF
 
+    if !empty(alltrim(mv_par19))
+        cQuery1 += " AND (B1_LOCPAD IN "+FilEst()+" )  "
+    endif
+
     /* IF  (mv_par16 <> 1)*/
         /* zerados */
         //cQuery += "AND (SB2.B2_QATU <> 0.0) "
@@ -874,4 +906,23 @@ MemoWrite ( cArq , script )
 
 
 Return
+
+Static Function FilEst()
+Local retorna,aString 
+Local i
+
+aString := strtokarr (alltrim(mv_par19), ",")
+
+retorna := '('
+For i := 1 to len(aString)
+    retorna := retorna + "'"+aString[i]+"'"
+Next
+
+retorna := retorna + ')'
+
+/*If len(aString) > 0 
+    
+Endif*/
+
+return(retorna)
 

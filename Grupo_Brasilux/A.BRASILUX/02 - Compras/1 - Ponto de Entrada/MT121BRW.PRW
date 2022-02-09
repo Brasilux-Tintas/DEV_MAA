@@ -7,6 +7,6 @@
  *---------------------------------------------------------------------------------*/
  
 User Function MT121BRW()
-     u_zcfga01( 'MT121BRW' ) //LGS#2021118 - Gravação de log de utilização da rotina
-    aAdd(aRotina, {"ImpR ALT", "U_BRCOM012", 0, 7, 0, Nil})
+     //u_zcfga01( 'MT121BRW' ) //LGS#2021118 - Gravação de log de utilização da rotina
+     aAdd(aRotina, {"ImpR ALT", "U_BRCOM012", 0, 7, 0, Nil})
 Return

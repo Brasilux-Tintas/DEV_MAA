@@ -979,7 +979,25 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 						MsUnLock()
 					Endif
 					aadd(aGerEtq, {cGet8Mnt+' '+cGet1Mnt})
-					FGerEtq(aGerEtq)
+
+					//***********************************************************************************/
+					//*** BRASILUX
+					//*** 12/11/2021 - Nelieder Corneta - Adequação para impressão de Etiquetas de volume
+					//***								  pelo protheus (excluindo agente)							
+
+					cPedido = cGet8Mnt /* pega valor do pedido */
+					cProduto = cGet1Mnt /* pega valor do produto */
+
+					/* pega valor do paramentro para habilitar a impressão pelo protheus */
+					_Etinew := GETMV("ZP_PAR0033")
+					if _Etinew == .F.
+						FGerEtq(aGerEtq) /* usa impressão por agende */
+					else
+						U_BRPCP032(cPedido,cProduto) /* usa impressão pelo protheus */
+					Endif						
+
+
+					//FGerEtq(aGerEtq)
 					// INCLUIR AQUI FUNÇÃO PARA BAIXAR ITEM DO RELATÓRIO DE FALTAS
                     DbSelectArea("ZZC")
                     DbSetOrder(2) // ZZC_FILIAL+ZZC_PEDIDO+ZZC_PRODUT                                                                                                                                
