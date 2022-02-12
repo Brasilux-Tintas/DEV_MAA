@@ -537,7 +537,23 @@ Static Function PCP037_04(linha,qtd)
 
 	/* identifica embalagem */
 	If len(Alltrim(Cod)) == 12
-		cEmb := substr(Cod,11,2)
+
+			/* 
+		   Tratativa para produtos com inicio BM
+		   Exemplo BM 00.23.157-01   	
+		   Neste caso, não utilizar o codigo da embalagem e sim 157
+
+		 */
+		 
+		if substr(Cod,1,2) == "BM"
+			cEmb          := substr(Cod,8,3)
+		else
+			cEmb          := substr(Cod,11,2)
+		endif	
+
+
+
+
 	Endif
 
 	/* inicio de impressão das etiquetas */
@@ -547,7 +563,7 @@ Static Function PCP037_04(linha,qtd)
 	MSCBBEGIN(1,6)
 
 	MSCBSAY(05,02   ,SUBSTR(Prod,1,27), "N", "0", "025,025") // negrito
-	MSCBSAY(70,02   ,cEmb, "N", "0", "025,025") // negrito
+	MSCBSAY(68,02   ,cEmb, "N", "0", "025,025") // negrito
 	MSCBSAY(05,06   ,ProdTxt, "N", "0", "025,025") // negrito
 	
 	MSCBLineH(00,10,190,3,'B')
@@ -564,12 +580,12 @@ Static Function PCP037_04(linha,qtd)
 	
 	if Empty(Catalis)
 		MSCBSAY(05,18,"CONTEUDO "+Volume+" "+UMEMB, "N", "0","068,068") // negrito
-		MSCBSAYBAR(50,11,CodBar,"N","MB04",5, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
+		MSCBSAYBAR(48,11,CodBar,"N","MB04",5, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
 	else
 		MSCBSAY(05,21,"CONTEUDO "+Volume+" "+UMEMB, "N", "0","030,030") // negrito
 		Catalis = TRANSFORM(Catalis, "@R XX 99.99.999-99")
 		MSCBSAY(35,22,"CAT: "+Catalis+" ("+RelCat1+")", "N", "0","025,025") // negrito
-		MSCBSAYBAR(50,11,CodBar,"N","MB04",7, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
+		MSCBSAYBAR(48,11,CodBar,"N","MB04",7, .F., .T., .F., ,02,02, .F., .F., "1", .T.)
 	Endif	
 
 	
@@ -639,7 +655,21 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 
 	/* identifica embalagem */
 	If len(Alltrim(Cod)) == 12
-		cEmb          := substr(Cod,11,2)
+		
+
+		/* 
+		   Tratativa para produtos com inicio BM
+		   Exemplo BM 00.23.157-01   	
+		   Neste caso, não utilizar o codigo da embalagem e sim 157
+
+		 */
+
+		if substr(Cod,1,2) == "BM"
+			cEmb          := substr(Cod,8,3)
+		else
+			cEmb          := substr(Cod,11,2)
+		endif	
+
 	Endif
 
 
@@ -653,7 +683,7 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 	MSCBBEGIN(1,6)
 
 	MSCBSAY(05,02 ,Prod, "N", "0", "025,025") // negrito
-	MSCBSAY(70,02 ,cEmb, "N", "0", "025,025") // negrito
+	MSCBSAY(68,02 ,cEmb, "N", "0", "025,025") // negrito
 	MSCBSAY(05,05 ,"**Val.: "+ CValToChar(DtVenc)+"** IDENTIF VOL *", "N", "0", "025,025") // negrito
 	
 	MSCBLineH(00,10,190,3, 'B' )
@@ -752,14 +782,14 @@ Static Function PCP037_06(linha,qtd)
 	MSCBLOADGRF("SIGA.GRF")
 	MSCBBEGIN(1,6)
 
-	MSCBSAY(02+cColuna,02,Prod,"N","0","020,020")
+	MSCBSAY(02+cColuna,02,Prod,"N","0","022,022")
 	
 	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
-	MSCBSAY(02+cColuna,06,Cod, "N", "0", "018,018")
+	MSCBSAY(02+cColuna,05,Cod, "N", "0", "022,022")
 	
-	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lot: "+cLote, "N", "0","018,018") // negrito
+	MSCBSAY(02+cColuna,08,Volume+UMEMB+" Lot: "+cLote, "N", "0","022,022") // negrito
 	
-	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "018,018") // negrito
+	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "022,022") // negrito
 	
 	if AllTrim(aBrowse[linha][1]) <> "**IDENTIF DE VOLUME**"
 		MSCBSAYBAR(23+cColuna,5,CodBar,"N","MB04",7, .F., .T., .F., ,1,1, .F., .F., "1", .T.)
@@ -770,13 +800,13 @@ Static Function PCP037_06(linha,qtd)
 
 	cColuna := 49
 
-	MSCBSAY(02+cColuna,02,Prod,"N","0","020,020")
+	MSCBSAY(02+cColuna,02,Prod,"N","0","022,022")
 	
-	MSCBSAY(02+cColuna,06,Cod, "N", "0", "018,018")
+	MSCBSAY(02+cColuna,05,Cod, "N", "0", "022,022")
 	
-	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lot: "+cLote, "N", "0","018,018") // negrito
+	MSCBSAY(02+cColuna,08,Volume+UMEMB+" Lot: "+cLote, "N", "0","022,022") // negrito
 	
-	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "018,018") // negrito
+	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "022,022") // negrito
 	
 	//if AllTrim(aBrowse[linha][1]) <> "**IDENTIF DE VOLUME**"
 		MSCBSAYBAR(23+cColuna,5,CodBar,"N","MB04",7, .F., .T., .F., ,1,1, .F., .F., "1", .T.)

@@ -159,7 +159,11 @@ Static Function ReportPrint(oReport)
 	cQuery1 += " GROUP BY B2_COD) "
 
  	cQuery1 += "    SELECT DISTINCT B1_COD, B1_DESC, B1_TIPO , B1_UM , B1_GRUPO,B2_LOCALIZ, "
-    cQuery1 += "    (SELECT SUM(B2_QATU) FROM "+RETSQLNAME("SB2")+" SB2 WHERE SB2.B2_COD = SB1.B1_COD  AND SB2.D_E_L_E_T_ = '')B2_SALDO "
+    cQuery1 += "    (SELECT SUM(B2_QATU) FROM "+RETSQLNAME("SB2")+" SB2 WHERE SB2.B2_COD = SB1.B1_COD  AND SB2.D_E_L_E_T_ = '' "
+     if !empty(alltrim(mv_par19))
+        cQuery1 += " AND (B2_LOCAL IN "+FilEst()+" )  "
+     endif
+    cQuery1 += " )B2_SALDO "
     cQuery1 += "    ,SB1.B1_UM AS UNIMED   "
     cQuery1 += "    FROM "+RETSQLNAME("SB1")+" SB1 WITH (NOLOCK)  "
     cQuery1 += "    LEFT JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL)   "
@@ -315,9 +319,9 @@ Static Function ReportPrint(oReport)
 
     /* filtra estoques */
 
-    if !empty(alltrim(mv_par19))
+   /* if !empty(alltrim(mv_par19))
         cQuery1 += " AND (B1_LOCPAD IN "+FilEst()+" )  "
-    endif
+    endif*/
   
       /* ordena codigo do produto */
     cQuery1 += "    ORDER BY B1_COD "
@@ -916,6 +920,9 @@ aString := strtokarr (alltrim(mv_par19), ",")
 retorna := '('
 For i := 1 to len(aString)
     retorna := retorna + "'"+aString[i]+"'"
+        if (i < len(aString))
+            retorna := retorna + ','
+        endif
 Next
 
 retorna := retorna + ')'
