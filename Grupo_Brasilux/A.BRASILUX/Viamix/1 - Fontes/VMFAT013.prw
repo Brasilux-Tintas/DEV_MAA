@@ -409,10 +409,11 @@ DbSelectArea("TCQ")
 			DbSkip()
 		Enddo
 	Else
+		cEndereco := "ENDEREÇO JÁ LIBERADO
 		Messagebox("Endereçamento já baixado !!","Atenção...",48) 
-		cEndereco := "ENDEREÇO JÁ LIBERADO"
-		ccchvnfe  := ""
-		ochvnfe:Setfocus()
+		//cEndereco := "ENDEREÇO JÁ LIBERADO"
+		//ccchvnfe  := ""            
+		//ochvnfe:Setfocus()
 	Endif
 
 	cSay1  :="Pedido....: "+TCQ->ZZ0_PEDIDO+space(5)+"Nota: "+TCQ->F2_DOC+" - "+TCQ->F2_SERIE+space(5)+"Emissão: "+TCQ->F2_EMISSAO
@@ -447,61 +448,70 @@ Static Function fBaixCol(cPedido)
 	Local cQry    := ""
 	Local cQry1   := ""
 	Local nY 	  := 1
+
+	If cPedido <> Nil  /*Adicionado por Lucas - 23-09-2025. Chamado R8950*/
 	
-	Begin Transaction
+		Begin Transaction
 
-		DbSelectArea("ZZ0")   //ZZ0_FILIAL+ZZ0_PEDIDO
-		DbSetOrder(4)
-		DbSeek(xFilial("ZZ0")+cPedido,.t.)
-		If Found()  				                                                                                                                                           
-			Reclock("ZZ0",.f.)
-				ZZ0->ZZ0_ENTREG := dDtBaixa
-				ZZ0->ZZ0_COLETA := Iif(Alltrim(dDtBaixa) <> '  /  /  ', 'S','N')
-			MsUnlock()		    
-		Endif
+			DbSelectArea("ZZ0")   //ZZ0_FILIAL+ZZ0_PEDIDO
+			DbSetOrder(4)
+			DbSeek(xFilial("ZZ0")+cPedido,.t.)
+			If Found()  				                                                                                                                                           
+				Reclock("ZZ0",.f.)
+					ZZ0->ZZ0_ENTREG := dDtBaixa
+					ZZ0->ZZ0_COLETA := Iif(Alltrim(dDtBaixa) <> '  /  /  ', 'S','N')
+				MsUnlock()		    
+			Endif
 
-		If  Substr(dtoc(dDtBaixa),1,2)  <> "  "
-			cQry := " "	
-			cQry += " SELECT ZZT_CODIGO, ZZT_TIPO, ZZT_STATUS "
-			cQry += " FROM "+RetSqlName("ZZT")+" ZZT WITH (NOLOCK) "
-			cQry += " LEFT OUTER JOIN "+RetSqlName("ZZU")+" ZZU WITH (NOLOCK) "
-			cQry += " ON ZZT_FILIAL = ZZU_FILIAL AND ZZT_CODIGO = ZZU_ENDERE AND ZZU.D_E_L_E_T_ ='' "
-			cQry += " WHERE ZZT.D_E_L_E_T_ ='' "
-			cQry += " AND ZZT_FILIAL ='"+xFilial("ZZT")+"'"
-			cQry += " AND ZZT_STATUS ='2' "
-			cQry += " AND ZZU_PEDIDO  ='"+cPedido+"'"				
+			If  Substr(dtoc(dDtBaixa),1,2)  <> "  "
+				cQry := " "	
+				cQry += " SELECT ZZT_CODIGO, ZZT_TIPO, ZZT_STATUS "
+				cQry += " FROM "+RetSqlName("ZZT")+" ZZT WITH (NOLOCK) "
+				cQry += " LEFT OUTER JOIN "+RetSqlName("ZZU")+" ZZU WITH (NOLOCK) "
+				cQry += " ON ZZT_FILIAL = ZZU_FILIAL AND ZZT_CODIGO = ZZU_ENDERE AND ZZU.D_E_L_E_T_ ='' "
+				cQry += " WHERE ZZT.D_E_L_E_T_ ='' "
+				cQry += " AND ZZT_FILIAL ='"+xFilial("ZZT")+"'"
+				cQry += " AND ZZT_STATUS ='2' "
+				cQry += " AND ZZU_PEDIDO  ='"+cPedido+"'"				
 
-			TCQUERY cQry ALIAS "TCQ" NEW
-			DbSelectArea("TCQ")
-
-			While !Eof()            
-    			aAdd(aLibEnd, {TCQ->ZZT_CODIGO})					
+				TCQUERY cQry ALIAS "TCQ" NEW
 				DbSelectArea("TCQ")
-				DbSkip()
-			Enddo
-	
-			DbSelectArea("TCQ")
-			DbCloseArea()
-    
-		    If Len(aLibEnd) >0
-				cQry := " "
-				cQry += " UPDATE "+RetSqlName("ZZU")+" SET D_E_L_E_T_ ='*' "
-				cQry += " WHERE D_E_L_E_T_ ='' AND ZZU_FILIAL ='"+xFilial("ZZU")+"' AND ZZU_PEDIDO ='"+cPedido+"'"
-   				TCSQLExec(cQry) 
-		
-				For nY:= 1 To Len(aLibEnd)
-					cQry1 := " "
-					cQry1 += " UPDATE "+RetSqlName("ZZT")+" SET ZZT_STATUS ='1' "
-					cQry1 += " FROM "+RetSqlName("ZZT")+" ZZT LEFT OUTER JOIN "+RetSqlName("ZZU")+" ZZU "
-					cQry1 += " ON ZZT_FILIAL = ZZU_FILIAL AND ZZT_CODIGO = ZZU_ENDERE AND ZZU.D_E_L_E_T_ ='' "
-					cQry1 += " WHERE ZZT.D_E_L_E_T_ ='' AND ZZT_FILIAL ='"+xFilial("ZZT")+"'"
-	   				cQry1 += " AND ZZU_PEDIDO IS NULL AND ZZT_CODIGO ='"+aLibEnd[nY][1]+"'"
-		   			TCSQLExec(cQry1) 
-				Next nY
-			Endif				
-		Endif
-	End Transaction
 
+				While !Eof()            
+    				aAdd(aLibEnd, {TCQ->ZZT_CODIGO})					
+					DbSelectArea("TCQ")
+					DbSkip()
+				Enddo
+
+				DbSelectArea("TCQ")
+				DbCloseArea()
+	
+			    If Len(aLibEnd) >0
+					cQry := " "
+					cQry += " UPDATE "+RetSqlName("ZZU")+" SET D_E_L_E_T_ ='*' "
+					cQry += " WHERE D_E_L_E_T_ ='' AND ZZU_FILIAL ='"+xFilial("ZZU")+"' AND ZZU_PEDIDO ='"+cPedido+"'"
+   					TCSQLExec(cQry) 
+
+					For nY:= 1 To Len(aLibEnd)
+						cQry1 := " "
+						cQry1 += " UPDATE "+RetSqlName("ZZT")+" SET ZZT_STATUS ='1' "
+						cQry1 += " FROM "+RetSqlName("ZZT")+" ZZT LEFT OUTER JOIN "+RetSqlName("ZZU")+" ZZU "
+						cQry1 += " ON ZZT_FILIAL = ZZU_FILIAL AND ZZT_CODIGO = ZZU_ENDERE AND ZZU.D_E_L_E_T_ ='' "
+						cQry1 += " WHERE ZZT.D_E_L_E_T_ ='' AND ZZT_FILIAL ='"+xFilial("ZZT")+"'"
+		   				cQry1 += " AND ZZU_PEDIDO IS NULL AND ZZT_CODIGO ='"+aLibEnd[nY][1]+"'"
+			   			TCSQLExec(cQry1) 
+					Next nY
+				Endif				
+			Endif
+		End Transaction
+	
+	Else 
+		MessageBox("Preencha o campo CHAVE","Atenção",48)
+		ochvnfe:Setfocus()
+		Return 
+	EndIf 
+	
+	
     DbSelectArea("ZZ0")
 	DbSetOrder(1)
 

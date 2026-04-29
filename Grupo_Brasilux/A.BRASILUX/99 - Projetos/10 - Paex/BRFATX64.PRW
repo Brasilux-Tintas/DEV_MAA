@@ -22,90 +22,100 @@
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function BRFATX64()
-     Private cGet1Env   := Space(11) //"      /    "	// Pallet
-     Private cGet2Env   := Space(06)				    // Lote
-     Private cGet3Env   := "     .  .   -  "    // Produto
-     Private cSay1Env   := Space(01)
-     Private cSay2Env   := Space(01)
-     Private cSay4Env   := Space(20)
-     Private cSay3Env   := Space(30)
-     Private cSay5Env   := Space(30)
-     Private nCapPallet := 0
-     Private nCapAntPal := 0
-     Private lProdMist  :=.f.
-     Private nCBox1Co   := ""
-     Private cCor4EnB   := CLR_BLUE
-     Private cCor4EnR   := CLR_RED
-     Private cCor4Env   := 0
-     Private nQtdeIni   := 0
-     Private cPallet    := ""
-     Private cMaxSeq    := ""
-     Private _CodProd   := ""
-     Private _cMaxSeq   := ""
-     Private nQtdTotal  := 0
-	 Private cCodBarra  := ""
-     Private _cSeq      := ""
-     Private lJaFech    := .f.
-     Private lTelaJaFechada := .f.
-     Private aDelete    :={} //  aAdd(aDelete, { cGet1Env, cCodBarra } )     
-     Private lCheck     :=.F.
-     Private oTempTbl1
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-     ±± Declaração de Variaveis Private dos Objetos                             ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     SetPrvt("oFontEnv", "oDlg1Env", "oGrp1Env", "oSay1Env", "oSay2Env", "oGet1Env", "oGet2Env", "oBtn1Env", "oBtn2Env")
-     SetPrvt("oBtn3Env", "oBtn4Env", "oBtn5Env", "oBtn6Env", "oBrw1Env", "oGrp3Env", "oBtn7Env", "oBtn8Env", "oBtn9Env")
-     SetPrvt("oSay4Env", "oBtn6Env", "oSay3Env", "oSay5Env", "oCBox1", "oBtnAEnv")
 
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-     ±± Definicao do Dialog e todos os seus componentes.                        ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     oFontEnv   := TFont():New( "MS Sans Serif", 0, -19, , .F., 0, , 400, .F., .F., , , , , , )
-     oFon2Env   := TFont():New( "Courier New"  , 0,  19, , .T., 0, , 400, .F., .F., , , , , , )
-     oDlg1Env   := MSDialog():New( 140, 264, 680, 980, "Monta / Desmonta / Transfere Pallet", , , .F., , , , , , .T., , , .T. )
-     oGrp1Env   := TGroup():New( 003, 004, 048, 356, "Dados do Pallet", oDlg1Env, CLR_RED, CLR_WHITE, .T., .F. )
-     oSay1Env   := TSay():New( 012, 008, { || "Pallet:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
-     oGet1Env   := TGet():New( 010, 064, { |u| If(PCount() > 0, cGet1Env := u, cGet1Env)}, oGrp1Env, 080, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet1Env", , ) 
-     oGet1Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet1Env)),fCarPall(cGet1Env),"")}
-   	 oCBox1     := TCheckBox():New( 012,150,"Informa QTDE",{|u| If(PCount() > 0, lCheck := u, lCheck)},oGrp1Env,080,012,,,oFontEnv,,CLR_BLUE ,CLR_WHITE,,.t.,"Habilita / Desabilita Digitação da Quantidade",, )	
+    Private cGet1Env   := Space(11) //"      /    "	// Pallet
+    Private cGet2Env   := Space(06)				    // Lote
+    Private cGet3Env   := "     .  .   -  "    // Produto
+    Private cSay1Env   := Space(01)
+    Private cSay2Env   := Space(01)
+    Private cSay4Env   := Space(20)
+    Private cSay3Env   := Space(30)
+    Private cSay5Env   := Space(30)
+	
+    Private nCapPallet := 0
+    Private nCapAntPal := 0
+    Private lProdMist  :=.f.
+    Private nCBox1Co   := ""
+	Private nCBox1Lo   := Space(04)
+    Private cCor4EnB   := CLR_BLUE
+    Private cCor4EnR   := CLR_RED
+    Private cCor4Env   := 0
+    Private nQtdeIni   := 0
+    Private cPallet    := ""
+    Private cMaxSeq    := ""
+    Private _CodProd   := ""
+    Private _cMaxSeq   := ""
+    Private nQtdTotal  := 0
+	Private cCodBarra  := ""
+    Private _cSeq      := ""
+    Private lJaFech    := .f.
+    Private lTelaJaFechada := .f.
+    Private aDelete    :={} //  aAdd(aDelete, { cGet1Env, cCodBarra } )     
+    Private lCheck     :=.F.
+    Private oTempTbl1
+	Private _ZPPAR0118 := GetMV( "ZP_PAR0118" ) // Libera Bloqueio de Lotes
 
-     oBtn3Env   := TButton():New( 028, 008, "Novo Pallet", oGrp1Env, {|| fNPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oSay4Env   := TSay():New( 030, 152, { || cSay4Env  }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., cCor4Env, CLR_WHITE, 106, 012)
-     oBtn1Env   := TButton():New( 009, 297, "Confirma", oGrp1Env, {|| fSMntPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oBtnAEnv   := TButton():New( 009, 240, "T. Rampa", oGrp1Env, {|| fTrLRampa()},045, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oBtn2Env   := TButton():New( 030, 297, "Abandona", oGrp1Env, {|| fSairMPa()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oGrp2Env   := TGroup():New( 050, 004, 268, 356, "", oDlg1Env, CLR_BLACK, CLR_WHITE, .T., .F. )
+    /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+    ±± Declaração de Variaveis Private dos Objetos                             ±±
+    Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+    SetPrvt("oFontEnv", "oDlg1Env", "oGrp1Env", "oSay1Env", "oSay2Env", "oGet1Env", "oGet2Env", "oBtn1Env", "oBtn2Env")
+    SetPrvt("oBtn3Env", "oBtn4Env", "oBtn5Env", "oBtn6Env", "oBrw1Env", "oGrp3Env", "oBtn7Env", "oBtn8Env", "oBtn9Env")
+    SetPrvt("oSay4Env", "oBtn6Env", "oSay3Env", "oSay5Env", "oCBox1"  , "oBtnAEnv", "oSay2Loc", "oCBox1Co")
 
-     oBtn4Env   := TButton():New( 068, 290, "<- Monta     " , oGrp2Env, {|| fMntPallet(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn5Env   := TButton():New( 088, 290, "<- Desmonta  " , oGrp2Env, {|| fMntPallet(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+    /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+    ±± Definicao do Dialog e todos os seus componentes.                        ±±
+    Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+    oFontEnv   := TFont():New( "MS Sans Serif", 0, -18, , .F., 0, , 400, .F., .F., , , , , , )
+    oFon2Env   := TFont():New( "Courier New"  , 0,  19, , .T., 0, , 400, .F., .F., , , , , , )
+    oDlg1Env   := MSDialog():New( 140, 264, 680, 980, "Monta / Desmonta / Transfere Pallet", , , .F., , , , , , .T., , , .T. )
+    oGrp1Env   := TGroup():New( 003, 004, 048, 356, "Dados do Pallet", oDlg1Env, CLR_RED, CLR_WHITE, .T., .F. )
+    oSay1Env   := TSay():New( 012, 008, { || "Pallet:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
+    oGet1Env   := TGet():New( 010, 064, { |u| If(PCount() > 0, cGet1Env := u, cGet1Env)}, oGrp1Env, 080, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet1Env", , ) 
+    oGet1Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet1Env)),fCarPall(cGet1Env),"")}
+	oCBox1     := TCheckBox():New( 012,150,"Informa QTDE",{|u| If(PCount() > 0, lCheck := u, lCheck)},oGrp1Env,080,012,,,oFontEnv,,CLR_BLUE ,CLR_WHITE,,.t.,"Habilita / Desabilita Digitação da Quantidade",, )	
 
-	 oSay2Env   := TSay():New( 168, 290, { || "Impressora"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
-     oCBox1Co   := TComboBox():New( 158, 290, {|u| If(PCount() > 0, nCBox1Co := u, nCBox1Co)}, {"", "ZEBRA S4M", "ZEBRA ZT230"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Co )
-     oBtn6Env   := TButton():New( 178, 290, "<- Imp.Etq ->" , oGrp2Env, {|| fIEtPallet(nCBox1Co) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn7Env 	:= TButton():New( 198, 290, "<- Res. Pro->" , oGrp2Env, {|| U_fResPallet(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn9Env 	:= TButton():New( 218, 290, "<- Res. Emb->" , oGrp2Env, {|| U_fResPallet(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn8Env 	:= TButton():New( 238, 290, "<-Transfere->" , oGrp2Env, {|| fTrLocais( )  }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )     
-     oSay3Env   := TSay():New( 038, 076, { || cSay3Env  },   oGrp1Env, , oFon2Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 240, 012)
-	 oSay5Env   := TSay():New( 028, 076, { || cSay5Env  },   oGrp1Env, , oFon2Env, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 240, 012)
+    oBtn3Env   := TButton():New( 028, 008, "Novo Pallet", oGrp1Env, {|| fNPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oSay4Env   := TSay():New( 030, 152, { || cSay4Env  }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., cCor4Env, CLR_WHITE, 106, 012)
+    oBtn1Env   := TButton():New( 009, 297, "Confirma", oGrp1Env, {|| fSMntPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oBtnAEnv   := TButton():New( 009, 240, "T. Rampa", oGrp1Env, {|| fTrLRampa()},045, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oBtn2Env   := TButton():New( 030, 297, "Abandona", oGrp1Env, {|| fSairMPa()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oGrp2Env   := TGroup():New( 050, 004, 268, 356, "", oDlg1Env, CLR_BLACK, CLR_WHITE, .T., .F. )
 
-     oTblIPall()
-     DbSelectArea("TMPITE")
-     DbSetOrder(1)
-     DbGoTop()
-     oBrw1Env   := MsSelect():New( "TMPITE", "", "", { {"TMPPRO", "", "Codigo", "@R XX 99.99.999-99"}, {"TMPSEQ", "", "Sequ.", "@!"}, { "TMPQTD", "", "Quantidade", "@E 999,999"}, {"TMPLOT", "", "Lote   ", "@E 999999"} }, .F., , {056, 007, 266, 280}, , , oGrp2Env ) 
+    oCBox1Lo   := TComboBox():New( 058, 290, {|u| If(PCount() > 0, nCBox1Lo := u, nCBox1Lo)}, {"", "FAB1", "FAB2","DEPO","ARA"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Lo )
+	oSay2Loc   := TSay():New( 078, 290, { || "Localização"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
+	oCBox1Lo:Refresh()
 
-     oBrw1Env:oBrowse:oFont          := oFon2Env
-     oBrw1Env:oBrowse:lAdjustColSize := .t.
-     oBrw1Env:oBrowse:Refresh()
-   	 oBtn3Env:SetFocus()
-     
-     oDlg1Env:Activate(,,,.T.)
-     
-     If !lJaFech
-     	lTelaJaFechada := .t.
+    oBtn4Env   := TButton():New( 088, 290, "<- Monta     " , oGrp2Env, {|| fMntPallet(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+    oBtn5Env   := TButton():New( 108, 290, "<- Desmonta  " , oGrp2Env, {|| fMntPallet(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+
+	oSay2Env   := TSay():New( 168, 290, { || "Impressora"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
+    oCBox1Co   := TComboBox():New( 150, 290, {|u| If(PCount() > 0, nCBox1Co := u, nCBox1Co)}, {"", "ZEBRA S4M", "ZEBRA ZT230"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Co )
+    oBtn6Env   := TButton():New( 178, 290, "<- Imp.Etq ->" , oGrp2Env, {|| fIEtPallet(nCBox1Co) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+    oBtn7Env 	:= TButton():New( 198, 290, "<- Res. Pro->" , oGrp2Env, {|| U_fResPallet(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+    oBtn9Env 	:= TButton():New( 218, 290, "<- Res. Emb->" , oGrp2Env, {|| U_fResPallet(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+    oBtn8Env 	:= TButton():New( 238, 290, "<-Transfere->" , oGrp2Env, {|| fTrLocais( )  }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )     
+    oSay3Env   := TSay():New( 038, 076, { || cSay3Env  },   oGrp1Env, , oFon2Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 240, 012)
+	oSay5Env   := TSay():New( 028, 076, { || cSay5Env  },   oGrp1Env, , oFon2Env, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 240, 012)
+
+    oTblIPall()
+    DbSelectArea("TMPITE")
+    DbSetOrder(1)
+    DbGoTop()
+    oBrw1Env   := MsSelect():New( "TMPITE", "", "", { {"TMPPRO", "", "Codigo", "@R XX 99.99.999-99"}, {"TMPSEQ", "", "Sequ.", "@!"}, { "TMPQTD", "", "Quantidade", "@E 999,999"}, {"TMPLOT", "", "Lote   ", "@E 999999"} }, .F., , {056, 007, 266, 280}, , , oGrp2Env ) 
+
+    oBrw1Env:oBrowse:oFont          := oFon2Env
+    oBrw1Env:oBrowse:lAdjustColSize := .t.
+    oBrw1Env:oBrowse:Refresh()
+	oBtn3Env:SetFocus()
+    
+    oDlg1Env:Activate(,,,.T.)
+    
+    If !lJaFech
+		lTelaJaFechada := .t.
         fSairMPa()
-     Endif
-     oTempTbl1:Delete()
+	Endif
+    oTempTbl1:Delete()
+
 Return
 
 
@@ -124,7 +134,7 @@ User Function fResPallet(nOpc)
     If nOpc == 1
 
 		cQry1 := " "
-		cQry1 += " WITH TMP AS(SELECT ZZK_CODIGO, ZZK_PRODUT, B1_DESC, ZZK_QUANT,  CASE WHEN LEN(ZZK_CODBAR)=14 THEN SUBSTRING(ZZK_CODBAR,9,2) ELSE '0'+dbo.DetVol(ZZK_FILIAL,ZZK_PRODUT) END AS 'QTDVOL'   "
+		cQry1 += " WITH TMP AS (SELECT ZZK_CODIGO, ZZK_PRODUT, B1_DESC, ZZK_QUANT,  CASE WHEN LEN(ZZK_CODBAR)=14 THEN SUBSTRING(ZZK_CODBAR,9,2) ELSE '0'+dbo.DetVol(ZZK_FILIAL,ZZK_PRODUT) END AS 'QTDVOL'   "		
 		cQry1 += " FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "
 		cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (B1_FILIAL = ZZK_FILIAL) AND ZZK_PRODUT = B1_COD AND SB1.D_E_L_E_T_ ='' "
 		cQry1 += " WHERE (ZZK.D_E_L_E_T_ ='') AND (ZZK_FILIAL = '"+xFilial("ZZK")+"') " 
@@ -185,8 +195,7 @@ User Function fResPallet(nOpc)
 			    //nTVol += VAL(TCQ->QTDVOL)
 			Elseif nOpc = 3
 				//LGS#20200210 - Adequação de release 12.1.25 e posteriores
-				//aAdd(aResPal, {TCQ->X5_CHAVE ,TCQ->X5_DESCRI ,TCQ->ZZK_QUANT, TCQ->QTDVOL})
-				aAdd(aResPal, { ( TCQ )->( X5_CHAVE ), ( TCQ )->( X5_DESCRI ) ,TCQ->ZZK_QUANT, TCQ->QTDVOL})
+				aAdd(aResPal, {TCQ->X5_CHAVE ,TCQ->X5_DESCRI ,TCQ->ZZK_QUANT, TCQ->QTDVOL})
 				nTQtd += TCQ->ZZK_QUANT 
 			    nTVol += TCQ->QTDVOL
 			Endif
@@ -528,11 +537,12 @@ Static Function fTrLRampa()
     oDlg1Tr   := MSDialog():New( 258, 232, 383, 570, "Transferência de RAMPA", , , .F., , , , , , .T., , , .T. )
     oSay3Tr   := TSay():New( 005, 010, {|| "Orig.: (P1/P2)"  }, oDlg1Tr, , oFontTr1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
     oGet3Tr   := TGet():New( 020, 025, {|u| If(PCount() > 0, cGet3Tr := u, cGet3Tr)}, oDlg1Tr, 024, 012, '@R XX'          , , CLR_BLACK, CLR_WHITE, oFontTr2, , , .T., "", , , .F., .F., , .F. , .F., "99"    ,"cGet3Tr", , )
-    oSay4Tr   := TSay():New( 005, 095, {|| "Dest.: (03/30)"  }, oDlg1Tr, , oFontTr1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
+    oSay4Tr   := TSay():New( 005, 095, {|| "Dest.: (03)"  }, oDlg1Tr, , oFontTr1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
     oGet4Tr   := TGet():New( 020, 110, {|u| If(PCount() > 0, cGet4Tr := u, cGet4Tr)}, oDlg1Tr, 024, 012, '@R XX'          , , CLR_BLACK, CLR_WHITE, oFontTr2, , , .T., "", , , .F., .F., , .F. , .F., "99"    ,"cGet4Tr", , )
     oBtn1Tr   := TButton():New( 042, 120, "Transfere", oDlg1Tr, {|| fTrPallet(cGet1Env, cGet3Tr,cGet4Tr)}  , 045, 018, , oFontTr2, , .T., , "", , , , .F. )
     oGet3Tr:bValid     := {|| Iif(Upper(Alltrim(cGet3Tr)) $ 'P1.P2', Upper(Alltrim(cGet3Tr)), oGet3Tr:Setfocus() ) }
-    oGet3Tr:bLostFocus := {|| cGet4Tr:= Iif(Upper(Alltrim(cGet3Tr)) $ 'P2', '30' ,Iif(Upper(Alltrim(cGet3Tr)) $ 'P1', '03',oGet3Tr:Setfocus())) }
+    //oGet3Tr:bLostFocus := {|| cGet4Tr:= Iif(Upper(Alltrim(cGet3Tr)) $ 'P2', '30' ,Iif(Upper(Alltrim(cGet3Tr)) $ 'P1', '03',oGet3Tr:Setfocus())) }
+	oGet3Tr:bLostFocus := {|| cGet4Tr:= Iif(Upper(Alltrim(cGet3Tr)) $ 'P1.P2', '03',oGet3Tr:Setfocus()) }
    
     oDlg1Tr:Activate( , , , .T.)
 
@@ -567,7 +577,8 @@ Static Function fTrLocais()
     		DbClosearea()
         	Return
 	  	Else
-		  	cGet1Tr := Iif(Alltrim(ZZJ->ZZJ_LOCPRO) $ 'P2', '30' ,Iif(Alltrim(ZZJ->ZZJ_LOCPRO) $ 'P1', '03',Space(2)))
+		  	//cGet1Tr := Iif(Alltrim(ZZJ->ZZJ_LOCPRO) $ 'P2', '30' ,Iif(Alltrim(ZZJ->ZZJ_LOCPRO) $ 'P1', '03',Space(2)))
+			cGet1Tr := Iif(Alltrim(ZZJ->ZZJ_LOCPRO) $ 'P1.P2', '03',Space(2))
 		Endif
    	Else
 		Messagebox("Código de Pallet não encontrado, salve o Pallet antes de transferir ou verifique o código do Pallet digitado !!","Atenção...",48)
@@ -600,6 +611,7 @@ Function  ³ fSMntPal()  Salvar Dados das Tabelas Temporárias - Botão Confirmar T
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fSMntPal()
     Local nY
+	
 	If Empty(Alltrim(cGet1Env))
 		Return
 	Endif
@@ -610,54 +622,54 @@ Static Function fSMntPal()
 	If Found()
 		If ZZJ->ZZJ_FLAG == "2"
 			Messagebox("Não é possível alterar este Pallet, Pallet já foi transferido !","Atenção...",48) 
-    		DbSelectArea("ZZJ")
-    		DbClosearea()
-        	Return
-	  	Endif
-   	Endif
+			DbSelectArea("ZZJ")
+			DbClosearea()
+			Return
+		Endif
+	Endif
 
 	Begin Transaction
         If cGet1Env $ "NOVO PALLET"
         	FGrvNPal() // Gravar ZZJ o Número do Pallet
         Endif
-	    DbSelectArea("ZZJ")
-	    DbSetOrder(1)
-	    DbSeek(xFilial("ZZJ")+cGet1Env, .t.)   
-	    If Found()
-		    If !ZZJ->ZZJ_FLAG $ '2'
-			    RecLock("ZZJ", .f.)
-		    	    ZZJ->ZZJ_DTFIM := Date()
-		    	    ZZJ->ZZJ_HFIM  := SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)
-		        MsUnLock()
+		DbSelectArea("ZZJ")
+		DbSetOrder(1)
+		DbSeek(xFilial("ZZJ")+cGet1Env, .t.)   
+		If Found()
+		If !ZZJ->ZZJ_FLAG $ '2'
+				RecLock("ZZJ", .f.)
+					ZZJ->ZZJ_DTFIM := Date()
+					ZZJ->ZZJ_HFIM  := SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)
+				MsUnLock()
 			Endif
 		Endif
         For nY :=1 to Len(aDelete)
 			If !lCheck
 				DbSelectArea("ZZK")
-			    DbSetOrder(5)
+				DbSetOrder(5)
 				DbGoTop()            		
-		    	DbSeek(xFilial("ZZK")+aDelete[nY][2], .t.)   
-			    If Found() 
+				DbSeek(xFilial("ZZK")+aDelete[nY][2], .t.)   
+				If Found() 
 					If (aDelete[nY][1]) == Alltrim(cGet1Env)
 						RecLock("ZZK", .F.)
 							DbDelete()
 						MsUnlock()		
 					Endif
-			    Endif	
-    		Else
+				Endif	
+			Else
 				DbSelectArea("ZZK")
-			    DbSetOrder(2)
+				DbSetOrder(2)
 				DbGoTop()            		
-		    	DbSeek(xFilial("ZZK")+aDelete[nY][1]+aDelete[nY][2]+aDelete[nY][2], .t.)   
-			    If Found() 
+				DbSeek(xFilial("ZZK")+aDelete[nY][1]+aDelete[nY][2]+aDelete[nY][2], .t.)   
+				If Found() 
 					RecLock("ZZK", .F.)
 						DbDelete()
 					MsUnlock()		
-			    Endif	
-    		Endif
+				Endif	
+			Endif
         Next
 		DbSelectArea("TMPITE")
-	    DbSetOrder(1)
+		DbSetOrder(1)
 		DbGoTop()    
 		If !Eof()
 			While !Eof() .And. ((Alltrim(cGet1Env) == Alltrim(TMPITE->TMPPAL)) .OR. (TMPITE->TMPPAL $ "NOVO PALLET"))
@@ -665,19 +677,19 @@ Static Function fSMntPal()
 					RecLock("TMPITE", .F.)
 						TMPITE->TMPPAL := (cGet1Env)
 					MsUnlock()
-		        Endif
+				Endif
 				DbSelectArea("ZZK")
-				If !lCheck   // Não buscar pelo código de barras qdo a quantidade for digitada
-				    DbSetOrder(5)
+				If !lCheck .and. (len(Alltrim(TMPITE->TMPCBR)) <> 42)  // Não buscar pelo código de barras qdo a quantidade for digitada
+					DbSetOrder(5)
 					DbGoTop()    
-				    DbSeek(xFilial("ZZK")+TMPITE->TMPCBR, .t.)   
-   				Else
+					DbSeek(xFilial("ZZK")+ALLTRIM(TMPITE->TMPCBR), .t.)   
+				Else
    					DbSetOrder(2) //ZZK_FILIAL+ZZK_CODIGO+ZZK_PRODUT+ZZK_SEQENV                                                                                                                                  
-   					DbGotop()
+					DbGotop()
 					DbSeek(xFilial("ZZK")+TMPITE->TMPPAL+TMPITE->TMPPRO+TMPITE->TMPSEQ, .t.)      					
-   				Endif
-   				If !Found()
-		    		RecLock("ZZK", .T.)
+				Endif
+				If !Found()
+					RecLock("ZZK", .T.)
 						ZZK_FILIAL := xFilial("ZZK")
 						ZZK_CODIGO := TMPITE->TMPPAL
 						ZZK_LOTE   := TMPITE->TMPLOT
@@ -693,11 +705,11 @@ Static Function fSMntPal()
 				DbSelectArea("TMPITE")
 				DbSkip()
 			Enddo
-	    Else
-		    DbSelectArea("ZZJ")
-		    DbSetOrder(1)
-		    DbSeek(xFilial("ZZJ")+cGet1Env, .t.)   
-		    If Found()
+		Else
+			DbSelectArea("ZZJ")
+			DbSetOrder(1)
+			DbSeek(xFilial("ZZJ")+cGet1Env, .t.)   
+			If Found()
 				RecLock("ZZJ", .F.)
 					DbDelete()
 				MsUnlock()		
@@ -720,16 +732,17 @@ Static Function fSMntPal()
 		DbCloseArea()
 	Endif
 	If ChkFile("ZZJ") 
-	    DbSelectArea("ZZJ")
+		DbSelectArea("ZZJ")
 		DbCloseArea()
 	Endif    
     If !lTelaJaFechada
-	    oBtn3Env:Enable()
-    Endif
-    If !Empty(Alltrim(cGet1Env))
-	    fCarPall(cGet1Env)
+		oBtn3Env:Enable()
+		If !Empty(Alltrim(cGet1Env))
+			fCarPall(cGet1Env)
+		Endif
+		oCBox1Lo:Enable()
 	Endif
-
+	//oCBox1Lo:Enable()
     //oGet1Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet1Env)),fCarPall(cGet1Env),""), MsAguarde( {|| Iif(!Empty(Alltrim(cGet1Env)),fCarPall(cGet1Env),"")}, "Aguarde...", "Buscando produtos no Pallet")}
 Return
 
@@ -799,7 +812,7 @@ Static Function oTblIPall()
     aAdd( aFds , {"TMPQTD"  ,"N", 011, 003} )   // QUANTIDADE
 	//aAdd( aFds , {"TMPORI"  ,"C", 002, 000} )   // ARMAZEM ORIGEM
     //aAdd( aFds , {"TMPFLG"  ,"C", 001, 000} )   // FLAG
-	aAdd( aFds , {"TMPCBR"  ,"C", 018, 000} )   // CODIGO DE BARRAS
+	aAdd( aFds , {"TMPCBR"  ,"C", 042, 000} )   // CODIGO DE BARRAS
     aAdd( aFds , {"TMPDEL"  ,"C", 001, 000} )   // DELETADO
 
        /********************************************************************************************************************************/
@@ -854,7 +867,7 @@ Static Function fCarPall(cPallet)
 	Endif
 
     cQry1 := ""
-    cQry1 += "SELECT ZZK_CODIGO, ZZK_LOTE, ZZK_SEQENV, ZZK_PRODUT, ZZK_QUANT, ZZK_LOCORI, ZZK_FLAG, ZZJ_FLAG, ZZK_CODBAR   "
+    cQry1 += "SELECT ZZK_CODIGO, ZZK_LOTE, ZZK_SEQENV, ZZK_PRODUT, ZZK_QUANT, ZZK_LOCORI, ZZK_FLAG, ZZJ_FLAG, ZZK_CODBAR, ZZJ_LOCALI   "
     cQry1 += "FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
     cQry1 += "LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) ON ZZJ_FILIAL = ZZK_FILIAL AND ZZJ_CODIGO = ZZK_CODIGO AND ZZK.D_E_L_E_T_ ='' "
     cQry1 += " WHERE (ZZJ.ZZJ_FILIAL = '"+XFILIAL("ZZJ")+"') "
@@ -867,27 +880,31 @@ Static Function fCarPall(cPallet)
     nConOrd := 1
     DbSelectArea("TCQ")
     If !Eof()
-	    If TCQ->ZZJ_FLAG $ '3.4'
+		If TCQ->ZZJ_FLAG $ '3.4'
 			Messagebox("Tipo de Pallet inválido (Compra por Borderô), verifique o código do Pallet bipado / digitado !!!","Atenção...",48)	  		
 			//cGet1Env := Space(11)
 			oGet1Env:Setfocus()
 		Else
-		    While !Eof()
-		    	RecLock("TMPITE", .T.)
+			While !Eof()
+				RecLock("TMPITE", .T.)
 					TMPITE->TMPPAL := TCQ->ZZK_CODIGO
 					TMPITE->TMPLOT := TCQ->ZZK_LOTE
-	            	TMPITE->TMPSEQ := TCQ->ZZK_SEQENV
-		            TMPITE->TMPPRO := TCQ->ZZK_PRODUT
-		            TMPITE->TMPQTD := TCQ->ZZK_QUANT
+					TMPITE->TMPSEQ := TCQ->ZZK_SEQENV
+					TMPITE->TMPPRO := TCQ->ZZK_PRODUT
+					TMPITE->TMPQTD := TCQ->ZZK_QUANT
 					TMPITE->TMPCBR := TCQ->ZZK_CODBAR
 					TMPITE->TMPINV := Inverte(TCQ->ZZK_SEQENV)
 				    //TMPITE->TMPORI := TCQ->ZZK_LOCORI
 					//TMPITE->TMPFLG := TCQ->ZZK_FLAG
 				MsUnLock()
-	        	DbSelectArea("TCQ")
-		        DbSkip()
-  			Enddo
-			oBtn3Env:Enable()
+				DbSelectArea("TCQ")
+				DbSkip()
+			Enddo
+			
+			If !lTelaJaFechada
+				oBtn3Env:Enable()
+			Endif
+			//oBtn3Env:Enable()
 			If Alltrim(TMPITE->TMPCBR) $ 'DIG'
 				lCheck :=.t.
 				oCBox1:Refresh()
@@ -900,22 +917,26 @@ Static Function fCarPall(cPallet)
 		Messagebox("Pallet Inexistente, verifique o número do Pallet digitado / bipado !!!","Atenção...",48)	  		
 		cGet1Env := Space(11)
 		oBtn3Env:Enable()
+		nCBox1Lo:=Space(04)
+		oCBox1Lo:Enable()
 		oGet1Env:Setfocus()
     Endif
     DbSelectArea("TCQ")
 	DbCloseArea()    
 
     If ChkFile("TMPITE")
-   	    DbSelectArea("TMPITE")
+		DbSelectArea("TMPITE")
         DbGoTop()
-	    oBrw1Env:oBrowse:GoTop()
-    	oBrw1Env:oBrowse:Refresh()
+		oBrw1Env:oBrowse:GoTop()
+		oBrw1Env:oBrowse:Refresh()
     Endif	
 	
 	DbSelectArea("ZZJ")
 	DbSetOrder(1)
 	DbSeek(xFilial("ZZJ")+cGet1Env, .t.)   
 	If Found() 
+		nCBox1Lo :=ZZJ->ZZJ_LOCALI
+		oCBox1Lo:Refresh()
 		If !Empty(Alltrim(ZZJ->ZZJ_LOCPRO)) .and. ZZJ->ZZJ_FLAG $ '1'
 			cSay5Env := "Pallet já passou pela Rampa. Origem -> "+ZZJ->ZZJ_LOCPRO 
 		Endif
@@ -925,6 +946,7 @@ Static Function fCarPall(cPallet)
 	Endif
 	DbSelectArea("ZZJ")
 	DbClosearea()	    
+
 Return
 
 
@@ -1002,7 +1024,7 @@ Static Function fMntPallet(nOpcMnt) // 1 - Monta / 2 - Desmonta
     ±± Declaração de cVariable dos componentes                                 ±±
     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 
-	Private cGet1Mnt   := Space(20) //Iif(nOpcMnt == 1, Space(15), TMPITE->TMPPRO)
+	Private cGet1Mnt   := Space(42) //Iif(nOpcMnt == 1, Space(15), TMPITE->TMPPRO)
  	Private cGet2Mnt   := Space(3)  //Iif(nOpcMnt == 1, Space(3) , TMPITE->TMPSEQ)
   	Private nGet3Mnt   := 0 	    //Iif(nOpcMnt == 1, 0        , TMPITE->TMPQTD) 
    	Private nGet7Mnt   := 0 	    //Iif(nOpcMnt == 1, 0        , TMPITE->TMPQTD) 
@@ -1113,75 +1135,90 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
     //Local lProdMist :=.f.
 
     lJaBipou := .f.
-    cCodBarra := Substr(cGet1Mnt,1,18)
+
+    cCodBarra := Substr(cGet1Mnt,1,len(alltrim(cGet1Mnt)))
 	
 	If Empty(Alltrim(cGet1Env)) .or. Empty(Alltrim(cCodBarra))
 		Return
 	Endif
-	If !(Len(Alltrim(cCodBarra)) == 14 .or. Len(Alltrim(cCodBarra)) == 18)
-	//If !(Len(Alltrim(cCodBarra)) == 12 .or. Len(Alltrim(cCodBarra)) == 14 .or. Len(Alltrim(cCodBarra)) == 18)
-		Messagebox("Tamanho do código de Barras incompatível com os padrões utilizados (14 ou 18 digitos)!!","Verifique...",48)
-	   	oGet1Mnt:SetFocus()
+	//If !(Len(Alltrim(cCodBarra)) == 14 .or. Len(Alltrim(cCodBarra)) == 18)
+	DbSelectArea("SB1")
+    DbSetOrder(1)
+	DbSeek(xFilial("SB1")+Substr(cCodBarra,1,12), .t.)                                                         
+ 	If !Found() 
+		If !(Len(Alltrim(cCodBarra)) == 14 .or. Len(Alltrim(cCodBarra)) == 18 .or.  Len(Alltrim(cCodBarra)) == 42 )
+			Messagebox("Tamanho do código de Barras incompatível com os padrões utilizados (14 / 18 / 42 digitos)!!","Verifique...",48)
+	   		oGet1Mnt:SetFocus()
+	   		Return
+		Endif
+	Else
+		oGet1Mnt:SetFocus()
 	   	Return
 	Endif
-	If !lCheck
-	    DbSelectArea("TMPITE")
-	   	DbSetOrder(4)
-   		DbGoTop()
-		DbSeek(cGet1Env+cCodBarra, .F.)
-	    If Found()
-		    If nOpcMnt == 1
-  		  		oGet4Mnt:SetFocus()
-  	   		   	lJaBipou :=.t.
-	      	Endif
-    	Else
-	    	If nOpcMnt == 2 .and. Len(Alltrim(Posicione("SB1", 1, xFilial("SB1")+cGet1Mnt, "B1_DESC")))==0
-				Messagebox("Produto não foi bipado neste Pallet, portanto não é possível retirá-lo!!!","Atenção...",48)
-      			Return
-	      	Endif  
-    	Endif
 
-		DbSelectArea("ZZK")
-    	DbSetOrder(5)
-		DbGoTop()    
-    	DbSeek(xFilial("ZZK")+cCodBarra, .t.)   
-		If Found()
-		    If nOpcMnt == 1
-				DbSelectArea("ZZJ")
-				DbSetOrder(1)
-				DbSeek(xFilial("ZZJ")+ZZK->ZZK_CODIGO, .t.)   
-				If Found() .and. ZZJ->ZZJ_FLAG $ '1.2'
-					Messagebox("Produto já digitado em Pallet..: "+ZZK->ZZK_CODIGO+" Faça a desmontagem do Pallet antes de bipar !!","Atenção...",48)
-					DbSelectArea("ZZK")
-			    	DbCloseArea()
-
+	If Len(Alltrim(cCodBarra)) == 18 .or. Len(Alltrim(cCodBarra)) == 14
+		If !lCheck
+	    	DbSelectArea("TMPITE")
+	   		DbSetOrder(4)
+   			DbGoTop()
+			DbSeek(cGet1Env+cCodBarra, .F.)
+	    	If Found()
+		    	If nOpcMnt == 1
+  		  			oGet4Mnt:SetFocus()
+  	   		   		lJaBipou :=.t.
+	      		Endif
+    		Else
+	    		If nOpcMnt == 2 .and. Len(Alltrim(Posicione("SB1", 1, xFilial("SB1")+cGet1Mnt, "B1_DESC")))==0
+					Messagebox("Produto não foi bipado neste Pallet, portanto não é possível retirá-lo!!!","Atenção...",48)
+      				Return
+	      		Endif  
+    		Endif
+			DbSelectArea("ZZK")
+    		DbSetOrder(5)
+			DbGoTop()    
+    		DbSeek(xFilial("ZZK")+cCodBarra, .t.)   
+			If Found()
+		    	If nOpcMnt == 1
 					DbSelectArea("ZZJ")
-					DbCloseArea()
+					DbSetOrder(1)
+					DbSeek(xFilial("ZZJ")+ZZK->ZZK_CODIGO, .t.)   
+					If Found() .and. ZZJ->ZZJ_FLAG $ '1.2'
+						Messagebox("Produto já digitado em Pallet..: "+ZZK->ZZK_CODIGO+" Faça a desmontagem do Pallet antes de bipar !!","Atenção...",48)
+						DbSelectArea("ZZK")
+			    		DbCloseArea()
 
-		    		oGet1Mnt:SetFocus()
-	    			Return
-		   		Endif
-		   		DbSelectArea("ZZJ")
-				DbCloseArea()
-	   		Endif
-		Endif    
-		DbSelectArea("ZZK")
-		DbCloseArea()
+						DbSelectArea("ZZJ")
+						DbCloseArea()
+
+		    			oGet1Mnt:SetFocus()
+	    				Return
+		   			Endif
+		   			DbSelectArea("ZZJ")
+					DbCloseArea()
+	   			Endif
+			Endif    
+			DbSelectArea("ZZK")
+			DbCloseArea()
+   		Endif
     Endif
-    
-    If Len(Alltrim(cCodBarra)) == 18
+    If Len(Alltrim(cCodBarra)) == 42
 		DbSelectArea("SB1")
 	    DbSetOrder(5)
-		DbSeek(xFilial("SB1")+Substr(cGet1Mnt,1,12), .t.)                                                         
+		DbSeek(xFilial("SB1")+Substr(cCodBarra,04,12), .t.)                                                         
 	 	If Found() 
   			If SB1->B1_MSBLQL <> '1'
-	    		//If SB1->B1_TIPO $ 'PA'
-					cGet5Mnt := '999999'//Substr(cGet1Mnt,1,6)
-					cGet1Mnt := (SB1->B1_COD)  
-				//Endif
+				//cGet5Mnt  := Substr(Alltrim(cCodBarra),42,06)
+				cGet5Mnt  := Substr(Alltrim(cCodBarra),29,06)
+				cGet1Mnt := (SB1->B1_COD)  
+				//dDtValida := cTod(Substr(cCodBarra,28,02)+'/'+Substr(cCodBarra,26,02)+'/'+Substr(cCodBarra,24,02))//     ("20"+Substr(Alltrim(cCodBarra),24,06))
+				dDtValida := cTod(Substr(cCodBarra,37,02)+'/'+Substr(cCodBarra,39,02)+'/'+Substr(cCodBarra,41,02))//     ("20"+Substr(Alltrim(cCodBarra),24,06))
+				If DateDiffDay(dDtValida, dDatabase ) < 360 //Apura Diferenca em Dias entre duas Datas > 
+					lVencido :=.t.	
+				Endif
 			Else
-       	     	oGet1Mnt:SetFocus()
-           	  	cGet1Mnt := space(20)
+       	     	Messagebox("Produto bloqueado !!!","Atenção...",48)
+				oGet1Mnt:SetFocus()
+           	  	cGet1Mnt := space(42)
            		oGet1Mnt:Refresh()
                 cGet4Mnt := space(30)
    	            oGet4Mnt:Refresh()
@@ -1195,17 +1232,46 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 				oGet5Mnt:Refresh()
 			Endif
 		Endif	
-    Else
+		//cGet1Mnt  := Substr(Alltrim(cCodBarra),04,13)
+	ElseIf Len(Alltrim(cCodBarra)) == 18
+		DbSelectArea("SB1")
+	    DbSetOrder(5)
+		DbSeek(xFilial("SB1")+Substr(cGet1Mnt,1,12), .t.)                                                         
+	 	If Found() 
+  			If SB1->B1_MSBLQL <> '1'
+	    		//If SB1->B1_TIPO $ 'PA'
+					cGet5Mnt := '999999'//Substr(cGet1Mnt,1,6)
+					cGet1Mnt := (SB1->B1_COD)  
+				//Endif
+			Else
+       	     	Messagebox("Produto bloqueado !!!","Atenção...",48)
+				oGet1Mnt:SetFocus()
+           	  	cGet1Mnt := space(42)
+           		oGet1Mnt:Refresh()
+                cGet4Mnt := space(30)
+   	            oGet4Mnt:Refresh()
+       	        cGet2Mnt := space(3)
+           	    oGet2Mnt:Refresh()
+                nGet3Mnt := 0
+       	        oGet3Mnt:Refresh()
+   	            nGet7Mnt := 0
+           	    oGet7Mnt:Refresh()
+       			cGet5Mnt := space(6)
+				oGet5Mnt:Refresh()
+			Endif
+		Endif	
+    ElseIf Len(Alltrim(cCodBarra)) == 14
     	DbSelectArea("SC2")
 	    DbSetOrder(13)
 	    DbSeek(xFilial("SC2")+Alltrim(Substr(cGet1Mnt,1,6)), .t.)
     	If Found() 
 	    	While !(SC2->(Eof())) .AND. (XFilial("SC2") == SC2->C2_FILIAL) .AND. (Substr(cGet1Mnt,1,6) == Alltrim(SC2->C2_LOTE)) 
 				If Substr(cGet1Mnt,7,2) == Substr(SC2->C2_PRODUTO,11,2) 
-					cGet5Mnt := Substr(cGet1Mnt,1,6)
-					cGet1Mnt := (SC2->C2_PRODUTO)
 					If DateDiffMonth(dDatabase, SC2->C2_DATPRF  ) > 35
 					   	lVencido :=.t.
+					Else
+						cGet5Mnt := Substr(cGet1Mnt,1,6)
+						cGet1Mnt := (SC2->C2_PRODUTO)
 					Endif
 				Endif
 				DbSelectArea("SC2")
@@ -1216,28 +1282,41 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 		Else
 			DbSelectArea("SC2")
 			DbCloseArea()
-	   	   	cGet1Mnt:= PADR(cGet1Mnt,20,' ')
+	   	   	cGet1Mnt:= PADR(cGet1Mnt,42,' ')
 	   	   	//oGet1Mnt:SetFocus()
 			Return
 		Endif
     Endif
-    If lVencido 
+    
+	If lVencido 
 		Messagebox("Problemas na identificação do Lote ou / Produto fora de validade, bipe novamente este produto / confirme a data de validade !!!","Atenção...",48)
     	oGet1Mnt:SetFocus()
+		cGet1Mnt:= PADR(cGet1Mnt,42,' ')
+		oGet1Mnt:SetFocus()
     	lVencido := .f.
     	Return
     Endif
-    If nOpcMnt = 1
+    If BLQLOTE(cGet5Mnt)
+		Messagebox("Lote bloqueado pelo setor de qualidade, não é possível separar, Verifique !!","Atenção...",48)
+    	oGet1Mnt:SetFocus()
+		cGet1Mnt:= PADR(cGet1Mnt,42,' ')
+		oGet1Mnt:SetFocus()
+		If ChkFile("TCR")
+			DbSelectArea("TCR")
+			DbCloseArea()
+		Endif
+		Return()
+	EndIf	
+	If nOpcMnt = 1
 	    If lJabiPou 
 	    	If Alltrim(_CodProd) <> Alltrim(cGet1Mnt)
 	     		nGet7Mnt:=0
 	    		nVol 	:=0
-				cGet1Mnt:= PADR(cGet1Mnt,20,' ')
+				cGet1Mnt:= PADR(cGet1Mnt,42,' ')
 				oGet1Mnt:SetFocus()
 		  	Endif
 			Return
 	    Endif
-	
 		DbSelectArea("SB1")
 	    DbSetOrder(1)
 		DbSeek(xFilial("SB1")+cGet1Mnt, .t.)                                                         
@@ -1249,6 +1328,8 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 	                If !lCheck
 		                If Len(Alltrim(cCodBarra)) == 14 // etiquetas novas já trazem a relação de volumes 
 							nGet3Mnt := Val(Substr(Alltrim(cCodBarra),9,2))
+						//ElseIF Len(Alltrim(cCodBarra)) == 42
+						//	nGet3Mnt := Val(Substr(Alltrim(cCodBarra),21,6))							
 						Else
 		    	            cQry += " SELECT RELVOL = dbo.DetVol('"+xFilial("SB1")+"','"+Alltrim(cGet1Mnt)+"')"
   						    TCQuery cQry ALIAS "TCR" NEW
@@ -1269,6 +1350,7 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 								cSay3Env := "Capacidade Total do Pallet "+TransForm(nCapPallet,"@E 9999")
 							Endif
 						Endif
+	
 	            	   	oGet1Mnt:SetFocus()
 						nCapAntPal := nCapPallet
 						oSay3Env:Refresh()
@@ -1286,15 +1368,15 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 			        	    TMPITE->TMPSEQ := cGet2Mnt
 			            	TMPITE->TMPQTD := nGet3Mnt
 				            TMPITE->TMPINV := Inverte(TMPITE->TMPSEQ)
-				            cGet1Mnt 	   := Space(20)
-				            cGet1Mnt       := PADR(TMPITE->TMPPRO,20,' ')
+				            cGet1Mnt 	   := Space(42)
+				            cGet1Mnt       := PADR(TMPITE->TMPPRO,42,' ')
 					    MsUnLock()
 					Else
 	       	   			oGet3Mnt:SetFocus()
        	   			Endif
 				Else
         	     	oGet1Mnt:SetFocus()
-            	  	cGet1Mnt := space(20)
+            	  	cGet1Mnt := space(42)
                		oGet1Mnt:Refresh()
 	                cGet4Mnt := space(30)
     	            oGet4Mnt:Refresh()
@@ -1310,7 +1392,7 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 			Else
 	 			Messagebox("Produto bloqueado, verifique!!!","Atenção...",48)
    				oGet1Mnt:SetFocus()
-		     	cGet1Mnt := space(20)
+		     	cGet1Mnt := space(42)
 		      	oGet1Mnt:Refresh()
     		   	cGet4Mnt := space(30)
         		oGet4Mnt:Refresh()
@@ -1326,7 +1408,7 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 	 	Else
     		Messagebox("Código de barras não reconhecido, verifique!!!","Atenção...",48)
      		oGet1Mnt:SetFocus()
-	      	cGet1Mnt := space(20)
+	      	cGet1Mnt := space(42)
     	   	oGet1Mnt:Refresh()
         	cGet4Mnt := space(30)
 	        oGet4Mnt:Refresh()
@@ -1359,7 +1441,7 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 				nVolAtual 	:= (nVolAtual +1)
 				cSay6Mnt  	:= "DESMONTAGEM - VOL. BIPADOS..:  "+TransForm(nVolAtual, "@E 9999")
 			    _CodProd 	:= cGet1Mnt
-		    	cGet1Mnt    := PADR(cGet1Mnt,20,' ')
+		    	cGet1Mnt    := PADR(cGet1Mnt,42,' ')
 	   	       	oGet4Mnt:Refresh()
     	       	oGet2Mnt:Refresh()
 	       	   	oGet1Mnt:SetFocus()
@@ -1375,7 +1457,7 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 	        Else
     			Messagebox("Produto não encontrado neste Pallet, verifique!!!","Atenção...",48)
 	    		oGet1Mnt:SetFocus()                                     	
-			   	cGet1Mnt := space(20)
+			   	cGet1Mnt := space(42)
     			oGet1Mnt:Refresh()
 	        	cGet4Mnt := space(30)
 		        oGet4Mnt:Refresh()
@@ -1399,7 +1481,7 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
             Else
        			Messagebox("Produto / Lote não encontrado neste Pallet, verifique!!!","Atenção...",48)
 	    		oGet1Mnt:SetFocus()                                     	
-			   	cGet1Mnt := space(20)
+			   	cGet1Mnt := space(42)
     			oGet1Mnt:Refresh()
 	        	cGet4Mnt := space(30)
 		        oGet4Mnt:Refresh()
@@ -1578,6 +1660,20 @@ User Function fMaxSeq()
 Return(cMaxSeq)
 
 Static Function fNPal()
+
+	Local cQry1   := ""
+	//Local cQry2   := ""
+    Local nCodReg := ""
+    //Local cLocali := ""
+	//Local cNumIP  := GetClientIP()       
+	oCBox1Lo:Refresh()
+
+	If Empty(Alltrim(nCBox1Lo)) .and. alltrim(FWCodFil()) =='010101'
+		Messagebox("Informe o local onde o Pallet esta sendo montado (FAB-1 / FAB-2 / DEPOS) !!","Verifique...",48)		
+		oCBox1Lo:Setfocus()
+		Return
+	Endif
+
 	aDelete  := {}
 	lCheck   := .f.
 	cGet1Env := "NOVO PALLET"
@@ -1587,91 +1683,178 @@ Static Function fNPal()
 	If ChkFile("TMPCAB")
 		DbSelectArea("TMPCAB")
 		DbGoTop()
-	 	Zap
+		Zap
 	Endif
- 	If ChkFile("TMPITE")
+	If ChkFile("TMPITE")
 		DbSelectArea("TMPITE")
 		//DbGoTop()
 	 	//Zap
         //LGS#20191029 - Substituido comandoZAP devido a utilização de função do banco.
         TCSqlExec("DELETE FROM " + oTempTbl1:GetRealName() )
 	Endif 
+    If cGet1Env $ "NOVO PALLET"  
+       //Buscar o ultimo R_E_C_N_O_ para Inclusão
+		cQry1 += " SELECT MAX(R_E_C_N_O_) AS R_E_C_N_O_ "
+		cQry1 += " FROM  "+RetSqlName("ZZJ")+" WITH (NOLOCK) "
+
+		TCQUERY cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+		nCodReg := Str(TCQ->R_E_C_N_O_ + 1, 10)
+
+		DbSelectArea("TCQ")
+		DbCloseArea() 
+	/*
+       // Buscar Localização baseado no cadastro de IP do Antivirus
+		cQry2 += " SELECT Z11_LOCALI FROM "+RetSqlName("Z11")+" WITH(NOLOCK) "
+		cQry2 += " WHERE D_E_L_E_T_ ='' AND D_E_L_E_T_ ='' AND Z11_CODIGO IN('000006') AND Z11_IP ='"+Alltrim(cNumIP)+"'"
+
+		TCQUERY cQry2 ALIAS "TCR" NEW
+		DbSelectArea("TCR")
+		DbGoTop()
+		If !Eof()
+			cLocali := Alltrim(TCR->Z11_LOCALI)
+		Endif		       
+		DbSelectArea("TCR")
+		DbCloseArea()
+	*/
+		cQry1 := ""
+		cQry1 += " SELECT TOP 1 ZZJ.ZZJ_CODIGO "
+		cQry1 += " FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
+		cQry1 += " WHERE ZZJ.ZZJ_FILIAL = '"+xFilial("ZZJ")+"'"
+		cQry1 += "  AND ZZJ.ZZJ_DTINI  = '"+DTOS(Date())+"' "
+		cQry1 += " ORDER BY ZZJ.ZZJ_CODIGO DESC "
+
+		TCQUERY cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+
+		cCodSeq := Iif(Empty(TCQ->ZZJ_CODIGO), SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CODIGO, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CODIGO, 8, 4))+1, 4) )
+		cNomArq := SubStr(cCodSeq, 8, 4)
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		
+		
+		/*
+		cQry1 := ""
+		cQry1 += "INSERT INTO "+RetSqlName("ZZJ")+" (ZZJ_FILIAL,  ZZJ_CODIGO  ,  ZZJ_DTINI         , ZZJ_HINI                                       ,  R_E_C_N_O_ , ZZJ_FLAG,   ZZJ_USER, ZZJ_LOCALI      ) "
+		cQry1 += "                  VALUES('"+xFilial("ZZJ")+"', '"+cCodSeq+"',  '"+DTOS(Date())+"', '"+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+"', "+nCodReg+" ,  '1'    , '"+__cUserId+"' , '"+cLocali+"' ) "
+		XXX := TCSQLExec(cQry1)		
+		If XXX <> 0
+			cNomArq := 'C:\TEMP\ERR'+DTOS(MsDate())+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+'.ERR'
+			MemoWrit(cNomArq, cQry1)
+		Endif
+		*/
+		
+		DbSelectArea("ZZJ")
+		DbSetOrder(1)
+		DbSeek(xFilial("ZZJ")+cCodSeq, .t.)   
+		If !Found() 
+			Reclock("ZZJ",.t.)
+				ZZJ->ZZJ_FILIAL := xFilial("ZZJ")
+				ZZJ->ZZJ_CODIGO := cCodSeq
+				ZZJ->ZZJ_DTINI  := Date()
+				ZZJ->ZZJ_HINI   := SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)
+				ZZJ->ZZJ_FLAG   := '1'
+				ZZJ->ZZJ_USER   := __cUserId
+				ZZJ->ZZJ_LOCALI := nCBox1Lo
+			MsUnlock()
+		Endif
+		
+		DbSelectArea("ZZJ")
+		DbCloseArea()
+		/*	
+		If ChkFile("TMPITE")
+			DbSelectArea("TMPITE")
+			DbGoTop()
+			//Zap
+		Endif */
+
+	   //oBtn3Env:Disable()
+       cGet1Env := cCodSeq
+    Endif
+	oGet1Env:Refresh()
 	oBtn3Env:Disable()
 	oBrw1Env:oBrowse:GoTop()
 	oBrw1Env:oBrowse:Refresh()
 	ocBox1:Refresh()
+	oCBox1Lo:Refresh()
+	oCBox1Lo:Disable()
+	
+
+
 Return
 
 Static Function fGrvNPal() // Grava Numeração do Pallet Antes de Salvar
-       
+
 	Local cQry1   := ""
-	Local cQry2   := ""
+	//Local cQry2   := ""
     Local nCodReg := ""
-    Local cLocali := ""
-	Local cNumIP  := GetClientIP()       
+    //Local cLocali := ""
+	//Local cNumIP  := GetClientIP()       
     
     If cGet1Env $ "NOVO PALLET"  
-       //Buscar o ultimo R_E_C_N_O_ para Inclusão
-       cQry1 += " SELECT MAX(R_E_C_N_O_) AS R_E_C_N_O_ "
-       cQry1 += " FROM  "+RetSqlName("ZZJ")+" WITH (NOLOCK) "
+    	//Buscar o ultimo R_E_C_N_O_ para Inclusão
+		cQry1 += " SELECT MAX(R_E_C_N_O_) AS R_E_C_N_O_ "
+		cQry1 += " FROM  "+RetSqlName("ZZJ")+" WITH (NOLOCK) "
 
-       TCQUERY cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
-       nCodReg := Str(TCQ->R_E_C_N_O_ + 1, 10)
+		TCQUERY cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+		nCodReg := Str(TCQ->R_E_C_N_O_ + 1, 10)
 
-       DbSelectArea("TCQ")
-       DbCloseArea() 
-       
-       // Buscar Localização baseado no cadastro de IP do Antivirus
-       cQry2 += " SELECT Z11_LOCALI FROM "+RetSqlName("Z11")+" WITH(NOLOCK) "
-       cQry2 += " WHERE D_E_L_E_T_ ='' AND D_E_L_E_T_ ='' AND Z11_CODIGO IN('000006') AND Z11_IP ='"+Alltrim(cNumIP)+"'"
+		DbSelectArea("TCQ")
+		DbCloseArea() 
+		/*
+       	// Buscar Localização baseado no cadastro de IP do Antivirus
+		cQry2 += " SELECT Z11_LOCALI FROM "+RetSqlName("Z11")+" WITH(NOLOCK) "
+		cQry2 += " WHERE D_E_L_E_T_ ='' AND D_E_L_E_T_ ='' AND Z11_CODIGO IN('000006') AND Z11_IP ='"+Alltrim(cNumIP)+"'"
 
-       TCQUERY cQry2 ALIAS "TCR" NEW
-       DbSelectArea("TCR")
-       DbGoTop()
-	   If !Eof()
-	   	   cLocali := Alltrim(TCR->Z11_LOCALI)
-	   Endif		       
-       DbSelectArea("TCR")
-       DbCloseArea()
+		TCQUERY cQry2 ALIAS "TCR" NEW
+		DbSelectArea("TCR")
+		DbGoTop()
+		If !Eof()
+			cLocali := Alltrim(TCR->Z11_LOCALI)
+		Endif		       
+		DbSelectArea("TCR")
+		DbCloseArea()
+		*/
+		cQry1 := ""
+		cQry1 += " SELECT TOP 1 ZZJ.ZZJ_CODIGO "
+		cQry1 += " FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
+		cQry1 += " WHERE ZZJ.ZZJ_FILIAL = '"+xFilial("ZZJ")+"'"
+       	//cQry1 += "  AND ZZJ.D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZZJ.ZZJ_DTINI  = '"+DTOS(Date())+"' "
+		cQry1 += " ORDER BY ZZJ.ZZJ_CODIGO DESC "
 
-	   cQry1 := ""
-       cQry1 += " SELECT TOP 1 ZZJ.ZZJ_CODIGO "
-       cQry1 += " FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
-       cQry1 += " WHERE ZZJ.ZZJ_FILIAL = '"+xFilial("ZZJ")+"'"
-       //cQry1 += "  AND ZZJ.D_E_L_E_T_ = '' "
-       cQry1 += "  AND ZZJ.ZZJ_DTINI  = '"+DTOS(Date())+"' "
-       cQry1 += " ORDER BY ZZJ.ZZJ_CODIGO DESC "
+		TCQUERY cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
 
-       TCQUERY cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
+		cCodSeq := Iif(Empty(TCQ->ZZJ_CODIGO), SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CODIGO, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CODIGO, 8, 4))+1, 4) )
+		cNomArq := SubStr(cCodSeq, 8, 4)
+		DbSelectArea("TCQ")
+		DbCloseArea()
 
-	   cCodSeq := Iif(Empty(TCQ->ZZJ_CODIGO), SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CODIGO, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CODIGO, 8, 4))+1, 4) )
-       cNomArq := SubStr(cCodSeq, 8, 4)
-       DbSelectArea("TCQ")
-       DbCloseArea()
-       
-       cQry1 := ""
-       cQry1 += "INSERT INTO "+RetSqlName("ZZJ")+" (ZZJ_FILIAL,  ZZJ_CODIGO  ,  ZZJ_DTINI         , ZZJ_HINI                                       ,  R_E_C_N_O_ , ZZJ_FLAG,   ZZJ_USER, ZZJ_LOCALI      ) "
-       cQry1 += "                  VALUES('"+xFilial("ZZJ")+"', '"+cCodSeq+"',  '"+DTOS(Date())+"', '"+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+"', "+nCodReg+" ,  '1'    , '"+__cUserId+"' , '"+cLocali+"' ) "
-	   XXX := TCSQLExec(cQry1)		
-       If XXX <> 0
-       	   cNomArq := 'C:\TEMP\ERR'+DTOS(MsDate())+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+'.ERR'
-           MemoWrit(cNomArq, cQry1)
-       Endif
-	   /*	
-       If ChkFile("TMPITE")
-		   DbSelectArea("TMPITE")
-		   DbGoTop()
+		cQry1 := ""
+		cQry1 += "INSERT INTO "+RetSqlName("ZZJ")+" (ZZJ_FILIAL,  ZZJ_CODIGO  ,  ZZJ_DTINI         , ZZJ_HINI                                       ,  R_E_C_N_O_ , ZZJ_FLAG,   ZZJ_USER, ZZJ_LOCALI      ) "
+		cQry1 += "                  VALUES('"+xFilial("ZZJ")+"', '"+cCodSeq+"',  '"+DTOS(Date())+"', '"+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+"', "+nCodReg+" ,  '1'    , '"+__cUserId+"' , '"+nCBox1Lo+"' ) "
+		XXX := TCSQLExec(cQry1)		
+		If XXX <> 0
+			cNomArq := 'C:\TEMP\ERR'+DTOS(MsDate())+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+'.ERR'
+			MemoWrit(cNomArq, cQry1)
+		Endif
+		/*	
+		If ChkFile("TMPITE")
+			DbSelectArea("TMPITE")
+			DbGoTop()
 	   	   //Zap
-	   Endif */
-	   
-	   //oBtn3Env:Disable()
-       cGet1Env := cCodSeq
+	   	Endif */
+
+	   	//oBtn3Env:Disable()
+		cGet1Env := cCodSeq
     Endif
-       
+
 Return()
 
 
@@ -1726,11 +1909,37 @@ Static Function fVerCPall(_cProduto)
     TCQUERY cQry ALIAS "TCQ" NEW
     DbSelectArea("TCQ")
     DbGoTop()	 
-    If !Eof() .and. !Bof()
-    	nCapacidade := Val( TCQ->X5_DESCRI ) 
+  	If !Eof() .and. !Bof()
+    	nCapacidade := Val(TCQ->X5_DESCRI)
     Endif
     DbSelectArea("TCQ")
     DbCloseArea()
           
 Return(nCapacidade)
 
+/*/
+{Protheus.doc} BLQLOTE
+(long_description)
+@type  Function
+@author Nelieder Corneta
+@since 20/07/2023
+@param cLote
+@return return
+/*/
+Static Function BLQLOTE(cLote)
+Local cReturn := .F.
+
+If _ZPPAR0118 // Bloqueio de lote = .T.
+
+	DbSelectArea("ZAE")
+	DbSetOrder(2)
+	If DbSeek(xFilial("ZAE")+cLote)
+		If ZAE->ZAE_TIPO == "1"
+			//Messagebox("Não é possível separar este produto pois o lote esta bloqueado, verifique !!","Atenção...",48)   
+			cReturn := .T.
+		EndIf 
+	EndIf
+
+EndIf	
+
+Return cReturn

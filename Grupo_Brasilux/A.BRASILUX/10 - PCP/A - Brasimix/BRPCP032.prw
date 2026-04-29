@@ -18,8 +18,23 @@
 User Function BRPCP032 (cPedido,cProduto)
 //User Function BRPCP032()
 
-//Local cPedido	:= '541683'
-//Local cProduto	:= 'BT 260901514'
+//Local cPedido
+//Local cProduto
+
+//cPedido	  := '779267'
+//cProduto  := 'PM 172338703'
+
+
+	if EMPTY(cPedido)
+		Messagebox("Variavel Pedido fora do padrão, informar ao T.I !","Atenção...",48) 
+		return()
+	endif
+
+
+	if !isdigit(cPedido)
+		Messagebox("Variavel Pedido fora do padrão, informar ao T.I !","Atenção...",48) 
+		return()
+	endif
 
 	//u_zcfga01("BRPCP032")
 	MsAguarde({|| Imprimir(cPedido,cProduto) },"Impressão de etiqueta","Aguarde...")
@@ -37,13 +52,11 @@ Local cCod		:= ''
 Local cEspe		:= ''
 Local qLib		:= ''
 Local qtdevol	:= ''
+Local TMP 		:= GetNextAlias()
 
 
 
-
-
-
-	cQuery := "SELECT DISTINCT C6_NUM AS C9_PEDIDO,C6_CLI AS C9_CLIENTE,SC5.C5_VOLUME1, "
+	/*cQuery := "SELECT DISTINCT C6_NUM AS C9_PEDIDO,C6_CLI AS C9_CLIENTE,SC5.C5_VOLUME1, "
     cQuery += " ISNULL(ZG_LOCALIZ,'') AS ZG_LOCALIZ,"
     cQuery += " dbo.DetVol(C6_FILIAL,C6_PRODUTO) AS RELVOL,C6_PRODUTO AS C9_PRODUTO, "
     cQuery += " C6_QTDVEN AS C9_QTDLIB,EMBA2 = CASE WHEN LEN(C6_PRODUTO) = 12 THEN SUBSTRING(C6_PRODUTO,11,2) ELSE '' END,"
@@ -70,48 +83,96 @@ Local qtdevol	:= ''
         DbCloseArea()
     ENDIF     
 
-
 	TcQuery cQuery New Alias "TMP"
 	
 	Count To nTotal
 
+	TMP->(DbGoTop())*/
+
+
+	BeginSQL Alias TMP
+
+	SELECT DISTINCT C6_NUM AS C9_PEDIDO,C6_CLI AS C9_CLIENTE,SC5.C5_VOLUME1,  ISNULL(ZG_LOCALIZ,'') AS ZG_LOCALIZ, 
+	C6_PRODUTO AS C9_PRODUTO,  C6_QTDVEN AS C9_QTDLIB,
+	EMBA2 = 
+	CASE 
+	WHEN LEN(C6_PRODUTO) = 12 THEN SUBSTRING(C6_PRODUTO,11,2) 
+	ELSE '' 
+	END, 
+
+	ISNULL(B2_LOCALIZ,'') AS B2_LOCALIZ,ISNULL(Z1_VOLJUNT,'S') AS Z1_VOLJUNT, 
+	ISNULL(A1_NOME,'') AS A1_NOME,ISNULL(A1_MUN,'') AS A1_MUN,ISNULL(A1_EST,'') AS A1_EST, 
+	ISNULL(A2_NOME,'') AS A2_NOME,ISNULL(A2_MUN,'') AS A2_MUN,ISNULL(A2_EST,'') AS A2_EST, 
+	A4_NOME,A4_REGIAO,CODANT = '',C5_VOLUME1 AS QTDEVOL  FROM %Table:SC6% SC6 
+
+	LEFT OUTER JOIN %Table:SC5% SC5 ON (SC5.D_E_L_E_T_ <> '*') AND (C5_FILIAL = C6_FILIAL) AND (C5_NUM = C6_NUM)  
+	LEFT OUTER JOIN %Table:SA4% SA4 ON (SC5.C5_REDESP = A4_COD) AND (SA4.D_E_L_E_T_ <> '*')  
+	LEFT OUTER JOIN %Table:SB2% SB2 ON (SB2.D_E_L_E_T_ <> '*') AND (B2_FILIAL = C6_FILIAL) AND (B2_COD = C6_PRODUTO) AND (B2_LOCAL = C6_LOCAL)  
+	LEFT OUTER JOIN %Table:SA1% SA1 ON (SA1.D_E_L_E_T_ <> '*') AND (C5_TIPO NOT IN ('D','B')) AND (A1_COD = C6_CLI)  
+	LEFT OUTER JOIN %Table:SA2% SA2 ON (SA2.D_E_L_E_T_ <> '*') AND (C5_TIPO IN ('D','B')) AND (A2_COD = C6_CLI)  
+	LEFT OUTER JOIN %Table:SZ1% SZ1 ON (SZ1.D_E_L_E_T_ <> '*') AND (LEN(C6_PRODUTO) = 12) AND (Z1_FILIAL = SUBSTRING(C6_FILIAL,1,2)) 
+	AND (Z1_LINHA = SUBSTRING(C6_PRODUTO,4,2))  
+
+	LEFT OUTER JOIN %Table:SZG% SZG  ON (SZG.D_E_L_E_T_ <> '*') AND (ZG_FILIAL = C6_FILIAL) 
+	AND (C6_NUM = RIGHT(ZG_PEDIDO,6))  WHERE (SC6.D_E_L_E_T_ <> '*')  AND (C6_FILIAL = %xfilial:SC6%)  
+	AND (C6_NUM = %exp:cPedido%)  AND (C6_PRODUTO = %exp:cProduto%)  
+	ORDER BY B2_LOCALIZ,C9_PRODUTO,C9_PEDIDO 
+
+	EndSQL
+
+	/*TcQuery cQuery New Alias "TMP"*/
+	
+	/*Count To nTotal
+
 	TMP->(DbGoTop())
+
+
+
 
 	if nTotal == 0
 		MsgStop('Etiqueta não localizada', 'Etique Volume')
 		return()
-	endif
+	endif*/
 
-	While TMP->(!Eof())
+	//While TMP->(!Eof())
+	While (TMP)->( !Eof() )
 
-		cCod = Alltrim(TMP->C9_PRODUTO)
+		cCod = Alltrim((TMP)->C9_PRODUTO)
 		
-		qtdevol = TMP->QTDEVOL
-		qLib = TMP->C9_QTDLIB
+		qtdevol = (TMP)->QTDEVOL
+		qLib = (TMP)->C9_QTDLIB
+
+		/* incluido em 04/03/2022 */
+		if ValidPort(cPorta) 
+			MsgInfo("Impressora Zebra (Etiqueta) nao esta pronta, Verifique a  Porta selecionada !")
+			Return()
+		Endi
+		
 
 		// Formata codigo do produto
-		cCod = TRANSFORM(cCod, "@R XX 99.99.999-99") 
+		cCod = TRANSFORM(cCod, "@R XX 99.99.999-XX") 
 		MSCBPRINTER(cModelo, cPorta,,12,.F.,,,,,,.F.,)
 		MSCBCHKSTATUS(.F.)
-		MSCBBEGIN(1,6)
+		MSCBBEGIN(1)
 
-		if Empty(TMP->B2_LOCALIZ)
+		if Empty((TMP)->B2_LOCALIZ)
 			cEspe = '*'
 		else
 			cEspe = ''
 		endif			
 
 		
+		
 		/* Pedido e Codigo do Produto */
 		MSCBSAY(03,04,"PEDIDO:","N","A","015,008")
-		MSCBSAY(14,03.5,Alltrim(TMP->C9_PEDIDO), "N", "0", "030,040") // negrito
+		MSCBSAY(14,03.5,Alltrim((TMP)->C9_PEDIDO), "N", "0", "030,040") // negrito
 		MSCBSAY(31,04,cEspe+cCod+"("+cValToChar(qLib)+"/"+cValToChar(qtdevol)+")", "N","0","020,028")
   	    MSCBLineH(00,7,190,3,'B')
 		
 
 		/* Nome do Cliente  */
 
-		cCliente = Alltrim(TMP->A1_NOME)
+		cCliente = Alltrim((TMP)->A1_NOME)
 		//cCliente = 'FIGUEIRA E SOARES COMERCIO DE TINTAS LTD'
 
 		MSCBSAY(03,09,cCliente, "N", "0", "020,026") // negrito
@@ -119,24 +180,41 @@ Local qtdevol	:= ''
 
 		/* Cidade */
 		MSCBSAY(03,14,"Cidade: ","N","A","015,008") // negrito
-		MSCBSAY(13,14,Alltrim(TMP->A1_MUN)+"-"+Alltrim(TMP->A1_EST), "N", "0", "020,030")
+		MSCBSAY(13,14,Alltrim((TMP)->A1_MUN)+"-"+Alltrim((TMP)->A1_EST), "N", "0", "020,030")
 		MSCBLineH(00,17,190,3,'B')
 
 		/* Transportadora */
 		MSCBSAY(03,19,"REDESP: ","N","A","015,008")
-		MSCBSAY(13,19,Alltrim(TMP->A4_NOME), "N", "0", "020,025")
+		MSCBSAY(13,19,Alltrim((TMP)->A4_NOME), "N", "0", "020,025")
 		MSCBLineH(00,22,190,3,'B')
 
 		/* volume */
 		MSCBSAY(03,24,"Q VOL.: ","N","A","015,008")
-		MSCBSAY(14,23.5,Alltrim(STR(TMP->QTDEVOL))+" L.: ", "N", "0", "030,040") // negrito
+		MSCBSAY(14,23.5,Alltrim(STR((TMP)->QTDEVOL))+" L.: ", "N", "0", "030,040") // negrito
 		MSCBLineH(00,27,190,3,'B')
 
-		MSCBSAY(02,30,"Q:"+Alltrim(TMP->ZG_LOCALIZ),  "N", "0","40,70") // negrito
+		MSCBSAY(02,30,"Q:"+Alltrim((TMP)->ZG_LOCALIZ),  "N", "0","40,70") // negrito
 		MSCBEND()
 
 		MSCBCLOSEPRINTER()
-		TMP->(DbSkip())
+		(TMP)->(DbSkip())
 	EndDo
 
 return
+
+
+/*/{Protheus.doc} ValidPort
+Função que Verifica se impressora está disponível
+@type function
+@author neliedercorneta
+@since 12/01/2022
+/*/
+Static function ValidPort(cLPT)
+local retorno := .F.
+
+	if !IsPrinter(cLPT)
+		  retorno := .T.
+	endif  
+
+
+return(retorno)

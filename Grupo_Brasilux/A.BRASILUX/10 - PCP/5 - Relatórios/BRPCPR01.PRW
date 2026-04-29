@@ -1,6 +1,7 @@
 #include 'rwmake.ch'
 #include "topconn.ch"
 #include "avprint.ch"
+
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±                                                             
@@ -33,8 +34,11 @@ User Function BRPCPR01()
      Private cPerg := "PCPR01"
      Private nLin  := 30
      Private nCol  := 30
-     Private nLinMax := 2920
+     Private nLinMax := 2920 
      Private nColMax := 2350
+     
+     Private _cPula  := 1 // Jose 11/08/2023
+
      u_zcfga01( 'BRPCPR01' ) //LGS#2021201 - Gravação de log de utilização da rotina
      //                     NOME DA FONTE             NEG ESP          ITA    
      oFont1 := TFont():New("Courier New"        , 9, 19, .F., .F.,  5, .F., 5, .F., .F.)
@@ -82,7 +86,8 @@ Static Function PCPR01_2()
        Local _cMVLINHAE := GETMV("MV_LINHAEX") //LGS#20200207 - Adequação de release 12.1.25 e posteriores
        Local _cMVLINHAI := GETMV("MV_LINHAIN") //LGS#20200207 - Adequação de release 12.1.25 e posteriores
        Local _cMVQTDINS := GETMV("MV_QTDINSP") //LGS#20200207 - Adequação de release 12.1.25 e posteriores
-       
+     
+       Private _DATPRF := 0 /// Jose 12/11/2024       
        Private nCmt  := 2.0
        ProcRegua(Val(SubStr(mv_par04, 1, 6)) - Val(SubStr(mv_par03, 1, 6)))
        oPrn:= TMSPrinter():New( "Impressão de Ordens de Produção." )
@@ -115,6 +120,9 @@ Static Function PCPR01_2()
                           Endif
                           _NumOrd := TCQ->C2_NUM+TCQ->C2_ITEM+TCQ->C2_SEQUEN
                           _DatEmi := CTOD(SubStr(TCQ->C2_EMISSAO, 7, 2)+"/"+SubStr(TCQ->C2_EMISSAO, 5, 2)+"/"+SUBSTR(TCQ->C2_EMISSAO, 1, 4))
+                          //  Jose 12/11/2024   acrecentado
+                          _DATPRF := CTOD(SubStr(TCQ->C2_DATPRF, 7, 2)+"/"+SubStr(TCQ->C2_DATPRF, 5, 2)+"/"+SUBSTR(TCQ->C2_DATPRF, 1, 4))
+                          //  Jose 12/11/2024   até aqui 
                           _CodRot := TCQ->C2_ROTEIRO
                           _QtdSol := TCQ->C2_QUANT
                           _ObsOrd := TCQ->C2_OBS
@@ -154,10 +162,10 @@ Static Function PCPR01_2()
                              oPrn:Say(nLin, nCol, 'PESAGEM     [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
                              nLin += 080
                              If Len(alltrim(TCQ->C2_PRODUTO)) < 12
-								oPrn:Say(nLin, nCol, 'BOMBEAMENTO [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
-                             	nLin += 080                                                          
-							 	oPrn:Say(nLin, nCol, 'CONFERENTE  [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
-                             	nLin += 080
+								     oPrn:Say(nLin, nCol, 'BOMBEAMENTO [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
+                             nLin += 080                                                          
+							 	     oPrn:Say(nLin, nCol, 'CONFERENTE  [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
+                             nLin += 080
                              EndIf
                              nLin += 080
                              If nLin >= nLinMax
@@ -185,12 +193,16 @@ Static Function PCPR01_2()
                                    Endif
                                 Endif
                                 nLin += 110
+                                // jOSE 12/11/2024 ACRESCENTADO
+                                oPrn:Say(nLin, nCol + 0030, "EMISSÃO: "                                              , oFont2, , , , )
+                                oPrn:Say(nLin, nCol + 0280, DTOC(_DatEmi)                                            , oFont2, , , , )
+                                // jOSE 12/11/2024 ATÉ AQUI
                                 oPrn:Say(nLin   , nCol + 0750, Iif(Len(Alltrim(TCQ->C2_PRODUTO)) == 12, Transform(TCQ->C2_PRODUTO, "@R XX 99.99.999-99"), TCQ->C2_PRODUTO), oFont3, , , , )
                                 oPrn:Say(nLin   , nCol + 1600, "QTDE. SOL.:"                                         , oFont2, , , , )
                                 oPrn:Say(nLin   , nCol + 2000, Transform(_QtdSol, "@E 99999.99")                     , oFont3, , , , )
                                 nLin += 60
-                                oPrn:Say(nLin, nCol + 0030, "EMISSÃO: "                                              , oFont2, , , , )
-                                oPrn:Say(nLin, nCol + 0280, DTOC(_DatEmi)                                            , oFont2, , , , )
+                                oPrn:Say(nLin, nCol + 0030, "ENTREGA: "                                              , oFont2, , , , ) // jOSE 12/11/2024 ANTES "EMISSÃO: "
+                                oPrn:Say(nLin, nCol + 0280, DTOC(_DATPRF)                                            , oFont2, , , , ) // jOSE 12/11/2024 ANTES  DTOC(_DatEmi)
                                 oPrn:Say(nLin, nCol + 0750, SubStr(Alltrim(_DesPro), 1, 25)                          , oFont3, , , , )
                                 oPrn:Say(nLin, nCol + 1600, SubStr(Iif(!Empty(_DesLin), Alltrim(_DesLin), ''), 1, 24), oFont2, , , , )
                                 nLin += 60
@@ -217,10 +229,10 @@ Static Function PCPR01_2()
                              oPrn:Say(nLin, nCol, 'PESAGEM     [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
                              nLin += 080   
                              If Len(alltrim(TCQ->C2_PRODUTO)) < 12
-								oPrn:Say(nLin, nCol, 'BOMBEAMENTO [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
-                             	nLin += 080                                                          
-							 	oPrn:Say(nLin, nCol, 'CONFERENTE  [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
-                             	nLin += 080
+								     oPrn:Say(nLin, nCol, 'BOMBEAMENTO [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
+                             nLin += 080                                                          
+							 	     oPrn:Say(nLin, nCol, 'CONFERENTE  [ ]LIBERADA / [ ]NÃO LIBER. - RESP.:  __________________ Hr:__:__', oFont2, , , , )
+                             nLin += 080
                              EndIf
                           Endif
                           aInfPro := fQtdPas(TCQ->C2_PRODUTO)
@@ -535,7 +547,7 @@ Static Function PCPR01_B(_CodCat, _DatEmi, _QtdSol, _DesPro, _DesLin, cFlagIm, a
          nLin := 30
          oPrn:Box(nLin, nCol      , nlin * nVez    , nColMax)
          _DatIni := SubStr(TESP->DTINI, 7, 2)+'/'+SubStr(TESP->DTINI, 5, 2)+'/'+SubStr(TESP->DTINI, 1, 4)
- 		 _CodEan := TCQ->C2_NUM+TCQ->C2_ITEM+TCQ->C2_SEQUEN+'0' //Iif(cNumEmp $ '0104' .and. SubStr(TCQ->C2_NUM, 1, 1) < '1', '1'+SubStr(TCQ->C2_NUM, 2, 5)+TCQ->C2_ITEM+TCQ->C2_SEQUEN+'0', TCQ->C2_NUM+TCQ->C2_ITEM+TCQ->C2_SEQUEN+'0')
+ 		   _CodEan := TCQ->C2_NUM+TCQ->C2_ITEM+TCQ->C2_SEQUEN+'0' //Iif(cNumEmp $ '0104' .and. SubStr(TCQ->C2_NUM, 1, 1) < '1', '1'+SubStr(TCQ->C2_NUM, 2, 5)+TCQ->C2_ITEM+TCQ->C2_SEQUEN+'0', TCQ->C2_NUM+TCQ->C2_ITEM+TCQ->C2_SEQUEN+'0')
          oPrn:Say(nLin, nCol + 800, "FICHA DE INSPEÇÃO", oFont1,,,,)
 		 If substr(cNumEmp,1,2) != '05' // substr(cNumEmp,1,4) $ '0101'
           //MSBAR ("EAN13",  1,  2.5 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL,    Nil, 1, NIL, NIL, NIL, .f.)
@@ -598,8 +610,8 @@ Static Function PCPR01_9(nOpc, _NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor)
           oPrn:Say(nLin, nCol + 0900, "CONTROLE ", oFont1,,,,)
           oPrn:Say(nLin, nCol +1850, "Hora..:"+Time(), oFont4,,,,)
 			If substr(cNumEmp,1,2) != "05" //substr(cNumEmp,1,4) $ '0101'
-	          MSBAR("CODE128",  nCmt-1.25,  1 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
-	  		Endif
+	          MSBAR("CODE128",  nCmt-1.25, 1 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)  
+ 	  		Endif
        Endif
        nLin += 60
        nCmt += 0.5
@@ -615,13 +627,17 @@ Static Function PCPR01_9(nOpc, _NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor)
           oPrn:Say(nLin, nCol + 0900, "CONTROLE ", oFont1,,,,)
           nLin += 90
           nCmt += 0.25
+          // Jose 12/11/2024 acrescentado
+          oPrn:Say(nLin   , nCol + 1800, "EMISSÃO:"                                        , oFont2, , , , ) // Jose 12/11/2024 nCol + 1800, 
+          oPrn:Say(nLin   , nCol + 2050, DTOC(_DatEmi)                                     , oFont2, , , , )
+          // Jose 12/11/2024  até aqui
           oPrn:Say(nLin, nCol + 0750, Transform(TCQ->C2_PRODUTO, "@R XX 99.99.999-99")  , oFont3, , , , )
-          oPrn:Say(nLin, nCol + 1850, "Hora..:"+Time(), oFont4,,,,)
+          oPrn:Say(nLin, nCol + 1400, "Hora..:"+Time(), oFont4,,,,) // Jose 12/11/2024 nCol + 1850,
           nLin += 60
           oPrn:Say(nLin   , nCol + 0750, SubStr(Alltrim(_DesPro), 1, 25)                   , oFont3, , , , )
        Endif
-       oPrn:Say(nLin   , nCol + 1800, "EMISSÃO:"                                        , oFont2, , , , )
-       oPrn:Say(nLin   , nCol + 2050, DTOC(_DatEmi)                                     , oFont2, , , , )
+       oPrn:Say(nLin   , nCol + 1800, "ENTREGA:"                                        , oFont2, , , , ) // Jose 12/11/2024 "EMISSÃO:"  
+       oPrn:Say(nLin   , nCol + 2050, DTOC(_DATPRF)                                     , oFont2, , , , ) // Jose 12/11/2024 DTOC(_DatEmi) 
        If nOpc == 2
           oPrn:Say(nLin, nCol + 0200, 'O.P.: '+SubStr(_NumOrd, 1, 6), oFont4, , , , )
        Endif
@@ -659,7 +675,7 @@ Static Function PCPR01_9(nOpc, _NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor)
 	   Endif	
        nLin += 60
        oPrn:Line(nLin, nCol      , nlin, nColMax)
-       oPrn:Say(nLin, nCol + 0030, "EMBALAGEM     R.VOL    DESCRICAO EMBALAGEM      QTD.EMBAL LOCALIZ.   NUM.OP", oFont2, , , , )
+       oPrn:Say(nLin, nCol + 0030, "EMBALAGEM     R.VOL    DESCRICAO EMBALAGEM      QTD.EMBAL ESTOQUE.   NUM.OP", oFont2, , , , )
 //     oPrn:Say(nLin, nCol + 0030, "   EMBALAGEM        DESCRICAO EMBALAGEM        QTDE. EMBAL  LOCALIZ.   NUM.OP", oFont2, , , , )
        nLin += 60
        oPrn:Line(nLin, nCol      , nlin, nColMax)
@@ -669,7 +685,7 @@ Static Function PCPR01_9(nOpc, _NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor)
              nCmt += 0.5
           Endif
           If substr(cNumEmp,1,2) != '05'//substr(cNumEmp,1,4) $ '0101'
-             MSBAR("CODE128",  nCmt-2.2,  1 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
+             MSBAR("CODE128",  nCmt-2.2, 1, _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.) 
                             //     -2.7
           Else
              //MSBAR("CODE128",  1,  2.5 , _CodEan, oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
@@ -688,14 +704,16 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
        Local aEmbal  := {}
        Local nAEmbal := 0
        Local nPesPadr:= 0 
-       //Local cGrpEmb := ""
-       //Local cAuxGrp := ""
+
+       Local nIndex  :=0 // Jose 23/04/2025
+     //Local cGrpEmb := ""
+     //Local cAuxGrp := ""
        Local nPos    := 0
-       //Local lAchou := .f.
+     //Local lAchou := .f.
        Local nZ, nY, nX
        Local cGrpEmb := Alltrim(GETMV("MV_GRPEMB"))
        Local _cMVGRTAMP := GETMV("MV_GRTAMPA") //LGS#20200207 - Adequação de release 12.1.25 e posteriores
-/*       While Len(cGrpEmb) > 0
+/*     While Len(cGrpEmb) > 0
              cAuxGrp += SubStr(cGrpEmb, 1, 4)+"."
              If SubStr(cGrpEmb, 5, 1) $ '.'
                 cGrpEmb := SubStr(cGrpEmb, 6, Len(cGrpEmb))
@@ -720,8 +738,12 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
        nLin := 30
        nCol := 30
        If !Empty(TCQ->C2_LOTE) .and. Len(Alltrim(TCQ->C2_PRODUTO)) == 12
-          cQry1 += "SELECT C2_FILIAL,C2_PRODUTO,C2_QUANT,C2_NUM,C2_ITEM,C2_SEQUEN,C2_PEDIDO,C2_LOTE, C2_ITEMPV "
+          cQry1 += "SELECT C2_FILIAL,C2_PRODUTO,C2_QUANT,C2_NUM,C2_ITEM,C2_SEQUEN,C2_PEDIDO,C2_LOTE, C2_ITEMPV,B1_ESTOQUE ESTOQUE "
           cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
+
+          /* incluido por nelieder em 14/07/2022 */
+          cQry1 += "INNER JOIN "+RetSqlName("SB1")+" B1 WITH (NOLOCK) ON B1_COD = C2_PRODUTO AND B1_FILIAL = C2_FILIAL AND B1.D_E_L_E_T_ = '' "
+
           cQry1 += "WHERE SC2.C2_FILIAL  = '"+xFilial("SC2")+"' "
           cQry1 += "  AND SC2.D_E_L_E_T_ = '' "
           cQry1 += "  AND SC2.C2_LOTE    = '"+TCQ->C2_LOTE+"' "
@@ -741,15 +763,16 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                    		dbsetorder(1)
                    		dbseek(xFilial("SB1")+SG1->G1_COMP,.f.)
                    		If found()
-                         	If Len(Alltrim(SG1->G1_COMP)) == 4 .OR. Len(Alltrim(SG1->G1_COMP)) == 5
+                                    	If Len(Alltrim(SG1->G1_COMP)) == 4 .OR. Len(Alltrim(SG1->G1_COMP)) == 5
                             	If Alltrim(SB1->B1_GRUPO) $ cGrpEmb //Alltrim(SG1->G1_COMP) >= '0500' .and. Alltrim(SG1->G1_COMP) <= '0599'
                                		aadd(aEmbal , {SG1->G1_COMP, SB1->B1_DESC, SubStr(TENV->C2_PRODUTO, 11, 2), ((Posicione("SZ5", 1, xFilial("SZ5")+SubStr(TENV->C2_PRODUTO, 11, 2), "Z5_VOLUME") * nQtdPas) * _PesEsp) })
-                               		aadd(aEmbala, { SubStr(TENV->C2_PRODUTO, 11, 2), SG1->G1_COMP, SB1->B1_DESC, SG1->G1_QUANT, TENV->C2_QUANT, SG1->G1_QUANT*TENV->C2_QUANT, ' ', ' ', 2, TENV->C2_PRODUTO, TENV->C2_NUM+TENV->C2_ITEM+TENV->C2_SEQUEN, SubStr(TENV->C2_PRODUTO, 11, 2), '', '' })
+                                    aadd(aEmbala, { SubStr(TENV->C2_PRODUTO, 11, 2), SG1->G1_COMP, SB1->B1_DESC, SG1->G1_QUANT, TENV->C2_QUANT, SG1->G1_QUANT*TENV->C2_QUANT,'', ' ', 2, TENV->C2_PRODUTO, TENV->C2_NUM+TENV->C2_ITEM+TENV->C2_SEQUEN, SubStr(TENV->C2_PRODUTO, 11, 2), '', '',TENV->ESTOQUE })
                             	Else
                                		If !(Alltrim(SB1->B1_GRUPO) $ 'E400')
-                                  		aadd(aEmbala, { '  ', SG1->G1_COMP, iif((cNumEmp = "01010101") .AND. (SUBSTR(SB1->B1_GRUPO,1,1) != "E"),"",SB1->B1_DESC), SG1->G1_QUANT, TENV->C2_QUANT, SG1->G1_QUANT*TENV->C2_QUANT, ' ', ' ', 2, TENV->C2_PRODUTO, TENV->C2_NUM+TENV->C2_ITEM+TENV->C2_SEQUEN, SubStr(TENV->C2_PRODUTO, 11, 2), '', '' })
+//                                		aadd(aEmbala, { '  ', SG1->G1_COMP, iif((cNumEmp = "01010101") .AND. (SUBSTR(SB1->B1_GRUPO,1,1) != "E"),"",SB1->B1_DESC), SG1->G1_QUANT, TENV->C2_QUANT, SG1->G1_QUANT*TENV->C2_QUANT, '', ' ', 2, TENV->C2_PRODUTO, TENV->C2_NUM+TENV->C2_ITEM+TENV->C2_SEQUEN, SubStr(TENV->C2_PRODUTO, 11, 2), '', '',TENV->ESTOQUE }) // Jose 22/04/2025
+                                  		aadd(aEmbala, { ' ', SG1->G1_COMP, iif((cNumEmp = "01010101") .AND. (SUBSTR(SB1->B1_GRUPO,1,1) != "E"),"",SB1->B1_DESC), SG1->G1_QUANT, TENV->C2_QUANT, SG1->G1_QUANT*TENV->C2_QUANT, '', ' ', 2, TENV->C2_PRODUTO, TENV->C2_NUM+TENV->C2_ITEM+TENV->C2_SEQUEN, SubStr(TENV->C2_PRODUTO, 11, 2), '', '',TENV->ESTOQUE }) // 22/04/2025
                               	 	Endif
-                            	Endif
+                           	Endif
                          	Endif           
                      	endif 
                       	DbSelectArea("SG1")
@@ -790,8 +813,8 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                   Endif
               Next
               If nPos <> 0
-                 aEmbala[nPos][7] := Posicione("SB2", 1, xFilial("SB2")+aEmbala[nPos][10]+Posicione("SB1",1,xFilial("SB1")+aEmbala[nPos][10],"B1_LOCPAD"), "B2_LOCALIZ")
-                 aEmbala[nPos][8] := Posicione("SC2", 6, xFilial("SC2")+aEmbala[nPos][11]+aEmbala[nPos][10], "C2_NUM")
+                aEmbala[nPos][7] := Posicione("SB2", 1, xFilial("SB2")+aEmbala[nPos][10]+Posicione("SB1",1,xFilial("SB1")+aEmbala[nPos][10],"B1_LOCPAD"), "B2_LOCALIZ")
+                aEmbala[nPos][8] := Posicione("SC2", 6, xFilial("SC2")+aEmbala[nPos][11]+aEmbala[nPos][10], "C2_NUM")
               Endif
               nPos := 0
           Next
@@ -817,7 +840,7 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                  oPrn:Say(nLin, nCol, cMsgPDC, oFont2, , , , )
                  nLin += 50
                  oPrn:Say(nLin, nCol, '*******************************************************************************', oFont2, , , , )
- 				 // ALTERAÇÃO ATENDENDO PLANO DE AÇÃO 00000000013/2011        em 06-12-11
+ 		  		  // ALTERAÇÃO ATENDENDO PLANO DE AÇÃO 00000000013/2011        em 06-12-11
                  nLin += 080
                  oPrn:Say(nLin, nCol, 'LIBERADO P/ ENVASE: [ ]SIM / [ ]NÃO     - RESP.:  __________________ Hr:__:__', oFont2, , , , )
                  nLin += 080                                                                
@@ -832,7 +855,13 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                  nCmt += 0.5
                  PCPR01_9(2, _NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor)
               Endif
+              
+//            nIndex := 0 // Jose 23/04/2025
+
               For nZ := 1 TO Len(aEmbala)
+//                  If ( (aEmbala[nZ][2]) = "" .AND. (aEmbala[nZ][10]) = " " ) // Jose 30/04/2025
+//                     nIndex := 0 // Jose 30/04/2025
+//                  EndIf // Jose 30/04/2025
                   oPrn:Say(nLin, nCol, Iif(!Empty(aEmbala[nZ][1]), aEmbala[nZ][1]+'-'+Alltrim(aEmbala[nZ][2]), space(03)+Alltrim(aEmbala[nZ][2])), oFont2, , , , ) 
                   
                   If !Empty(aEmbala[nZ][1]) //.and. !Empty(Posicione("SB1", 1, xFilial("SB1")+aEmbala[nZ][2], "B1_RELCAT1")) //Omitido por Cleber(07/03/2012
@@ -845,33 +874,53 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                   Endif                 
                   cQry := ""      // INCLUSÃO DA RELAÇÃO DE VOLUMES - SOLICITADO POR MICHELLY 20/08/12
                   cQry += "SELECT RELVOL = dbo.DetVol('"+xFilial("SB1")+"','"+Iif(!Empty(aEmbala[nZ][1]), aEmbala[nZ][10], aEmbala[nZ][2])+"')"
-				  TCQuery cQry ALIAS "TCR" NEW
+				      TCQuery cQry ALIAS "TCR" NEW
                   DbSelectArea("TCR")
                   oPrn:Say(nLin, nCol+460, IIF(!Empty(TCR->RELVOL),Substr(Alltrim(TCR->RELVOL),1,10),''), oFont2, , , , )
                   DbClosearea() 
                   
-                  //MSBAR("EAN13",  5,  nCmt , aEmbala[nZ][10], oPrn, NIL, NIL, NIL, Nil, 0.7, NIL, NIL, NIL, .f.)
-                  //MSBAR("CODE128",  6,  nCmt , Posicione("SB1", 1, xFilial("SB1")+aEmbala[nZ][10], "B1_CODBAR"), oPrn, NIL, NIL, NIL, Nil, 0.7, NIL, NIL, NIL, .f.)
+                //MSBAR("EAN13",  5,  nCmt , aEmbala[nZ][10], oPrn, NIL, NIL, NIL, Nil, 0.7, NIL, NIL, NIL, .f.) 
+                //MSBAR("CODE128",  6,  nCmt , Posicione("SB1", 1, xFilial("SB1")+aEmbala[nZ][10], "B1_CODBAR"), oPrn, NIL, NIL, NIL, Nil, 0.7, NIL, NIL, NIL, .f.) 
                   
                   
                   oPrn:Say(nLin, nCol+0770, SubStr(aEmbala[nZ][3], 1, 26), oFont2, , , , )
                   oPrn:Say(nLin, nCol+1530, TransForm(aEmbala[nZ][6], "@E 99999"), oFont2, , , , )
 
-                  If !Empty(aEmbala[nZ][7])
-                     oPrn:Say(nLin, nCol+1860, SubStr(aEmbala[nZ][7] , 1, 10), oFont2, , , , )
-                  Endif
-                  If !Empty(aEmbala[nZ][8])
-                     oPrn:Say(nLin, nCol+2120, aEmbala[nZ][8], oFont2, , , , )
-                  Endif
+                  If substr(cNumEmp,3,2) = '06' // jose 06/05/2025
+                     If !Empty(aEmbala[nZ][7])  
+                        nColCB  :=16
+                        MSBAR("CODE128",    nCmt -0.2,  nColCB , aEmbala[nZ][11], oPrn, NIL, NIL, NIL, NIL, 0.8, NIL, NIL, NIL, .f.)    //Jose 08/04/2025  Jose 30/04/205 aEmbala[nZ][11] 
+                        oPrn:Say(nLin, nCol+1870, SubStr(aEmbala[nZ][11] , 1, 30), oFont2, , , , )  // Jose 08/04/2025    Jose 30/04/2025 aEmbala[nZ][11]
+                     Else
+
+                     EndIF
+                  Else
+//                   If !Empty(aEmbala[nZ][7]) // Jose 30/04/2025 
+                     If ( (aEmbala[nZ][2]) = "" .AND. (aEmbala[nZ][10]) = " " ) // Jose 30/04/2025
+                        nColCB  :=16
+//                      nIndex += 1 // Jose 30/04/2025
+                        nIndex := nZ - 1 // Jose 30/04/2025
+                        MSBAR("CODE128",    nCmt -0.2,  nColCB , aEmbala[nIndex][11], oPrn, NIL, NIL, NIL, NIL, 0.8, NIL, NIL, NIL, .f.)    //Jose 08/04/2025  Jose 30/04/205 aEmbala[nZ][11] 
+                        oPrn:Say(nLin, nCol+1870, SubStr(aEmbala[nIndex][11] , 1, 30), oFont2, , , , )  // Jose 08/04/2025    Jose 30/04/2025 aEmbala[nZ][11]
+//                      oPrn:Say(nLin, nCol+1860, SubStr(aEmbala[nZ][7] , 1, 20), oFont2, , , , )  // Jose 08/04/2025
+                     Else
+
+                     Endif
+                  EndIf
+
+//                If !Empty(aEmbala[nZ][8])  // Jose 08/04/2025 +2120 
+//                    oPrn:Say(nLin, nCol+2140, aEmbala[nZ][8], oFont2, , , , ) // Jose 08/04/2025 +2120  
+//                Endif  // Jose 08/04/2025 +2120 
+
                   If aEmbala[nZ][9] == 1
                      nLin += 30
                      nCmt += 0.25
                   ElseIf aEmbala[nZ][9] == 2
                   	 oPrn:Say(nLin, nCol+1660, ' [ ]', oFont2, , , , ) 
-					//Cleber (19/04/13) -> Michelly reclamou que não tava saindo nro das OPs das embalagens
-                     //oPrn:Say(nLin, nCol+1660, "["+aEmbala[nZ][11]+"]", oFont2, , , , )
-                     nCmt += 0.5
-                     nLin += 60
+		 			       //Cleber (19/04/13) -> Michelly reclamou que não tava saindo nro das OPs das embalagens
+                  //  oPrn:Say(nLin, nCol+1860, "["+aEmbala[nZ][11]+"]", oFont2, , , , )
+                      nCmt += 0.5
+                      nLin += 60
                  	 
                   /*   
                   ElseIf aEmbala[nZ][9] == 3 REMOVIDO POR SOLICITAÇÃOD E CHAMADO 015414
@@ -880,6 +929,17 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                          nCmt += 0.5 */
                   Endif  
               Next
+// Jose 23/04/2025 
+/*              If nIndex = 0 // Jose 23/04/2025
+                 nZ = nZ - 3 // Jose 23/04/2025
+                 If nZ > 0  // Jose 23/04/2025
+                    nColCB  :=16 // Jose 23/04/2025
+                    MSBAR("CODE128",    nCmt -0.2,  nColCB , aEmbala[nZ][11], oPrn, NIL, NIL, NIL, NIL, 0.8, NIL, NIL, NIL, .f.)    // Jose 23/04/2025
+                    oPrn:Say(nLin, nCol+1870, SubStr(aEmbala[nZ][11] , 1, 30), oFont2, , , , )  // Jose 23/04/2025
+                 EndIf
+               EndIf*/
+//  ate aqui 23/04/2025
+
               nLin += 050             //         1         2         3         4         5         6         7         
               nCmt += 0.5             //1234567890123456789012345678901234567890123456789012345678901234567890123456789
           Next
@@ -888,13 +948,16 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
           nColCB  :=0.1
           nColCod :=100
           cCodPro := ""
+          /* nelieder */
           For nZ := 1 TO Len(aEmbala)
-              If aEmbala[nZ][9] == 2 .and. aEmbala[nZ][10] <> cCodPro 
-                  MSBAR("CODE128",  nCmt +0.6,  nColCB , aEmbala[nZ][10], oPrn, NIL, NIL, NIL, Nil, 0.8, NIL, NIL, NIL, .f.)              	
-                  cCodPro := aEmbala[nZ][10]
-                  oPrn:Say(nLin +110, nCol + nColCod, aEmbala[nZ][10], oFont4,,,,)
-                  nColCB  +=7.8
-                  nColCod +=915	
+              If aEmbala[nZ][9] == 2 .and. ALLTRIM(aEmbala[nZ][10]) <> ALLTRIM(cCodPro) 
+                 MSBAR("CODE128",  nCmt +0.6,  nColCB , aEmbala[nZ][10], oPrn, NIL, NIL, NIL, Nil, 0.8, NIL, NIL, NIL, .f.)  
+                 cCodPro := aEmbala[nZ][10]     
+                 oPrn:Say(nLin +110, nCol + nColCod, aEmbala[nZ][10], oFont4,,,,)  
+                 /* Nelieder */
+                 oPrn:Say(nLin +110, nCol + nColCod + 400, "Est = "+Alltrim(aEmbala[nZ][15]), oFont4,,,,)
+                 nColCB  +=7.8
+                 nColCod +=915	
               Endif
           Next nZ
           If NColCB >0.1
@@ -914,7 +977,7 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
           nLin += 60
           oPrn:Say(nLin, nCol, 'ETIQUETADOR  : [ __________________________________________________ ]', oFont7, , , , )
           nLin += 60
- /*         oPrn:Say(nLin, nCol, 'PERDAS       :'                                                       , oFont7, , , , )
+ /*       oPrn:Say(nLin, nCol, 'PERDAS       :'                                                       , oFont7, , , , )
           For nY := 1 To Len(aEmbal)
               nLin += 40
               oPrn:Say(nLin, nCol     , aEmbal[nY][1]               , oFont7, , , , )
@@ -982,12 +1045,16 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
                   oPrn:Say(nLin, nCol + 0900, "CONTROLE ", oFont1,,,,)
 	       	      nLin += 90
 	              nCmt += 0.25
+                 // Jose 12/11/2024 acrescentado 
+	              oPrn:Say(nLin   , nCol + 1800, "EMISSÃO:"                                        , oFont2, , , , )
+                 oPrn:Say(nLin   , nCol + 2050, DTOC(_DatEmi)                                     , oFont2, , , , )
+                 // jose 12/11/2024 ate aqui
 	              oPrn:Say(nLin, nCol + 0750, Transform(TCQ->C2_PRODUTO, "@R XX 99.99.999-99")  , oFont3, , , , )
-	              oPrn:Say(nLin, nCol + 1850, "Hora..:"+Time(), oFont4,,,,)
+	              oPrn:Say(nLin, nCol + 1400, "Hora..:"+Time(), oFont4,,,,) // Jose 12/11/2024 nCol + 1850,
      	          nLin += 60
 	              oPrn:Say(nLin   , nCol + 0750, SubStr(Alltrim(_DesPro), 1, 25)                   , oFont3, , , , )
-	              oPrn:Say(nLin   , nCol + 1800, "EMISSÃO:"                                        , oFont2, , , , )
-                  oPrn:Say(nLin   , nCol + 2050, DTOC(_DatEmi)                                     , oFont2, , , , )
+	              oPrn:Say(nLin   , nCol + 1800, "ENTREGA:"                                        , oFont2, , , , ) // Jose 12/11/2024  "EMISSÃO:" 
+                 oPrn:Say(nLin   , nCol + 2050, DTOC(_DATPRF)                                     , oFont2, , , , ) // Jose 12/11/2024  DTOC(_DatEmi)  
 	              oPrn:Say(nLin, nCol + 0200, 'O.P.: '+SubStr(_NumOrd, 1, 6), oFont4, , , , )
 	              nLin += 60
 	              oPrn:Line(nLin, nCol      , nlin, nColMax)
@@ -995,37 +1062,37 @@ Static Function PCPR01_8(_NumOrd, _DatEmi, _DesPro, _CodCat, _PadCor, aRetenc, _
 	              oPrn:Line(nLin, nCol      , nlin, nColMax)
 	              nLin += 60
 			 EndIF     		  
-             //If !Alltrim(Posicione("SB1", 1, xFilial("SB1")+SubStr(aEmbal[nY][1],1,5), "B1_GRUPO")) $ GETMV("MV_GRTAMPA")
+           //If !Alltrim(Posicione("SB1", 1, xFilial("SB1")+SubStr(aEmbal[nY][1],1,5), "B1_GRUPO")) $ GETMV("MV_GRTAMPA")
              If !Alltrim(Posicione("SB1", 1, xFilial("SB1")+SubStr(aEmbal[nY][1],1,5), "B1_GRUPO")) $ _cMVGRTAMP
               	nLin += 40
           	  	oPrn:Say(nLin, nCol, 'EMBALAGEM: '+SubStr(aEmbal[nY][1],1,5)+'-'+SubStr(aEmbal[nY][2], 1, 30)+'            REG 1-)____________  ', oFont7, , , , )
           	  	nLin += 050                                                         
-          	    //oPrn:Say(nLin, nCol, 'PESO           MÍN -0,5%  MÁX +0,5% RESPONSÁVEL            REG 2-)____________  ', oFont7, , , , ) 
+             //oPrn:Say(nLin, nCol, 'PESO           MÍN -0,5%  MÁX +0,5% RESPONSÁVEL            REG 2-)____________  ', oFont7, , , , ) 
           	  	oPrn:Say(nLin, nCol, '   PESO                          RESPONSÁVEL               REG 2-)____________  ', oFont7, , , , ) 
           	  	nLin += 050                                                                    
           	  	oPrn:Say(nLin, nCol, '                                                           REG 3-)____________  ', oFont7, , , , )      
-          	  	//If TCQ->C2_QUANT >= GETMV("MV_QTDINSP") // RETIRADO A PEDIDO DE MARCIO NONIS - MICHELLY CIENTE - 11/12/14
-	          	//  	nLin += 050
-          	  	//	oPrn:Say(nLin, nCol, '__________    ________   ________   _______________        REG 4-)____________  ', oFont7, , , , )	
-		  	  	//Else // Incluído o peso da embalagem de acordo com o peso específico padrão para produtos que não atingem o volume de inspeção, já que não são realizadas análises para estas o.ps
-			  	  	 // Variação : Peso Máximo 0.5% p/ mais / Peso Mínimo 0.5% p/ menos 
-			  	  	 // Alterado de 1% para 0.5% por Solicitação de Gustavo Diniz via chamado em 14/09/15
+         	 //If TCQ->C2_QUANT >= GETMV("MV_QTDINSP") // RETIRADO A PEDIDO DE MARCIO NONIS - MICHELLY CIENTE - 11/12/14
+	          //  	nLin += 050
+          	 //	oPrn:Say(nLin, nCol, '__________    ________   ________   _______________        REG 4-)____________  ', oFont7, , , , )	
+		  	  	 //Else // Incluído o peso da embalagem de acordo com o peso específico padrão para produtos que não atingem o volume de inspeção, já que não são realizadas análises para estas o.ps
+			  	  // Variação : Peso Máximo 0.5% p/ mais / Peso Mínimo 0.5% p/ menos 
+			  	  // Alterado de 1% para 0.5% por Solicitação de Gustavo Diniz via chamado em 14/09/15
 			    	nPesPadr = Iif(Posicione("SB1", 1, xFilial("SB1")+Substr(TCQ->C2_PRODUTO,1,10)+aEmbal[nY][3], "B1_SEGUM") $ 'K ', Posicione("SB1", 1, xFilial("SB1")+Substr(TCQ->C2_PRODUTO,1,10)+aEmbal[nY][3], "B1_CONV"), (Posicione("SB1", 1, xFilial("SB1")+Substr(TCQ->C2_PRODUTO,1,10)+aEmbal[nY][3], "B1_CONV")) * Posicione("SB1", 1, xFilial("SB1")+TCQ->C2_PRODUTO, "B1_PESOESP"))
 	          	  	nLin += 020
-					//oPrn:Say(nLin, nCol, Transform(nPesPadr,"@E 9999.9999") +'    '+Transform((nPesPadr*0.995),"@E 9999.9999") +'  '+Transform((nPesPadr*1.005),"@E 9999.9999"), oFont7, , , , )	
+				 //oPrn:Say(nLin, nCol, Transform(nPesPadr,"@E 9999.9999") +'    '+Transform((nPesPadr*0.995),"@E 9999.9999") +'  '+Transform((nPesPadr*1.005),"@E 9999.9999"), oFont7, , , , )	
 					oPrn:Say(nLin, nCol, Transform(nPesPadr,"@E 9999.9999")						 , oFont7, , , , )	
 	       	  		nLin += 030
-           	  		//oPrn:Say(nLin, nCol, '__________    ________   ________   _______________        REG 4-)____________  ', oFont7, , , , )	
+           	    //oPrn:Say(nLin, nCol, '__________    ________   ________   _______________        REG 4-)____________  ', oFont7, , , , )	
            	  		oPrn:Say(nLin, nCol, '______________            _________________________        REG 4-)____________  ', oFont7, , , , )	
 
-		  	  	//Endif
-		  	  	nLin += 050
+	 	  	   //Endif
+		  	  	   nLin += 050
           	  	oPrn:Say(nLin, nCol, '                                                           REG 5-)____________  ', oFont7, , , , )	
           	  	nLin += 020
-         	  		//oPrn:Say(nLin, nCol, '__________    ________   ________   _______________ ', oFont7, , , , )	
+         	 //oPrn:Say(nLin, nCol, '__________    ________   ________   _______________ ', oFont7, , , , )	
 					oPrn:Say(nLin, nCol, '______________            _________________________ ', oFont7, , , , )	
           	  	nLin += 030
-          	  	//nLin += 050 
+          	 //nLin += 050 
           	 
            	Endif
           Next
@@ -1052,14 +1119,16 @@ Return
 Static Function PCPR01_7()
        Local nLoop
        
-	   nLin += 80
+	    nLin += 80
        DbSelectArea("SG2")
        DbSetOrder(1)  // g2_filial+g2_produto
        DbSeek(xFilial("SG2")+TCQ->C2_PRODUTO+TCQ->C2_ROTEIRO, .t.)
        If Found()
+          _cPula = 0  //  Jose   11/08/2023
           oPrn:Say(nLin, nCol +850, "O P E R A Ç Õ E S", oFont2, , , , )
           nLin += 40
           While !Eof() .and. SG2->G2_PRODUTO+SG2->G2_CODIGO == TCQ->C2_PRODUTO+TCQ->C2_ROTEIRO
+                _cPula := 1  //  Jose   11/08/2023
                 oPrn:Say(nLin, nCol    , '-------------------------------------------------------------------------------', oFont2, , , , )
                 nLin += 50
                 oPrn:Say(nLin, nCol     , Alltrim(SG2->G2_OPERAC)        , oFont2, , , , )
@@ -1089,24 +1158,32 @@ Static Function PCPR01_7()
                          Endif
                       Next
                    Endif
+                 If !Empty(nMCount) = .F.  // Jose 14/08/2023
+                    _cPula = 0  // Jose 14/08/2023
+                 EndIf // Jose 14/08/2023
                 Endif
                 nLin += 50
                 oPrn:Say(nLin, nCol    , '-------------------------------------------------------------------------------', oFont2, , , , )
                 nLin += 50
+            If _cPula = 1  //  Jose 14/08/2023
                 If nLin >= nLinMax
                    AVNEWPAGE
                    nLin := 30
                    PCPR01_3(_NumOrd, _DatEmi, _QtdSol, _DesPro, _DesLin, _CodCat)
                 Endif
+            EndIf  // Jose 14/08/2023
                 DbSelectArea("SG2")
                 DbSkip()
+                _cPula = 0  //  Jose   11/08/2023
           Enddo
        Endif
-       If nLin >= nLinMax
-          AVNEWPAGE
-          nLin := 30
-          PCPR01_3(_NumOrd, _DatEmi, _QtdSol, _DesPro, _DesLin, _CodCat)
-       Endif
+       If _cPula = 1  //  Jose 11/08/2023
+          If nLin >= nLinMax
+             AVNEWPAGE
+             nLin := 30
+             PCPR01_3(_NumOrd, _DatEmi, _QtdSol, _DesPro, _DesLin, _CodCat)
+          Endif
+       EndIf  //  Jose   11/08/2023
 Return
 
 /**********************************************************************************************************/
@@ -1481,7 +1558,7 @@ Static Function fBusPDC()
                 DbSeek(xFilial("ZZE")+SZ3->Z3_PADCOR, .t.)
                 If Found()
                    If ZZE->ZZE_LIBERA $ 'S.R'
-                      cRet := '***              PADRÃO DE COR: '+ZZE->ZZE_DESCRI+'              ***'
+                      cRet := '***PADRÃO DE COR:'+ZZE->ZZE_DESCRI+'***'
                    Else
                       cRet := '***                 PADRÃO DE COR NÃO LIBERADO - VERIFIQUE!              CAD***'
                    Endif
@@ -1503,6 +1580,7 @@ Return(cRet)
 /*** PCPR01_3 - Monta cabeçalho da Ordem de Produção - Tintas / Pastas                                  ***/
 /**********************************************************************************************************/
 Static Function PCPR01_3(_NumOrd, _DatEmi, _QtdSol, _DesPro, _DesLin, _CodCat)
+//If _cPula = 1
        nVez    := Iif(Empty(_CodCat), 11, 13)
        cLogCor := ''
        //_CodEan := TCQ->C2_LOTE+'000000'         
@@ -1516,19 +1594,23 @@ Static Function PCPR01_3(_NumOrd, _DatEmi, _QtdSol, _DesPro, _DesLin, _CodCat)
        oPrn:Say(nLin, nCol + 700, "ORDEM DE PRODUÇÃO: "+TCQ->C2_NUM, oFont1,,,,)
        oPrn:Say(nLin, nCol +1850, "Hora..:"+Time(), oFont4,,,,)
        If substr(cNumEmp,1,2) != '05'// substr(cNumEmp,1,4) $ "0101" 
-          //MSBar3('INT25',  0.8,  2.2 , SUBSTR(_CodEan+EanDigito(_CodEan),1,13), oPrn, .F.,    , .T., 0.025 , 0.8, .F., 'TAHOMA', 'B', .F. )
-          MSBAR("CODE128",  0.1,  1 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
-          //MSBAR("EAN13",  1,  2.5 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
+        //MSBar3('INT25',  0.8,  2.2 , SUBSTR(_CodEan+EanDigito(_CodEan),1,13), oPrn, .F.,    , .T., 0.025 , 0.8, .F., 'TAHOMA', 'B', .F. )
+          MSBAR("CODE128",  0.1,  1 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.) 
+        //MSBAR("EAN13",  1,  2.5 , _CodEan+EanDigito(_CodEan), oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
        Else
           //MSBAR("CODE128",  1,  2.5 , _CodEan, oPrn, NIL, NIL, NIL, Nil, 1, NIL, NIL, NIL, .f.)
        Endif
        nLin += 110
+       // jOSE 12/11/2024 acrescentado
+       oPrn:Say(nLin, nCol + 0030, "EMISSÃO: "                                              , oFont2, , , , )
+       oPrn:Say(nLin, nCol + 0280, DTOC(_DatEmi)                                            , oFont2, , , , )
+       // Jose 12/11/2024 ate aqui
        oPrn:Say(nLin   , nCol + 0750, Iif(Len(Alltrim(TCQ->C2_PRODUTO)) == 12, Transform(TCQ->C2_PRODUTO, "@R XX 99.99.999-99"), TCQ->C2_PRODUTO), oFont3, , , , )
        oPrn:Say(nLin   , nCol + 1600, "QTDE. SOL.:"                                         , oFont2, , , , )
        oPrn:Say(nLin   , nCol + 2000, Transform(_QtdSol, "@E 99999.99")                     , oFont3, , , , )
        nLin += 60
-       oPrn:Say(nLin, nCol + 0030, "EMISSÃO: "                                              , oFont2, , , , )
-       oPrn:Say(nLin, nCol + 0280, DTOC(_DatEmi)                                            , oFont2, , , , )
+       oPrn:Say(nLin, nCol + 0030, "ENTREGA: "                                              , oFont2, , , , ) // Jose 12/11/2024 "EMISSÃO: "
+       oPrn:Say(nLin, nCol + 0280, DTOC(_DATPRF)                                            , oFont2, , , , ) // Jose 12/112024  DTOC(_DatEmi)
        oPrn:Say(nLin, nCol + 0750, SubStr(Alltrim(_DesPro), 1, 25)                          , oFont3, , , , )
        oPrn:Say(nLin, nCol + 1600, SubStr(Iif(!Empty(_DesLin), Alltrim(_DesLin), ''), 1, 24), oFont2, , , , )
        nLin += 60
@@ -1546,6 +1628,7 @@ Static Function PCPR01_3(_NumOrd, _DatEmi, _QtdSol, _DesPro, _DesLin, _CodCat)
        oPrn:Say(nLin, nCol + 0030, "MATERIA PRIMA     LOTE   QTDE. MAT. PRIMA (Kg)        PERC. MAT.PRIMA    SEQ", oFont2, , , , )
        nLin += 60
        oPrn:Line(nLin, nCol      , nlin, nColMax)
+//EndIf 
 Return
 
 /**********************************************************************************************************/
@@ -1620,21 +1703,21 @@ Static Function PCPR01_1()
 
        //Cleber(17-03-15)-> Mudei pra trazer apenas 1 registro no máximo e também pegando somente o SC2.R_E_C_N_O_, estava 
        //como SC2.* para melhorar a performance pois essa consulta é somente pra saber se existe alguma OP.
-       cQuery += " SELECT C2_FILIAL,C2_PRODUTO,C2_QUANT,C2_NUM,C2_ITEM,C2_SEQUEN,C2_PEDIDO,C2_LOTE,C2_EMISSAO,C2_ROTEIRO,C2_OBS,C2_UM,C2_REVI "
+       cQuery += " SELECT C2_FILIAL,C2_PRODUTO,C2_QUANT,C2_NUM,C2_ITEM,C2_SEQUEN,C2_PEDIDO,C2_LOTE,C2_EMISSAO,C2_ROTEIRO,C2_OBS,C2_UM,C2_REVI, C2_DATPRF " // 12/11/20204 , C2_DATPRF
        cQuery += " FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
        cQuery += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (B1_FILIAL = '"+xFilial("SB1")+"') AND (C2_PRODUTO = B1_COD) "
        cQuery += " WHERE SC2.C2_FILIAL  = '"+xFilial("SC2")+"' "
        cQuery += "   AND (SC2.D_E_L_E_T_ <> '*') "
        cQuery += "   AND (SC2.C2_ITEM    IN('01', '02')) AND (((B1_TIPO = 'PI') AND (LEN(B1_COD) = 12)) OR (LEN(B1_COD) <> 12)) "
-       cQuery += "   AND (SC2.C2_XFLAG <> 'S') "  // NÃO IMPRIMIR OPS QUE JÁ FORAM IMPRESSAS
+       cQuery += "   AND (SC2.C2_XFLAG <> 'S') "  // NÃO IMPRIMIR OPS QUE JÁ FORAM IMPRESSAS  
        cQuery += cCond 
        cQuery := cQuery + " ORDER BY SC2.C2_NUM+SC2.C2_ITEM+SC2.C2_SEQUEN "
 	    //Cleber (16-09-2015) -> tá dando erro de alias já aberto anteriormente!
 	   If Select("TCQ") <> 0
 	       DbCloseArea()
 	   Endif 
-       TCQuery cQuery NEW ALIAS "TCQ"
-  
+      TCQuery cQuery NEW ALIAS "TCQ"
+    
 	//cQuery += "  AND SC2.C2_LOCAL  BETWEEN '"+mv_par01+"' AND '"+mv_par02+"' "             retirado p/ impressão ser direta, sem escolha de almoxarifado padrao
 Return
 

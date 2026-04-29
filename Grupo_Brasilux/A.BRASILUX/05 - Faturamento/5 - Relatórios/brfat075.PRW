@@ -1,5 +1,6 @@
 #include "rwmake.ch"        
 #INCLUDE "TOPCONN.CH"   
+#INCLUDE "PROTHEUS.CH"
 /////////////////////////////////////////////////////////
 // Funçào....: BRFAT075     Data....: 02/10/02         //
 // Autor.....: Cleber Orati Domingues                  //
@@ -52,11 +53,11 @@ User Function BRFAT075()
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-     u_zcfga01( 'BRFAT075' ) //LGS#2021201 - Gravação de log de utilização da rotina
+                                                                                                                                              
 //																					999,999.99  999,999.9  99,999
      //               0       1           2        3           4       5          6  *       7  *       8  *     9           10        11      12        13       14        15        16       17        18        19         20       21
      //           012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-     cCabec1  := "BORD     NRO NF  PEDIDO SPRAY DESTINATARIO                            VALOR       PESO     VOL CIDADE                        CNPJ                   REDESPACHO     "
+     cCabec1  := "BORD     NRO NF  PEDIDO SPRAY DESTINATARIO                              VLR NF     VLR PEDIDO     PESO     VOL CIDADE                        CNPJ                   REDESPACHO     "
      cCabec2  := ""   
      cCabec3  := ""
      nTamNf   := 220     // Apenas Informativo
@@ -97,8 +98,10 @@ Static Function RptDetail()
 
      Local cAux,nQtdeVol,nPesoBruto
      Local nQtdeNf // Qtde total de notas fiscais
+	 Local nQtdePD // Qtde total de Pedido de Venda
      Local nValorNF // Valor total da Nf
      Local nSomaNF // Soma dos valores de todas as notas fiscais
+	 Local nSomaPD // Soma dos valores de todos pedidos
      Local nSomaVol // Qtde total de volumes
      Local nSomaPesoB // Peso Bruto Total
      Local _cAliasF2 // Conterá alias de sf2(Nf's saída) de outra empresa
@@ -133,7 +136,7 @@ dbSelectArea("ZZO")
 dbSetorder(1)                
 
   cQuery := " "
-  cQuery += " SELECT ZA_CODIGO,ZB_PEDIDO,ZB_RAZAO FROM "+RetSqlName("SZB")+" SZB WITH (NOLOCK) "
+  cQuery += " SELECT ZA_CODIGO,ZB_PEDIDO,ZB_RAZAO,C5_NUM FROM "+RetSqlName("SZB")+" SZB WITH (NOLOCK) "
   cQuery += " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON (SZA.D_E_L_E_T_ <> '*') AND (ZA_FILIAL = ZB_FILIAL) AND (ZA_CODIGO = ZB_CODIGO) "
   cQuery += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND (C5_FILIAL = '"+xFilial("SC5")+"') AND (C5_NUM = SUBSTRING(ZB_PEDIDO,3,6)) "
   cQuery += " WHERE (SZB.ZB_FILIAL = '"+xFilial("SZB")+"')"
@@ -148,6 +151,7 @@ dbSetorder(1)
   TCQuery cQuery NEW ALIAS "TCQ" 
     
   dbSelectArea("TCQ")
+  
   dbgotop()
   
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -158,7 +162,9 @@ dbSetorder(1)
 //	Cabec(titulo+" NRO "+TCQ->ZA_CODIGO,cCabec1,cCabec2,nomeprog,tamanho,nTipo)
 	nLin := 90
 	nQtdeNF = 0  // Qtde total de Notas Fiscais
+	nQtdePD = 0  // Qtde total de Pedido de Vendas
 	nSomaNF = 0 // Soma dos valores de todas as notas fiscais  
+	nSomaPD  = 0 // Soma dos valores de todos os pedidos
 	nSomaVol = 0 // Qtde total de volumes
 	nSomaPesoB = 0 // Peso Bruto Total
 	aEmbaBord := {}
@@ -220,6 +226,7 @@ dbSetorder(1)
 				endif
 			endif 
 		endif
+		coluna := 15
 		nSomaVol += nQtdeVol 
 		dbselectarea("SF2")
 		dbseek(xFilial("SF2")+substr(cPedido,3,6),.f.)  
@@ -230,17 +237,29 @@ dbSetorder(1)
 			cAux = iif(lFaturado,ALLTRIM(SF2->F2_SERIE)+"-"+ALLTRIM(SF2->F2_DOC)," ") //"ALLTRIM("+_cAliasF2+"->F2_SERIE)+"+_cAliasF2+"->F2_DOC"
 	    	@nLin,000 psay cBord
 	    	@nLin,008 psay cAux
-			@nLin,019 psay RIGHT(cPedido,6)//+iif(!lFaturado,"*"," ") 
+			@nLin,019 psay PADC(cPedido,6)//+iif(!lFaturado,"*"," ") 
 	    	@nLin,025 psay Iif(u_fTemSpray(Alltrim(cPedido)), '*','   ')   
     		@nLin,028 psay SUBSTR(iif(lFaturado,SF2->F2_RAZAO,TCQ->ZB_RAZAO),1,38)
-   			@nLin,067 psay IIF(lFaturado,nValorNf,SC5->C5_VLRDUP) picture "@E 999,999.99"
+
+   			//@nLin,067 psay IIF(lFaturado,nValorNf,SC5->C5_VLRDUP) picture "@E 999,999.99"
+
+			@nLin,067 psay nValorNf picture "@E 999,999.99"   /* valor nf */
+
+			@nLin,067+coluna psay SC5->C5_VLRDUP picture "@E 999,999.99"   /* valor pedido */
+
    			nPesoBruto := iif(lFaturado,SF2->F2_PBRUTO,	SC5->C5_PBRUTO) 
-	    	@nLin,078 psay nPesoBruto picture "@E 999,999.9"
-    		@nLin,089 psay nQtdeVol picture "@E 99,999"
-    		@nLin,096 psay substr((_cCodCid),1,29)
-			@nLin,126 psay _cCnpj picture "@R 99.999.999/9999-99"
+	    	@nLin,078+coluna psay nPesoBruto picture "@E 999,999.9"
+    		@nLin,089+coluna psay nQtdeVol picture "@E 99,999"
+    		@nLin,096+coluna psay substr((_cCodCid),1,29)
+			@nLin,126+coluna psay _cCnpj picture "@R 99.999.999/9999-99"
 			nQtdeNF += iif(lFaturado,1,0)   
+
+			IF !EMPTY(TCQ->C5_NUM)
+				nQtdePD++	
+			endif
+
 			nSomaNF += nValorNf
+			nSomaPD += SC5->C5_VLRDUP
 /*		else
 			@nLin,010 psay cPedido picture "@R 99-999999" 
 	    	@nLin,021 psay Iif(u_fTemSpray(Alltrim(cPedido)), '*','')   
@@ -258,7 +277,7 @@ dbSetorder(1)
 	   		dbselectarea("SA4")
 	   		dbseek(xFilial("SA4")+SC5->C5_REDESP)
 	   		if found()
-		   		@nLin,149 psay SC5->C5_REDESP+"-"+SA4->A4_NOME+" - "+SUBSTR(SA4->A4_DDD,1,4)+" "+SA4->A4_TEL
+		   		@nLin,149+coluna psay SC5->C5_REDESP+"-"+SA4->A4_NOME+" - "+SUBSTR(SA4->A4_DDD,1,4)+" "+SA4->A4_TEL
 	   		endif 
 	   	endif
 	   	cAuxTra := SC5->C5_TRANSP
@@ -299,10 +318,17 @@ dbSetorder(1)
    	@nLin,000 psay replicate("_",220)
    	nLin++
    	@nLin,000 psay "Qtde de Notas: "+alltrim(transform(nQtdeNf,"@E 999,999"))
-   	@nLin,054  psay "TOTAIS => "
-   	@nLin,064 psay nSomaNf picture "@E 9,999,999.99"
-	@nLin,78 psay nSomaPesoB picture "@E 999,999.9"
-   	@nLin,088 psay nSomaVol picture "@E 999,999"
+
+	/* incluido por nelieder em  07/03/2022 */   	
+	@nLin,020 psay "Qtde de Pedidos: "+alltrim(transform(nQtdePD,"@E 999,999"))
+
+
+
+   	@nLin,057  psay "TOTAIS => "
+   	@nLin,066  psay nSomaNf picture "@E 9,999,999.99" /* TOTAL NF*/
+    @nLin,080  psay nSomaPD picture "@E 9,999,999.99" /* TOTAL PEDIDO */
+	@nLin,093  psay nSomaPesoB picture "@E 999,999.9" /* TOTAL PESO */
+   	@nLin,101  psay nSomaVol picture "@E 999,999" /* TOTAL VOLUME */
    	nLin++
    	@nLin,000 psay replicate("_",220)
 
@@ -361,6 +387,8 @@ If aReturn[5] == 1
    dbcommitAll()
    ourspool(wnrel)
 Endif
+
+MS_FLUSH()
 
 Return
 

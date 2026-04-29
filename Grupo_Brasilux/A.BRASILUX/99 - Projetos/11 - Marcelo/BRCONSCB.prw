@@ -13,7 +13,12 @@ oSay := TSay():New( 10, 10, {|| "Mensagem"},oDlg,, oFont,,,, .T., CLR_WHITE,CLR_
 @ 010, 010 SAY  "Cód Barra"  SIZE 052, 007 OF oDlg COLORS 0, 16777215 PIXEL
 @ 005, 045 MSGET oCodBar VAR cCodBar SIZE 100, 010 OF oDlg  COLORS 0, 16777215 PIXEL When .t.
 @ 005, 155 Button "Consultar" Size 030, 012 PIXEL OF oDlg Action(CONSCBAR(cCodBar))   
-@ 005, 210 Button "Imprimir" Size 030, 012 PIXEL OF oDlg  Action(FGerEtq(Alltrim(cPedido)+' '+Alltrim(cCodProd)))
+
+
+/* Retirada BrasTintas */
+/* Alterado por Nelieder 17/03/2022 */
+//@ 005, 210 Button "Imprimir" Size 030, 012 PIXEL OF oDlg  Action(FGerEtq(Alltrim(cPedido)+' '+Alltrim(cCodProd)))
+@ 005, 210 Button "Imprimir" Size 030, 012 PIXEL OF oDlg  Action(U_BRPCP032(Alltrim(cPedido),Alltrim(cCodProd)))
 
 ACTIVATE MSDIALOG oDlg CENTERED
 return                                          

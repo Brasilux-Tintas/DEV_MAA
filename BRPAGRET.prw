@@ -1,0 +1,530 @@
+#Include "Protheus.ch"
+#Include "fileio.ch"
+
+/*/{Protheus.doc} BRPAGRET
+Programa que le o arquivo de retorno de pagamento bancario (.ret),
+extrai os dados dos blocos A/B/Z e gera um CSV com:
+  - Conta bancaria (sem zeros a esquerda)
+  - Nome do favorecido
+  - Tipo de pagamento (ADI / FER / FOL / RSC)
+  - Data de lancamento (DD/MM/AAAA)
+  - Data de credito    (DD/MM/AAAA)
+  - Valor com centavos (R$)
+  - Autenticacao bancaria (linha Z)
+Funcionalidades adicionais:
+  - Pesquisa de arquivo via cGetFile com diretorio de rede pre-definido
+  - Filtro opcional por nome do favorecido (parcial, sem distincao de maiusculas)
+Layout do arquivo retorno (posicoes 1-based):
+  Linha A:
+    [01-13] Cabecalho sequencial
+    [14]    Tipo de registro = 'A'
+    [15-45] Conta bancaria (30 chars)
+    [43-73] Nome do favorecido (31 chars)
+    [74-76] Tipo de pagamento  (ADI/FER/FOL/RSC)
+    [94-101] Data de lancamento (DDMMAAAA)
+    [120-134] Valor (15 digitos inteiros / 100 = valor com centavos)
+    [155-162] Data de credito (DDMMAAAA)
+  Linha Z:
+    [14]    Tipo de registro = 'Z'
+    Primeira sequencia numerica >= 10 digitos apos pos 14 = autenticacao
+@type function Processamento
+@version 1.00
+@author marioantonaccio
+@since 08/04/2026
+@return character, sem retorno
+/*/
+User Function BRPAGRET()
+
+	Local cMsgIntro := "" as character
+
+	cMsgIntro := ;
+		"Este programa executa:" + CRLF + ;
+		" " + Chr(149) + " Leitura do arquivo de retorno bancario (.ret)" + CRLF + ;
+		" " + Chr(149) + " Extracao dos blocos A (dados) e Z (autenticacao)" + CRLF + ;
+		" " + Chr(149) + " Tipos suportados: ADI, FER, FOL, RSC" + CRLF + ;
+		" " + Chr(149) + " Pesquisa de arquivo diretamente em pasta de rede" + CRLF + ;
+		" " + Chr(149) + " Filtro opcional por nome do favorecido" + CRLF + ;
+		" " + Chr(149) + " Geracao de arquivo CSV separado por ponto-e-virgula" + CRLF + ;
+		" " + Chr(149) + " Geracao de LOG detalhado do processamento" + CRLF + CRLF + ;
+		"Clique SIM para selecionar o arquivo."
+
+	If .NOT. FWAlertNoYes(cMsgIntro, "Extrator de Retorno Bancario")
+		Return (NIL)
+	Else
+		Processa({|| BRPAGRET01()}, "Processando retorno bancario...")
+	EndIf
+
+Return (NIL)
+
+/*/{Protheus.doc} BRPAGRET01
+Funcao principal de leitura e extracao do arquivo de retorno bancario.
+Abre cGetFile apontando para diretorio de rede configuravel e solicita
+filtro opcional de nome antes de iniciar o processamento.
+@type function Processamento
+@version 1.00
+@author marioantonaccio
+@since 08/04/2026
+@return character, sem retorno
+/*/
+Static Function BRPAGRET01()
+	// --- Arrays ---
+	Local aLinhas      := {} as array
+
+	// --- Strings ---
+	Local cArqCSV      := "" as character
+	Local cArqOrig     := "" as character
+	Local cDataHoraFim := "" as character
+	Local cDataHoraIni := "" as character
+	Local cDiretorio   := "" as character
+	Local cDirRede     := "" as character // Diretorio de rede inicial do cGetFile
+	Local cDrive       := "" as character
+	Local cExtensao    := "" as character
+	Local cFiltroNome  := "" as character // Filtro de nome digitado pelo usuario
+	Local cHoraFim     := "" as character
+	Local cHoraIni     := "" as character
+	Local cLinha       := "" as character
+	Local cLogArq      := "" as character
+	Local cNome        := "" as character
+
+	// --- Numericos ---
+	Local nHandle    := 0 as numeric
+	Local nHCSV      := 0 as numeric
+	Local nHLog      := 0 as numeric
+	Local nRegistros := 0 as numeric
+	Local nTotal     := 0 as numeric
+
+	cDataHoraIni := DtoC(Date()) + " " + Time()
+	cHoraIni     := Time()
+
+	// =========================================================
+	// 1. DIRETORIO DE REDE - ajuste o caminho conforme o ambiente
+	//    Exemplos:
+	//      Windows mapeado : "G:\Retornos\"
+	//      UNC direto      : "\\servidor\compartilhamento\retornos\"
+	//      Linux/Totvs     : "/mnt/rede/retornos/"
+	// =========================================================
+	cDirRede := "\\servidor\retornos\"   // << ALTERE PARA O CAMINHO DA REDE
+
+	// =========================================================
+	// 2. SELECAO DO ARQUIVO VIA cGetFile COM DIRETORIO DE REDE
+	//    O quarto parametro define o diretorio inicial do dialogo.
+	//    Se o caminho de rede nao existir ou nao estiver acessivel,
+	//    o dialogo abre no diretorio padrao sem gerar erro.
+	// =========================================================
+	/*
+	cArqOrig := cGetFile( ;
+		"Arquivos RET (*.ret)|*.ret|Arquivos TXT (*.txt)|*.txt|", ;
+		"Selecione o arquivo de retorno bancario", ;
+		1, ;          // Indice do filtro inicial (1 = *.ret)
+		cDirRede, ;   // Diretorio inicial: pasta de rede
+		.F. ;         // Nao permite selecao multipla
+		)
+*/
+		    //Chamando o cGetFile para pegar um arquivo txt ou xml, mostrando o servidor
+    cArqOrig := cGetFile( 'Arquivos RET (*.ret)|*.ret|Arquivos TXT (*.txt)|*.txt|Todos Arquivos|*.*',; //[ cMascara],
+        "Selecione o arquivo de retorno bancario",;                  //[ cTitulo],
+        0,;                                      //[ nMascpadrao],
+        'C:\',;                                  //[ cDirinicial],
+        .F.,;                                    //[ lSalvar],
+        GETF_LOCALHARD  + GETF_NETWORKDRIVE,;    //[ nOpcoes],
+        .T.)                                     //[ lArvore]
+
+	If Empty(cArqOrig)
+		FWAlertError("Nenhum arquivo selecionado.", "Selecao de arquivo", NIL)
+		Return (NIL)
+	EndIf
+
+	// =========================================================
+	// 3. FILTRO OPCIONAL POR NOME DO FAVORECIDO
+	//    O usuario digita parte do nome (ou deixa em branco para
+	//    processar todos). A comparacao sera feita sem distincao
+	//    de maiusculas/minusculas (Upper x Upper).
+	// =========================================================
+	//cFiltroNome := FWInputBox( "Filtro por nome (ou parte) do favorecido: BRANCO = TODOS", "")
+
+	If Aviso("Filtro por nome do favorecido",;
+		@cFiltroNome,;
+		{"OK", "Cancelar"},;
+		1,;
+		"Digite parte do nome ou o nome completo para filtrar os registros." + CRLF + ;
+		"Deixe em branco para incluir TODOS os registros.",;
+		/*nRotAutDefault*/,;
+		/*cBitmap*/,;
+		.T.) <> 1
+		cFiltroNome := ""
+	Else
+		cFiltroNome:=AllTrim(cFiltroNome)
+	EndIf
+
+	// Confirmacao do filtro ao usuario
+	If .NOT. Empty(cFiltroNome)
+		If .NOT. FWAlertNoYes( ;
+				"Sera aplicado o seguinte filtro de nome:" + CRLF + CRLF + ;
+				"  >> " + Upper(cFiltroNome) + " <<" + CRLF + CRLF + ;
+				"Somente registros cujo nome do favorecido" + CRLF + ;
+				"contenha esse texto serao incluidos no CSV e no LOG." + CRLF + CRLF + ;
+				"Confirma?", ;
+				"Confirmar Filtro" ;
+				)
+			FWAlertInfo("Processamento cancelado pelo usuario.", "Cancelado", NIL)
+			Return (NIL)
+		EndIf
+	EndIf
+
+	// =========================================================
+	// 4. MONTAGEM DOS CAMINHOS DE SAIDA
+	// =========================================================
+	SplitPath(cArqOrig, @cDrive, @cDiretorio, @cNome, @cExtensao)
+	cArqCSV := cDrive + cDiretorio + ChgFileExt(cNome, "_extrato.csv")
+	cLogArq := cDrive + cDiretorio + ChgFileExt(cNome, "_extrato.log")
+
+	// Remove arquivos anteriores
+	If File(cArqCSV)
+		If FERASE(cArqCSV) == -1
+			FWAlertError("Nao foi possivel excluir o arquivo:" + CRLF + cArqCSV, "Erro na exclusao")
+			Return (NIL)
+		End
+	End
+	If File(cLogArq)
+		If FERASE(cLogArq) == -1
+			FWAlertError("Nao foi possivel excluir o arquivo:" + CRLF + cLogArq, "Erro na exclusao")
+			Return (NIL)
+		End
+	End
+
+	// =========================================================
+	// 5. CRIACAO DO LOG
+	// =========================================================
+	nHLog := FCreate(cLogArq)
+	If nHLog < 0
+		FWAlertError("Erro ao criar arquivo de LOG.", "Erro", NIL)
+		Return (NIL)
+	End
+
+	FWrite(nHLog, "LOG DO PROCESSAMENTO - RETORNO BANCARIO" + CRLF)
+	FWrite(nHLog, "Arquivo origem   : " + cArqOrig     + CRLF)
+	FWrite(nHLog, "Iniciado em      : " + cDataHoraIni + CRLF)
+	If Empty(cFiltroNome)
+		FWrite(nHLog, "Filtro de nome   : (todos os registros)" + CRLF + CRLF)
+	Else
+		FWrite(nHLog, "Filtro de nome   : " + Upper(cFiltroNome) + " (comparacao parcial, sem case)" + CRLF + CRLF)
+	EndIf
+
+	// =========================================================
+	// 6. LEITURA DO ARQUIVO DE RETORNO
+	// =========================================================
+	If File(cArqOrig)
+		FWMsgRun(, {|| nHandle := FT_FUse(cArqOrig)}, "Processando", "Aguarde... lendo arquivo...")
+		If nHandle == -1
+			FWAlertError("Erro na abertura do arquivo.", "Erro na abertura", NIL)
+			FClose(nHLog)
+			Return (NIL)
+		End
+		FT_FGoTop()
+		aLinhas := {}
+		While .NOT. FT_FEOF()
+			cLinha := FT_FReadLn()
+			AAdd(aLinhas, cLinha)
+			FT_FSKIP()
+		End
+		FT_FUSE()
+	Else
+		FWAlertError("Arquivo nao encontrado.", "Nao encontrado", NIL)
+		FClose(nHLog)
+		Return (NIL)
+	EndIf
+
+	FWrite(nHLog, "Total de linhas lidas: " + cValToChar(Len(aLinhas)) + CRLF + CRLF)
+
+	// =========================================================
+	// 7. CRIACAO DO CSV
+	// =========================================================
+	nHCSV := FCreate(cArqCSV)
+	If nHCSV < 0
+		FWAlertError("Erro ao criar arquivo CSV.", "Erro", NIL)
+		FClose(nHLog)
+		Return (NIL)
+	End
+
+	// Cabecalho CSV
+	FWrite(nHCSV, ;
+		"CONTA"         + ";" + ;
+		"NOME"          + ";" + ;
+		"TIPO"          + ";" + ;
+		"DT_LANCAMENTO" + ";" + ;
+		"DT_CREDITO"    + ";" + ;
+		"VALOR"         + ";" + ;
+		"AUTENTICACAO"  + CRLF)
+
+	// Cabecalho LOG
+	FWrite(nHLog, Replicate("=", 135) + CRLF)
+	FWrite(nHLog, ;
+		PadR("CONTA",          22) + " | " + ;
+		PadR("NOME",           32) + " | " + ;
+		PadR("TIPO",            4) + " | " + ;
+		PadR("DT_LANC",        10) + " | " + ;
+		PadR("DT_CRED",        10) + " | " + ;
+		PadL("VALOR",          14) + " | " + ;
+		PadR("AUTENTICACAO",   26) + CRLF)
+	FWrite(nHLog, Replicate("-", 135) + CRLF)
+
+	// =========================================================
+	// 8. EXTRACAO DOS BLOCOS A/Z COM FILTRO DE NOME
+	// =========================================================
+	nRegistros := BRPAGRET02(@aLinhas, nHCSV, nHLog, @nTotal, cFiltroNome)
+
+	// =========================================================
+	// 9. RODAPE DO LOG E ENCERRAMENTO
+	// =========================================================
+	cDataHoraFim := DtoC(Date()) + " " + Time()
+	cHoraFim     := Time()
+
+	FWrite(nHLog, Replicate("=", 135) + CRLF + CRLF)
+	FWrite(nHLog, "=== RESUMO FINAL ===" + CRLF)
+	FWrite(nHLog, "Finalizado em    : " + cDataHoraFim + CRLF)
+	FWrite(nHLog, "Tempo gasto      : " + ElapTime(cHoraIni, cHoraFim) + CRLF)
+	FWrite(nHLog, "Filtro nome aplic: " + If(Empty(cFiltroNome), "(nenhum)", Upper(cFiltroNome)) + CRLF)
+	FWrite(nHLog, "Registros gerados: " + cValToChar(nRegistros) + CRLF)
+	FWrite(nHLog, "Valor total      : " + AllTrim(Transform(nTotal, "@ER 999999999.99")) + CRLF)
+	FWrite(nHLog, "CSV gerado       : " + cArqCSV + CRLF)
+	FClose(nHCSV)
+	FClose(nHLog)
+
+	FWAlertSuccess( ;
+		"Processamento finalizado!" + CRLF + CRLF + ;
+		"Filtro de nome    : " + If(Empty(cFiltroNome), "(todos)", Upper(cFiltroNome)) + CRLF + ;
+		"Registros gerados : " + cValToChar(nRegistros) + CRLF + ;
+		"Valor total       : R$ " + AllTrim(Transform(nTotal, "@ER 999999999.99")) + CRLF + CRLF + ;
+		"CSV gerado        : " + cArqCSV + CRLF + ;
+		"Log gerado        : " + cLogArq, ;
+		"Extracao Concluida")
+
+Return (NIL)
+
+/*/{Protheus.doc} BRPAGRET02
+Varre o array de linhas do arquivo de retorno, extrai os dados dos blocos
+compostos por linha A (dados) + linha B (endereco) + linha Z (autenticacao)
+e grava cada registro no CSV e no LOG.
+Aplica filtro parcial de nome quando cFiltroNome nao estiver vazio:
+a comparacao e feita em Upper() para ignorar maiusculas/minusculas.
+Posicoes utilizadas na linha A (1-based):
+  [14]      Tipo de registro = 'A'
+  [15-42]   Conta bancaria (28 chars) - gravada sem zeros a esquerda
+  [43-73]   Nome do favorecido (31 chars)
+  [74-76]   Tipo de pagamento: ADI / FER / FOL / RSC
+  [94-101]  Data de lancamento DDMMAAAA
+  [120-134] Valor bruto (15 digitos inteiros; dividir por 100 = R$ com centavos)
+  [155-162] Data de credito DDMMAAAA
+Posicao utilizada na linha Z:
+  Primeira sequencia numerica com 10+ digitos apos posicao 14 = autenticacao
+@type function Auxiliar
+@version 1.00
+@author marioantonaccio
+@since 08/04/2026
+@param aLinhas,     array,     Array com todas as linhas do arquivo (by reference)
+@param nHCSV,       numeric,   Handle do arquivo CSV
+@param nHLog,       numeric,   Handle do arquivo LOG
+@param nTotal,      numeric,   Acumulador do valor total (by reference)
+@param cFiltroNome, character, Texto parcial para filtrar nome (vazio = todos)
+@return numeric, quantidade de registros gravados
+/*/
+Static Function BRPAGRET02(aLinhas, nHCSV, nHLog, nTotal, cFiltroNome)
+	// --- Strings ---
+	Local cAutent   := "" as character
+	Local cConta    := "" as character
+	Local cDtCred   := "" as character
+	Local cDtLanc   := "" as character
+	Local cFiltroUp := "" as character // Filtro em maiusculas para comparacao
+	Local cNome     := "" as character
+	Local cTipoPag  := "" as character
+	Local cTipoReg  := "" as character
+	Local cValorRaw := "" as character
+
+	// --- Numericos ---
+	Local nI         := 0 as numeric
+	Local nIndex     := 0 as numeric
+	Local nRegistros := 0 as numeric
+	Local nValor     := 0 as numeric
+
+	// --- Logicos ---
+	Local lBlocoA      := .F. as logical
+	Local lPassaFiltro := .F. as logical // .T. se o bloco A passa pelo filtro de nome
+
+	// Dados do bloco A corrente
+	Local cContaA  := "" as character
+	Local cDtCredA := "" as character
+	Local cDtLancA := "" as character
+	Local cNomeA   := "" as character
+	Local cTipoA   := "" as character
+	Local nValorA  := 0  as numeric
+
+	// Pre-processa o filtro uma unica vez em maiusculas
+	cFiltroUp := Upper(AllTrim(cFiltroNome))
+
+	ProcRegua(Len(aLinhas))
+
+	For nIndex := 1 To Len(aLinhas)
+		IncProc()
+
+		If Len(aLinhas[nIndex]) < 14
+			Loop
+		End
+
+		cTipoReg := SubStr(aLinhas[nIndex], 14, 1)
+
+		// -------------------------------------------------------
+		// Linha A: extrai todos os campos do bloco
+		// -------------------------------------------------------
+		If cTipoReg == "A"
+
+			// Nome: posicoes 43-73 (31 chars) - extraido primeiro para aplicar filtro
+			cNome := AllTrim(SubStr(aLinhas[nIndex], 43, 31))
+
+			// -------------------------------------------------------
+			// FILTRO DE NOME: verifica se o nome contem o texto
+			// informado. Comparacao parcial e sem distincao de case.
+			// Se filtro vazio -> todos passam.
+			// -------------------------------------------------------
+			If Empty(cFiltroUp)
+				lPassaFiltro := .T.
+			Else
+				lPassaFiltro := ( cFiltroUp $ Upper(cNome) )
+			EndIf
+
+			// Se nao passa no filtro, marca bloco como inativo e segue
+			If .NOT. lPassaFiltro
+				lBlocoA := .F.
+				Loop
+			EndIf
+
+			// Conta: posicoes 15-42 (28 chars), remove zeros a esquerda
+			cConta := AllTrim(SubStr(aLinhas[nIndex], 15, 28))
+			For nI := 1 To Len(cConta)
+				If .NOT. (SubStr(cConta, nI, 1) == "0")
+					Exit
+				End
+			End
+			cConta := SubStr(cConta, nI)
+
+			// Tipo pagamento: posicoes 74-76 (3 chars)
+			cTipoPag := AllTrim(SubStr(aLinhas[nIndex], 74, 3))
+
+			// Data lancamento: posicoes 94-101 (DDMMAAAA)
+			cDtLanc := BRPAGRET03(AllTrim(SubStr(aLinhas[nIndex], 94, 8)))
+
+			// Valor: posicoes 120-134 (15 digitos inteiros / 100)
+			cValorRaw := AllTrim(SubStr(aLinhas[nIndex], 120, 15))
+			nValor    := 0
+			If cValorRaw == StrTran(cValorRaw, " ", "") .AND. Len(cValorRaw) > 0
+				nValor := Val(cValorRaw) / 100
+			End
+
+			// Data credito: posicoes 155-162 (DDMMAAAA)
+			cDtCred := BRPAGRET03(AllTrim(SubStr(aLinhas[nIndex], 155, 8)))
+
+			// Guarda bloco A para fechar na linha Z
+			cContaA  := cConta
+			cNomeA   := cNome
+			cTipoA   := cTipoPag
+			cDtLancA := cDtLanc
+			cDtCredA := cDtCred
+			nValorA  := nValor
+			lBlocoA  := .T.
+		End
+
+		// -------------------------------------------------------
+		// Linha Z: fecha o bloco e grava o registro
+		// -------------------------------------------------------
+		If cTipoReg == "Z" .AND. lBlocoA
+			// Autenticacao: primeira sequencia numerica >= 10 digitos apos pos 14
+			cAutent := BRPAGRET04(SubStr(aLinhas[nIndex], 15))
+
+			// Grava no CSV (separador ; decimal ,)
+			FWrite(nHCSV, ;
+				cContaA  + ";" + ;
+				cNomeA   + ";" + ;
+				cTipoA   + ";" + ;
+				cDtLancA + ";" + ;
+				cDtCredA + ";" + ;
+				StrTran(AllTrim(Transform(nValorA, "@ER 999999999.99")), ".", ",") + ";" + ;
+				cAutent  + CRLF)
+
+			// Grava no LOG
+			FWrite(nHLog, ;
+				PadR(cContaA,  22) + " | " + ;
+				PadR(cNomeA,   32) + " | " + ;
+				PadR(cTipoA,    4) + " | " + ;
+				PadR(cDtLancA, 10) + " | " + ;
+				PadR(cDtCredA, 10) + " | " + ;
+				PadL(Transform(nValorA, "@ER 999999999.99"), 14) + " | " + ;
+				cAutent + CRLF)
+
+			nTotal     += nValorA
+			nRegistros++
+			lBlocoA    := .F.
+		End
+	Next
+
+Return (nRegistros)
+
+/*/{Protheus.doc} BRPAGRET03
+Converte data no formato DDMMAAAA para DD/MM/AAAA.
+Retorna a string original se nao for uma data valida.
+@type function Auxiliar
+@version 1.00
+@author marioantonaccio
+@since 08/04/2026
+@param cData, character, Data no formato DDMMAAAA
+@return character, Data formatada DD/MM/AAAA
+/*/
+Static Function BRPAGRET03(cData)
+	Local cRet := "" as character
+	cData := AllTrim(cData)
+	If Len(cData) == 8 .AND. cData == StrTran(cData, " ", "")
+		If Val(cData) > 0 .OR. cData == "00000000"
+			cRet := SubStr(cData,1,2) + "/" + SubStr(cData,3,2) + "/" + SubStr(cData,5,4)
+		Else
+			cRet := cData
+		End
+	Else
+		cRet := cData
+	End
+Return (cRet)
+
+/*/{Protheus.doc} BRPAGRET04
+Extrai a autenticacao bancaria da linha Z: localiza a primeira sequencia
+numerica com 10 ou mais digitos consecutivos na string recebida.
+@type function Auxiliar
+@version 1.00
+@author marioantonaccio
+@since 08/04/2026
+@param cTexto, character, Conteudo da linha Z apos a posicao 14
+@return character, Codigo de autenticacao ou vazio se nao encontrado
+/*/
+Static Function BRPAGRET04(cTexto)
+	Local cRet   := "" as character
+	Local cBloco := "" as character
+	Local nI     := 0  as numeric
+	Local cChar  := "" as character
+
+	nI := 1
+	While nI <= Len(cTexto)
+		cChar := SubStr(cTexto, nI, 1)
+		If cChar >= "0" .AND. cChar <= "9"
+			cBloco += cChar
+		Else
+			If Len(cBloco) >= 10
+				cRet := cBloco
+				Exit
+			End
+			cBloco := ""
+		End
+		nI++
+	End
+
+	// Testa o ultimo bloco (caso a linha termine com digitos)
+	If Empty(cRet) .AND. Len(cBloco) >= 10
+		cRet := cBloco
+	End
+
+Return (cRet)

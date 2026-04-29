@@ -2,7 +2,7 @@
 #INCLUDE "TOPCONN.CH"
 
 User Function BRFAT099()
-
+     Local _lPAR0041 := GETMV("ZP_PAR0041")
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define Variaveis                                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -24,6 +24,10 @@ PRIVATE nomeprog:="BRFAT099"
 PRIVATE aLinha  := { },nLastKey := 0
 PRIVATE cPerg   :="BRFAT099"
      
+If _lPAR0041
+   U_ZFATR01()
+   Return
+Endif
 	if !u_VldAcesso(funname())
 		MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
 		return 

@@ -14,7 +14,8 @@ Local _cFilOrig          // Filias de origem.
 Local cFildest          // Filias de destino.
 Local aFilPE := ""                  // Array de retorno, início com valor diferente de array para o caso de não retornar nada e o sistema precisar desconsiderar
 Local _cFilial
-     u_zcfga01( 'M310FILIAL' ) //LGS#2021118 - Gravação de log de utilização da rotina
+     //---------------- LGS#20231023 ----- RETIRADA DA GRAVAÇÃO DO LOG DE ROTINA PARA MELHORA DE PERFORMANCE.
+     //u_zcfga01( 'M310FILIAL' ) //LGS#2021118 - Gravação de log de utilização da rotina
 If alltrim(FWGrpCompany()) == '01' //Empresas que não são do grupo 11(Tecpolpa).
    _cFilial := alltrim(FWCodFil())
    _cFilOrig := _cFilial

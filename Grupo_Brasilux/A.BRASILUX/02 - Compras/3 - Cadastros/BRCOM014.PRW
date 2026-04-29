@@ -81,7 +81,6 @@ nOrigem:	1-Console
 			RESET ENVIRONMENT
 			RpcSetType(3) //seta tipo de consumo de licença
 
-			//RpcSetEnv( "01",_cFilial,'Administrador' ,'851296' , "COM" , , aTables, , , ,  )
 			PREPARE ENVIRONMENT EMPRESA "01" FILIAL _cFilial MODULO "COM" TABLES "SC7","SD1","SB1","SA2","SD1","SF1","SZY","SB2","SF4"
 			
 			bErro := {|e| SCHERRO_1(e)}    
@@ -102,7 +101,7 @@ return(nil)
 
 Static Function BRCO14(nOrigem)
 
-	Local aPed, aPedRel, aItensPed, nQtdeItens, lSucesso, cAux, cMensErro, dUlMes, lMudouUlmes
+	Local aPed, aPedRel, aItensPed, nQtdeItens, lSucesso, cAux, cMensErro
 	Local _cDoc,_cSerie, _cFornec, cMens,cErros,lErro,cCC,cPara,cQuery,_cFilial,cCliente,cEspecie
 	Local cArqBloq, aBloq,_cAreaBloq,_cLojaF,_cChvnf,lIncluiNf,nVlrUn,nVlrTot,cTcq,_cFilNf            
 	Private lMsErroAuto

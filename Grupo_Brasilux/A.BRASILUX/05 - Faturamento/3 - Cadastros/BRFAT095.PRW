@@ -68,8 +68,6 @@ Else
 
 	//RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões
 	//RpcSetType(3) //seta tipo de consumo de licença
-	//RpcSetEnv( "01","010106",'Administrador' ,'843952' , "FAT" , , aTables, , , ,  )
-
 
     cAuxMens := Replicate( "=", 80 ) + CHR( 13 ) + CHR( 10 )
     cAuxMens += "-- INICIO INCLUSÃO DE PEDIDOS NO DEPÓSITO  - BRFAT095"+ CHR( 13 ) + CHR( 10 )
@@ -108,7 +106,7 @@ Static Function BRFT95(nOrigem)
 	Local cAux,cQuery,nSaldo,cItem,nQtde,nVlrUnit
 	Local aPed, aPedRel, nQtdeItens, aItensPed,aAux,lErro,;
 		cMensErro, aStrut, cObs,lSucesso,aArea,nOrdM0,cCgc,cErros,;
-       	cCC,cPara,cAuxMail,nContPed,cCodBor,_cPed,nPreco,cTmp, cCliente
+       	cCC,cPara,nContPed,cCodBor,_cPed,nPreco,cTmp, cCliente
 	Local cArqBloq, aBloq,_cAreaBloq             
     Private lMsErroAuto
     Private lMsHelpAuto := .f.

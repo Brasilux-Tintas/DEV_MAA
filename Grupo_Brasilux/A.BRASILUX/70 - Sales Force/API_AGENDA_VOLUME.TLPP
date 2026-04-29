@@ -1,0 +1,37 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+#include "tlpp-rest.th"
+
+
+User Function API_AGENDA_VOLUME()
+local cQry as character
+
+
+
+RpcSetEnv("01","010101","","","","",{"SC5","SC6","SA1","SB1","SB2","SF4"})
+
+ 
+
+ cQry := " UPDATE "+RetSqlName("SB5")+" SET B5_XDETVOL = dbo.DetVol(B1_FILIAL,DA1.DA1_CODPRO)   " + CRLF
+ cQry += " , B5_XDETCUB = dbo.DetCubagem(B1_FILIAL,B1_COD)
+ cQry += " FROM "+RetSqlName("DA0")+" DA0  " + CRLF
+ cQry += " INNER JOIN "+RetSqlName("DA1")+" DA1 ON DA1.D_E_L_E_T_ = '' AND DA1_FILIAL = DA0_FILIAL AND DA1_CODTAB = DA0_CODTAB  " + CRLF
+ cQry += " INNER JOIN "+RetSqlName("SB1")+" SB1 ON SB1.D_E_L_E_T_ = '' AND B1_FILIAL = DA0_FILIAL AND B1_COD = DA1_CODPRO  " + CRLF
+ cQry += " LEFT  JOIN "+RetSqlName("SB5")+" SB5 ON SB5.D_E_L_E_T_ = '' AND B5_FILIAL = DA0_FILIAL AND B5_COD = DA1_CODPRO  " + CRLF
+ cQry += " WHERE DA0.D_E_L_E_T_ = '' AND DA0_FILIAL = '"+xFilial("DA1")+"'  " + CRLF
+ cQry += " AND DA0_ATIVO = '1'   " + CRLF
+ cQry += " AND convert(varchar, getdate(), 112) >= DA0_DATDE    " + CRLF
+ cQry += " AND convert(varchar, getdate(), 112) <= DA0_DATATE  " + CRLF
+
+
+ if TCSQLExec(cQry) <> 0
+	U_EnvMail("[API_AGENDA_VOLUME]["+GetEnvServer()+"] - Erro SQL",TCSqlError(),"neliedercorneta@brasilux.com.br","","")
+else 
+	U_EnvMail("[API_AGENDA_VOLUME]["+GetEnvServer()+"] - OK ","Gerado com Sucesso","neliedercorneta@brasilux.com.br","","")
+endif
+
+RpcClearEnv()
+
+
+
+return()

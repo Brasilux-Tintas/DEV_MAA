@@ -1,6 +1,9 @@
 #include "protheus.ch"
 #include "topconn.ch" 
 #include 'font.ch'
+
+#Define STR_PULA    Chr(13)+Chr(10)
+
 #xtranslate bsetget(<uvar>) => { | u | If( PCount() == 0, <uvar>, <uvar> := u ) }
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -35,15 +38,17 @@ User Function BRFATA02()
     Private cCadastro := "Cadastro de Bordero de Pedidos"
     Private aTroBor   := {}
 
-	If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
-     	If !SubStr(cAcessos, 1, 1) $ '*'
+    //LGS#12/07/2023 - Ajuste dos parametros da funÁ„o PSWAdmin
+    //If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+    //If PSWADMIN( , , RetCodUsr() ) != 0
+       If !SubStr(cAcessos, 1, 1) $ '*'
         	MsgStop('Usu·rio sem acesso. Consulte o Administrador do Sistema!')
         	Return
      	Endif 
- 	else   
+ 	//else   
  		//Cleber (05/06/14) ->Administradores tÍm acesso irrestrito
- 		cAcessos := "********"
- 	endif 
+ 	//	cAcessos := "*********"
+ 	//endif 
 
 
      aAdd(aRotina, { OemToAnsi("Pesquisar" 				), 'AxPesqui       ', 0, 1})
@@ -63,44 +68,50 @@ User Function BRFATA02()
      Endif
      If SUBSTR(cNumEmp,3,2) ='06'
 	     If SubStr(cAcessos, 2, 1) $ '*'
-    	    aAdd(aRotina, { OemToAnsi("EndereÁamento") , 'u_FATA02_5()     ', 0, 9} )
-        	aAdd(aRotina, { OemToAnsi("End. Bord. Espec.") , 'u_FATA02_A()   ', 0, 9} )
+    	    aAdd(aRotina, { OemToAnsi("EndereÁamento") ,     'u_FATA02_5()   ', 0, 9} )
+          aAdd(aRotina, { OemToAnsi("End. Bord. Espec.") , 'u_FATA02_A()   ', 0, 9} )
 	     Endif
     	 If SubStr(cAcessos, 3, 1) $ '*'
-	        aAdd(aRotina, { OemToAnsi('Retirada')      , 'u_FATA03_5("1")', 0, 9} ) //N„o revisado no periodo de 07/07
+	        aAdd(aRotina, { OemToAnsi('Retirada')      ,    'u_FATA03_5("1")', 0, 9} ) //N„o revisado no periodo de 07/07
     	 Endif
 	     If SubStr(cAcessos, 4, 1) $ '*'
-    	    aAdd(aRotina, { OemToAnsi('Baixa Retirada'), 'u_FATA03_5("2")', 0, 9} ) //N„o revisado no periodo de 07/07
+    	    aAdd(aRotina, { OemToAnsi('Baixa Retirada'),     'u_FATA03_5("2")', 0, 9} ) //N„o revisado no periodo de 07/07
 	     Endif
      Endif
      If SubStr(cAcessos, 5, 1) $ '*'
-        aAdd(aRotina, { OemToAnsi('Monta Despacho'), 'u_FATA02_7()   ', 0, 9} )
-        //aAdd(aRotina, { OemToAnsi('LIBERA BORDERO'), 'U_BRFATLIBEST("007642",1,1,"")   ', 0, 9} )
-   //     aAdd(aRotina, { OemToAnsi('Re-Monta Pedidos'), 'u_FATA02_8() ', 0, 9} ) // Remonta BorderÙ de Pedidos
+        aAdd(aRotina, { OemToAnsi('Monta Despacho'),       'u_FATA02_7()   ', 0, 9} )
+      //aAdd(aRotina, { OemToAnsi('LIBERA BORDERO'), 'U_BRFATLIBEST("007642",1,1,"")   ', 0, 9} )
+      //aAdd(aRotina, { OemToAnsi('Re-Monta Pedidos'), 'u_FATA02_8() ', 0, 9} ) // Remonta BorderÙ de Pedidos
      Endif
      If Substr(cAcessos, 6, 1) $ '*'
-	 	aadd(aRotina,    { OemToAnsi('Transfere Bordero'), 'u_TransfBorPed() ', 0 , 9 } )
+	 	aadd(aRotina,    { OemToAnsi('Transfere Bordero'),     'u_TransfBorPed() ', 0 , 9 } )
 	 	aadd(aRotina,    { OemToAnsi('Sequenciador EndereÁo'), 'u_BrSeqBord() ', 0 , 9 } )
 	 Endif
      If SubStr(cAcessos, 7, 1) $ '*'
         aAdd(aRotina, { OemToAnsi('Baixa Retirada Bord Bipado'), 'u_BxRetBipe()', 0, 9} ) //Gerar relatÛrio de Faltas para bordero monta compra
      Endif
      If SubStr(cAcessos, 8, 1) $ '*'
-		aAdd(aRotina, { OemToAnsi('Reprocessa Faltas Pedido'), 'u_BRRepFal()', 0, 9} ) //Reprocessa relatÛrio de faltas pra um determinado pedido
+		aAdd(aRotina, { OemToAnsi('Reprocessa Faltas Pedido'),  'u_BRRepFal()', 0, 9} ) //Reprocessa relatÛrio de faltas pra um determinado pedido
+		aAdd(aRotina, { OemToAnsi('Estorna Bordero de Pedido'), 'u_BREstBor()', 0, 9} ) //Reprocessa relatÛrio de faltas pra um determinado pedido
      Endif
-       
+//------------   JOSE 25/10/2022 --------
+     If SubStr(cAcessos, 09, 1) $ '*'
+		aAdd(aRotina, { OemToAnsi('Processa Pedidos Fechados'), 'u_TExcel()', 0, 9} ) //Processa Pediso Fechados
+     Endif
+//-----------------------------------
+
      aAdd(aRotina, { OemToAnsi("Voltar")        , 'u_FATA02_Z()   ', 0, 9} )
      aAdd(aRotina, { OemToAnsi("Legenda")       , 'u_FATA02_1()   ', 0, 9} )
 
      Private aCores    := { { 'SZF->ZF_FLAG == "D"', 'ENABLE'     },; //D - Bordero digitado
-  							{ 'SZF->ZF_FLAG == "Y"', 'BR_MARRON'  },; //Y - Baixa Retirada
-   							{ 'SZF->ZF_FLAG == "X"', 'BR_LARANJA' },; //X - Destinado Totalmente     
-    						{ 'SZF->ZF_FLAG == "Z"', 'BR_BRANCO'  } } //Z - Totalmente Bipado
+  							       { 'SZF->ZF_FLAG == "Y"', 'BR_MARRON'  },; //Y - Baixa Retirada
+   						       { 'SZF->ZF_FLAG == "X"', 'BR_LARANJA' },; //X - Destinado Totalmente     
+    						       { 'SZF->ZF_FLAG == "Z"', 'BR_BRANCO'  } } //Z - Totalmente Bipado
                             
-                            //{ 'SZF->ZF_FLAG == "E"', 'BR_AMARELO' },; //E - EndereÁado
-                            //{ 'SZF->ZF_FLAG == "P"', 'BR_AZUL'    },; //P - Parcialmente retirado
-                            //{ 'SZF->ZF_FLAG == "T"', 'DISABLE'    },; //T - Totalmente separado
-                            //{ 'SZF->ZF_FLAG == "R"', 'BR_PRETO'   },; //R - Totalmente destinado
+                          //{ 'SZF->ZF_FLAG == "E"', 'BR_AMARELO' },; //E - EndereÁado
+                          //{ 'SZF->ZF_FLAG == "P"', 'BR_AZUL'    },; //P - Parcialmente retirado
+                          //{ 'SZF->ZF_FLAG == "T"', 'DISABLE'    },; //T - Totalmente separado
+                          //{ 'SZF->ZF_FLAG == "R"', 'BR_PRETO'   },; //R - Totalmente destinado
 
      Private cDelFunc := ".T." // Validacao para a exclusao. Pode-se utilizar ExecBlock
 
@@ -124,8 +135,8 @@ User Function FATA02_1()
 
                                    // {"BR_AMARELO" ,"EndereÁado"                } ,;
                                    // {"BR_AZUL"    ,"Parcialmente Retirado"     } ,;
-                                  //  {"DISABLE"    ,"Totalmente Retirado"       } ,;
-                                  //    {"BR_PRETO"   ,"Totalmente Destinado"      } ,;
+                                   // {"DISABLE"    ,"Totalmente Retirado"       } ,;
+                                   // {"BR_PRETO"   ,"Totalmente Destinado"      } ,;
 Return(.t.)
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
@@ -215,7 +226,7 @@ User Function FATA02_2(cAlias, nReg, nOpcX)
             fGetDados1(nOpcX)
 
             CtrlArea(2, _aArea, _aAlias) // RestArea
-     //ACTIVATE MSDIALOG _oDlg CENTERED  ON INIT EnchoiceBar(_oDlg, {||nOpcA := 1}, {|| _oDlg:End()},, aButtons)
+   //ACTIVATE MSDIALOG _oDlg CENTERED  ON INIT EnchoiceBar(_oDlg, {||nOpcA := 1}, {|| _oDlg:End()},, aButtons)
 	 ACTIVATE MSDIALOG _oDlg CENTERED  ON INIT EnchoiceBar(_oDlg, {||nOpcA := 1, _oDlg:End()}, {|| _oDlg:End()},, aButtons)
      If nOpcA == 1
         nQtdIte := 0
@@ -311,6 +322,103 @@ User Function FATA02_2(cAlias, nReg, nOpcX)
      
 Return(.T.)
 
+/*
+/******************************************************************************************************************/
+/*** BRESTBOR - Estorna o Status do Bordero de Pedido			                                                ***/
+/******************************************************************************************************************/
+
+User Function BRESTBOR()
+
+   Local 	cQry1 := ""
+
+   If SZF->ZF_FLAG = 'D'
+      Messagebox("Status do Bordero -> "+SZF->ZF_CODIGO+" n„o permite estorno !!","AtenÁ„o...",48)  
+      Return
+   Endif    
+
+   If !MsgYesNo("Confirma o estorno e demontagem dos itens separados para o bordero "+SZF->ZF_CODIGO+" ?. Todo o movimento de separaÁ„o ser· apagado e os pallets ser„o desmontados.", "Pergunta...")
+      Return
+   Endif    
+
+   Begin Transaction
+   
+      cQry1 += "SELECT ZG_CODIGO AS BORDERO, SUBSTRING(ZG_PEDIDO,3,6) AS PEDIDO "
+      cQry1 += "  FROM "+RetSqlName("SZF")+" SZF WITH(NOLOCK) "
+      cQry1 += "   LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZG_FILIAL = ZF_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
+      cQry1 += " WHERE SZF.D_E_L_E_T_ ='' " 
+      cQry1 += "   AND ZF_FILIAL ='"+XFilial("SZF")+"' "
+      cQry1 += "   AND SZF.D_E_L_E_T_ ='' "
+      cQry1 += " 	 AND ZG_CODIGO ='"+SZF->ZF_CODIGO+"' "
+      cQry1 += "GROUP BY ZG_CODIGO, SUBSTRING(ZG_PEDIDO,3,6) "
+      cQry1 += "ORDER BY ZG_CODIGO, SUBSTRING(ZG_PEDIDO,3,6) " 
+
+      TCQuery cQry1 ALIAS "TCQ" NEW
+      DbSelectArea("TCQ")
+      DbGoTop()
+
+      While !Eof()
+
+         DbSelectArea("ZZK")
+         DbSetOrder(6)
+         DbSeek(xFilial("ZZK")+TCQ->PEDIDO, .t.)
+         If Found() 
+            While !Eof() .and. (ZZK->ZZK_FILIAL == xFilial("ZZK")) .and. (Alltrim(TCQ->PEDIDO)== Alltrim(ZZK->ZZK_PEDIDO))
+               DbSelectArea("SC6")
+               DbSetOrder(2) // PRODUTO + NUM PEDIDO + ITEM
+               DbSeek(xFilial("SC6")+ZZK->ZZK_PRODUT+ZZK->ZZK_PEDIDO, .t.)
+
+               If Found() 
+                  RecLock("ZZK", .f.) 
+                     DbDelete()
+                  MsUnLock()
+               Endif
+         
+               DbSelectArea("SC6")
+               DbCloseArea()
+
+               DbSelectArea("ZZK")
+               DbSkip()
+            Enddo	        	
+         Endif
+
+         DbSelectArea("ZZC")
+         DbSetOrder(2)
+         DbSeek(xFilial("ZZC")+TCQ->PEDIDO, .t.)
+         If Found()
+            While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. (Alltrim(TCQ->PEDIDO)== Alltrim(ZZC->ZZC_PEDIDO))
+         
+               RecLock("ZZC", .f.) 
+                  DbDelete()
+               MsUnLock()
+         
+               DbSelectArea("ZZC")
+               DbSkip()
+            Enddo
+         Endif
+      
+         DbSelectArea("TCQ")
+         DbSkip()
+
+      Enddo
+     
+      DbSelectArea("TCQ")
+      DbCloseArea()
+
+      DbSelectArea("SZF")
+      DbSetOrder(1)
+      DbSeek(xFilial("SZF")+SZF->ZF_CODIGO, .t.)
+      If Found()
+         RecLock("SZF", .f.)
+         SZF->ZF_FLAG ='D' // BORDERO DIGITADO
+         MsUnlock()        
+      Endif	
+   
+      Messagebox("Estornado Status do Bordero -> "+SZF->ZF_CODIGO+" !!","AtenÁ„o...",48)  
+
+   End Transaction
+
+Return()
+
 /******************************************************************************************************************/
 /*** FATA02_3 - ValidaÁ„o do pedido e da localizaÁ„o digitada pelo usu·rio.                                     ***/
 /******************************************************************************************************************/
@@ -324,13 +432,14 @@ User Function FATA02_3(cOpcVal, cOpcTip, aTroBor)
      Local nY      := 0
      If cOpcVal $ 'P' //ValidaÁ„o do Pedido
         //N„o permitir inclus„o de ped amostras (solic. Ramon)
-/*        If U_BRTEMAMOSTRA(M->ZG_PEDIDO)
-   	          lRet = .f.
-       	      aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
-              M->ZG_PEDIDO                                  := ''
-              Msgstop("AtenÁ„o, se trata de um pedido de amostra. N„o misturar com pedidos normais!")
-              Return(lRet)
-       */ 
+/* 
+        If U_BRTEMAMOSTRA(M->ZG_PEDIDO)
+           lRet = .f.
+           aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
+           M->ZG_PEDIDO                                  := ''
+           Msgstop("AtenÁ„o, se trata de um pedido de amostra. N„o misturar com pedidos normais!")
+           Return(lRet)
+*/ 
          If U_BrVerPed(M->ZG_PEDIDO,M->ZF_CODIGO)        
         	lRet = .f.                 
        	    aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
@@ -338,87 +447,86 @@ User Function FATA02_3(cOpcVal, cOpcTip, aTroBor)
             Msgstop("AtenÁ„o, divergÍncia entre tipo de pedido (DepÛsito/Regiao-Retira/ExportaÁ„o) e o tipo do bordero!")
          	Return(lRet)	    
 	     Else
-	     	DbSelectArea("SZG")
+        	DbSelectArea("SZG")
 	    	nRecNo := RecNo()
-    	    NumOr := IndexOrd()
-		    DbSetOrder(2)
+    	   NumOr := IndexOrd()
+		   DbSetOrder(2)
     		DbSeek(xFilial("SZG")+M->ZG_PEDIDO, .t.)
-	        If Found() .and. (cOpcTip == "I") .and. (M->ZF_CODIGO # SZG->ZG_CODIGO)
+	       If Found() .and. (cOpcTip == "I") .and. (M->ZF_CODIGO # SZG->ZG_CODIGO)
 		    	If SZG->ZG_CODIGO $ '000000'
     		    	aAdd(aTroBor, {'000000', space(06)})
-        		    MsgStop("Pedido ser· trocado de bordero no final do processo")
-		         Else
-    		        lRet = .f.
-        		    aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
-	            	M->ZG_PEDIDO                                  := Space(08)
-		            MsgStop("Pedido j· digitado anteriormente!")
-    		     Endif
-	        	 Return(lRet)
+        		   MsgStop("Pedido ser· trocado de bordero no final do processo")
+		      Else
+    		      lRet = .f.
+        		   aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
+	          	M->ZG_PEDIDO                                := Space(08)
+		         MsgStop("Pedido j· digitado anteriormente!")
+    		   Endif
+	        Return(lRet)
 		    Endif
     	
 	    	DbSetOrder(nNumOr)
-    	    DbGoto(nRecNo)
-
+    	   DbGoto(nRecNo)
 	     Endif 
 	     
 	     For nY := 1 To Len(aCols)
     	 	If !NwDeleted(oGetDados1, nY)
         		If nY <> n
-	            	If aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] == M->ZG_PEDIDO
-    	            	lRet := .f.
-        	            aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
-            	        M->ZG_PEDIDO                                  := Space(08)
-                	    MsgStop("Pedido j· digitado nesse bordero!")
-	                    Return(lRet)
-    	            Endif
-        	    Endif
-          	Endif
-         Next      
+	            If aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] == M->ZG_PEDIDO
+    	           	lRet := .f.
+        	         aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
+            	   M->ZG_PEDIDO                                  := Space(08)
+                  MsgStop("Pedido j· digitado nesse bordero!")
+	               Return(lRet)
+    	         Endif
+        	   Endif
+         Endif
+        Next      
     	 
-    	 cAprova := Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_APROVA") //Posicione("SC5", 1, M->ZG_PEDIDO, "C5_APROVA")
+    	  cAprova := Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_APROVA") //Posicione("SC5", 1, M->ZG_PEDIDO, "C5_APROVA")
 	     If cAprova != "1"
-    	 	lRet := .f.
-        	aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
+    	     lRet := .f.
+           aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')] := Space(08)
 	        M->ZG_PEDIDO                                  := Space(08)
-    	    MsgStop("Pedido NAO est· Liberado!")
-        	Return(lRet)
+    	     MsgStop("Pedido NAO est· Liberado!")
+           Return(lRet)
 	     Else
     	 	If !Empty(Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_NOTA"))
         		MsgStop("Pedido j· foi faturado!")  
-	            Return(lRet)
+	         Return(lRet)
     	  	Endif
 	        
-	        DbSelectArea("SA1")
-    	    DbSetOrder(1)
+	      DbSelectArea("SA1")
+    	   DbSetOrder(1)
         	DbSeek(xFilial("SA1")+Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_CLIENTE"), .t.)
-	        If Found()
+	      If Found()
     	    	aCols[n][NwFieldPos(oGetDados1, 'ZG_RAZAO')] := Posicione("SA1", 1, xFilial("SA1")+SC5->C5_CLIENTE, "A1_NOME")
-        	    M->ZG_RAZAO                                  := Posicione("SA1", 1, xFilial("SA1")+SC5->C5_CLIENTE, "A1_NOME")
-	        Endif
+        	    M->ZG_RAZAO                                 := Posicione("SA1", 1, xFilial("SA1")+SC5->C5_CLIENTE, "A1_NOME")
+	      Endif
     	    lRet := .t.
-         Endif
+        Endif
 	     nPesBor := 0
-    	 nVolBor := 0
-         For nY := 1 To Len(aCols)
+    	  nVolBor := 0
+        For nY := 1 To Len(aCols)
 	     	If !NwDeleted(oGetDados1, nY)
     	    	If n <> nY
-        	    	nPesBor += Posicione("SC5", 1, xFilial("SZG")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_PBRUTO")
-            	    nVolBor += Posicione("SC5", 1, xFilial("SZG")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_VOLUME1")
-	            Else
-    	            nPesBor += Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_PBRUTO")
-        	        nVolBor += Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_VOLUME1")
-	            Endif
-    	    Endif
+           	   nPesBor += Posicione("SC5", 1, xFilial("SZG")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_PBRUTO")
+           	   nVolBor += Posicione("SC5", 1, xFilial("SZG")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_VOLUME1")
+	         Else
+    	         nPesBor += Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_PBRUTO")
+        	      nVolBor += Posicione("SC5", 1, xFilial("SC5")+SUBSTR(M->ZG_PEDIDO,3,6), "C5_VOLUME1")
+	         Endif
+    	   Endif
 	     Next
      ElseIf cOpcVal $ 'L' //ValidaÁ„o da LocalizaÁ„o
-     	DbSelectArea("SC5")
+     	  DbSelectArea("SC5")
         DbSetOrder(1)
         DbSeek(aCols[n][NwFieldPos(oGetDados1, 'ZG_PEDIDO')], .t.)
         If Found()
-        	cNumNot := SC5->C5_NOTA
+           cNumNot := SC5->C5_NOTA
         Endif
         If !Empty(cNumNot)
-        	cMsgNot := "        ATEN«√O: Esse pedido est· faturado!        "+chr(13)+chr(10)
+          	cMsgNot := "        ATEN«√O: Esse pedido est· faturado!        "+chr(13)+chr(10)
             cMsgNot += "Verifique com a ExpediÁ„o se o mesmo ser· retirado!"
             MsgStop(cMsgNot)
         Endif
@@ -434,14 +542,14 @@ Return(lRet)
 /******************************************************************************************************************/
 User Function FATA02_4()
      Local nY:= 0
-        nPesBor := 0
-        nVolBor := 0
-        For nY := 1 To Len(aCols)
-            If !NwDeleted(oGetDados1, nY)
-               nPesBor += Posicione("SC5", 1, xFilial("SC5")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_PBRUTO")
-               nVolBor += Posicione("SC5", 1, xFilial("SC5")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_VOLUME1")
-            Endif
-        Next
+     nPesBor := 0
+     nVolBor := 0
+     For nY := 1 To Len(aCols)
+         If !NwDeleted(oGetDados1, nY)
+             nPesBor += Posicione("SC5", 1, xFilial("SC5")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_PBRUTO")
+             nVolBor += Posicione("SC5", 1, xFilial("SC5")+Substr(aCols[nY][NwFieldPos(oGetDados1, 'ZG_PEDIDO')],3,6), "C5_VOLUME1")
+         Endif
+     Next
         onPesBor:Refresh()
         onVolBor:Refresh()
 
@@ -451,12 +559,12 @@ Return(.t.)
 /*** FATA02_5 - EndereÁamento dos pedidos que est„o contidos no bordero.                                        ***/
 /******************************************************************************************************************/
 User Function FATA02_5()
-    /*
+/*
      If SZF->ZF_TIPOBOR $ '1.2' .OR. EMPTY(Alltrim(SZF->ZF_TIPOBOR))  // POR EQTO S” N√O ENDERE«A CARGA PRA SP
-		MsgBox("Bordero n„o pode ser endereÁado!", "AtenÁ„o", "STOP")
-		Return
-	 Endif        	
-      */
+   	  MsgBox("Bordero n„o pode ser endereÁado!", "AtenÁ„o", "STOP")
+		  Return
+	  Endif        	
+*/
      Processa({|| fEndBor()}, Iif(SZF->ZF_FLAG $ 'D', OemToAnsi("EndereÁando pedidos..."), Iif(SZF->ZF_FLAG $ 'E', OemToAnsi("Estornando endereÁando..."), OemToAnsi("Verificando alteraÁıes nos pedidos...")))  )
 Return
      
@@ -477,10 +585,10 @@ Return
                   While !Eof() .and. SZG->ZG_CODIGO == SZF->ZF_CODIGO
                         cQry1 := ""
                         cQry1 += "SELECT SC6.C6_PRODUTO AS PRODUTO, SC6.C6_QTDVEN AS QUANTI, SC6.C6_VOLITEM AS VOLUME, SC6.C6_PALLET AS OCUPAC, '' AS DTHOT, 'B' AS TPINCL, '' AS LOCEXP, 0 AS RESERV "
-                        cQry1 += "FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
-                        cQry1 += "WHERE SC6.C6_FILIAL  = '"+xFilial("SC6")+"' "
-                        cQry1 += "  AND SC6.D_E_L_E_T_ = '' "
-                        cQry1 += "  AND SC6.C6_NUM     = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
+                        cQry1 += "  FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
+                        cQry1 += " WHERE SC6.C6_FILIAL  = '"+xFilial("SC6")+"' "
+                        cQry1 += "   AND SC6.D_E_L_E_T_ = '' "
+                        cQry1 += "   AND SC6.C6_NUM     = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
                         cQry1 += "ORDER BY SC6.C6_PRODUTO "
                         TCQuery cQry1 ALIAS "TCQSC6" NEW
                         DbSelectArea("TCQSC6")
@@ -547,7 +655,7 @@ Return
                    If SZF->ZF_CODIGO $ '000000'
                       Return()
                    Endif
-                   /*
+/*
                    DbSelectArea("ZZC")
                    DbSetOrder(1)
                    DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO, .t.)
@@ -556,13 +664,14 @@ Return
                             IncProc()
                             If Empty(ZZC->ZZC_CARGA)
                                RecLock("ZZC", .f.)
-                                  DbDelete()
+                               DbDelete()
                                MsUnLock()
                             Endif
                             DbSelectArea("ZZC")
                             DbSkip()
                       Enddo
-                   Endif */
+                   Endif 
+*/
                    RecLock("SZF", .f.)
                       SZF->ZF_FLAG := 'D'
                    MsUnLock()
@@ -581,11 +690,11 @@ Return
                             //Busca dados da Tabela de EndereÁada
                             cQry1 := ""
                             cQry1 += "SELECT * "
-                            cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-                            cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-                            cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-                            cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-                            cQry1 += "  AND ZZC.ZZC_PEDIDO = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
+                            cQry1 += "  FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+                            cQry1 += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+                            cQry1 += "   AND ZZC.D_E_L_E_T_ = '' "
+                            cQry1 += "   AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
+                            cQry1 += "   AND ZZC.ZZC_PEDIDO = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
                             cQry1 += "ORDER BY ZZC.ZZC_PEDIDO "
                             TCQuery cQry1 ALIAS "TCQZZC" NEW
                             DbSelectArea("TCQZZC")
@@ -602,7 +711,7 @@ Return
                             aMatSC6 := {}
                             cQry1 := ""
                             cQry1 += "SELECT SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_NUM, SC6.C6_VOLITEM, SC6.C6_PALLET "
-                            cQry1 += "FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
+                            cQry1 += "  FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
                             cQry1 += "WHERE (SC6.C6_FILIAL  = '"+xFilial("SC6")+"') "
                             cQry1 += "  AND SC6.D_E_L_E_T_ = '' "
                             cQry1 += "  AND SC6.C6_NUM     = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
@@ -772,23 +881,23 @@ User Function FATA02_7()
            DbSelectArea("SZG")
            DbSetOrder(1)
            DbSeek(xFilial("SZG")+SZF->ZF_CODIGO, .t.)
-           	While !Eof() .and. (xFilial("SZG") = SZG->ZG_FILIAL) .AND. (SZG->ZG_CODIGO == SZF->ZF_CODIGO)
-           		nConTot += 1
-             	DbSelectArea("SZB")
-				DbSetOrder(2)
-				DbSeek(xFilial("SZB")+SZG->ZG_PEDIDO, .T.)
-				If Found()
-					nConAdd += 1
-     			Endif
-        		DbSelectArea("SZG")
-				DbSkip()
-    		Enddo
-           	If nConTot == nConAdd
+           While !Eof() .and. (xFilial("SZG") = SZG->ZG_FILIAL) .AND. (SZG->ZG_CODIGO == SZF->ZF_CODIGO)
+            	  nConTot += 1
+             	  DbSelectArea("SZB")
+			   DbSetOrder(2)
+			   DbSeek(xFilial("SZB")+SZG->ZG_PEDIDO, .T.)
+			   If Found()
+				   nConAdd += 1
+     		   Endif
+        	   DbSelectArea("SZG")
+			   DbSkip()
+    		  Enddo
+           If nConTot == nConAdd
               	RecLock("SZF", .f.)
               		SZF->ZF_FLAG := 'Y'
               		//SZF->ZF_FLAG := 'Y'
               	MsUnLock()
-           	Endif
+           Endif
         Else
            ACTIVATE MSDIALOG _oDlg CENTERED ON INIT (_oDlg:End())
         Endif
@@ -831,6 +940,7 @@ Return Int(nTam)
 ±±∫Locacao   ≥ Fab.Tradicional  ≥Contato ≥ mansano@microsiga.com.br       ∫±±
 ±±ÃÕÕÕÕÕÕÕÕÕÕÿÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕœÕÕÕÕÕÕÕÕœÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕπ±±
 ±±∫Descricao ≥ Static Function auxiliar no GetArea e ResArea retornando   ∫±±
+
 ±±∫          ≥ o ponteiro nos Aliases descritos na chamada da Funcao.     ∫±±
 ±±∫          ≥ Exemplo:                                                   ∫±±
 ±±∫          ≥ Local _aArea  := {} // Array que contera o GetArea         ∫±±
@@ -862,7 +972,7 @@ Static Function CtrlArea(_nTipo, _aArea, _aAlias, _aArqs)
               DbSelectArea(_aArqs[_nN])
               aAdd(_aAlias, {Alias(), IndexOrd(), Recno()})
           Next
-          // Tipo 2 = RestArea()
+       // Tipo 2 = RestArea()
        Else
           For _nN := 1 To Len(_aAlias)
               DbSelectArea(_aAlias[_nN][1])
@@ -931,9 +1041,10 @@ Static Function fGetDados1(nOpcX)
        Local aHead        := {}               // Array a ser tratado internamente na MsNewGetDados como aHeader
        Local aCol         := {}               // Array a ser tratado internamente na MsNewGetDados como aCols
        Local _lOpen      := .F. // AdequaÁ„o para release 12.1.25
-	   Local _cAliasSX3  := GetNextAlias() // AdequaÁ„o para release 12.1.25
+	    Local _cAliasSX3  := GetNextAlias() // AdequaÁ„o para release 12.1.25
        // Carrega aHead
-       /* RELEASE 12.1.25
+/*
+       RELEASE 12.1.25
        DbSelectArea("SX3")
        SX3->(DbSetOrder(2)) // Campo
        For nX := 1 to Len(aCpoGDa)
@@ -959,7 +1070,7 @@ Static Function fGetDados1(nOpcX)
                            SX3->X3_RELACAO    })
            Endif
        Next nX
-       */
+*/
        OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
        _lOpen := Select( _cAliasSX3 ) > 0       
        
@@ -975,17 +1086,17 @@ Static Function fGetDados1(nOpcX)
                  cCpoVld := "AllwaysTrue()"
               Endif
               aAdd(aHead, {AllTrim(( _cAliasSX3 )->(X3_TITULO)),;
-                           ( _cAliasSX3 )->(X3_CAMPO)      ,;
-                           ( _cAliasSX3 )->(X3_PICTURE)    ,;
-                           ( _cAliasSX3 )->(X3_TAMANHO)    ,;
-                           ( _cAliasSX3 )->(X3_DECIMAL)    ,;
-                           cCpoVld            			   ,;
-                           ( _cAliasSX3 )->(X3_USADO)      ,;
-                           ( _cAliasSX3 )->(X3_TIPO)       ,;
-                           ( _cAliasSX3 )->(X3_F3)         ,;
-                           ( _cAliasSX3 )->(X3_CONTEXT)    ,;
-                           ( _cAliasSX3 )->(X3_CBOX)       ,;
-                           ( _cAliasSX3 )->(X3_RELACAO)    })
+                               ( _cAliasSX3 )->(X3_CAMPO)      ,;
+                               ( _cAliasSX3 )->(X3_PICTURE)    ,;
+                               ( _cAliasSX3 )->(X3_TAMANHO)    ,;
+                               ( _cAliasSX3 )->(X3_DECIMAL)    ,;
+                                cCpoVld            			   ,;
+                               ( _cAliasSX3 )->(X3_USADO)      ,;
+                               ( _cAliasSX3 )->(X3_TIPO)       ,;
+                               ( _cAliasSX3 )->(X3_F3)         ,;
+                               ( _cAliasSX3 )->(X3_CONTEXT)    ,;
+                               ( _cAliasSX3 )->(X3_CBOX)       ,;
+                                 ( _cAliasSX3 )->(X3_RELACAO)    })
            Endif
 
 
@@ -1011,12 +1122,12 @@ Static Function fGetDados1(nOpcX)
           nVolBor := 0
           cQry1 := ""
           cQry1 += "SELECT SZG.ZG_PEDIDO, SA1.A1_NOME, SZG.ZG_LOCALIZ, SC5.C5_PBRUTO, SC5.C5_VOLUME1 "
-          cQry1 += "FROM "+RetSqlName("SZG")+" SZG WITH (NOLOCK) "
-          cQry1 += "LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON SC5.C5_FILIAL = SZG.ZG_FILIAL AND SC5.C5_NUM = SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AND SC5.D_E_L_E_T_ = '' "
-          cQry1 += "LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.A1_FILIAL = '"+xFilial("SA1")+"') AND SA1.A1_COD = SC5.C5_CLIENTE AND SA1.A1_LOJA = SC5.C5_LOJACLI AND SC5.D_E_L_E_T_ = '' "
-          cQry1 += "WHERE SZG.ZG_FILIAL  = '"+xFilial("SZG")+"' "
-          cQry1 += "  AND SZG.D_E_L_E_T_ = '' "
-          cQry1 += "  AND SZG.ZG_CODIGO  = '"+SZF->ZF_CODIGO+"' "
+          cQry1 += "  FROM "+RetSqlName("SZG")+" SZG WITH (NOLOCK) "
+          cQry1 += "    LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON SC5.C5_FILIAL = SZG.ZG_FILIAL AND SC5.C5_NUM = SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AND SC5.D_E_L_E_T_ = '' "
+          cQry1 += "    LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.A1_FILIAL = '"+xFilial("SA1")+"') AND SA1.A1_COD = SC5.C5_CLIENTE AND SA1.A1_LOJA = SC5.C5_LOJACLI AND SC5.D_E_L_E_T_ = '' "
+          cQry1 += " WHERE SZG.ZG_FILIAL  = '"+xFilial("SZG")+"' "
+          cQry1 += "   AND SZG.D_E_L_E_T_ = '' "
+          cQry1 += "   AND SZG.ZG_CODIGO  = '"+SZF->ZF_CODIGO+"' "
           cQry1 += "ORDER BY 1 "
           TCQuery cQry1 ALIAS "TCQSZG" NEW
           DbSelectArea("TCQSZG")
@@ -1107,7 +1218,7 @@ Static Function NwFieldGet(oObjeto, cCampo, nLinha)
        Local xRet
        // Se nLinha nao for preenchida Retorna a Posicao de nAt do Objeto
        Default nLinha := oObjeto:nAt
-       xRet := oObjeto:aCols[nLinha][nCol]
+       xRet           := oObjeto:aCols[nLinha][nCol]
 Return(xRet)
 
 /*‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
@@ -1127,7 +1238,7 @@ Return(xRet)
 ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
 
 Static Function NwFieldPut(oObjeto, cCampo, nLinha, xNewValue)
-       Local nCol := aScan(oObjeto:aHeader,{|x| AllTrim(x[2]) == Upper(cCampo)})
+       Local nCol     := aScan(oObjeto:aHeader,{|x| AllTrim(x[2]) == Upper(cCampo)})
        // Se nLinha nao for preenchida Retorna a Posicao de nAt do Objeto
        Default nLinha := oObjeto:nAt
        // Alimenta Celula com novo Valor se este foi preenchido
@@ -1152,12 +1263,12 @@ Return Nil
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
 Static Function NwDeleted(oObjeto, nLinha)
-       Local nCol := Len(oObjeto:aCols[1])
-       Local lRet := .T.
+       Local nCol     := Len(oObjeto:aCols[1])
+       Local lRet     := .T.
        // Se nLinha nao for preenchida Retorna a Posicao de nAt do Objeto
        Default nLinha := oObjeto:nAt
        // Alimenta Celula com novo Valor
-       lRet := oObjeto:aCols[nLinha][nCol]
+       lRet           := oObjeto:aCols[nLinha][nCol]
 Return(lRet)
 
 /******************************************************************************************************************/
@@ -1177,7 +1288,7 @@ User Function fVldPed(aCols, cOpcao)
        Local cMsgSC5 := ""
        Local cMsgSC9 := ""
        Local cQry1   := ""
-       Local cMsg 	 := ""
+       Local cMsg 	:= ""
        For _ni := 1 To Len(aCols)
            DbSelectArea("SC5")
            DbGoTop()
@@ -1227,13 +1338,13 @@ User Function fVldPed(aCols, cOpcao)
           aPedSC9 := {}
           cQry1 := ""
           cQry1 += "SELECT C9_PEDIDO "
-          cQry1 += "FROM "+RetSqlName("SC9")+" SC9 WITH (NOLOCK) "
-          cQry1 += "WHERE (SC9.C9_FILIAL  = '"+xFilial("SC9")+"') "
-          cQry1 += "  AND SC9.D_E_L_E_T_ = '' "
-//          cQry1 += "  AND SC9.C9_PEDIDO IN('"+SubStr(cAuxPed, 1, Len(cAuxPed)-3)+") "
-          cQry1 += "  AND SC9.C9_PEDIDO IN('"+cAuxPed+"') "
-          cQry1 += "  AND SC9.C9_BLEST   <> '' "
-          cQry1 += "  AND SC9.C9_BLCRED  <> '' "
+          cQry1 += "  FROM "+RetSqlName("SC9")+" SC9 WITH (NOLOCK) "
+          cQry1 += " WHERE (SC9.C9_FILIAL  = '"+xFilial("SC9")+"') "
+          cQry1 += "   AND SC9.D_E_L_E_T_ = '' "
+//        cQry1 += "   AND SC9.C9_PEDIDO IN('"+SubStr(cAuxPed, 1, Len(cAuxPed)-3)+") "
+          cQry1 += "   AND SC9.C9_PEDIDO IN('"+cAuxPed+"') "
+          cQry1 += "   AND SC9.C9_BLEST   <> '' "
+          cQry1 += "   AND SC9.C9_BLCRED  <> '' "
           TCQuery cQry1 ALIAS "XC9" NEW
           DbSelectArea("XC9")
           While !Eof()
@@ -1251,14 +1362,14 @@ User Function fVldPed(aCols, cOpcao)
           aPedSC5 := {}
           cQry1 := ""
           cQry1 += "SELECT C5_NUM "
-          cQry1 += "FROM "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) "
-          cQry1 += "WHERE (D_E_L_E_T_ <> '*') AND (SC5.C5_FILIAL = '"+xFilial("SC5")+"') "
-          cQry1 += "  AND C5_NOTA = '' "
-          cQry1 += "  AND SC5.C5_LIBCAD = 'T' "
-          cQry1 += "  AND SC5.C5_LIBPED = 'T' "
-          cQry1 += "  AND SC5.C5_LIBCRE = 'T' "
-          cQry1 += "  AND SC5.C5_LIBDIR = 'T' "
-          cQry1 += "  AND SC5.C5_APROVA = 0 "
+          cQry1 += "  FROM "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) "
+          cQry1 += " WHERE (D_E_L_E_T_ <> '*') AND (SC5.C5_FILIAL = '"+xFilial("SC5")+"') "
+          cQry1 += "   AND C5_NOTA = '' "
+          cQry1 += "   AND SC5.C5_LIBCAD = 'T' "
+          cQry1 += "   AND SC5.C5_LIBPED = 'T' "
+          cQry1 += "   AND SC5.C5_LIBCRE = 'T' "
+          cQry1 += "   AND SC5.C5_LIBDIR = 'T' "
+          cQry1 += "   AND SC5.C5_APROVA = 0 "
           TCQuery cQry1 ALIAS "XC5" NEW
           DbSelectArea("XC5")
           While !Eof()
@@ -1340,7 +1451,7 @@ Static Function fListBox1()
                 //              |    +---------------------------------------------------->>> 02 - CÛdigo do Cliente
                 //              +--------------------------------------------------------->>> 01 - Numero do Pedido
 
-                aMatDad[Len(aMatDad)][01] := TCQZZC->ZZC_PEDIDO                                                                                      //Pedido
+                aMatDad[Len(aMatDad)][01] := TCQZZC->ZZC_PEDIDO                                                                                   //Pedido
                 aMatDad[Len(aMatDad)][02] := Posicione("SC5", 1, xFilial("SC5")+aMatDad[Len(aMatDad)][01], "C5_CLIENTE")                          //Cliente
                 aMatDad[Len(aMatDad)][03] := Posicione("SC5", 1, xFilial("SC5")+aMatDad[Len(aMatDad)][01], "C5_LOJACLI")                          //Loja Cliente
                 aMatDad[Len(aMatDad)][04] := Posicione("SA1", 1, xFilial("SA1")+aMatDad[Len(aMatDad)][02]+aMatDad[Len(aMatDad)][03], "A1_NOME")   //Raz„o Social
@@ -1353,11 +1464,11 @@ Static Function fListBox1()
                 Endif
                 aMatDad[Len(aMatDad)][12] := Posicione("SZG", 2, xFilial("SZG")+'01'+aMatDad[Len(aMatDad)][01], "ZG_LOCALIZ")                     //EndereÁo na ExpediÁ„o
                 If TCQZZC->ZZC_SEPARA $ 'S'
-                   aMatDad[Len(aMatDad)][07] := TCQZZC->QTDE                                                                                         //Quantidade j· separada
+                   aMatDad[Len(aMatDad)][07] := TCQZZC->QTDE                                                                                      //Quantidade j· separada
                 Else
-                   aMatDad[Len(aMatDad)][08] := TCQZZC->QTDE                                                                                         //Quantidade n„o separada
+                   aMatDad[Len(aMatDad)][08] := TCQZZC->QTDE                                                                                      //Quantidade n„o separada
                 Endif
-                aMatDad[Len(aMatDad)][09] += TCQZZC->QTDE                                                                                            //Quantidade Total
+                aMatDad[Len(aMatDad)][09] += TCQZZC->QTDE                                                                                         //Quantidade Total
                 aMatDad[Len(aMatDad)][10] := aMatDad[Len(aMatDad)][06]                                                                            //Regi„o (Passou a ser Transportadora)
                 aMatDad[Len(aMatDad)][13] := Posicione("SC5", 1, xFilial("SC5")+aMatDad[Len(aMatDad)][01], "C5_VOLUME1")                          //Volume do Pedido
 
@@ -1472,15 +1583,15 @@ Static Function fTroPed(cObsMsg)
           If Found()
               While !Eof() .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PEDIDO == oMonDes:aArray[oMonDes:nAt][2]
                   If ZZC->ZZC_SEPARA <> 'S'
-				      cQry1 := "SELECT ZZC.ZZC_PRODUT AS PRODUTO, ZZC.ZZC_CARGA AS CODIGO, ZZC.ZZC_PEDIDO AS PEDIDO, "+;
-                      "CASE WHEN ZZC.ZZC_CARGA = '' THEN '' ELSE SUBSTRING(ISNULL(SZA.ZA_DESCR, ''), 1, 10) END AS DESCRICAO, "+;
-                      "CASE WHEN ZZC.ZZC_CARGA = '' THEN 'SEM BORD. ' ELSE CASE WHEN SZA.ZA_PREVDSP = '' THEN '99999999' ELSE SZA.ZA_PREVDSP END END AS PREVISAO "+;
-					  "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "+;
-					  "LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON (SZB.ZB_FILIAL = ZZC.ZZC_FILIAL) AND (SUBSTRING(SZB.ZB_PEDIDO, 3, 6) = ZZC.ZZC_PEDIDO) AND (SZB.D_E_L_E_T_ = '') "+;
-					  "LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON SZA.ZA_FILIAL = SZB.ZB_FILIAL AND SZA.ZA_CODIGO = SZB.ZB_CODIGO AND SZA.D_E_L_E_T_ = '' "+;
-					  "WHERE (ZZC.ZZC_FILIAL = '"+xFilial("SZA")+"') AND (ZZC.D_E_L_E_T_ = '') AND (ZZC.ZZC_SEPARA <> 'S') AND (ZZC.ZZC_DESPAC <> 'S') "+;
-					  "AND (ZZC.ZZC_PRODUT = '"+ZZC->ZZC_PRODUTO+"') "+;
-					  "ORDER BY PREVISAO"
+				         cQry1 := "SELECT ZZC.ZZC_PRODUT AS PRODUTO, ZZC.ZZC_CARGA AS CODIGO, ZZC.ZZC_PEDIDO AS PEDIDO, "+;
+                                "CASE WHEN ZZC.ZZC_CARGA = '' THEN '' ELSE SUBSTRING(ISNULL(SZA.ZA_DESCR, ''), 1, 10) END AS DESCRICAO, "+;
+                                "CASE WHEN ZZC.ZZC_CARGA = '' THEN 'SEM BORD. ' ELSE CASE WHEN SZA.ZA_PREVDSP = '' THEN '99999999' ELSE SZA.ZA_PREVDSP END END AS PREVISAO "+;
+					                 "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "+;
+					                    "LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON (SZB.ZB_FILIAL = ZZC.ZZC_FILIAL) AND (SUBSTRING(SZB.ZB_PEDIDO, 3, 6) = ZZC.ZZC_PEDIDO) AND (SZB.D_E_L_E_T_ = '') "+;
+					                    "LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON SZA.ZA_FILIAL = SZB.ZB_FILIAL AND SZA.ZA_CODIGO = SZB.ZB_CODIGO AND SZA.D_E_L_E_T_ = '' "+;
+					                "WHERE (ZZC.ZZC_FILIAL = '"+xFilial("SZA")+"') AND (ZZC.D_E_L_E_T_ = '') AND (ZZC.ZZC_SEPARA <> 'S') AND (ZZC.ZZC_DESPAC <> 'S') "+;
+					                  "AND (ZZC.ZZC_PRODUT = '"+ZZC->ZZC_PRODUTO+"') "+;
+					               "ORDER BY PREVISAO"
                       TCQuery cQry1 ALIAS "TCQZZC" NEW
                       DbSelectArea("TCQZZC")
                       cDesDes := TCQZZC->DESCRICAO
@@ -1532,15 +1643,14 @@ Static Function fNewBor()
               aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 5), 0, 0, 0})
            Else
            		_nLin := aScan(aQtdReg, {|x| Alltrim(x[1]) == Alltrim(oMonDes:aArray[nY][7])})
-           		IF !(valtype(_nLin) = "N") .or. (_nLin <= 0)
-		              aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 5), 0, 0, 0})
-		              _nLin := 1
-		     	endif 
-
+           IF !(valtype(_nLin) = "N") .or. (_nLin <= 0)
+		         aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 5), 0, 0, 0})
+		         _nLin := 1
+		     endif 
               aQtdReg[_nLin][2] += 1
-              If oMonDes:aArray[nY][1]
-                 aQtdReg[aScan(aQtdReg, {|x| Alltrim(x[1]) == Alltrim(oMonDes:aArray[nY][7])})][3] += 1
-              Endif
+            If oMonDes:aArray[nY][1]
+               aQtdReg[aScan(aQtdReg, {|x| Alltrim(x[1]) == Alltrim(oMonDes:aArray[nY][7])})][3] += 1
+            Endif
            Endif
        Next
        If Len(aMatReg) > 0
@@ -1604,6 +1714,7 @@ Static Function fBorJaE()
        Local _nLin
        Local nY       := 0
        Local nA       := 0
+       Private cBorDes := Space(06) // Jose 20/03/2024
        Private aMarCar:= {}
        Private oMarCar
 
@@ -1616,19 +1727,19 @@ Static Function fBorJaE()
            Endif 
            //Cleber (19/02/2016)
            If Empty(oMonDes:aArray[nY][2]) .or. (len(aQtdReg) == 0)
-              aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 5), 0, 0, 0})
+              aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 6), 0, 0, 0})      //  Jose 10/04/2025    1, 5
            Else
 	           //Cleber (19/02/2016)
            		_nLin := aScan(aQtdReg, {|x| Alltrim(x[1]) == Alltrim(oMonDes:aArray[nY][7])})
-           		IF !(valtype(_nLin) = "N") .or. (_nLin <= 0)
-		              aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 5), 0, 0, 0})
-		              _nLin := 1
-		     	endif 
+           IF !(valtype(_nLin) = "N") .or. (_nLin <= 0)
+ 		          aAdd(aQtdReg, {SubStr(oMonDes:aArray[nY][3], 1, 6), 0, 0, 0})    //  Jose 10/04/2025    1, 5
+		         _nLin := 1
+		     endif 
              	aQtdReg[_nLin][2] += 1
-       			If oMonDes:aArray[nY][1]   
-              		//_nLin := aScan(aQtdReg, {|x| Alltrim(x[1]) == Alltrim(oMonDes:aArray[nY][7])}) //Cleber(13/12/19)->Chamado 015419, _nLin est· vindo nulo 
-              		aQtdReg[_nLin][3] += 1
-              	Endif
+       		If oMonDes:aArray[nY][1]   
+            	//_nLin := aScan(aQtdReg, {|x| Alltrim(x[1]) == Alltrim(oMonDes:aArray[nY][7])}) //Cleber(13/12/19)->Chamado 015419, _nLin est· vindo nulo 
+            	aQtdReg[_nLin][3] += 1
+            Endif
            Endif
        Next
        If Len(aMatReg) > 0
@@ -1641,75 +1752,75 @@ Static Function fBorJaE()
                     cBorDes := aMarCar[nA][2]
                  Endif
              Next
-             If !Empty(cBorDes)
-                //1∫) GravaÁ„o de Dados no Bordero de Despacho
-                DbSelectArea("SZA")
-                DbSetOrder(1)
-                DbSeek(xFilial("SZA")+cBorDes, .t.)
-                If Found()
-                   nPesBor := 0
-                   nVolBor := 0
-                   aDelMon := {}
-                   lOutBor := .f.
-                   For nA := 1 To Len(oMonDes:aArray)
-                       If oMonDes:aArray[nA][1]
-                          aQtdReg[aScan(aQtdReg, {|x| Alltrim(x[1]) == AllTrim(oMonDes:aArray[nA][7])})][4] += 1
-                          DbSelectArea("SZB")
-                          DbSetOrder(2)
-                          DbSeek(xFilial("SZB")+oMonDes:aArray[nA][2], .t.)
-                          If !Found()
-                             RecLock("SZB", .t.)
-                                SZB->ZB_FILIAL := xFilial("SZB")
-                                SZB->ZB_CODIGO := cBorDes
-                                SZB->ZB_PEDIDO := Substr(cnumemp,1,2)+oMonDes:aArray[nA][2]
-                                SZB->ZB_RAZAO  := SubStr(oMonDes:aArray[nA][3], 13, 40)
-                             MsUnLock()
-                             nPesBor += Posicione("SC5", 1, xFilial("SC5")+oMonDes:aArray[nA][2], "C5_PBRUTO")
-                             nVolBor += Posicione("SC5", 1, xFilial("SC5")+oMonDes:aArray[nA][2], "C5_VOLUME1")
-                             DbSelectArea("ZZC")
-                             DbSetOrder(2)
-                             DbSeek(xFilial("ZZC")+oMonDes:aArray[nA][2], .t.)
-                             If Found()
-                                While !Eof() .AND. ZZC->ZZC_FILIAL == SZB->ZB_FILIAL .AND. ZZC->ZZC_PEDIDO == oMonDes:aArray[nA][2]
-                                      RecLock("ZZC", .f.)
-                                         ZZC->ZZC_CARGA := cBorDes
-                                      MsUnLock()
-                                      DbSelectArea("ZZC")
-                                      DbSkip()
-                                Enddo
-                             Else
+          If !Empty(cBorDes)
+             //1∫) GravaÁ„o de Dados no Bordero de Despacho
+             DbSelectArea("SZA")
+             DbSetOrder(1)
+             DbSeek(xFilial("SZA")+cBorDes, .t.)
+             If Found()
+                nPesBor := 0
+                nVolBor := 0
+                aDelMon := {}
+                lOutBor := .f.
+                For nA  := 1 To Len(oMonDes:aArray)
+                    If oMonDes:aArray[nA][1]
+                       aQtdReg[aScan(aQtdReg, {|x| Alltrim(x[1]) == AllTrim(oMonDes:aArray[nA][7])})][4] += 1
+                       DbSelectArea("SZB")
+                       DbSetOrder(2)
+                       DbSeek(xFilial("SZB")+oMonDes:aArray[nA][2], .t.)
+                       If !Found()
+                           RecLock("SZB", .t.)
+                              SZB->ZB_FILIAL := xFilial("SZB")
+                              SZB->ZB_CODIGO := cBorDes
+                              SZB->ZB_PEDIDO := Substr(cnumemp,1,2)+oMonDes:aArray[nA][2]
+                              SZB->ZB_RAZAO  := SubStr(oMonDes:aArray[nA][3], 13, 40)
+                           MsUnLock()
+                           nPesBor += Posicione("SC5", 1, xFilial("SC5")+oMonDes:aArray[nA][2], "C5_PBRUTO")
+                           nVolBor += Posicione("SC5", 1, xFilial("SC5")+oMonDes:aArray[nA][2], "C5_VOLUME1")
+                           DbSelectArea("ZZC")
+                           DbSetOrder(2)
+                           DbSeek(xFilial("ZZC")+oMonDes:aArray[nA][2], .t.)
+                           If Found()
+                              While !Eof() .AND. ZZC->ZZC_FILIAL == SZB->ZB_FILIAL .AND. ZZC->ZZC_PEDIDO == oMonDes:aArray[nA][2]
+                                     RecLock("ZZC", .f.)
+                                     ZZC->ZZC_CARGA := cBorDes
+                                     MsUnLock()
+                                     DbSelectArea("ZZC")
+                                     DbSkip()
+                              Enddo
+                           Else
                                 DbSelectArea("SC6")
                                 DbSetOrder(1)
                                 DbSeek(xFilial("SC6")+oMonDes:aArray[nA][2], .t.)
                                 If Found()
                                    While !Eof() .AND. SC6->C6_FILIAL == SZB->ZB_FILIAL .AND. SC6->C6_NUM == oMonDes:aArray[nA][2]
                                          RecLock("ZZC", .t.)
-                                            ZZC->ZZC_FILIAL := xFilial("ZZC")
-                                            ZZC->ZZC_BORDER := Posicione("SZG", 1, xFilial("SZG")+oMonDes:aArray[nA][2], "ZG_CODIGO")
-                                            ZZC->ZZC_PEDIDO := SC6->C6_NUM
-                                            ZZC->ZZC_PRODUT := SC6->C6_PRODUTO
-                                            ZZC->ZZC_QUANTI := SC6->C6_QTDVEN
-                                            ZZC->ZZC_RETIRA := 0.0
-                                            ZZC->ZZC_GAVETA := Space(03)
-                                            ZZC->ZZC_VOLUME := SC6->C6_VOLUME
-                                            ZZC->ZZC_VOLRET := 0.0
-                                            ZZC->ZZC_CARGA  := cBorDes
-                                            ZZC->ZZC_OCUPAC := SC6->C6_OCUPAC
-                                            ZZC->ZZC_DESPAC := 'N'
-                                            ZZC->ZZC_SEPARA := 'N'
-                                            ZZC->ZZC_LOTE   := Space(06)
-                                            ZZC->ZZC_SEMID  := Space(01)
-                                            ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-                                            ZZC->ZZC_TPINCL := 'B'
-                                            ZZC->ZZC_LOCEXP := Space(09)
-                                            ZZC->ZZC_RESERV := 0.0
+                                         ZZC->ZZC_FILIAL := xFilial("ZZC")
+                                         ZZC->ZZC_BORDER := Posicione("SZG", 1, xFilial("SZG")+oMonDes:aArray[nA][2], "ZG_CODIGO")
+                                         ZZC->ZZC_PEDIDO := SC6->C6_NUM
+                                         ZZC->ZZC_PRODUT := SC6->C6_PRODUTO
+                                         ZZC->ZZC_QUANTI := SC6->C6_QTDVEN
+                                         ZZC->ZZC_RETIRA := 0.0
+                                         ZZC->ZZC_GAVETA := Space(03)
+                                         ZZC->ZZC_VOLUME := SC6->C6_VOLUME
+                                         ZZC->ZZC_VOLRET := 0.0
+                                         ZZC->ZZC_CARGA  := cBorDes
+                                         ZZC->ZZC_OCUPAC := SC6->C6_OCUPAC
+                                         ZZC->ZZC_DESPAC := 'N'
+                                         ZZC->ZZC_SEPARA := 'N'
+                                         ZZC->ZZC_LOTE   := Space(06)
+                                         ZZC->ZZC_SEMID  := Space(01)
+                                         ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
+                                         ZZC->ZZC_TPINCL := 'B'
+                                         ZZC->ZZC_LOCEXP := Space(09)
+                                         ZZC->ZZC_RESERV := 0.0
                                          MsUnLock()
                                          DbSelectArea("SC6")
                                          DbSkip()
                                    Enddo
                                 Endif
-                             Endif
-                          Else
+                           Endif
+                       Else
                           //***********
                              If MsgYesNo("Pedido "+oMonDes:aArray[nA][2]+" est· no despacho "+SZB->ZB_CODIGO, "Continua nesse despacho ?")
                                 cRedAtu := SZB->ZB_CODIGO
@@ -1732,10 +1843,10 @@ Static Function fBorJaE()
                                 nVolBor += Posicione("SC5", 1, xFilial("SC5")+oMonDes:aArray[nA][2], "C5_VOLUME1")
                                 lOutBor := .f.
                              Endif
-                          Endif
-                          aAdd(aDelMon, oMonDes:aArray[nA][2])
                        Endif
-                   Next
+                          aAdd(aDelMon, oMonDes:aArray[nA][2])
+                    Endif
+                Next
                    RecLock("SZA", .f.)
                       SZA->ZA_PESO   += nPesBor
                       SZA->ZA_VOLUME += nVolBor
@@ -1795,10 +1906,10 @@ Static Function fListBox2()
 
        cQry1 := ""
        cQry1 += "SELECT SZA.ZA_CODIGO, SUBSTRING(SZA.ZA_EMISSAO, 7, 2)+'/'+SUBSTRING(SZA.ZA_EMISSAO, 5, 2)+'/'+SUBSTRING(SZA.ZA_EMISSAO, 1, 4) AS ZA_EMISSAO, SUBSTRING(SZA.ZA_PREVDSP, 7, 2)+'/'+SUBSTRING(SZA.ZA_PREVDSP, 5, 2)+'/'+SUBSTRING(SZA.ZA_PREVDSP, 1, 4) AS ZA_PREVDSP, SZA.ZA_REGIAO+' - '+SZA.ZA_DESCR AS ZA_REGIAO, SZA.ZA_PESO, SZA.ZA_VOLUME "
-       cQry1 += "FROM "+RetSqlName("SZA")+" SZA WITH (NOLOCK) "
-       cQry1 += "WHERE SZA.ZA_FILIAL  = '"+xFilial("SZA")+"' "
-       cQry1 += "  AND SZA.D_E_L_E_T_ = '' "
-       cQry1 += "  AND SZA.ZA_DTDESPA = '' "
+       cQry1 += "  FROM "+RetSqlName("SZA")+" SZA WITH (NOLOCK) "
+       cQry1 += " WHERE SZA.ZA_FILIAL  = '"+xFilial("SZA")+"' "
+       cQry1 += "   AND SZA.D_E_L_E_T_ = '' "
+       cQry1 += "   AND SZA.ZA_DTDESPA = '' "
        cQry1 += "ORDER BY SZA.ZA_PREVDSP, SZA.ZA_REGIAO "
        TCQuery cQry1 ALIAS "PRE" NEW
        DbSelectArea("PRE")
@@ -1854,8 +1965,8 @@ User Function FATA02_Z()
      // Variaveis Locais da Funcao
 
      // Variaveis da Funcao de Controle e GertArea/RestArea
-     Local _aArea   		:= {}
-     Local _aAlias  		:= {}
+     Local _aArea   	:= {}
+     Local _aAlias  	:= {}
      // Variaveis Private da Funcao
      Private cBorPed := Space(06)
      Private cBorDes := Space(06)
@@ -1949,18 +2060,18 @@ Static Function fValVol(nOpcVol)
                  If !Empty(cCodPro)
                     cQry1 := ""
                     cQry1 += "SELECT SUM(ZZC.ZZC_RETIRA) AS QUANTI "
-                    cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-                    cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-                    cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-                    cQry1 += "  AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
+                    cQry1 += "  FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+                    cQry1 += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+                    cQry1 += "   AND ZZC.D_E_L_E_T_ = '' "
+                    cQry1 += "   AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
                     If !Empty(cBorPed)
-                       cQry1 += "  AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
+                       cQry1 += "AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
                     Endif
                     If !Empty(cBorDes)
-                       cQry1 += "  AND ZZC.ZZC_CARGA = '"+cBorDes+"' "
+                       cQry1 += "AND ZZC.ZZC_CARGA = '"+cBorDes+"' "
                     Endif
                     If !Empty(cNumPed)
-                       cQry1 += "  AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
+                       cQry1 += "AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
                     Endif
                     TCQuery cQry1 ALIAS "TCQRET" NEW
                     DbSelectArea("TCQRET")
@@ -1983,18 +2094,18 @@ Static Function fValVol(nOpcVol)
                  If !Empty(cCodPro)
                     cQry1 := ""
                     cQry1 += "SELECT SUM(ZZC.ZZC_RETIRA) AS QUANTI "
-                    cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-                    cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-                    cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-                    cQry1 += "  AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
+                    cQry1 += "  FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+                    cQry1 += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+                    cQry1 += "   AND ZZC.D_E_L_E_T_ = '' "
+                    cQry1 += "   AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
                     If !Empty(cBorPed)
-                       cQry1 += "  AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
+                       cQry1 += "AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
                     Endif
                     If !Empty(cBorDes)
-                       cQry1 += "  AND ZZC.ZZC_CARGA = '"+cBorDes+"' "
+                       cQry1 += "AND ZZC.ZZC_CARGA = '"+cBorDes+"' "
                     Endif
                     If !Empty(cNumPed)
-                       cQry1 += "  AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
+                       cQry1 += "AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
                     Endif
                     TCQuery cQry1 ALIAS "TCQRET" NEW
                     DbSelectArea("TCQRET")
@@ -2019,18 +2130,18 @@ Static Function fValVol(nOpcVol)
                  If !Empty(cBorPed) .or. !Empty(cBorDes) .or. !Empty(cNumPed)
                     cQry1 := ""
                     cQry1 += "SELECT SUM(ZZC.ZZC_RETIRA) AS QUANTI "
-                    cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-                    cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-                    cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-                    cQry1 += "  AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
+                    cQry1 += "  FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+                    cQry1 += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+                    cQry1 += "   AND ZZC.D_E_L_E_T_ = '' "
+                    cQry1 += "   AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
                     If !Empty(cBorPed)
-                       cQry1 += "  AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
+                       cQry1 += "AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
                     Endif
                     If !Empty(cBorDes)
-                       cQry1 += "  AND ZZC.ZZC_CARGA = '"+cBorDes+"' "
+                       cQry1 += "AND ZZC.ZZC_CARGA = '"+cBorDes+"' "
                     Endif
                     If !Empty(cNumPed)
-                       cQry1 += "  AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
+                       cQry1 += "AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
                     Endif
                     TCQuery cQry1 ALIAS "TCQRET" NEW
                     DbSelectArea("TCQRET")
@@ -2063,19 +2174,19 @@ Static Function fVolBor()
        cQry3 := ""
        cQry1 += "SELECT COUNT(*) AS QTDE "
        cQry2 += "SELECT ZZC.ZZC_PEDIDO, ZZC.ZZC_QUANTI, ZZC.ZZC_RETIRA, ZZC.ZZC_GAVETA "
-       cQry3 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-       cQry3 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-       cQry3 += "  AND ZZC.D_E_L_E_T_ = '' "
-       cQry3 += "  AND ZZC.ZZC_RETIRA > 0
-       cQry3 += "  AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
+       cQry3 += "  FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+       cQry3 += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+       cQry3 += "   AND ZZC.D_E_L_E_T_ = '' "
+       cQry3 += "   AND ZZC.ZZC_RETIRA > 0
+       cQry3 += "   AND ZZC.ZZC_PRODUT = '"+cCodPro+"' "
        If !Empty(cBorPed)
-          cQry3 += "  AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
+          cQry3 += "AND ZZC.ZZC_BORDER = '"+cBorPed+"' "
        Endif
        If !Empty(cBorDes)
-          cQry3 += "  AND ZZC.ZZC_CARGA  = '"+cBorDes+"' "
+          cQry3 += "AND ZZC.ZZC_CARGA  = '"+cBorDes+"' "
        Endif
        If !Empty(cNumPed)
-          cQry3 += "  AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
+          cQry3 += "AND ZZC.ZZC_PEDIDO = '"+cNumPed+"' "
        Endif
        cQry1 += cQry3
        cQry2 += cQry3 ; cQry2 += "ORDER BY ZZC.ZZC_RETIRA "
@@ -2197,8 +2308,7 @@ User Function FATA02_A()
      If SZF->ZF_TIPOBOR $ '1.2' .OR. EMPTY(Alltrim(SZF->ZF_TIPOBOR))  // POR EQTO S” N√O ENDERE«A CARGA PRA SP
 		MsgBox("Bordero n„o pode ser endereÁado!", "AtenÁ„o", "STOP")
 		Return
-	 Endif        	
-
+	  Endif        	
 
      If !SZF->ZF_FLAG $ 'P'
         If SZF->ZF_FLAG $ 'D'
@@ -2256,16 +2366,16 @@ Static Function fMonOpc(cOpcMen)
 
        If cOpcMen $ 'L'
           cQry1 += "SELECT SZ1.Z1_LINHA AS CODIGO, SZ1.Z1_DESCR AS DESCRICAO "
-          cQry1 += "FROM "+RetSqlName("SZ1")+" SZ1 WITH (NOLOCK) "
-          cQry1 += "WHERE SZ1.Z1_FILIAL = '"+xFilial("SZ1")+"' "
-          cQry1 += "  AND SZ1.D_E_L_E_T_ = '' "
+          cQry1 += "  FROM "+RetSqlName("SZ1")+" SZ1 WITH (NOLOCK) "
+          cQry1 += " WHERE SZ1.Z1_FILIAL = '"+xFilial("SZ1")+"' "
+          cQry1 += "   AND SZ1.D_E_L_E_T_ = '' "
           cQry1 += "ORDER BY SZ1.Z1_LINHA "
        Else
           cQry1 += "SELECT SZ5.Z5_EMB AS CODIGO, SZ5.Z5_DESCR AS DESCRICAO "
-          cQry1 += "FROM "+RetSqlName("SZ5")+" SZ5 WITH (NOLOCK) "
-          cQry1 += "WHERE SZ5.Z5_FILIAL = '' "
-          cQry1 += "  AND SZ5.D_E_L_E_T_ = '' "
-          cQry1 += "  AND SZ5.Z5_EMB <> '00' "
+          cQry1 += "  FROM "+RetSqlName("SZ5")+" SZ5 WITH (NOLOCK) "
+          cQry1 += " WHERE SZ5.Z5_FILIAL = '' "
+          cQry1 += "   AND SZ5.D_E_L_E_T_ = '' "
+          cQry1 += "   AND SZ5.Z5_EMB <> '00' "
           cQry1 += "ORDER BY SZ5.Z5_EMB "
        Endif
        TCQuery cQry1 ALIAS "TOPC" NEW
@@ -2377,17 +2487,17 @@ Static Function fEndEsp()
           cEmbAux := SubStr(cEmbAux, 1, Len(cEmbAux) - 3)+')'
        Endif
        cQry1 += "SELECT COUNT(*) AS QTDE "
-       cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-       cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-       cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-       cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-       cQry1 += "  AND ZZC.ZZC_RETIRA < ZZC.ZZC_QUANTI "
-       cQry1 += "  AND ZZC.ZZC_GAVETA = '' "
+       cQry1 += "  FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+       cQry1 += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+       cQry1 += "   AND ZZC.D_E_L_E_T_ = '' "
+       cQry1 += "   AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
+       cQry1 += "   AND ZZC.ZZC_RETIRA < ZZC.ZZC_QUANTI "
+       cQry1 += "   AND ZZC.ZZC_GAVETA = '' "
        If !Empty(cLinAux)
-          cQry1 += "  AND SUBSTRING(ZZC.ZZC_PRODUT, 4, 2)"+cLinAux+" "
+          cQry1 += "AND SUBSTRING(ZZC.ZZC_PRODUT, 4, 2)"+cLinAux+" "
        Endif
        If !Empty(cEmbAux)
-          cQry1 += "  AND SUBSTRING(ZZC.ZZC_PRODUT, 11, 2)"+cEmbAux+" "
+          cQry1 += "AND SUBSTRING(ZZC.ZZC_PRODUT, 11, 2)"+cEmbAux+" "
        Endif
        TCQuery cQry1 ALIAS "QTCQ" NEW
        DbSelectArea("QTCQ")
@@ -2491,7 +2601,6 @@ Function  ≥ oTbl1TBo() - Cria temporario para o Alias: TMPTBO
 Static Function oTbl1TBo()
        Local aFds := {}
        //Local cTmp
-
        
        Aadd( aFds , {"MARCA", "C", 002, 000} )
        Aadd( aFds , {"PEDID", "C", 008, 000} )
@@ -2500,12 +2609,12 @@ Static Function oTbl1TBo()
        Aadd( aFds , {"PALLE", "N", 004, 000} )
 
        //Aadd( aFds , {"VOLUM", "N", 005, 000} )
-       /*
+/*
        cTmp := U_NovoArqTrab("dbf") 
        dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
        Use (cTmp+".Dbf") Alias "TMPTBO" VIA "DBFCDXADS" New Exclusive
        Index On PEDID To (cTmp)      
-       */
+*/
        
        oTempTb0l := FWTemporaryTable():New( 'TMPTBO' )
        oTempTb0l:SetFields( aFds )
@@ -2515,7 +2624,6 @@ Static Function oTbl1TBo()
 Return
 
 Static Function fValBorDe()
-
        Local nVolBor :=0
        Local nPesBor :=0
        DbSelectArea("TMPTBO")
@@ -2556,29 +2664,25 @@ Static Function fValBorDe()
 Return
 
 Static Function InvTrans(cMarca, oBrw1TBo)
-	
 	Local nReg := TMPTBO->(Recno())
+   DbSelectArea("TMPTBO")
+   DbGoTop()
     
-    DbSelectArea("TMPTBO")
-    DbGoTop()
-    
-    While !Eof()
+   While !Eof()
     	RecLock("TMPTBO", .f.)
         If TMPTBO->MARCA == cMarca
         	TMPTBO->MARCA := "  "
         Else
-            TMPTBO->MARCA := cMarca
+         TMPTBO->MARCA := cMarca
         Endif
         MsUnLock()
         DbSkip()
-    Enddo
+   Enddo
     TMPTBO->(dbGoto(nReg))
     oBrw1TBo:oBrowse:Refresh(.t.)
-    
 Return
 
 Static Function fComTran()
-
        If Empty(cGet1TBo) .or. (Len(Alltrim(cGet2TBo)) <> 3)
           Return
        Endif
@@ -2609,7 +2713,6 @@ Static Function fComTran()
 Return
 
 Static Function fGravEnd()
-
        Local lcontinua := .f.
 
        If Empty(cGet1TBo) .or. (Len(Alltrim(cGet2TBo)) <> 3)
@@ -2619,7 +2722,7 @@ Static Function fGravEnd()
 
        If MsgYesNo("Grava EndereÁamento gerado ?", "AtenÁ„o")
 
-	       DbSelectArea("TMPTBO")
+         DbSelectArea("TMPTBO")
     	   DbGoTop()
 	       While !Eof()
 		       If IsMark("MARCA", cMarca)
@@ -2627,7 +2730,7 @@ Static Function fGravEnd()
         	   Endif
 	           DbSelectArea("TMPTBO")
     	       DbSkip() 
-    	   Enddo 
+    	    Enddo 
     	   
     	   If lcontinua
     	   	
@@ -2662,14 +2765,13 @@ Static Function fGravEnd()
 		
 Return
 
-
 User Function BxRetBipe()
 
-	//Local vetorWfFaltante := {}
+ //Local vetorWfFaltante := {}
 	Local countVetorFaltante := wfLaco:= 1
 	Local cSZFBORD
 	Local wfFlag := 0
-	//Local aArea  := GetArea()
+ //Local aArea  := GetArea()
 	Local cAssunto  
 	Local cMsg   := ""
 	Local NTOTAL := 0
@@ -2689,19 +2791,19 @@ User Function BxRetBipe()
         If Found()
         	While !Eof() .and. (SZG->ZG_FILIAL == XFilial("SZG")) .and. (SZG->ZG_CODIGO == SZF->ZF_CODIGO)
          		cQry1 := ""
-           	    cQry1 += " SELECT SC6.C6_NUM, SC6.C6_PRODUTO AS PRODUTO, SC6.C6_QTDVEN AS QUANTI, SC6.C6_VOLITEM AS VOLUME,SB2.B2_LOCALIZ,SB1.B1_DESC,SB1.B1_ESTOQUE, "
-				cQry1 += " SC6.C6_PALLET AS OCUPAC, '' AS DTHOT, 'B' AS TPINCL, '' AS LOCEXP, 0 AS RESERV, ISNULL(SUM(ZZK_QUANT),0) AS ZZK_QUANT "
-				cQry1 += " FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
-				cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON C6_FILIAL = ZZK_FILIAL AND C6_NUM = ZZK_PEDIDO AND C6_PRODUTO = ZZK_PRODUT AND ZZK.D_E_L_E_T_ ='' "
-				cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = C6_FILIAL AND B1_COD = C6_PRODUTO AND SB1.D_E_L_E_T_ ='' "
-				cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH(NOLOCK) ON B2_FILIAL = B1_FILIAL AND B2_LOCAL = B1_LOCPAD AND B2_COD = B1_COD AND SB2.D_E_L_E_T_ ='' "
-				cQry1 += " LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON F4_FILIAL  ='"+XFilial("SF4")+"' AND F4_CODIGO = C6_TES AND SF4.D_E_L_E_T_ ='' "
-				cQry1 += " WHERE SC6.C6_FILIAL  = '"+xFilial("SC6")+"'" 
-				cQry1 += " AND SC6.D_E_L_E_T_   = '' "
-				cQry1 += " AND SF4.F4_ESTOQUE   = 'S' "
-				cQry1 += " AND SC6.C6_NUM = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
-				cQry1 += " GROUP BY SC6.C6_NUM, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC6.C6_PALLET,SB2.B2_LOCALIZ,SB1.B1_DESC,SB1.B1_ESTOQUE "
-				cQry1 += " ORDER BY SC6.C6_NUM, SC6.C6_PRODUTO"
+         	   cQry1 += " SELECT SC6.C6_NUM, SC6.C6_PRODUTO AS PRODUTO, SC6.C6_QTDVEN AS QUANTI, SC6.C6_VOLITEM AS VOLUME,SB2.B2_LOCALIZ,SB1.B1_DESC,SB1.B1_ESTOQUE, "
+    				cQry1 += "        SC6.C6_PALLET AS OCUPAC, '' AS DTHOT, 'B' AS TPINCL, '' AS LOCEXP, 0 AS RESERV, ISNULL(SUM(ZZK_QUANT),0) AS ZZK_QUANT "
+				   cQry1 += "   FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
+				   cQry1 += "     LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON C6_FILIAL = ZZK_FILIAL AND C6_NUM = ZZK_PEDIDO AND C6_PRODUTO = ZZK_PRODUT AND ZZK.D_E_L_E_T_ ='' "
+				   cQry1 += "     LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = C6_FILIAL AND B1_COD = C6_PRODUTO AND SB1.D_E_L_E_T_ ='' "
+				   cQry1 += "     LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH(NOLOCK) ON B2_FILIAL = B1_FILIAL AND B2_LOCAL = B1_LOCPAD AND B2_COD = B1_COD AND SB2.D_E_L_E_T_ ='' "
+				   cQry1 += "     LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON F4_FILIAL  ='"+XFilial("SF4")+"' AND F4_CODIGO = C6_TES AND SF4.D_E_L_E_T_ ='' "
+				   cQry1 += "  WHERE SC6.C6_FILIAL   = '"+xFilial("SC6")+"'" 
+				   cQry1 += "    AND SC6.D_E_L_E_T_  = '' "
+				   cQry1 += "    AND SF4.F4_ESTOQUE  = 'S' "
+				   cQry1 += "    AND SC6.C6_NUM      = '"+SubStr(SZG->ZG_PEDIDO, 3, 6)+"' "
+				   cQry1 += " GROUP BY SC6.C6_NUM, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC6.C6_PALLET, SB2.B2_LOCALIZ, SB1.B1_DESC, SB1.B1_ESTOQUE "
+				   cQry1 += " ORDER BY SC6.C6_NUM, SC6.C6_PRODUTO"
                 
                 TCQuery cQry1 ALIAS "TCQSC6" NEW
                 DbSelectArea("TCQSC6")
@@ -2783,8 +2885,8 @@ User Function BxRetBipe()
 
 	// se flag igual a 1, significa que pedido tem protudo(s) faltante.
 	If wfFlag == 1
-        /*
-        cQry1 := "" 
+/*
+      cQry1 := "" 
     	cQry1 += " SELECT DISTINCT ZG_CODIGO, SC6.C6_PRODUTO AS PRODUTO, SB1.B1_DESC, SB2.B2_LOCALIZ "  
     	cQry1 += " FROM "+RetSqlName("SZG")+" SZG WITH(NOLOCK) "
     	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C6_FILIAL = ZG_FILIAL AND C6_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SZG.D_E_L_E_T_ ='' "
@@ -2801,28 +2903,27 @@ User Function BxRetBipe()
     	cQry1 += " HAVING C6_QTDVEN > ISNULL(SUM(ZZK_QUANT),0) "
     	cQry1 += " ORDER BY ZG_CODIGO, SC6.C6_PRODUTO, SB2.B2_LOCALIZ "  */
     	
-        cQry1 := "" 
+      cQry1 := "" 
     	cQry1 += " WITH TMP AS(SELECT ZG_CODIGO, SC6.C6_PRODUTO AS PRODUTO, SB1.B1_DESC, SB2.B2_LOCALIZ, (C6_VOLITEM -ISNULL(COUNT(ZZK_QUANT),0)) AS 'FALTA'
-    	cQry1 += " FROM "+RetSqlName("SZG")+" SZG WITH(NOLOCK) "
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C6_FILIAL = ZG_FILIAL AND C6_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SZG.D_E_L_E_T_ ='' "
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON C6_FILIAL = ZZK_FILIAL AND C6_NUM = ZZK_PEDIDO AND C6_PRODUTO = ZZK_PRODUT AND ZZK.D_E_L_E_T_ ='' "
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON F4_FILIAL  =F4_FILIAL AND F4_CODIGO = C6_TES AND SF4.D_E_L_E_T_ ='' " 
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = C6_FILIAL AND B1_COD = C6_PRODUTO AND SB1.D_E_L_E_T_ ='' " 
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH(NOLOCK) ON B2_FILIAL = B1_FILIAL AND B2_LOCAL = B1_LOCPAD AND B2_COD = B1_COD AND SB2.D_E_L_E_T_ ='' "
+    	cQry1 += "  FROM "+RetSqlName("SZG")+" SZG WITH(NOLOCK) "
+    	cQry1 += "   LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C6_FILIAL = ZG_FILIAL AND C6_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SZG.D_E_L_E_T_ ='' "
+    	cQry1 += "   LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON C6_FILIAL = ZZK_FILIAL AND C6_NUM = ZZK_PEDIDO AND C6_PRODUTO = ZZK_PRODUT AND ZZK.D_E_L_E_T_ ='' "
+    	cQry1 += "   LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON F4_FILIAL  =F4_FILIAL AND F4_CODIGO = C6_TES AND SF4.D_E_L_E_T_ ='' " 
+    	cQry1 += "   LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = C6_FILIAL AND B1_COD = C6_PRODUTO AND SB1.D_E_L_E_T_ ='' " 
+    	cQry1 += "   LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH(NOLOCK) ON B2_FILIAL = B1_FILIAL AND B2_LOCAL = B1_LOCPAD AND B2_COD = B1_COD AND SB2.D_E_L_E_T_ ='' "
     	cQry1 += " WHERE SZG.D_E_L_E_T_ ='' "
-    	cQry1 += " AND ZG_FILIAL = '"+xFilial("SZG")+"'"
-    	cQry1 += " AND ZG_CODIGO = '"+cSZFBORD+"'"
-    	cQry1 += " AND SF4.F4_ESTOQUE = 'S' "
-    	cQry1 += " AND SB2.B2_LOCALIZ <>'' AND B1_GRUPO NOT IN('PA55') " 
+    	cQry1 += "   AND ZG_FILIAL = '"+xFilial("SZG")+"'"
+    	cQry1 += "   AND ZG_CODIGO = '"+cSZFBORD+"'"
+    	cQry1 += "   AND SF4.F4_ESTOQUE = 'S' "
+    	cQry1 += "   AND SB2.B2_LOCALIZ <>'' AND B1_GRUPO NOT IN('PA55') " 
     	cQry1 += " GROUP BY ZG_CODIGO, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SB2.B2_LOCALIZ,SB1.B1_DESC, C6_VOLITEM "
     	cQry1 += " HAVING C6_QTDVEN > ISNULL(SUM(ZZK_QUANT),0) ) "
     	cQry1 += " SELECT ZG_CODIGO, PRODUTO, B1_DESC, B2_LOCALIZ, SUM(FALTA) AS FALTA FROM TMP "
     	cQry1 += " GROUP BY ZG_CODIGO, PRODUTO, B2_LOCALIZ, B1_DESC "
     	cQry1 += " ORDER BY ZG_CODIGO, PRODUTO, B2_LOCALIZ "
     	
-
-        TCQuery cQry1 ALIAS "TCQSZG" NEW
-        DbSelectArea("TCQSZG")
+      TCQuery cQry1 ALIAS "TCQSZG" NEW
+      DbSelectArea("TCQSZG")
 
    		If !Eof() //se o arquivo estiver vazio, sai da rotina
 
@@ -2859,12 +2960,11 @@ User Function BxRetBipe()
 			cMsg+="</table>"
   			cMsg+="</body>"
 	  		cMsg+="</html>" 
-   
 
 			DbSelectArea("TCQSZG")
             DbCloseArea() 
 			cAssunto := "Falta de produtos de estoque na compra do BorderÙ -> "+cSZFBORD    
- 		    tfMail(cAssunto,cMsg)
+		    tfMail(cAssunto,cMsg)
 	    Endif
 	EndIf
 
@@ -2873,7 +2973,6 @@ Return
 User Function BRRepFal()
 
 	Private cGet1Tr   := Space(6) 
-
 
 	/*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±	
 	±± DeclaraÁ„o de Variaveis Private dos Objetos                             ±±
@@ -2894,12 +2993,11 @@ User Function BRRepFal()
 
     oBtn1Tr   := TButton():New( 046, 122, "Confirma", oDlg1Tr, {|| FReproFaltas(cGet1Tr)}  , 048, 014, , oFontTr2, , .T., , "", , , , .F. )
     oDlg1Tr:Activate( , , , .T.)
-
 	
 Return
 
 Static Function FReproFaltas(cNumPed)	
-    
+  
     //Local aArea 	  := GetArea()
     Local cQry1 := ""
     If !MsgYesNo("Confirma atualizaÁ„o de Faltas / Produtos Bipados para o Pedido "+cNumPed+" ?", "Pergunta...")
@@ -2926,13 +3024,13 @@ Static Function FReproFaltas(cNumPed)
 
     	cQry1 := ""
     	cQry1 += " SELECT SC6.C6_NUM, SC6.C6_PRODUTO AS PRODUTO, SC6.C6_QTDVEN AS QUANTI, SC6.C6_VOLITEM AS VOLUME, SC6.C6_PALLET AS OCUPAC, '' AS DTHOT, 'B' AS TPINCL, '' AS LOCEXP, 0 AS RESERV, ISNULL(SUM(ZZK_QUANT),0) AS ZZK_QUANT "
-    	cQry1 += " FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON C6_FILIAL = ZZK_FILIAL AND C6_NUM = ZZK_PEDIDO AND C6_PRODUTO = ZZK_PRODUT AND ZZK.D_E_L_E_T_ ='' "
-    	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON F4_FILIAL  ='"+XFilial("SF4")+"' AND F4_CODIGO = C6_TES AND SF4.D_E_L_E_T_ ='' "
-    	cQry1 += " WHERE SC6.C6_FILIAL  = '"+xFilial("SC6")+"' "
-    	cQry1 += " AND SC6.D_E_L_E_T_ = '' "
-    	cQry1 += " AND SC6.C6_NUM     = '"+cNumPed+"' "
-    	cQry1 += " AND SF4.F4_ESTOQUE = 'S' "
+    	cQry1 += "   FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
+    	cQry1 += "     LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON C6_FILIAL = ZZK_FILIAL AND C6_NUM = ZZK_PEDIDO AND C6_PRODUTO = ZZK_PRODUT AND ZZK.D_E_L_E_T_ ='' "
+    	cQry1 += "     LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON F4_FILIAL  ='"+XFilial("SF4")+"' AND F4_CODIGO = C6_TES AND SF4.D_E_L_E_T_ ='' "
+    	cQry1 += "  WHERE SC6.C6_FILIAL  = '"+xFilial("SC6")+"' "
+    	cQry1 += "    AND SC6.D_E_L_E_T_ = '' "
+    	cQry1 += "    AND SC6.C6_NUM     = '"+cNumPed+"' "
+    	cQry1 += "    AND SF4.F4_ESTOQUE = 'S' "
     	cQry1 += " GROUP BY SC6.C6_NUM, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC6.C6_PALLET "
     	cQry1 += " ORDER BY SC6.C6_NUM, SC6.C6_PRODUTO "
                 
@@ -2981,7 +3079,7 @@ Static Function FReproFaltas(cNumPed)
     	// LIMPAR BIP DE PEDIDOS EXCLUÕDOS
         If MsgYesNo("Todos os itens QUE FORAM bipados e EXCLUÕDOS do pedido "+cNumPed+" ser„o desmontados, confirma ?", "Pergunta...")
 
-      		DbSelectArea("ZZK")
+      	DbSelectArea("ZZK")
         	DbSetOrder(6)
         	DbSeek(xFilial("ZZK")+cNumPed, .t.)
         	If Found() 
@@ -3003,8 +3101,8 @@ Static Function FReproFaltas(cNumPed)
     	    Endif
  		
        		
-       		DbSelectArea("ZZK")
-       		DbCloseArea()
+       	DbSelectArea("ZZK")
+       	DbCloseArea()
 
         Endif  
     
@@ -3027,16 +3125,15 @@ Local 	cQry1 := ""
     ProcRegua(50)
     
 	cQry1 += " 	SELECT ZF_CODIGO  "
-	cQry1 += " 	FROM "+RetSqlName("SZF")+" SZF WITH(NOLOCK) "
-	cQry1 += " 	LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZG_FILIAL = ZF_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
-	cQry1 += " 	LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH(NOLOCK) ON ZB_FILIAL = ZG_FILIAL AND ZB_PEDIDO = ZG_PEDIDO AND SZB.D_E_L_E_T_ ='' "
-	cQry1 += " 	WHERE ZF_FLAG ='Y' 
-	cQry1 += "	AND ZF_FILIAL ='"+XFilial("SZF")+"'"
-	cQry1 += " 	AND SZF.D_E_L_E_T_ ='' "
+	cQry1 += "    FROM "+RetSqlName("SZF")+" SZF WITH(NOLOCK) "
+	cQry1 += " 	   LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZG_FILIAL = ZF_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
+	cQry1 += " 	   LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH(NOLOCK) ON ZB_FILIAL = ZG_FILIAL AND ZB_PEDIDO = ZG_PEDIDO AND SZB.D_E_L_E_T_ ='' "
+	cQry1 += " 	 WHERE ZF_FLAG ='Y' 
+	cQry1 += "  	AND ZF_FILIAL ='"+XFilial("SZF")+"'"
+	cQry1 += " 	   AND SZF.D_E_L_E_T_ ='' "
 	cQry1 += " 	GROUP BY ZF_CODIGO "
 	cQry1 += " 	HAVING COUNT(ZG_PEDIDO) = ISNULL(COUNT(ZB_PEDIDO),0) " 
 	cQry1 += " 	ORDER BY ZF_CODIGO " 
-
 
     TCQuery cQry1 ALIAS "TCQ" NEW
     DbSelectArea("TCQ")
@@ -3044,8 +3141,8 @@ Local 	cQry1 := ""
 
    	While !Eof()
 	   	IncProc()
-	    DbSelectArea("SZF")
-	    DbSetOrder(1)
+	   DbSelectArea("SZF")
+	   DbSetOrder(1)
     	DbSeek(xFilial("SZF")+TCQ->ZF_CODIGO, .t.)
 	    If Found()
            	RecLock("SZF", .f.)
@@ -3062,17 +3159,17 @@ Local 	cQry1 := ""
 	cQry1 := "" 
 	cQry1 += " WITH TMP AS( "
 	cQry1 += " SELECT ZF_CODIGO, C6_NUM, C6_PRODUTO, C6_QTDVEN, SUM(ZZK_QUANT) AS ZZK_QUANT, COUNT(ZZK.R_E_C_N_O_) AS ZZKVOLUME "
-	cQry1 += " FROM "+RetSqlName("SZF")+" SZF WITH(NOLOCK) "
-	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZF_FILIAL = ZG_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
-	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C6_FILIAL = ZG_FILIAL AND C6_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SC6.D_E_L_E_T_ ='' "
-	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = C6_FILIAL AND B1_COD = C6_PRODUTO AND SB1.D_E_L_E_T_ ='' "
-	cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON ZZK_FILIAL = C6_FILIAL AND ZZK_PRODUT = C6_PRODUTO AND ZZK_PEDIDO = C6_NUM AND ZZK.D_E_L_E_T_ ='' "
-	cQry1 += " WHERE ZF_FLAG IN('X','Y') AND SZF.D_E_L_E_T_ ='' " 
-	cQry1 += " AND ZF_FILIAL ='"+XFilial("SZF")+"' "
-	cQry1 += " AND B1_TIPO IN('PA','PI') AND (B1_GRUPO <>'PA55') AND (LEN(B1_COD)=12) "
+	cQry1 += "   FROM "+RetSqlName("SZF")+" SZF WITH(NOLOCK) "
+	cQry1 += "    LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZF_FILIAL = ZG_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
+	cQry1 += "    LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C6_FILIAL = ZG_FILIAL AND C6_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SC6.D_E_L_E_T_ ='' "
+	cQry1 += "    LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = C6_FILIAL AND B1_COD = C6_PRODUTO AND SB1.D_E_L_E_T_ ='' "
+	cQry1 += "    LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON ZZK_FILIAL = C6_FILIAL AND ZZK_PRODUT = C6_PRODUTO AND ZZK_PEDIDO = C6_NUM AND ZZK.D_E_L_E_T_ ='' "
+	cQry1 += "  WHERE ZF_FLAG IN('X','Y') AND SZF.D_E_L_E_T_ ='' " 
+	cQry1 += "    AND ZF_FILIAL ='"+XFilial("SZF")+"' "
+	cQry1 += "    AND B1_TIPO IN('PA','PI') AND (B1_GRUPO <>'PA55') AND (LEN(B1_COD)=12) "
 	cQry1 += " GROUP BY ZF_CODIGO, C6_NUM , C6_QTDVEN, C6_PRODUTO, ZG_CODIGO) "
 	cQry1 += " SELECT TMP.ZF_CODIGO "
-	cQry1 += " FROM TMP "
+	cQry1 += "   FROM TMP "
 	cQry1 += " GROUP BY TMP.ZF_CODIGO "
 	cQry1 += " HAVING (SUM(TMP.ZZK_QUANT) = SUM(TMP.C6_QTDVEN)) "
 	cQry1 += " ORDER BY TMP.ZF_CODIGO "
@@ -3085,11 +3182,11 @@ Local 	cQry1 := ""
 	   	IncProc()
 	    DbSelectArea("SZF")
 	    DbSetOrder(1)
-    	DbSeek(xFilial("SZF")+TCQ->ZF_CODIGO, .t.)
+    	 DbSeek(xFilial("SZF")+TCQ->ZF_CODIGO, .t.)
 	    If Found()
-           	RecLock("SZF", .f.)
-           	    SZF->ZF_FLAG ='Z' // TOTALMENTE DESTINADO E BIPADO
-           	MsUnlock()        
+          RecLock("SZF", .f.)
+              SZF->ZF_FLAG ='Z' // TOTALMENTE DESTINADO E BIPADO
+          MsUnlock()        
 		Endif	
         DbSelectArea("TCQ")
         DbSkip()
@@ -3102,11 +3199,9 @@ Local 	cQry1 := ""
 	
 Return
 
-
-
 /*
 /******************************************************************************************************************/
-/*** FATA02_8 - Re-Monta Pedidos                                                                               ***/
+/*** FATA02_8 - Re-Monta Pedidos                                                                                ***/
 /******************************************************************************************************************/
 /*
 User Function FATA02_8()
@@ -3229,12 +3324,463 @@ Static Function fNovBorP()
           _oDlg1:End()
        Endif
 Return
+---------------------------------------------------------------------------------------------------------------------*/                                                  
 
-*/                                                  
 Static function tfMail(cAssunto,cTexto)
-local cPara,cCC,cArquivo
-cPara 	 :="pcp@brasilux.com.br"
-cCC      :="expedicao@brasilux.com.br;paulo@brasilux.com.br"
-cArquivo :=''
-U_EnvMail(cAssunto,cTexto,cPara,cCC,cArquivo)
+       local  cPara
+       Local  cCC
+       Local  cArquivo
+       cPara 	 :="pcp@brasilux.com.br"
+       cCC      :="expedicao@brasilux.com.br;paulo@brasilux.com.br"
+       cArquivo :=''
+       U_EnvMail(cAssunto,cTexto,cPara,cCC,cArquivo)
 return
+
+User Function TExcel()
+       Local aAreaa       := GetArea()
+       Local oFWMsExcel
+       Local oExcel
+       Local eArquivo     := "C:\Temp\"+"BRFATA02.xml"
+       Local cQry         := ""
+       Local ccabecalho
+       Local cPedido      := 0
+       Local cPedido1     := 0
+       Local cProduto     := 0
+       Local cPercen      := 0
+       Local CPercen1     := 0
+       Local cPercent     := 0
+       Local CPrim        := 0
+       Local CPrim1       := 0
+       Local cQtde        := 0
+       Local cQtdea       := 0
+//     Local cQtdee       := 0
+       Local cQtdee1      := 0
+       Local cSaldo       := 0
+//     Local cSAldo1      := 0
+       Local cVolume      := 0
+       Local cVolume1     := 0
+       Local cVolume2     := 0
+       Local cVolumeitem  := 0
+       Local cVolumep     := 0
+       Local cVolumei     := 0
+       Local cVolumepn    := 0
+       Local cVol         := 0
+       Local cVol1        := 0
+       Local cQtdeitem    := 0
+//     Local cQtdeif      := 0       Jose 07/02/2024
+       Local cEmissao 
+       Local cEmissao1
+       Local cEstoque
+       Local nX
+       Local nZ
+       Local nY
+       Local _lRet := .f.
+//     Local cProduto 
+//     Local cSaldo 
+       Private cGet2Env   := Space(06)				    // Bordero
+       Private OGRP1ENV
+       Private OFONTENV
+       Private cGet1Tr    := Space(6) 
+       Private aTotPed    := {}
+       Private aTotPed1   := {}
+
+///-------------------
+
+	    /*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±	
+	    ±± DeclaraÁ„o de Variaveis Private dos Objetos                             ±±
+	    Ÿ±±¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
+    
+	    SetPrvt("oFontTr1", "oFontTr2", "oDlg1Tr", "oSay1Tr", "oSay2Tr", "oSay3Tr", "oGet1Tr")
+
+       /*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±
+       ±± Definicao do Dialog e todos os seus componentes.                        ±±
+       Ÿ±±¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
+       oFontTr1  := TFont():New( "MS Sans Serif", 0, -19, , .T., 0, , 700, .F., .F., , , , , , )
+       oFontTr2  := TFont():New( "MS Sans Serif", 0, -19, , .F., 0, , 400, .F., .F., , , , , , )
+       oDlg1Tr   := MSDialog():New( 258, 232, 383, 570, "Processa Pedidos Fechados", , , .F., , , , , , .T., , , .T. )
+
+       oSay1Tr   := TSay():New( 023, 008, {|| "Bordero.:"  }, oDlg1Tr, , oFontTr1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 032, 012)
+       oGet1Tr   := TGet():New( 020, 047, {|u| If(PCount() > 0, cGet2Env := u, cGet2Env)}, oDlg1Tr, 088, 018, '@!'             , , CLR_BLACK, CLR_WHITE, oFontTr1, , , .T., "", , , .F., .F., , .F. , .F., ""      ,"cGet1Tr", , )
+
+       oBtn1Tr   := TButton():New( 046, 122, "Confirma", oDlg1Tr, {||  _lRet := fTExcel(cGet2Env)}  , 048, 014, , oFontTr2, , .T., , "", , , , .F. )
+       oDlg1Tr:Activate( , , , .T.)
+      
+      If _lRet
+///--------------
+		 cQry  = "SELECT SZG.ZG_PEDIDO, SZG.ZG_CODIGO, SC6.C6_NUM, SC6.C6_PRODUTO, SC6.C6_LOCAL, SC6.C6_QTDVEN, SB1.B1_ESTOQUE, 'VOLU' = ( SELECT dbo.DetVol ( SC6.C6_FILIAL, SC6.C6_PRODUTO ) ), " + STR_PULA
+//     cQry +="  'VOLUME' = ( ( ISNULL ( ( SC6.C6_QTDVEN ),0 ) ) / ( SELECT dbo.DetVol ( SC6.C6_FILIAL, SC6.C6_PRODUTO ) ) ), "                               + STR_PULA
+       cQry += " 'VOLUMEITEM'  = CASE WHEN (SELECT dbo.DetVol ( SC6.C6_FILIAL, SC6.C6_PRODUTO )) > 0 THEN  (SC6.C6_QTDVEN / ( SELECT dbo.DetVol ( SC6.C6_FILIAL, SC6.C6_PRODUTO ) ) ) ELSE SC6.C6_QTDVEN END , "  + STR_PULA
+       cQry += " 'VOLUME' = (SELECT  SC5.C5_VOLUME1  "                                                                                                        + STR_PULA
+       cQry += "                                            FROM "+RetSqlName("SC5")+" SC5 WITH(NOLOCK) "                                                     + STR_PULA
+       cQry += "                                           WHERE SC5.C5_FILIAL  = SC6.C6_FILIAL "                                                             + STR_PULA 
+       cQry += "                                             AND SC5.C5_NUM     = SC6.C6_NUM "                                                                + STR_PULA
+       cQry += "                                             AND SC5.D_E_L_E_T_ = '' ), "                                                                     + STR_PULA
+ 	    cQry += " 'EMISSAO' = (SELECT SUBSTRING(  SC55.C5_EMISSAO,7,2 ) + '/' + SUBSTRING(  SC55.C5_EMISSAO,5,2 ) + '/' + SUBSTRING(  SC55.C5_EMISSAO,1,4 ) "  + STR_PULA
+ 	    cQry += "                                            FROM "+RetSqlName("SC5")+" SC55 WITH(NOLOCK) "                                                    + STR_PULA                                         
+	    cQry += "                                           WHERE SC55.C5_FILIAL  = SC6.C6_FILIAL "                                                            + STR_PULA                               
+	    cQry += "                                             AND SC55.C5_NUM     = SC6.C6_NUM "                                                               + STR_PULA                                         
+	    cQry += "                                             AND SC55.D_E_L_E_T_ = '' ), "                                                                    + STR_PULA
+//     cQry += " 'P1P20330G3' = ISNULL( ( SELECT   (SUM(SB2.B2_QATU) - SUM(SB2.B2_RESERVA) ) "                                                                + STR_PULA Jose 06/02/2024
+       cQry += " 'P1P20330G3' = ISNULL( ( SELECT   (SUM(SB2.B2_QATU) ) "                                                                                      + STR_PULA
+       cQry += "                            FROM "+RetSqlName("SB2")+" SB2 WITH(NOLOCK) "                                                                     + STR_PULA
+//----------------  Jose 15/01/2024 --------------------------------------------------------------------------------------
+    	 cQry += " 	                               INNER JOIN "+RetSqlName("SC5")+" SC50 WITH (NOLOCK) ON SC50.C5_FILIAL  = SC6.C6_FILIAL "                     + STR_PULA
+       cQry += "                                                                                    AND SC50.C5_NUM     = SC6.C6_NUM "                        + STR_PULA
+       cQry += "                                                                                    AND SC50.D_E_L_E_T_ = '' "                                + STR_PULA
+		 cQry += " 									                                                          AND SC50.C5_TRANSP IN ('00700','00800') "                 + STR_PULA
+//------------------------------------------------------------------------------------------------------------------------
+       cQry += "                                           WHERE SB2.B2_FILIAL = SZG.ZG_FILIAL "                                                              + STR_PULA 
+       cQry += "                                             AND SB2.B2_COD    = SC6.C6_PRODUTO "                                                             + STR_PULA
+       cQry += "                                             AND SB2.D_E_L_E_T_ = '' "                                                                        + STR_PULA
+       cQry += "                                             AND SB2.B2_LOCAL IN( 'P1','P2','03','30','G3','G1','01','A3' ) ), 0 ), "                         + STR_PULA  // Jose 03/04/2025 Acescentou A3
+//     cQry += " 'SALDO'    = ISNULL( ( SELECT ( (SUM(SB22.B2_QATU) - SUM(SB22.B2_RESERVA) ) - SC6.C6_QTDVEN ) "                                              + STR_PULA
+//     cQry += "                                            FROM "+RetSqlName("SB2")+" SB22 WITH(NOLOCK) "                                                    + STR_PULA
+//     cQry += "                                           WHERE SB22.B2_FILIAL = SZG.ZG_FILIAL "                                                             + STR_PULA
+//     cQry += "                                             AND SB22.B2_COD    = SC6.C6_PRODUTO "                                                            + STR_PULA
+//     cQry += "                                             AND SB22.D_E_L_E_T_ = '' "                                                                       + STR_PULA
+//     cQry += "                                             AND SB22.B2_LOCAL IN( '03','30' ) ), 0 ) "                                                       + STR_PULA
+//-------    Jose 15/01/2024 ------------------------------------------------------------------------------------------
+//     cQry += " 'P1P20330' = ISNULL( ( SELECT   (SUM(SB22.B2_QATU) - SUM(SB22.B2_RESERVA) ) "      jOSE 07/02/2024                                           + STR_PULA 
+       cQry += " 'P1P20330' = ISNULL( ( SELECT   (SUM(SB22.B2_QATU) ) "                                                                                       + STR_PULA 
+       cQry += "                          FROM "+RetSqlName("SB2")+" SB22 WITH(NOLOCK) "                                                                      + STR_PULA 
+       cQry += "                               INNER JOIN "+RetSqlName("SC5")+" SC51 WITH (NOLOCK) ON SC51.C5_FILIAL  = SC6.C6_FILIAL "                       + STR_PULA 
+       cQry += "                                                            AND SC51.C5_NUM     = SC6.C6_NUM "                                                + STR_PULA 
+       cQry += "                                                            AND SC51.D_E_L_E_T_ = '' "                                                        + STR_PULA 
+       cQry += " 											                            AND SC51.C5_TRANSP NOT IN ('00700','00800') "                                     + STR_PULA 
+       cQry += "                         WHERE SB22.B2_FILIAL = SZG.ZG_FILIAL "                                                                               + STR_PULA 
+       cQry += "                           AND SB22.B2_COD    = SC6.C6_PRODUTO "                                                                              + STR_PULA 
+       cQry += "                           AND SB22.D_E_L_E_T_ = '' "                                                                                         + STR_PULA 
+       cQry += "                           AND SB22.B2_LOCAL IN( 'P1','P2','03','30','01' ) ), 0 ), "                                                         + STR_PULA 
+       cQry += "'BIPADOS'   =  ISNULL ( ( SELECT  ISNULL(SUM(ZZK_QUANT),0) "                                                                                  + STR_PULA
+       cQry += "                            FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "                                                                    + STR_PULA
+       cQry += "                                  LEFT OUTER JOIN   "+RetSqlName("SC5")+" SC52 WITH (NOLOCK) ON SC52.C5_FILIAL = SC6.C6_FILIAL   "            + STR_PULA   //jOSE 07/02/2024                                                          + STR_PULA 
+       cQry += "                                                                                            AND SC52.C5_NUM = ZZK_PEDIDO "                    + STR_PULA //jOSE 07/02/2024    
+       cQry += "                                                                                            AND SC52.D_E_L_E_T_ = '' "                        + STR_PULA //jOSE 07/02/2024    
+       cQry += "			                   WHERE ZZK.D_E_L_E_T_ = '' "                                                                                        + STR_PULA 
+       cQry += "				                  AND ZZK.ZZK_FILIAL = SC6.C6_FILIAL "                                                                             + STR_PULA
+       cQry += "                             AND ZZK.ZZK_PRODUT = SC6.C6_PRODUTO "                                                                            + STR_PULA
+       cQry += "                             AND SC52.C5_APROVA = '1' "                                                                                       + STR_PULA 
+       cQry += "                             AND SC52.C5_NOTA   = '' ),0 ), "                                                                                 + STR_PULA 
+//     cQry += "		                        AND ZZK.ZZK_PEDIDO = SC6.C6_NUM ),0 ) , "                                                                        + STR_PULA  jOSE 07/02/2024
+//---------------------------------------------------------------------------------------------------------------------
+//     cQry += " 'RESERV'   = ISNULL ( ( SELECT ( (SUM( ZZCC.ZZC_QUANTI)  / SC6.C6_QTDVEN ) * 100 )  "                                                        + STR_PULA jOSE 07/02/2024
+//     cQry += "                                             FROM "+RetSqlName("ZZC")+" ZZCC  "                                                               + STR_PULA jOSE 07/02/2024
+//     cQry += "                                            WHERE ZZCC.ZZC_FILIAL = SZG.ZG_FILIAL "                                                           + STR_PULA jOSE 07/02/2024
+//		 cQry += " 										                 AND ZZCC.ZZC_BORDER = SZG.ZG_CODIGO "                                                           + STR_PULA jOSE 07/02/2024
+//	 	 cQry += " 										                 AND ZZCC.ZZC_PEDIDO = SC6.C6_NUM "                                                              + STR_PULA jOSE 07/02/2024
+//     cQry += "                                              AND ZZCC.ZZC_PRODUT = SC6.C6_PRODUTO "                                                          + STR_PULA jOSE 07/02/2024
+//     cQry += "                                              AND ZZCC.D_E_L_E_T_ ='' ),0 )  "                                                                + STR_PULA jOSE 07/02/2024
+       cQry += " 'RESERV'   = 0  "                                                                                                                            + STR_PULA // JOSE 07/02/2024
+       cQry += "  FROM "+RetSqlName("SZG")+" SZG WITH(NOLOCK), "+RetSqlName("SC6")+" SC6 WITH(NOLOCK), "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) "               + STR_PULA
+       cQry += " WHERE SZG.D_E_L_E_T_ = '' "                                                                                                                  + STR_PULA
+       cQry += "   AND SZG.ZG_FILIAL  = '"+XFilial("SZG")+"' "                                                                                                + STR_PULA
+       cQry += "   AND SZG.ZG_CODIGO  = '"+Alltrim(cGet2Env)+"'"                                                                                              + STR_PULA
+       cQry += "   AND SC6.D_E_L_E_T_ = '' "                                                                                                                  + STR_PULA
+       cQry += "   AND SZG.ZG_FILIAL  = SC6.C6_FILIAL "                                                                                                       + STR_PULA
+//     cQry += "   AND SC6.C6_NUM   IN ('922821','922801','921936') "                                                                                         + STR_PULA
+       cQry += "   AND SUBSTRING(SZG.ZG_PEDIDO,3,6) = SC6.C6_NUM "                                                                                            + STR_PULA
+       cQry += "   AND SB1.D_E_L_E_T_ = '' "                                                                                                                  + STR_PULA
+       cQry += "   AND SB1.B1_FILIAL  = SC6.C6_FILIAL "                                                                                                       + STR_PULA
+       cQry += "   AND SB1.B1_COD     = SC6.C6_PRODUTO"                                                                                                       + STR_PULA
+       cQry += " GROUP BY SZG.ZG_CODIGO, SC6.C6_NUM, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_LOCAL, SZG.ZG_FILIAL, SC6.C6_FILIAL, SB1.B1_ESTOQUE, SZG.ZG_PEDIDO"+ STR_PULA
+       cQry += " ORDER BY SC6.C6_PRODUTO, SC6.C6_NUM, SZG.ZG_CODIGO "                                                                                         + STR_PULA
+       /* verifica se arquivo est· aberto e finaliza */
+       IF Select("TCQF") <> 0
+          DbSelectArea("TCQF")
+          DbCloseArea()
+       ENDIF
+       
+       TCQuery cQry ALIAS "TCQF" NEW
+/*-------------------------------------------------------------------------------------------------------
+       While !(TCQF->(EoF()))
+             If cPrim   = 0 
+                cPrim   := 1
+                cPercen := 0
+                cQtde   := 0
+                cPedido := TCQF->C6_NUM
+             EndIf              
+             IF TCQF->C6_NUM = cPedido 
+                cQtde ++
+                cPercen := cPercen +  TCQF->RESERV
+             Else
+                cPercen = cPercen / cQtde
+                aAdd(aTotPed, {cPedido, cPercen})
+                cPercen := TCQF->RESERV 
+                cPedido := TCQF->C6_NUM
+                cQtde   := 1
+             Endif
+             //Pulando Registro
+             TCQF->(DbSkip())
+		 EndDo
+-----------------------------------------------------------------------------------------------------------*/
+       While !(TCQF->(EoF()))
+             If cPrim    = 0 
+                cPrim   := 1
+//------- AQUI OP -------------------------------
+//-----------------------------------------------
+                If TCQF->P1P20330G3 > 0 // Jose 15/01/2024
+                   cSaldo  := TCQF->P1P20330G3 - TCQF->BIPADOS
+                   cSaldot := TCQF->P1P20330G3 - TCQF->BIPADOS 
+                Else // Jose 15/01/2024
+                   cSaldo  := TCQF->P1P20330   - TCQF->BIPADOS // Jose 15/01/2024
+                   cSaldot := TCQF->P1P20330   - TCQF->BIPADOS // Jose 15/01/2024
+                EndIf // Jose 15/01/2024
+                cProduto:= TCQF->C6_PRODUTO
+                cpedido := TCQF->C6_NUM
+                cVolume := TCQF->VOLUME
+                cEmissao:= TCQF->EMISSAO
+                cVol    := VAL( TCQF->VOLU )
+                cVolumeitem := TCQF->VOLUMEITEM // JOSE 07/02/2024
+                cVolumetoit := TCQF->VOLUMEITEM // JOSE 07/02/2024
+                cEstoque    := TCQF->B1_ESTOQUE
+                cQtdeitem   := 0
+                cQtdeitemf  := 0
+                cPercen := 0
+             EndIf              
+             IF TCQF->C6_PRODUTO = cProduto 
+                cpedido  := TCQF->c6_NUM
+                cVolume := TCQF->vOLUME
+                cEmissao:= TCQF->EMISSAO
+                cVol    := VAL( TCQF->VOLU )
+                cVolumeitem := TCQF->VOLUMEITEM // JOSE 07/02/2024
+                cEstoque:= TCQF->B1_ESTOQUE
+                cPercen := 0
+                cVolumeP := cSaldo / cVolumeitem
+                cVolumei := TCQF->C6_QTDVEN / cVolumeitem
+                cSaldo   := cSaldo - TCQF->C6_QTDVEN
+                IF cVolumei <= cVolumep
+                   cQtdeitem := cVolumeitem // cVolumei
+                   cPercen := 100
+                Else 
+                   if cVolumep <= 0
+                      cVolumepn = (cVolumep * -1)
+                   Endif
+                   if cVolumepn < cVolumeitem
+                      cPercen := (cVolumepn / cVolumeitem) //cVolumei)
+                      cQtdeitem := (cVolumepn / cVolumeitem) // cVolumei)
+                   Else
+                      cPercen = 0
+                      cQtdeitem =0
+                   Endif
+                Endif 
+/*
+                If (cSaldo  >= 0 )     // JOSE 07/02/2024
+                    cVolumetoit = cSaldo / cVolumeitem   // JOSE 07/02/2024
+                    if CVolumetoit > 0                    // JOSE 07/02/2024
+                        cPercen := 100                     // JOSE 07/02/2024
+                    Else                                    // JOSE 07/02/2024
+                        Qtdeitemf = ( cVolumetoit - cVolumeitem )    // JOSE 07/02/2024
+                        cPercen   = ( Qtdeitemf / cVolumeitem ) * 100   // JOSE 07/02/2024
+                    EndIf
+                EndIF 
+*/
+/*                  If cSaldo <= 0
+                     cSaldo1 = (cSaldo * -1)
+                  EndIf
+                  IF cSaldo1 < TCQF->C6_QTDVEN 
+                     cPercen =  (cSaldo1 / TCQF->C6_QTDVEN) * 100
+                  else
+                     cPercen = 0
+              Endif
+*/
+                aAdd( aTotPed, { cPedido, cProduto, cPercen, cVolume, cEmissao, cVol, cEstoque, cSaldot, cQtdeitem } )
+             Else
+//----- AQUI OP -----------------------------------------
+//-------------------------------------------------------
+                If TCQF->P1P20330G3 > 0 // Jose 15/01/2024
+                   cSaldot := TCQF->P1P20330G3 - TCQF->BIPADOS
+                   cSaldo  := TCQF->P1P20330G3 - TCQF->BIPADOS
+                Else // Jose 15/01/2024
+                   cSaldo  := TCQF->P1P20330   - TCQF->BIPADOS // Jose 15/01/2024
+                   cSaldot := TCQF->P1P20330   - TCQF->BIPADOS // Jose 15/01/2024
+                EndIf // Jose 15/01/2024
+                cProduto:= TCQF->C6_PRODUTO
+                cpedido := TCQF->c6_NUM
+                cVolume := TCQF->vOLUME
+                cEmissao:= TCQF->EMISSAO
+                cVol    := VAL( TCQF->VOLU ) 
+                cVolumeitem := TCQF->VOLUMEITEM  // JOSE 07/02/2024
+                cVolumetoit := TCQF->VOLUMEITEM // JOSE 07/02/2024
+                cEstoque    := TCQF->B1_ESTOQUE
+                cQtdeitem   := 0
+                cQtdeitem   := 0
+                cVolumeP := cSaldo / cVolumeitem
+                cVolumei := TCQF->C6_QTDVEN / cVolumeitem
+                cSaldo  := cSaldo - TCQF->C6_QTDVEN
+               IF cVolumei <= cVolumep
+                  cQtdeitem := cVolumeitem //cVolumei
+                  cPercen := 100
+                Else 
+                   if cVolumep <= 0
+                      cVolumepn = (cVolumep * -1)
+                   Endif
+                   if cVolumepn < cVolumeitem
+                      cQtdeitem := (cVolumepn / cVolumeitem) // cVolumei)
+                      cPercen := (cVolumepn / cVolumeitem) //cVolumei)
+                   Else
+                      cPercen = 0
+                      cQtdeitem = 0
+                   Endif
+                Endif 
+/*
+                If (cSaldo  >= 0 )     // JOSE 07/02/2024
+                    cVolumetoit = cSaldo / cVolumeitem   // JOSE 07/02/2024
+                    if CVolumetoit > 0                    // JOSE 07/02/2024
+                        cPercen := 100                     // JOSE 07/02/2024
+                    Else                                    // JOSE 07/02/2024
+                        Qtdeitemf = ( cVolumetoit - cVolumeitem )    // JOSE 07/02/2024
+                        cPercen   = ( Qtdeitemf / cVolumeitem ) * 100   // JOSE 07/02/2024
+                    EndIf
+                EndIF 
+*/
+/*
+                 If (cSaldo  >= 0 .And. cVolumetoit <= cVolume) // JOSE 07/02/2024
+                    cQtdeitem += cVolumeitem  // JOSE 07/02/2024
+                Else    // JOSE 07/02/2024
+                     cQtdeitemf = ( cVolumetoit / cVolumeitem ) // * 100    // JOSE 07/02/2024
+                     cQtdeitem += cQtdeitemf   // JOSE 07/02/2024
+                   cPercen := 100
+                Endif 
+                  If cSaldo <= 0
+                     cQtdeitem += 0  // JOSE 07/02/2024
+                     cSaldo1 = cSaldo * -1
+                  EndIf
+                  If cSaldo1 < TCQF->C6_QTDVEN 
+//                   cQtdeif   = ( ( cVol - cSaldo1 ) ) //  - cVolumeitem )   // Jose 07/02/2024
+//                   cQtdeitem += cQtdeitem + cQtdeif  // Jose 07/02/2024
+                     cQtdeitem += 0  // JOSE 07/02/2024
+                     cPercen    =  (cSaldo1 / TCQF->C6_QTDVEN) * 100
+                     cPercen = 0
+                EndIf
+*/
+                aAdd( aTotPed, { cPedido, cProduto, cPercen, cVolume, cEmissao, cVol, cEstoque, cSaldot, cQtdeitem } )
+             Endif
+             //Pulando Registro
+             TCQF->(DbSkip())
+		 EndDo
+
+       For nZ := 1 To Len(aTotPed)
+           aSort(aTotPed,,,{|x,y| x[1] > y[1]})
+       Next
+
+       For nY := 1 To Len(aTotPed)
+             If cPrim1     = 0 
+                cPrim1    := 1
+                cPercen1  := 0
+                cPercen2  := 0 // Jose 07/02/2024
+                cQtde     := 0
+                cqtdea    := 0
+                cQtdee1   := 0
+                cSaldot1  := 0
+                cPedido1  := aTotPed[nY][1]
+                cVolume1  := aTotPed[nY][4]
+                cEmissao1 := aTotPed[nY][5]
+                cVolume2  := aTotPed[nY][9] // Jose 07/02/2024
+                cVol1     := 0
+                cVolume2  := 0
+//              cVol1     := aTotPed[nY][6]
+             EndIf              
+             IF aTotPed[nY][1] = cPedido1 
+                cQtde ++
+                If  aTotPed[nY][7] = "S"
+                    cQtdee1  ++
+                EndIf
+                cPercen1 := cPercen1 + aTotPed[nY][3]
+                cSaldot1 := cSaldot1 + aTotPed[nY][8]
+                cVol1    := cVol1    + aTotPed[nY][6]
+                cVolume2 := cVolume2 + aTotPed[nY][9] // Jose 07/02/2024
+             Else
+                cSaldot1 = cSaldot1 / cVol1
+                cPercen1 = cPercen1 / cQtde
+                cQtdea   = ( ( cPercen1 / 100 ) * cQtde )
+                cPercent = ( ( cVolume2 / cVolume1 ) * 100 ) // Jose 07/02/2024
+                aAdd( aTotPed1, { cPedido1, cPercen1, cVolume1, cEmissao1, cVol1, cQtde, cQtdea, cQtdee1, cSaldot1, cVolume2, cPercent } )
+                cPercen1  := aTotPed[nY][3]
+                cPedido1  := aTotPed[nY][1]
+                cVolume1  := aTotPed[nY][4]
+                cVolume2  := aTotPed[nY][9]  // Jose 07/02/2024
+                cVol1     := aTotPed[nY][6]
+                cSaldot1  := aTotPed[nY][8]
+                cEmissao1 := aTotPed[nY][5]
+                cQtde    := 1
+                cQtdea   := 0
+                cQtdee1  := 0
+                If  aTotPed[nY][7] = "S"
+                    cQtdee1  ++
+                EndIf
+             Endif
+       Next
+       IF cPrim = 1
+          cSaldot1 = cSaldot1 / cVol1
+          cPercen1 = cPercen1 / cQtde
+          cQtdea   = ( ( cPercen1 / 100 ) * cQtde )
+           cPercent = ( ( cVolume2 / cVolume1 ) * 100 )// Jose 07/02/2024
+//        cQtdea   = round( ( Round( ( cPercen1 / 100 ),2) * cQtde ),2)
+          aAdd( aTotPed1, { cPedido1, cPercen1, cVolume1, cEmissao1, cVol1, cQtde, cQtdea, cQtdee1, cSaldot1, cVolume2, cPercent } )
+
+          For nZ := 1 To Len(aTotPed1)
+              aSort(aTotPed1,,,{|x,y| x[11] < y[11]}) // Substituido para teste 05/02/2024 aSort(aTotPed1,,,{|x,y| x[2] > y[2]})
+          Next
+
+          //Criando o objeto que ir· gerar o conte˙do do Excel
+          oFWMsExcel := FWMSExcel():New()
+          //Aba 01 
+          oFWMsExcel:AddworkSheet("FechaPedido") //N„o utilizar n˙mero junto com sinal de menos. Ex.: 1-
+          //Criando a Tabela
+          ccabecalho :="BRFATA02      -      Data.: "+DTOC(dDataBase)+"  AS  "+Time()+ "   "+"Pedidos Atendidos em Percentual   -   Bordero:   "+cGet2Env
+          //Criando Colunas
+          oFWMsExcel:AddTable("FechaPedido",ccabecalho) // Adiciona a tabela 
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"EMISSAO  "      , 2)     // aTotPed1[nX][4]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"PEDIDO   "      , 2)     // aTotPed1[nX][1]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"VOLUME PED"     , 2)     // SC5.C5_VOLUME1       Volume que est· no pedido      //"VOLUME PED"        // aTotPed1[nX][3]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"QT IT CONTR EST", 2, 1)  // SB1.B1_ESTOQUE="S"   Quandidade de Itens que s„o controlados estoque, ou seja, esta com S neste campo     // aTotPed1[nX][8]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"QT IT PEDIDO"   , 2)     //                      Quantidade de Itens que tem no pedido  // aTotPed1[nX][6]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"QT IT ATEND "   , 2, 1)  //                      Quantidade de Itens que deu para atender com a quantidade que est· em estoque  //  INT( aTotPed1[nX][7] )
+//        oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"RESERV.%"       , 2, 2)  // aTotPed1[nX][2]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"VOLUME ITE"     , 2, 2)  // aTotPed1[nX][10]
+          oFWMsExcel:AddColumn("FechaPedido",ccabecalho,"RESERV.%"       , 2, 2)  // aTotPed1[nX][11]
+
+          //Criando as Linhas... Enquanto n„o for fim da query
+          For nX := 1 To Len(aTotPed1)
+              oFWMsExcel:AddRow("FechaPedido",ccabecalho,{;
+              aTotPed1[nX][4],;          
+              aTotPed1[nX][1],;
+              aTotPed1[nX][3],;
+              aTotPed1[nX][8],;           //  INT( aTotPed1[nX][9] ),;  
+              aTotPed1[nX][6],;
+              Round(aTotPed1[nX][7],0),; // Jose 16/01/2024 INT( aTotPed1[nX][7] ),;    //  Antes do dia 29/11/2022 INT( aTotPed1[nX][8] ),;        
+              Round(aTotPed1[nX][10],0),; 
+              INT( aTotPed1[nX][11] ); 
+              })
+          Next
+//            INT( aTotPed1[nX][2]  ),;  // Jose 07/02/2024  aTotPed1[nX][10];
+          //Ativando o arquivo e gerando o xml
+          oFWMsExcel:Activate()
+          MsgRun("Processando...","Aguarde Gerando arquivo em Excel...",{|| oFWMsExcel:GetXMLFile(eArquivo) } )
+          //Abrindo o excel e abrindo o arquivo xml
+          oExcel := MsExcel():New()           //Abre uma nova conex„o com ExcelVOLUME
+          oExcel:WorkBooks:Open(eArquivo)     //Abre uma planilha
+          oExcel:SetVisible(.T.)              //Visualiza a planilha
+          oExcel:Destroy()                    //Encerra o processo do gerenciador de tarefas
+          TCQF->(DbCloseArea())
+       EndIf
+       IF cPrim = 0
+       	MsgStop("AtenÁ„o, Bordero Vazio, verifique antes de prosseguir !!!")
+       Endif
+      Endif
+      RestArea(aAreaa)
+
+Return
+
+Static Function fTExcel(cGet2Env)
+       Local _lRet
+       If Empty(Alltrim(cGet2Env))
+ 			 Messagebox("Informe o cÛdigo do BorderÙ de pedidos !","AtenÁ„o...",48)
+			 _lRet := .f.
+       Else
+          _lRet := .t.
+       Endif
+ 
+       oDlg1Tr:End()  
+
+Return _lRet

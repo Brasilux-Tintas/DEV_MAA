@@ -17,7 +17,8 @@ User Function MATI681CRG()
      Local _nQtdFalta := 0
      Local _nQtdApont := nQtdSOG
      //Local _nQtdPerd  := 0
-     u_zcfga01( 'MATI681CRG' ) //LGS#2021201 - Gravação de log de utilização da rotina
+     //---------------- LGS#20231023 ----- RETIRADA DA GRAVAÇÃO DO LOG DE ROTINA PARA MELHORA DE PERFORMANCE.
+     //u_zcfga01( 'MATI681CRG' ) //LGS#2021201 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         If PARAMIXB[ _nPos ][ 2 ] == "P"
            //Verificar se SC2 está posicionado

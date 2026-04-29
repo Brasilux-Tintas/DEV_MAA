@@ -37,7 +37,9 @@ User Function BRSEN002()
                             { OemToAnsi("&Usuários")             , 'U_SEN002_2(1)', 0, 5} ,;
 							{ OemToAnsi("Transferir Permissao")  , 'U_validusr', 0, 5} }
 	
-   if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) <> 0 
+   //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+   //if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) <> 0 
+   if PSWADMIN( , , RetCodUsr() ) <> 0 
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
     endif

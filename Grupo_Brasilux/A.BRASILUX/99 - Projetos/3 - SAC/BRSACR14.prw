@@ -1,5 +1,19 @@
-#include "rwmake.ch"
-#INCLUDE "TOPCONN.CH"
+#include 'rwmake.ch'
+#INCLUDE 'TOPCONN.CH'
+#Include 'Protheus.ch' // jOSE 025/06/2023
+#INCLUDE 'Avprint.ch'  // jOSE 025/06/2023
+#include 'font.ch'     // jOSE 025/06/2023
+#include 'totvs.ch'    // jOSE 025/06/2023
+
+/*/  JOSE 05/06/2023
+{Protheus.doc} BRSACR14
+//RrELATÓRIO DE SAC X PRODUÇÃO
+@type function
+@version  v.2022.08.09.001 
+@author joseuliana
+@since 05/06/2023
+@return variant, return 
+jOSE 05/06/2022    /*/
 
 User Function BRSACR14()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -10,8 +24,8 @@ PRIVATE Titulo := "Relatorio de SAC  x Produção"
 PRIVATE cDesc1 := "Relatorio informa sacs existentes sob o lote"
 PRIVATE cDesc2 := ""
 PRIVATE cDesc3 := "" 
-                   //   0          1           2         3         4         5         6       7          8        9        10         11        12       13        14         15         16
-                   //012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+                   //0         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16        17        18        19        20
+                   //0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
 PRIVATE cCabec1  := "Produto              Descrição                               Lote          Data Sac       Num. Sac       Ocorrencia                              QtdeLK         UM        Total Lote     %         Assunto"
 PRIVATE cCabec2  := ""
 private nTipo := 18
@@ -24,7 +38,7 @@ PRIVATE aReturn := {"Zebrado", 1,"Administracao", 2, 2, 1, "",1 }
 PRIVATE nomeprog:= "BRSACR14"
 PRIVATE aLinha  := { },nLastKey := 0
 PRIVATE cPerg   := "BRSACR14"
-PRIVATE MV_PAR01,MV_PAR02,MV_PAR03,MV_PAR04,MV_PAR05,MV_PAR06,MV_PAR07,MV_PAR08
+PRIVATE MV_PAR01,MV_PAR02,MV_PAR03,MV_PAR04,MV_PAR05,MV_PAR06,MV_PAR07,MV_PAR08,MV_PAR09 
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Verifica as perguntas selecionadas                           ³
@@ -67,11 +81,31 @@ return
 /////////////////////////////////////////////////////////
 
 Static Function RptDetail()
+Local vnQtdKg   := 0  // jose 05/06/2023
+Local vnVLoteK  := 0  // jose 05/06/2023
+Local vnQtdLi   := 0  // jose 05/06/2023
+Local vnVLoteL  := 0  // jose 05/06/2023
+Local vnQtdUn   := 0  // jose 05/06/2023
+Local _Perce    := 0  // jose 05/06/2023
+Local _filler   :=""  // jose 05/06/2023
+Local _filler1  :=""  // jose 05/06/2023
+Local _filler2  :=""  // jose 05/06/2023
+Local _filler3  :=""  // jose 05/06/2023
+Local _filler4  :=""  // jose 05/06/2023
+Local _filler5  :=""  // jose 05/06/2023
+Local _filler6  :=""  // jose 05/06/2023
+Local _filler7  :=""  // jose 05/06/2023
+Local aArea     := GetArea() //  jose 05/06/2023
+//Local oExcel        //  jose 05/06/2023
+Local cArquivo  := "C:\Temp\"+"BRSACR14.xml"  //  jose 05/06/2023
+Local oExcel    := FWMsExcelEx():New()        //  jose 05/06/2023
+//Local oFWMsExcel    // Jose 05/06/2023
+
 //Local nTotal := 0
-//Local 	_nCont := 0
+//Local _nCont := 0
 //Local lNormal
 Local cQuery,cQry1,cQry2,cWhere
-Private _nLin := 7
+Private _nLin := 8 // JOSE 25/05/2023  7
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Inicializa  regua de impressao                            ³
@@ -128,149 +162,337 @@ cWhere+;
 TCQUERY cQry1 NEW ALIAS "TCQ"
 TCQUERY cQry2 NEW ALIAS "TCQ2"
 
-SetRegua(RECCOUNT()) 
+//-------------          COLOCAR AQUI A PERGUNTA DO EXCEL    -------------------------------
+If MV_PAR09 = 2
+//-------    Ate Aqui Jose 05/06/2023 ------------------------------------------------------
 
-Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)
+   SetRegua(RECCOUNT()) 
 
+   Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)
 
-nQtdLi:=nQtdLi2 :=0
-nQtdKg:=nQtdKg2 :=0
-nQtdUn:=0                                                  
-LimLinha := 70                                         	
-nVLoteL:=nVLoteK:=0
-cNrLoteL:=cNrLoteK:= TCQ->ZR_LOTE
+   nQtdLi:=nQtdLi2 :=0
+   nQtdKg:=nQtdKg2 :=0
+   nQtdUn:=0                                                  
+   LimLinha := 70                                         	
+   nVLoteL:=nVLoteK:=0
+   cNrLoteL:=cNrLoteK:= TCQ->ZR_LOTE
 
-dbselectarea("TCQ2")
-dbgotop()
-do while !eof()  
-	cLote := alltrim(TCQ2->LOTE)
-	do while !eof() .and. (TCQ2->LOTE = cLote)    
-		DO CASE
-		CASE TCQ2->UM = "L"
-			nQtdLi += TCQ2->QTDE 
-			nVLoteL += TCQ2->PRODUZIDO
-		CASE (TCQ2->UM = "K")
-			nQtdKg += TCQ2->QTDE  
-			nVLoteK += TCQ2->PRODUZIDO
-		ENDCASE
-		dbselectarea("TCQ2")
-		dbskip()
-	ENDDO   
-ENDDO
+   dbselectarea("TCQ2")
+   dbgotop()
+   do while !eof()  
+	   cLote := alltrim(TCQ2->LOTE)
+	   do while !eof() .and. (TCQ2->LOTE = cLote)    
+		   DO CASE
+	   	   CASE TCQ2->UM = "L"
+			    nQtdLi += TCQ2->QTDE 
+			    nVLoteL += TCQ2->PRODUZIDO
+		   CASE (TCQ2->UM = "K")
+			    nQtdKg += TCQ2->QTDE  
+			    nVLoteK += TCQ2->PRODUZIDO
+		   ENDCASE
+		   dbselectarea("TCQ2")
+		   dbskip()
+	   ENDDO   
+   ENDDO
 
+   dbselectarea("TCQ")
+   dbgotop()                                                                                   
+   While !TCQ->(eof())
+	   cOcorrencia := POSICIONE("SU9",1,XFILIAL("SU9")+TCQ->ASSUNTO+TCQ->ZR_OCORREN,"U9_DESC")
+	   cAssunto    := TCQ->DESCR
+	   if _nLin > LimLinha
+		   @ _nLin,000 psay replicate("_",220)
+		   Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)               
+	   	   _nLin := 09	// JOSE 25/05/2023  08    
+	   endif                              
+ 	   @_nLin,000 psay TCQ->ZR_PRODUTO
+	   @_nLin,020 psay TCQ->B1_DESC
+       @_nLin,060 psay TCQ->ZR_LOTE
+       @_nLin,075 psay SubStr(TCQ->ZQ_DATA, 7, 2)+'/'+SubStr(TCQ->ZQ_DATA, 5, 2)+'/'+SubStr(TCQ->ZQ_DATA, 3, 2)
+       @_nLin,090 psay TCQ->ZQ_NUM
+       @_nLin,105 psay cOcorrencia
+       @_nLin,145 psay TCQ->QTDELK
+       @_nLin,160 psay TCQ->UM
 
-dbselectarea("TCQ")
-dbgotop()                                                                                   
-While !eof()
-	cOcorrencia := POSICIONE("SU9",1,XFILIAL("SU9")+TCQ->ASSUNTO+TCQ->ZR_OCORREN,"U9_DESC")
-	cAssunto    := TCQ->DESCR
-	if _nLin > LimLinha
-		@ _nLin,000 psay replicate("_",220)
-		Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)               
-		_nLin := 08	    
-	endif                              
- 	@_nLin,000 psay TCQ->ZR_PRODUTO
-	@_nLin,020 psay TCQ->B1_DESC
-    @_nLin,060 psay TCQ->ZR_LOTE
-    @_nLin,075 psay SubStr(TCQ->ZQ_DATA, 7, 2)+'/'+SubStr(TCQ->ZQ_DATA, 5, 2)+'/'+SubStr(TCQ->ZQ_DATA, 3, 2)
-    @_nLin,090 psay TCQ->ZQ_NUM
-    @_nLin,105 psay cOcorrencia
-    @_nLin,145 psay TCQ->QTDELK
-    @_nLin,160 psay TCQ->UM
-
-   	nQtdeLote := TCQ->PRODUZIDO  
-   	IF empty(TCQ->ZR_LOTE)
-   		nQtdUn += TCQ->QTDELK
-   	ENDIF 
+   	   nQtdeLote := TCQ->PRODUZIDO  
+   	   IF empty(TCQ->ZR_LOTE)
+   		   nQtdUn += TCQ->QTDELK
+   	   ENDIF 
 /*
-   	nQtdeLote := 0
-	IF !EMPTY(TCQ->ZR_LOTE) 
-		dbselectarea("SB1")
-		dbsetorder(1)
-		dbselectarea("SC2")
-		DbOrderNickName("SC2001")
-		dbseek(xFilial("SC2")+TCQ->ZR_LOTE)
+   	   nQtdeLote := 0
+	   IF !EMPTY(TCQ->ZR_LOTE) 
+		   dbselectarea("SB1")
+		   dbsetorder(1)
+		   dbselectarea("SC2")
+		   DbOrderNickName("SC2001")
+		   dbseek(xFilial("SC2")+TCQ->ZR_LOTE)
 	
-		do while !eof() .and. (SC2->C2_FILIAL == xFilial("SC2")) .AND. (SC2->C2_LOTE = TCQ->ZR_LOTE)
-			dbselectarea("SB1")
-			dbseek(xFilial("SB1")+SC2->C2_PRODUTO)
-			if found() .and. (SB1->B1_TIPO = "PI")
-				nQtdeLote := SC2->C2_QUANT
-			endif
-			dbselectarea("SC2")
-			dbskip()
-		enddo 
-	ENDIF      */
- 	@_nLin,170 psay TCQ->PRODUZIDO //nQtdeLote       
- 	if !EMPTY(TCQ->ZR_LOTE) .AND. (TCQ->ZR_LOTE > '0') .AND. (TCQ->PRODUZIDO > 0)
- 		@ _nLin,182 psay round(((TCQ->QTDELK/nQtdeLote)*100),2)  
- 	endif  
- 	@ _nLin,195  psay cAssunto
+		   do while !eof() .and. (SC2->C2_FILIAL == xFilial("SC2")) .AND. (SC2->C2_LOTE = TCQ->ZR_LOTE)
+			   dbselectarea("SB1")
+			   dbseek(xFilial("SB1")+SC2->C2_PRODUTO)
+			   if found() .and. (SB1->B1_TIPO = "PI")
+				  nQtdeLote := SC2->C2_QUANT
+			   endif
+			   dbselectarea("SC2")
+			   dbskip()
+		   enddo 
+	   ENDIF  
+*/
+ 	   @_nLin,170 psay TCQ->PRODUZIDO //nQtdeLote       
+ 	   if !EMPTY(TCQ->ZR_LOTE) .AND. (TCQ->ZR_LOTE > '0') .AND. (TCQ->PRODUZIDO > 0)
+ 		   @ _nLin,182 psay round(((TCQ->QTDELK/nQtdeLote)*100),2)  
+ 	   endif  
+ 	   @ _nLin,195  psay cAssunto
 
-    _nLin++   
-    dbSelectArea("TCQ")
-	dbSkip()
+       _nLin++   
+       dbSelectArea("TCQ")
+	   dbSkip()
 	
-	
-endDo 
+   endDo 
 
+   if (_nLin+13) > LimLinha
+	   @ _nLin,000 psay replicate("_",220)
+	   Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)               
+	   _nLin := 09	    //  JOSE 25/05/2023   08
+   endif                              
 
-if (_nLin+13) > LimLinha
-	@ _nLin,000 psay replicate("_",220)
-	Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)               
-	_nLin := 08	    
-endif                              
+   _nLin++                  
+   @ _nLin,000 psay replicate("_",220)
+   _nLin++
+   @ _nLin,000 psay "Total Litros em SACs c/ Lote Informado"
+   @ _nLin,050 psay "Total Litros em Lotes c/ Lote Informado"
+   @ _nLin,090 psay "Porcentagem Devolução(SAC/LOTE)" 
+// @ _nLin,095 psay "Total Devolvido" 
+   _nLin++
+   @ _nLin,000 psay nQtdLi
+   @ _nLin,050 psay nVLoteL
+   @ _nLin,090 psay round(((nQtdLi/nVLoteL)*100),2)
+// @ _nLin,095 psay nQtdLi2+nQtdLi
 
-_nLin++                  
-@ _nLin,000 psay replicate("_",220)
-  _nLin++
-@ _nLin,000 psay "Total Litros em SACs c/ Lote Informado"
-@ _nLin,050 psay "Total Litros em Lotes c/ Lote Informado"
-@ _nLin,090 psay "Porcentagem Devolução(SAC/LOTE)" 
-//@ _nLin,095 psay "Total Devolvido" 
-_nLin++
-@ _nLin,000 psay nQtdLi
-@ _nLin,050 psay nVLoteL
-@ _nLin,090 psay round(((nQtdLi/nVLoteL)*100),2)
-//@ _nLin,095 psay nQtdLi2+nQtdLi
+     _nLin++  
+     @ _nLin,000 psay replicate("_",220)
+     _nLin++
+     @ _nLin,000 psay "Total Kg em SACs c/ Lote Informado"
+     @ _nLin,050 psay "Total Kg em Lotes c/ Lote Informado"
+     @ _nLin,090 psay "Porcentagem Devolução(SAC/LOTE)" 
+//   @ _nLin,095 psay "Total Devolvido" 
+     _nLin++
+     @ _nLin,000 psay nQtdKg
+     @ _nLin,050 psay nVLoteK
+     @ _nLin,090 psay round(((nQtdKg/nVLoteK)*100),2)
+//   @ _nLin,095 psay nQtdKg2+nQtdKg
 
-  _nLin++  
-@ _nLin,000 psay replicate("_",220)
-  _nLin++
-@ _nLin,000 psay "Total Kg em SACs c/ Lote Informado"
-@ _nLin,050 psay "Total Kg em Lotes c/ Lote Informado"
-@ _nLin,090 psay "Porcentagem Devolução(SAC/LOTE)" 
-//@ _nLin,095 psay "Total Devolvido" 
-_nLin++
-@ _nLin,000 psay nQtdKg
-@ _nLin,050 psay nVLoteK
-@ _nLin,090 psay round(((nQtdKg/nVLoteK)*100),2)
-//@ _nLin,095 psay nQtdKg2+nQtdKg
-
-_nLin++  
-@ _nLin,000 psay replicate("_",220)
-  _nLin++
-@ _nLin,000 psay "Soma Qtdes SEM Lote informado"
-_nLin++
-@ _nLin,000 psay nQtdUn
-_nLin++                		   
+     _nLin++  
+     @ _nLin,000 psay replicate("_",220)
+     _nLin++
+     @ _nLin,000 psay "Soma Qtdes SEM Lote informado"
+     _nLin++
+     @ _nLin,000 psay nQtdUn
+     _nLin++                		   
                   		   
-dbselectarea("TCQ")
-dbclosearea()
+     dbselectarea("TCQ")
+     dbclosearea()
 
-dbselectarea("TCQ2")
-dbclosearea()
+     dbselectarea("TCQ2")
+     dbclosearea()
 
-Set Device To Screen
-If aReturn[5] == 1
-	Set Printer TO
-	dbcommitAll()
-	ourspool(wnrel)
-Endif
+     Set Device To Screen
+     If aReturn[5] == 1
+     	Set Printer TO
+	    dbcommitAll()
+	    ourspool(wnrel)
+     Endif
+
+//  Acrescentado por Jose 05/06/2023 -------------------------------------------------
+Else  
+//SetRegua(RECCOUNT()) 
+
+   nQtdLi:=nQtdLi2 :=0
+   nQtdKg:=nQtdKg2 :=0
+   nQtdUn:=0                                                  
+   nVLoteL:=nVLoteK:=0
+   cNrLoteL:=cNrLoteK:= TCQ->ZR_LOTE
+
+   dbselectarea("TCQ2")
+   dbgotop()
+   do while !eof()  
+	   cLote := alltrim(TCQ2->LOTE)
+	   do while !eof() .and. (TCQ2->LOTE = cLote)    
+		   DO CASE
+		   CASE TCQ2->UM = "L"
+			    nQtdLi += TCQ2->QTDE 
+			    nVLoteL += TCQ2->PRODUZIDO
+		   CASE (TCQ2->UM = "K")
+			    nQtdKg += TCQ2->QTDE  
+			    nVLoteK += TCQ2->PRODUZIDO
+		   ENDCASE
+		   dbselectarea("TCQ2")
+		   dbskip()
+	   ENDDO   
+   ENDDO
+
+   //Criando o objeto que irá gerar o conteúdo do Excel
+   osExcel := FWMSExcel():New()
+   //Aba 01 
+   oExcel:AddworkSheet("Sac") //Não utilizar número junto com sinal de menos. Ex.: 1-
+   //Criando a Tabela
+   ccabecalho :="Data.: "+DTOC(dDataBase)+"  AS  "+Time()+ "                          "+"Relatório de SAC X Produção"
+   //Criando Colunas
+   oExcel:AddTable ("Sac",ccabecalho) // Adiciona a tabela 
+   oExcel:AddColumn("Sac",ccabecalho,"Produto"       ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Descrição"     ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Lote"          ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Data Sac"      ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Num. SAc"      ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Ocorrencia"    ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"QtdeLK"        ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"UN"            ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Total Lote"    ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"%"             ,1) 
+   oExcel:AddColumn("Sac",ccabecalho,"Assunto"       ,1) 
+   
+   dbselectarea("TCQ")
+   dbgotop()                                                                                   
+   While !TCQ->(eof())
+       cOcorrencia := POSICIONE("SU9",1,XFILIAL("SU9")+TCQ->ASSUNTO+TCQ->ZR_OCORREN,"U9_DESC")  
+	   cAssunto    := TCQ->DESCR
+  	   nQtdeLote   := TCQ->PRODUZIDO  
+   	   IF empty(TCQ->ZR_LOTE)
+   		  nQtdUn += TCQ->QTDELK
+   	   ENDIF 
+ 	   if !EMPTY(TCQ->ZR_LOTE) .AND. (TCQ->ZR_LOTE > '0') .AND. (TCQ->PRODUZIDO > 0)
+ 		   _Perce := round(((TCQ->QTDELK/nQtdeLote)*100),2)  
+ 	   endif  
+
+       oExcel:AddRow("Sac",ccabecalho,{;
+       TCQ->ZR_PRODUTO,;
+       TCQ->B1_DESC,;
+       TCQ->ZR_LOTE,;
+       SubStr(TCQ->ZQ_DATA, 7, 2)+'/'+SubStr(TCQ->ZQ_DATA, 5, 2)+'/'+SubStr(TCQ->ZQ_DATA, 3, 2),;
+	    TCQ->ZQ_NUM,;
+       cOcorrencia,;
+       TCQ->QTDELK,;
+       TCQ->UM,;
+       TCQ->PRODUZIDO,;
+       _Perce,;
+       cAssunto;
+       })
+       dbSelectArea("TCQ")
+	   dbSkip()
+   EndDo 
+ 
+   oExcel:AddRow("Sac",ccabecalho,{;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler;
+   })
+
+   vnQtdLi  := TransForm( nQtdLi,"@E 99,999,999.99" )
+   vnVLoteL := TransForm( nVLoteL,"@E 99,999,999.99" )
+   oExcel:AddRow("Sac",ccabecalho,{;
+   _filler1 :="Total Litros em SACs c/ Lote Informado",;
+   vnQtdLi,;
+   _filler2 :="Total Litros em Lotes c/ Lote Informado",;
+   vnVLoteL,;
+   _filler3 :="Porcentagem Devolução(SAC/LOTE)",;
+   round(((nQtdLi/nVLoteL)*100),2),;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler;
+   })
+
+   oExcel:AddRow("Sac",ccabecalho,{;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler;
+   })
+
+   vnQtdKg  := TransForm( nQtdKg,"@E 99,999,999.99" )
+   vnVLoteK := TransForm( nVLoteK,"@E 99,999,999.99" )
+   oExcel:AddRow("Sac",ccabecalho,{;
+   _filler4 :="Total Kg em SACs c/ Lote Informado",;
+   vnQtdKg,;
+   _filler5 :="Total Kg em Lotes c/ Lote Informado",;
+   vnVLoteK,;
+   _filler6 :="Porcentagem Devolução(SAC/LOTE)",;
+   round(((nQtdKg/nVLoteK)*100),2),;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler;
+   })
+
+   oExcel:AddRow("Sac",ccabecalho,{;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler;
+   })
+
+   vnQtdUn  := TransForm( nQtdUn,"@E 99,999,999.99" )
+   oExcel:AddRow("Sac",ccabecalho,{;
+   _filler7 :="Soma Qtdes SEM Lote informado",;
+   vnQtdUn,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler,;
+   _filler;
+   })
+
+   //Ativando o arquivo e gerando o xml
+   oExcel:Activate()
+   MsgRun("Processando...","Aguarde Gerando arquivo em Excel...",{|| oExcel:GetXMLFile(cArquivo) } )
+
+   //Abrindo o excel e abrindo o arquivo xml
+   oExcel:= MsExcel():New()            //Abre uma nova conexão com Excel
+   oExcel:WorkBooks:Open(cArquivo)     //Abre uma planilha
+   oExcel:SetVisible(.T.)              //Visualiza a planilha
+   oExcel:Destroy()                    //Encerra o processo do gerenciador de tarefas
+
+     TCQ->(DbCloseArea())
+
+     TCQ2->(DbCloseArea())
+
+   RestArea(aArea)
+
+EndIf
+//     ate aqui Jose 05/06/2023 ------------------------------------------------------------------------------------------
 Return
               
 //LGS#20200211 - Adequação de release 12.1.25 e posteriores
-/*Static Function CriaSX1(cPerg)
+/*
+Static Function CriaSX1(cPerg)
 
 Local aHelp := {}
 
@@ -295,4 +517,5 @@ PutSX1(cPerg,"07","Excluir SACs tipo Interno?"  , "Excluir SACs tipo Interno?"  
 //    (<cGrupo>,<cOrdem>,<Pergunt>            ,< cPergSpa>           ,< cPergEng>           ,< cVar>    ,< cTipo>,< nTamanho>,[ nDecimal],[ nPreSel],<cGSC>,[ cValid], [ cF3], [ cGrpSXG], [ cPyme], < cVar01> , [ cDef01], [ cDefSpa1], [ cDefEng1], [ cCnt01], [ cDef02]   , [ cDefSpa2]  , [ cDefEng2]  , [ cDef03]   , [ cDefSpa3] , [ cDefEng3], [ cDef04], [ cDefSpa4], [ cDefEng4], [ cDef05], [ cDefSpa5], [ cDefEng5], [ aHelpPor], [ aHelpEng], [ aHelpSpa], [ cHelp] ) --> Nil
 PutSX1(cPerg   ,"08"    ,"Proced/Não Proced"  , "Proced/Não Proced"  , "Proced/Não Proced"  , "mv_ch8"  , "N"    ,  1        , 0         , 1        , "C"  , ""      , ""    , ""        , ""      , "mv_par08", "Todos"  , "Todos"    , "Todos"    , ""       ,"Procedentes", "Procedentes", "Procedentes", "NÃO Proced", "NÃO Proced","NÃO Proced", ""        , ""          , ""          ,  ""       , ""          , ""          , aHelp[8,1],aHelp[8,2],aHelp[8,3],"")
 
-Return*/
+Return
+*/

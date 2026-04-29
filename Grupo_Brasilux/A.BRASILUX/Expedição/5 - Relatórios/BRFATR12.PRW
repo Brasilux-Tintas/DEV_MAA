@@ -151,10 +151,10 @@ User Function BRFATR12(cOpcMen)
                Else
                   If parpad01 == 2 .and. !empty(parpad02)
                       mv_par01 := parpad01
-	                  mv_par02 := parpad02
-    	              mv_par04 := parpad04
-        	          mv_par05 := parpad05
-            	      mv_par06 := parpad06
+	                   mv_par02 := parpad02
+    	                mv_par04 := parpad04
+        	             mv_par05 := parpad05
+            	       mv_par06 := parpad06
             	      //mv_par07 := parpad07
                	  Endif	      
                Endif
@@ -178,11 +178,17 @@ User Function BRFATR12(cOpcMen)
 */              	
             Endif
             cQry1 += " FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+            cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) ON (SC6.C6_FILIAL = '"+xFilial("SC6")+"') AND SC6.C6_NUM = ZZC.ZZC_PEDIDO AND SC6.C6_PRODUTO = ZZC.ZZC_PRODUT AND (SC6.D_E_L_E_T_ = '') " // Jose 11/04/2025
             cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.B1_FILIAL = '"+xFilial("SB1")+"') AND (SB1.B1_COD = ZZC.ZZC_PRODUT) AND (SB1.D_E_L_E_T_ ='') "
-            cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.B2_FILIAL = '"+xFilial("SB2")+"') AND (SB1.B1_COD = SB2.B2_COD) AND (SB1.B1_LOCPAD = SB2.B2_LOCAL) AND (SB2.D_E_L_E_T_ ='') 
+            If substr(cnumemp,1,2) = "06" // Jose 14/04/2025.
+               cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.B2_FILIAL = '"+xFilial("SB2")+"') AND (SB1.B1_COD = SB2.B2_COD) AND (SB1.B1_LOCPAD = SB2.B2_LOCAL) AND (SB2.D_E_L_E_T_ ='') "  
+            Else // Jose 14/04/2025.
+               cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.B2_FILIAL = '010101') AND (SB1.B1_COD = SB2.B2_COD) AND (CASE WHEN SC6.C6_LOCAL IN('G3') THEN 'A3' ELSE SC6.C6_LOCAL END = SB2.B2_LOCAL) AND (SB2.D_E_L_E_T_ = '')" // Jose 11/04/2025.
+            EndIf // Jose 14/04/2025.
             cQry1 += " WHERE (ZZC.D_E_L_E_T_ = '') AND (ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"') AND (ZZC.ZZC_SEPARA = 'N') "
-//            cQry1 += "AND (ZZC.D_E_L_E_T_ = '') AND (SB1.B1_TIPO IN('PI','MP') OR SUBSTRING(SB1.B1_COD,1,5)='ST 55' OR SB1.B1_TIPO IN('PA') AND LEN(SB1.B1_COD) <12) "
+//          cQry1 += "AND (ZZC.D_E_L_E_T_ = '') AND (SB1.B1_TIPO IN('PI','MP') OR SUBSTRING(SB1.B1_COD,1,5)='ST 55' OR SB1.B1_TIPO IN('PA') AND LEN(SB1.B1_COD) <12) "
             cQry1 += "AND (SB1.B1_TIPO IN('PI','MP','PA','GG')) "
+
             If mv_par01 == 2     //Por bodero de despacho
                cQry1 += "AND (ZZC.ZZC_CARGA  = '"+mv_par02+"') "
             Else
@@ -521,7 +527,10 @@ Return
 Static Function FATR12_1(Titulo, lEnd)
        Local aMatImp   := {} 
        Local _cEst, nY, nA, nB
-
+       Local cNumped   := ""
+//     Local cLocal    := "A3" // Jose 15/04/2025 
+       Local cLocaliz  := ""
+       
        Private nLin    := 0
        Private nCol    := 30
        Private nLinMax := 2920
@@ -537,7 +546,7 @@ Static Function FATR12_1(Titulo, lEnd)
        oFont7 := TFont():New("Courier New"        , 9, 12, .F., .F.,  5, .F., 5, .F., .F.)
        oFont8 := TFont():New("Courier New"        , 9, 12, .F., .T.,  5, .F., 5, .F., .F.)
 
-       If cOpcRel == 1
+       If cOpcRel == 1 // Bordeô de Pedidos
           Titulo := 'Faltas - Pedidos '+Iif(mv_par01 == 1, '(TODOS)', mv_par02)
           DbSelectArea("TCQ")
           DbGoTop()
@@ -551,11 +560,11 @@ Static Function FATR12_1(Titulo, lEnd)
                    nQtdPro := 0
                    cNumOP:= "'"
                    cNumLT:= "'"
-					cQry2 := "SELECT SC2.C2_OP AS ORDEM, SC2.C2_LOTE AS LOTE, ISNULL(SUM(SC2.C2_QUANT - SC2.C2_QUJE),0) AS QUANT "+;
-					"FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "+;
-					"WHERE (SC2.C2_FILIAL  = '"+xFilial("SC2")+"') AND (SC2.D_E_L_E_T_ = '') "+;
-					"AND (SC2.C2_DATRF   = '') AND (C2_PRODUTO = '"+TCQ->ZZC_PRODUT+"') "+;
-					"GROUP BY SC2.C2_OP, SC2.C2_LOTE"
+					    cQry2 := "SELECT SC2.C2_OP AS ORDEM, SC2.C2_LOTE AS LOTE, ISNULL(SUM(SC2.C2_QUANT - SC2.C2_QUJE),0) AS QUANT "+;
+				    	 "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "+;
+			    		 "WHERE (SC2.C2_FILIAL  = '"+xFilial("SC2")+"') AND (SC2.D_E_L_E_T_ = '') "+;
+				   	 "AND (SC2.C2_DATRF   = '') AND (C2_PRODUTO = '"+TCQ->ZZC_PRODUT+"') "+;
+					    "GROUP BY SC2.C2_OP, SC2.C2_LOTE"
                    TCQuery cQry2 ALIAS "QOP" NEW
                    DbSelectArea("QOP")
                    While !Eof()
@@ -584,7 +593,7 @@ Static Function FATR12_1(Titulo, lEnd)
                          cQry2 += "FROM PESQUISA_PRODUCAO_2 PSQ "
                          cQry2 += "WHERE PSQ.C2_LOTE IN("+SubStr(cNumLT, 1, Len(cNumLT)-3)+") "
                          //cQry2 += "  AND PSQ.PRODUTO = '"+SubStr(Alltrim(TCQ->ZZC_PRODUT), 1, 10)+"00' "
-						 cQry2 += "  AND PSQ.PRODUTO = '"+SubStr(Alltrim(TCQ->ZZC_PRODUT), 1, 10)+Iif(Alltrim(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(TCQ->ZZC_PRODUT, 11, 02), "Z5_UMEMB"))='K','99','00')+"' "
+					      	 cQry2 += "  AND PSQ.PRODUTO = '"+SubStr(Alltrim(TCQ->ZZC_PRODUT), 1, 10)+Iif(Alltrim(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(TCQ->ZZC_PRODUT, 11, 02), "Z5_UMEMB"))='K','99','00')+"' "
                          cQry2 += "ORDER BY PSQ.FIM "
                          TCQuery cQry2 ALIAS "QOP" NEW
                       Endif
@@ -619,8 +628,30 @@ Static Function FATR12_1(Titulo, lEnd)
                       cPesado := ' '
                       cEnvase := ' '
                    Endif
+//   Jose 15/04/2025
+                   cQry2 := "SELECT SB2.B2_LOCALIZ "+;
+						          "  FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "+;
+					             " WHERE (SB2.B2_FILIAL  = '010101') AND (SB2.D_E_L_E_T_ = '') "+;      // "+xFilial("SC2")+"'
+				        		    "   AND (SB2.B2_LOCAL   = 'A3') AND (SB2.B2_COD = '"+TCQ->ZZC_PRODUT+"') "+;
+						          "GROUP BY SB2.B2_LOCALIZ"
+						          If Select( "SB20" ) > 0
+                               DbSelectArea( "SB20" )
+                               DbCloseArea()
+                            Endif
+                            TCQuery cQry2 ALIAS "SB20" NEW
+                            DbSelectArea("SB20")
+                            cLocaliz := ""
+                            While !Eof()
+                                  cLocaliz := SB20->B2_LOCALIZ
+                                  DbSelectArea("SB20")
+                                  DbSkip()
+                            Enddo
+                            DbSelectArea("SB0")
+                            DbCloseArea()
+// JOSE 14/04/2025   
                    If mv_par02 $ '000000'
-                      If Empty(Alltrim(Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ")))
+/*
+                     If Empty(Alltrim(Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ")))
                          aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU})
                       Endif
                    Else
@@ -638,6 +669,27 @@ Static Function FATR12_1(Titulo, lEnd)
                    Else
                       aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]) == Alltrim(TCQ->ZZC_PRODUT)})][2] += TCQ->ZZC_QUANTI
                    Endif
+*/
+//    jOSE 14/04/2025
+                     If Empty(Alltrim(Posicione("SB2", 1, '010101'+TCQ->ZZC_PRODUT+cLocaliz)))
+                         aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU})
+                      Endif
+                   Else
+                      aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU})
+                   Endif
+                Else
+                   If mv_par03 == 1 .or. mv_par03 == 3
+                      If mv_par02 $ '000000'
+                         If Empty(Alltrim(Posicione("SB2", 1, '010101'+TCQ->ZZC_PRODUT+cLocaliz)))
+                            aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "R", cNumPed, '', '', TCQ->B1_PESBRU})
+                         Endif
+                      Else
+                         aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "R", cNumPed, '', '', TCQ->B1_PESBRU})
+                      Endif
+                   Else
+                      aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]) == Alltrim(TCQ->ZZC_PRODUT)})][2] += TCQ->ZZC_QUANTI
+                   Endif
+// ATÉ AQUI JOSE 14/04/2025
                 Endif
                 DbSelectArea("TCQ")
                 DbSkip()
@@ -661,14 +713,16 @@ Static Function FATR12_1(Titulo, lEnd)
                                   nLin := 160
                                   FATR12_2(1) //Cabeçalho
                            Endif 
+////qui 15/06/2022
                            _cEst := iif(EHESTOQUE(aMatImp[nY][1]),"*"," ")
+///-----------------------------------------------------------
                            oPrn:Say(nLin, nCol     , TransForm(aMatImp[nY][2], "@E 99999")                                                                                  , oFont7, , , , ) //Quantidade de Falta
                            oPrn:Say(nLin, nCol+0150, _cEst         , oFont7, , , , ) //Marca de Item de Estoque
                            oPrn:Say(nLin, nCol+0180, TransForm(aMatImp[nY][1], "@R XX 99.99.999-99")                                                                        , oFont7, , , , ) //Código do Produto
-                           oPrn:Say(nLin, nCol+0600, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 30)                                  , oFont7, , , , ) //Descrição do Produto
-                           oPrn:Say(nLin, nCol+1400, aMatImp[nY][6]                                                                                                         , oFont7, , , , )
-                           oPrn:Say(nLin, nCol+1600, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                           , oFont7, , , , ) //Descrição da Embalagem
-                           oPrn:Say(nLin, nCol+1900, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 9)                                  , oFont7, , , , ) //Localização
+                           oPrn:Say(nLin, nCol+0580, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 20)                                  , oFont7, , , , ) //Descrição do Produto  // jose 16/04/2025 (nLin, nCol+0600
+                           oPrn:Say(nLin, nCol+1300, aMatImp[nY][6]                                                                                                         , oFont7, , , , ) // jose 16/04/2025 (nLin, nCol+1400
+                           oPrn:Say(nLin, nCol+1500, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                           , oFont7, , , , ) //Descrição da Embalagem // jose 16/04/2025 (nLin, nCol+1600
+                           oPrn:Say(nLin, nCol+1800, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 14)                                  , oFont7, , , , ) //Localização // jose 16/04/2025  (nLin, nCol+1900,
                            oPrn:Say(nLin, nCol+2150, aMatImp[nY][7]+Iif((mv_par03 == 1 .or. mv_par03 == 3) .and. aMatImp[nY][5] == 'R', '', TransForm(aMatImp[nY][4], "@E 99999"))+aMatImp[nY][8], oFont7, , , , ) //Qtde. Produção
                            nPesoFalta := ((aMatImp[nY][9] * aMatImp[nY][2]) + nPesoFalta)
                            nLin += 50
@@ -720,7 +774,7 @@ Static Function FATR12_1(Titulo, lEnd)
                                     cQry2 += "FROM PESQUISA_PRODUCAO PSQ "
                                     cQry2 += "WHERE PSQ.C2_LOTE IN("+SubStr(cNumLT, 1, Len(cNumLT)-3)+") "
                                     //cQry2 += "  AND PSQ.PRODUTO = '"+SubStr(Alltrim(TCQ->ZZC_PRODUT), 1, 10)+"00' "
-									cQry2 += "  AND PSQ.PRODUTO = '"+SubStr(Alltrim(TCQ->ZZC_PRODUT), 1, 10)+Iif(Alltrim(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(TCQ->ZZC_PRODUT, 11, 02), "Z5_UMEMB"))='K','99','00')+"' "
+								         	cQry2 += "  AND PSQ.PRODUTO = '"+SubStr(Alltrim(TCQ->ZZC_PRODUT), 1, 10)+Iif(Alltrim(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(TCQ->ZZC_PRODUT, 11, 02), "Z5_UMEMB"))='K','99','00')+"' "
                                     cQry2 += "ORDER BY PSQ.FIM "
                                     TCQuery cQry2 ALIAS "QOP" NEW
                                     If Empty(QOP->STATUS)
@@ -765,6 +819,27 @@ Static Function FATR12_1(Titulo, lEnd)
                                     cPesado := ' '
                                     cEnvase := ' '
                                  Endif
+//   Jose 15/04/2025
+                                 cQry2 := "SELECT SB2.B2_LOCALIZ "+;
+						                        "FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "+;
+					                          "WHERE (SB2.B2_FILIAL  = '010101') AND (SB2.D_E_L_E_T_ = '') "+;      // "+xFilial("SC2")+"'
+				        		                 "  AND (SB2.B2_LOCAL   = 'A3') AND (SB2.B2_COD = '"+TCQ->ZZC_PRODUT+"') "+;
+						                       "GROUP BY SB2.B2_LOCALIZ"
+						               If Select( "SB20" ) > 0
+                                    DbSelectArea( "SB20" )
+                                    DbCloseArea()
+                                 Endif
+                                 TCQuery cQry2 ALIAS "SB20" NEW
+                                 DbSelectArea("SB20")
+                                 cLocaliz := ""
+                                 While !Eof()
+                                       cLocaliz := SB20->B2_LOCALIZ
+                                       DbSelectArea("SB20")
+                                       DbSkip()
+                                 Enddo
+                                 DbSelectArea("SB0")
+                                 DbCloseArea()
+/* JOSE 14/04/2025
                                  aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, aNumCar[nA][5], aNumCar[nA][1], cPesado, cEnvase })
                                  aNumCar[nA][6] += 1
                               Else
@@ -774,6 +849,22 @@ Static Function FATR12_1(Titulo, lEnd)
                                  Else
                                     aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]+x[7]) == Alltrim(TCQ->ZZC_PRODUT+TCQ->ZZC_CARGA)})][2] += TCQ->ZZC_QUANTI
                                  Endif
+*/ 
+//   JOSE 14/04/2025
+//                               aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010101'+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "A3"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, aNumCar[nA][5], aNumCar[nA][1], cPesado, cEnvase })
+                                 aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "P", cNumPed, aNumCar[nA][5], aNumCar[nA][1], cPesado, cEnvase })
+//                               aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010108'+TCQ->ZZC_PRODUT+Posicione("SC6", 1, xFilial("SC6")+cNumPed+TCQ->ZZC_PRODUT, "C6_LOCAL"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, aNumCar[nA][5], aNumCar[nA][1], cPesado, cEnvase })
+                                 aNumCar[nA][6] += 1
+                              Else
+                                 If mv_par03 = 1 .or. mv_par03 == 3
+//                                  aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010101'+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "A3"), "B2_LOCALIZ"), nQtdPro, "R", cNumPed, aNumCar[nA][5], aNumCar[nA][1], ' ', ' '})
+                                    aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "R", cNumPed, aNumCar[nA][5], aNumCar[nA][1], ' ', ' '})
+//                                  aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010108'+TCQ->ZZC_PRODUT+Posicione("SC6", 1, xFilial("SC6")+cNumPed+TCQ->ZZC_PRODUT, "C6_LOCAL"), "B2_LOCALIZ"), nQtdPro, "R", cNumPed, aNumCar[nA][5], aNumCar[nA][1], ' ', ' '})
+                                    aNumCar[nA][6] += 1
+                                 Else
+                                    aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]+x[7]) == Alltrim(TCQ->ZZC_PRODUT+TCQ->ZZC_CARGA)})][2] += TCQ->ZZC_QUANTI
+                                 Endif
+//  ATÉ AQUI JOSE 14/04/2005
                               Endif
                            Endif
                            DbSelectArea("TCQ")
@@ -868,6 +959,29 @@ Static Function FATR12_1(Titulo, lEnd)
                              cPesado := ' '
                              cEnvase := ' '
                           Endif
+//   Jose 15/04/2025
+
+                         cQry2 := "SELECT SB2.B2_LOCALIZ "+;
+						                "FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "+;
+					                   "WHERE (SB2.B2_FILIAL  = '010101') AND (SB2.D_E_L_E_T_ = '') "+;      // "+xFilial("SC2")+"'
+				        		          "  AND (SB2.B2_LOCAL   = 'A3') AND (SB2.B2_COD = '"+TCQ->ZZC_PRODUT+"') "+;
+						                "GROUP BY SB2.B2_LOCALIZ"
+						       If Select( "SB2" ) > 0
+                            DbSelectArea( "SB2" )
+                            DbCloseArea()
+                          Endif						  
+                          TCQuery cQry2 ALIAS "SB2" NEW
+                          DbSelectArea("SB2")
+                          cLocaliz := ""
+                          While !Eof()
+                                cLocaliz := SB2->B2_LOCALIZ
+                                DbSelectArea("SB2")
+                                DbSkip()
+                          Enddo
+                          DbSelectArea("SB2")
+                          DbCloseArea()
+
+/*   jOSE 14/04/2025               
                           aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU })
                        Else
                           If mv_par03 = 1 .or. mv_par03 == 3
@@ -875,6 +989,23 @@ Static Function FATR12_1(Titulo, lEnd)
                           Else
                              aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]) == Alltrim(TCQ->ZZC_PRODUT)})][2] += TCQ->ZZC_QUANTI
                           Endif
+*/
+// jOSE 14/04/2025
+//                        aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "A3"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU })
+                          aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU })
+//                        aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010108'+TCQ->ZZC_PRODUT+Posicione("SC6", 1, xFilial("SC6")+cNumPed+TCQ->ZZC_PRODUT, "C6_LOCAL"), "B2_LOCALIZ"), nQtdPro, "P", cNumPed, cPesado, cEnvase, TCQ->B1_PESBRU })
+
+                       Else
+                          If mv_par03 = 1 .or. mv_par03 == 3
+//                           aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "A3"), "B2_LOCALIZ"), nQtdPro, "R", cNumPed, ' ', ' ', TCQ->B1_PESBRU })
+                             aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "R", cNumPed, ' ', ' ', TCQ->B1_PESBRU })
+//                           aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010108'+TCQ->ZZC_PRODUT+Posicione("SC6", 1, xFilial("SC6")+cNumPed+TCQ->ZZC_PRODUT, "C6_LOCAL"), "B2_LOCALIZ"), nQtdPro, "R", cNumPed, ' ', ' ', TCQ->B1_PESBRU })
+                          Else
+                             aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]) == Alltrim(TCQ->ZZC_PRODUT)})][2] += TCQ->ZZC_QUANTI
+                          Endif
+
+// aTÉ AQUI 14/04/2025
+
                        Endif
                        DbSelectArea("TCQ")
                        DbSkip()
@@ -949,20 +1080,20 @@ Static Function FATR12_1(Titulo, lEnd)
                                          	oPrn:Say(nLin, nCol     , TransForm(aMatImp[nB][2], "@E 99999")                                                                         , oFont7, , , , ) //Quantidade de Falta
                                          	oPrn:Say(nLin, nCol+0150, IIF(EHESTOQUE(aMatImp[nB][1]), "*", " "), oFont7, , , , ) //Marca de Item de Estoque
                                          	oPrn:Say(nLin, nCol+0180, TransForm(aMatImp[nB][1], "@R XX 99.99.999-99")                                                               , oFont7, , , , ) //Código do Produto
-                                         	oPrn:Say(nLin, nCol+0600, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nB][1], "B1_DESC")), 1, 30)                         , oFont7, , , , ) //Descrição do Produto
-                                         	oPrn:Say(nLin, nCol+1400, aMatImp[nB][6]                                                                                                , oFont7, , , , )
-                                         	oPrn:Say(nLin, nCol+1600, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nB][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem
-                                         	oPrn:Say(nLin, nCol+1900, SubStr(Iif(Empty(aMatImp[nB][3]), ' ', SubStr(Alltrim(aMatImp[nB][3]), 1, 15)), 1, 9)                         , oFont7, , , , ) //Localização
-                                         	oPrn:Say(nLin, nCol+2150, aMatImp[nB][9]+Iif((mv_par03 == 1 .or. mv_par03 == 3) .and. aMatImp[nB][5] == 'R', '', TransForm(aMatImp[nB][4], "@E 99999"))+aMatImp[nB][10], oFont7, , , , ) //Qtde. Produção
+                                         	oPrn:Say(nLin, nCol+0580, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nB][1], "B1_DESC")), 1, 20)                         , oFont7, , , , ) //Descrição do Produto  jose 15/04/2025  nLin, nCol+0600
+                                         	oPrn:Say(nLin, nCol+1300, aMatImp[nB][6]                                                                                                , oFont7, , , , ) // jose 15/04/2025  nCol+1400
+                                         	oPrn:Say(nLin, nCol+1500, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nB][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem  jose 15/04/2025  nCol+1600
+                                         	oPrn:Say(nLin, nCol+1800, SubStr(Iif(Empty(aMatImp[nB][3]), ' ', SubStr(Alltrim(aMatImp[nB][3]), 1, 15)), 1, 14)                        , oFont7, , , , ) //Localização    jose 15/04/2025  nCol+1900  1, 9)  
+                                         	oPrn:Say(nLin, nCol+2150, aMatImp[nB][9]+Iif((mv_par03 == 1 .or. mv_par03 == 3) .and. aMatImp[nB][5] == 'R', '', TransForm(aMatImp[nB][4], "@E 99999"))+aMatImp[nB][10], oFont7, , , , ) //Qtde. Produção  
                                          	nLin += 50
                                          Elseif mv_par03 == 3
                                          	oPrn:Say(nLin, nCol     , TransForm(aMatImp[nB][2], "@E 99999")                                                                         , oFont7, , , , ) //Quantidade de Falta
                                          	oPrn:Say(nLin, nCol+0150, IIF(EHESTOQUE(aMatImp[nB][1]), "*", " "), oFont7, , , , ) //Marca de Item de Estoque
                                          	oPrn:Say(nLin, nCol+0180, TransForm(aMatImp[nB][1], "@R XX 99.99.999-99")                                                               , oFont7, , , , ) //Código do Produto
-                                         	oPrn:Say(nLin, nCol+0600, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nB][1], "B1_DESC")), 1, 30)                         , oFont7, , , , ) //Descrição do Produto
-                                         	oPrn:Say(nLin, nCol+1400, aMatImp[nB][6]                                                                                                , oFont7, , , , )
-                                         	oPrn:Say(nLin, nCol+1600, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nB][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem
-                                         	oPrn:Say(nLin, nCol+1900, SubStr(Iif(Empty(aMatImp[nB][3]), ' ', SubStr(Alltrim(aMatImp[nB][3]), 1, 15)), 1, 9)                         , oFont7, , , , ) //Localização
+                                         	oPrn:Say(nLin, nCol+0580, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nB][1], "B1_DESC")), 1, 20)                         , oFont7, , , , ) //Descrição do Produto jose 15/04/2025  nLin, nCol+0600
+                                         	oPrn:Say(nLin, nCol+1300, aMatImp[nB][6]                                                                                                , oFont7, , , , )  // jose 15/04/2025  nCol+1400
+                                         	oPrn:Say(nLin, nCol+1500, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nB][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem jose 15/04/2025  nCol+1600
+                                         	oPrn:Say(nLin, nCol+1800, SubStr(Iif(Empty(aMatImp[nB][3]), ' ', SubStr(Alltrim(aMatImp[nB][3]), 1, 15)), 1, 14)                         , oFont7, , , , ) //Localização  jose 15/04/2025  nCol+1900  1, 9)  
                                          	oPrn:Say(nLin, nCol+2150, aMatImp[nB][9]+Iif((mv_par03 == 1 .or. mv_par03 == 3) .and. aMatImp[nB][5] == 'R', '', TransForm(aMatImp[nB][4], "@E 99999"))+aMatImp[nB][10], oFont7, , , , ) //Qtde. Produção
                                          	nLin += 50
                                          Endif
@@ -985,12 +1116,12 @@ Static Function FATR12_1(Titulo, lEnd)
                                   oPrn:Say(nLin, nCol     , TransForm(aMatImp[nY][2], "@E 99999")                                                                         , oFont7, , , , ) //Quantidade de Falta
                                   oPrn:Say(nLin, nCol+0150, iif(EHESTOQUE(aMatImp[nY][1]), "*", " "), oFont7, , , , ) //Marca de Item de Estoque
                                   oPrn:Say(nLin, nCol+0180, TransForm(aMatImp[nY][1], "@R XX 99.99.999-99")                                                               , oFont7, , , , ) //Código do Produto
-                                  oPrn:Say(nLin, nCol+0600, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 30)                         , oFont7, , , , ) //Descrição do Produto
-                                  oPrn:Say(nLin, nCol+1400, aMatImp[nY][6]                                                                                                , oFont7, , , , )
-                                  oPrn:Say(nLin, nCol+1600, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem
-                                  oPrn:Say(nLin, nCol+1900, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 9)                         , oFont7, , , , ) //Localização
+                                  oPrn:Say(nLin, nCol+0580, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 20)                         , oFont7, , , , ) //Descrição do Produto // jose 16/04/2025 (nLin, nCol+0600 ,1,30
+                                  oPrn:Say(nLin, nCol+1300, aMatImp[nY][6]                                                                                                , oFont7, , , , ) // jose 16/04/2025 (nLin, nCol+1400
+                                  oPrn:Say(nLin, nCol+1500, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem // jose 16/04/2025 (nLin, nCol+1600
+                                  oPrn:Say(nLin, nCol+1800, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 14)                         , oFont7, , , , ) //Localização // jose 16/04/2025 (nLin, nCol+1900 1,9
                                   nPesoFalta := ((aMatImp[nY][9] * aMatImp[nY][2]) + nPesoFalta)
-                                  //oPrn:Say(nLin, nCol+2050, Transform(Posicione("SC5", 1, xFilial("SC5")+aMatImp[nY][6], "C5_VOLUME1"), "@E 9999")                        , oFont7, , , , ) //Volume
+                                //oPrn:Say(nLin, nCol+2050, Transform(Posicione("SC5", 1, xFilial("SC5")+aMatImp[nY][6], "C5_VOLUME1"), "@E 9999")                        , oFont7, , , , ) //Volume
                                   oPrn:Say(nLin, nCol+2150, aMatImp[nY][7]+Iif((mv_par03 == 1 .or. mv_par03 == 3) .and. aMatImp[nY][5] == 'R', '', TransForm(aMatImp[nY][4], "@E 99999"))+aMatImp[nY][8], oFont7, , , , ) //Qtde. Produção
                                   nLin += 50
                               Next
@@ -1001,7 +1132,7 @@ Static Function FATR12_1(Titulo, lEnd)
               Else
                  MsgAlert("Não foi encontrado informação para esse relatório", "Atenção")
               Endif
-       ElseIf cOpcRel == 3 //Pedidos
+       ElseIf cOpcRel == 3 //   Pedidos
               If !Empty(cNumBor)
                  DbSelectArea("TCQ")
                  DbGoTop()
@@ -1080,11 +1211,44 @@ Static Function FATR12_1(Titulo, lEnd)
                              cPesado := ' '
                              cEnvase := ' '
                           Endif
+//   Jose 15/04/2025
+                          cQry2 := "SELECT SB2.B2_LOCALIZ "+;
+						                 "FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "+;
+					                    "WHERE (SB2.B2_FILIAL  = '010101') AND (SB2.D_E_L_E_T_ = '') "+;      // "+xFilial("SC2")+"'
+				        		           "  AND (SB2.B2_LOCAL   = 'A3') AND (SB2.B2_COD = '"+TCQ->ZZC_PRODUT+"') "+;
+						                 "GROUP BY SB2.B2_LOCALIZ"
+						        If Select( "SB20" ) > 0
+                             DbSelectArea( "SB20" )
+                             DbCloseArea()
+                          Endif
+                          TCQuery cQry2 ALIAS "SB20" NEW
+                          DbSelectArea("SB20")
+                          cLocaliz := ""
+                          While !Eof()
+                                cLocaliz := SB20->B2_LOCALIZ
+                                DbSelectArea("SB20")
+                                DbSkip()
+                          Enddo
+                          DbSelectArea("SB0")
+                          DbCloseArea()
+/* JOSE 14/04/2025
 
+/*  JOSE 14/04/2025
                           aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ"), nQtdPro, "P", '', cPesado, cEnvase})
                        Else
                           aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]) == Alltrim(TCQ->ZZC_PRODUT)})][2] += TCQ->ZZC_QUANTI
                        Endif
+  jOSE 14/04/2025*/
+
+//   jOSE 14/04/205
+//                        aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "A3"), "B2_LOCALIZ"), nQtdPro, "P", '', cPesado, cEnvase})
+//                        cNumPed := mv_par01
+                          aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "P", '', cPesado, cEnvase})
+//                        aadd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, '010108'+TCQ->ZZC_PRODUT+Posicione("SC6", 1, xFilial("SC6")+cNumPed+TCQ->ZZC_PRODUT, "C6_LOCAL"), "B2_LOCALIZ"), nQtdPro, "P", '', cPesado, cEnvase})  // Jose 15/04/2025  xFilial("SB2")
+                       Else
+                          aMatImp[aScan(aMatImp, {|x| Alltrim(x[1]) == Alltrim(TCQ->ZZC_PRODUT)})][2] += TCQ->ZZC_QUANTI
+                       Endif
+  //   aTÉ AQUII  jOSE 14/04/2025
                        DbSelectArea("TCQ")
                        DbSkip()
                  Enddo
@@ -1099,7 +1263,6 @@ Static Function FATR12_1(Titulo, lEnd)
                       AVPAGE
                         nLin := 160
                         FATR12_2(5)     //Cabeçalho
-                        
 
                         //Log do Status do Pedido         
                         DBSELECTAREA("SC5")
@@ -1109,7 +1272,7 @@ Static Function FATR12_1(Titulo, lEnd)
 							dDatLog := "  /  /  "
 							nTotal := 0
 						ELSE                         
-                        	//dDatLog := SubStr((SC5->C5_DTAPR), 7, 2)+'/'+SubStr((SC5->C5_DTAPR), 5, 2)+'/'+SubStr((SC5->C5_DTAPR), 3, 2)
+                          //dDatLog := SubStr((SC5->C5_DTAPR), 7, 2)+'/'+SubStr((SC5->C5_DTAPR), 5, 2)+'/'+SubStr((SC5->C5_DTAPR), 3, 2)
                         	dDatLog := Dtoc(SC5->C5_DTAPR)
 	                        //Valor total da Mercadoria do Pedido ou Nota Fiscal
     	                    If EMPTY(SC5->C5_NOTA)
@@ -1129,7 +1292,8 @@ Static Function FATR12_1(Titulo, lEnd)
                         cQry1 += "SELECT TOP 1 SC6.R_E_C_N_O_ AS NAOEST "
                         cQry1 += "FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
                         cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SC6.C6_FILIAL = SB1.B1_FILIAL) AND (SC6.C6_PRODUTO = SB1.B1_COD) AND (SB1.D_E_L_E_T_ = '') "
-                        cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB1.B1_FILIAL = B2_FILIAL ) AND (SB1.B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) AND (SB1.D_E_L_E_T_ = '') "
+//                      cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB1.B1_FILIAL = B2_FILIAL ) AND (SB1.B1_COD = B2_COD) AND (B1_LOCPAD = B2_LOCAL) AND (SB1.D_E_L_E_T_ = '') " // Jose 15/04/2025
+                        cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB1.B1_FILIAL = B2_FILIAL ) AND (SB1.B1_COD = B2_COD) AND (B2_LOCAL = 'A3') AND (SB1.D_E_L_E_T_ = '') " // Jose 15/04/2025
                         cQry1 += "WHERE (SC6.C6_FILIAL  = '"+xFilial("SB1")+"') "
                         cQry1 += "  AND (SC6.D_E_L_E_T_ = '') "
                         cQry1 += "  AND (SC6.C6_NUM = '"+mv_par01+"') "
@@ -1206,9 +1370,9 @@ Static Function FATR12_1(Titulo, lEnd)
                                oPrn:Say(nLin, nCol     , TransForm(aMatImp[nY][2], "@E 99999")                                                                         , oFont7, , , , ) //Quantidade de Falta
                                oPrn:Say(nLin, nCol+0150, iif(EHESTOQUE(aMatImp[nY][1]), "*", " "), oFont7, , , , ) //Marca de Item de Estoque
                                oPrn:Say(nLin, nCol+0180, TransForm(aMatImp[nY][1], "@R XX 99.99.999-99")                                                               , oFont7, , , , ) //Código do Produto
-                               oPrn:Say(nLin, nCol+0600, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 30)                         , oFont7, , , , ) //Descrição do Produto
-                               oPrn:Say(nLin, nCol+1600, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem
-                               oPrn:Say(nLin, nCol+1900, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 9)                         , oFont7, , , , ) //Localização
+                               oPrn:Say(nLin, nCol+0580, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 20)                         , oFont7, , , , ) //Descrição do Produto  // Jose 16/04/2025  (nLin, nCol+0600 ,1,30
+                               oPrn:Say(nLin, nCol+1500, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem // Jose 16/04/2025 (nLin, nCol+1600
+                               oPrn:Say(nLin, nCol+1800, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 9)                         , oFont7, , , , ) //Localização // Jose 16/04/2025  (nLin, nCol+1900  ,1,9
                                oPrn:Say(nLin, nCol+2150, aMatImp[nY][7]+TransForm(aMatImp[nY][4], "@E 99999")+aMatImp[nY][8]                                           , oFont7, , , , ) //Qtde. Produção
                                nLin += 50
                            Next
@@ -1217,7 +1381,7 @@ Static Function FATR12_1(Titulo, lEnd)
                         FATR12_2(6)
                       AVENDPAGE
               AVENDPRINT
-       ElseIf cOpcRel == 4 //Clientes
+       ElseIf cOpcRel == 4 //  Clientes
               Titulo := 'Cliente '+mv_par01
               DbSelectArea("TCQ")
               DbGoTop()
@@ -1295,8 +1459,35 @@ Static Function FATR12_1(Titulo, lEnd)
                        cPesado := ' '
                        cEnvase := ' '
                     Endif
-                   
+//   Jose 15/04/2025
+                    cQry2 := "SELECT SB2.B2_LOCALIZ "+;
+						           "  FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "+;
+					              " WHERE (SB2.B2_FILIAL  = '010101') AND (SB2.D_E_L_E_T_ = '') "+;      // "+xFilial("SC2")+"'
+				        		     "   AND (SB2.B2_LOCAL   = 'A3') AND (SB2.B2_COD = '"+TCQ->ZZC_PRODUT+"') "+;
+						           "GROUP BY SB2.B2_LOCALIZ"
+						           If Select( "SB20" ) > 0
+                                DbSelectArea( "SB20" )
+                                DbCloseArea()
+                             Endif
+                             TCQuery cQry2 ALIAS "SB20" NEW
+                             DbSelectArea("SB20")
+                             cLocaliz := ""
+                             While !Eof()
+                                   cLocaliz := SB20->B2_LOCALIZ
+                                   DbSelectArea("SB20")
+                                   DbSkip()
+                             Enddo
+                             DbSelectArea("SB0")
+                             DbCloseArea()
+/* JOSE 14/04/2025
+
+/*    jOSE 14/04/205                   
                     aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "B1_LOCPAD"), "B2_LOCALIZ"), nQtdPro, "P", TCQ->ZZC_PEDIDO, cPesado, cEnvase })
+   jOSE 14/04/2025  */
+//    JOSE 14/04/2025
+//                  aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, Posicione("SB2", 1, xFilial("SB2")+TCQ->ZZC_PRODUT+Posicione("SB1", 1, xFilial("SB1")+TCQ->ZZC_PRODUT, "A3"), "B2_LOCALIZ"), nQtdPro, "P", TCQ->ZZC_PEDIDO, cPesado, cEnvase })
+                    aAdd(aMatImp, {TCQ->ZZC_PRODUT, TCQ->ZZC_QUANTI, cLocaliz, nQtdPro, "P", TCQ->ZZC_PEDIDO, cPesado, cEnvase })
+//   ATÉ AQUI JOSE  14/04/2025
                     DbSelectArea("TCQ")
                     DbSkip()
               Enddo
@@ -1360,9 +1551,9 @@ Static Function FATR12_1(Titulo, lEnd)
                                       oPrn:Say(nLin, nCol     , TransForm(aMatImp[nY][2], "@E 99999")                                                                         , oFont7, , , , ) //Quantidade de Falta
                                       oPrn:Say(nLin, nCol+0150, IIF(EHESTOQUE(aMatImp[nY][1]), "*", " "), oFont7, , , , ) //Marca de Item de Estoque
                                       oPrn:Say(nLin, nCol+0180, TransForm(aMatImp[nY][1], "@R XX 99.99.999-99")                                                               , oFont7, , , , ) //Código do Produto
-                                      oPrn:Say(nLin, nCol+0600, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 30)                         , oFont7, , , , ) //Descrição do Produto
-                                      oPrn:Say(nLin, nCol+1600, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem
-                                      oPrn:Say(nLin, nCol+1900, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 9)                         , oFont7, , , , ) //Localização
+                                      oPrn:Say(nLin, nCol+0580, SubStr(Alltrim(Posicione("SB1", 1, xFilial("SB1")+aMatImp[nY][1], "B1_DESC")), 1, 20)                         , oFont7, , , , ) //Descrição do Produto // Jose 16/04/2025 (nLin, nCol+0600 1,30
+                                      oPrn:Say(nLin, nCol+1500, SubStr(Posicione("SZ5", 1, xFilial("SZ5")+SubStr(aMatImp[nY][1], 11, 2), "Z5_DESCR"), 1, 11)                  , oFont7, , , , ) //Descrição da Embalagem // Jose 16/04/2025 (nLin, nCol+1600
+                                      oPrn:Say(nLin, nCol+1800, SubStr(Iif(Empty(aMatImp[nY][3]), ' ', SubStr(Alltrim(aMatImp[nY][3]), 1, 15)), 1, 14)                         , oFont7, , , , ) //Localização // Jose 16/04/2025 (nLin, nCol+1900 1,9
                                       oPrn:Say(nLin, nCol+2150, aMatImp[nY][7]+TransForm(aMatImp[nY][4], "@E 99999")+aMatImp[nY][8]                                           , oFont7, , , , ) //Qtde. Produção
                                       nLin += 50
                                    Endif
@@ -1394,10 +1585,10 @@ Static Function FATR12_2(nOpc)
           oPrn:Line(nLin, nCol, nlin, nColMax)
           nLin += 10
           If mv_par03 == 1 .or. mv_par03 == 3
-             oPrn:Say(nLin, nCol, "QTDE. PRODUTO        DESCRIÇÃO                    PEDIDO EMBAL.     QUADR.    PROD.", oFont4, , , , )
+             oPrn:Say(nLin, nCol, "QTDE.        PRODUTO      DESCRIÇÃO                               PEDIDO     EMBAL.         QUADR.             PROD.", oFont4, , , , )
           Else
-             oPrn:Say(nLin, nCol, "QTDE. PRODUTO        DESCRIÇÃO                           EMBAL.     QUADR.    PROD.", oFont4, , , , )
-          Endif
+             oPrn:Say(nLin, nCol, "QTDE.        PRODUTO      DESCRIÇÃO                                          EMBAL.         QUADR.             PROD.", oFont4, , , , )
+          Endif    
           nLin += 50
           oPrn:Line(nLin, nCol, nlin, nColMax)
        ElseIf nOpc == 2  //Rodapé do Bordero de Pedidos
@@ -1415,9 +1606,9 @@ Static Function FATR12_2(nOpc)
               oPrn:Line(nLin, nCol, nlin, nColMax)
               nLin += 10
               If mv_par03 == 1 .or. mv_par03 == 3
-                 oPrn:Say(nLin, nCol, "QTDE. PRODUTO        DESCRIÇÃO                    PEDIDO EMBAL.     QUADR.    PROD.", oFont4, , , , )
+                 oPrn:Say(nLin, nCol, "QTDE.        PRODUTO      DESCRIÇÃO                               PEDIDO     EMBAL.         QUADR.             PROD.", oFont4, , , , )
               Else
-                 oPrn:Say(nLin, nCol, "QTDE. PRODUTO        DESCRIÇÃO                           EMBAL.     QUADR.    PROD.", oFont4, , , , )
+                 oPrn:Say(nLin, nCol, "QTDE.        PRODUTO      DESCRIÇÃO                                          EMBAL.         QUADR.             PROD.", oFont4, , , , )
               Endif
               nLin += 50
               oPrn:Line(nLin, nCol, nlin, nColMax)
@@ -1448,7 +1639,7 @@ Static Function FATR12_2(nOpc)
               nLin += 50
               oPrn:Line(nLin, nCol, nlin, nColMax)
               nLin += 10
-              oPrn:Say(nLin, nCol, "QTDE. PRODUTO        DESCRIÇÃO                           EMBAL.     QUADR.    PROD.", oFont4, , , , )
+              oPrn:Say(nLin, nCol, "QTDE.        PRODUTO      DESCRIÇÃO                                          EMBAL.        QUADR.              PROD.", oFont4, , , , )
               nLin += 50
               oPrn:Line(nLin, nCol, nlin, nColMax)
               nLin += 10
@@ -1483,7 +1674,7 @@ Static Function FATR12_2(nOpc)
               nLin += 50
               oPrn:Line(nLin, nCol, nlin, nColMax)
               nLin += 10
-              oPrn:Say(nLin, nCol, "QTDE. PRODUTO        DESCRIÇÃO                           EMBAL.     QUADR.    PROD.", oFont4, , , , )
+              oPrn:Say(nLin, nCol, "QTDE.        PRODUTO      DESCRIÇÃO                                          EMBAL.         QUADR.             PROD.", oFont4, , , , )
               nLin += 50
               oPrn:Line(nLin, nCol, nlin, nColMax)
               nLin += 10
@@ -1607,6 +1798,8 @@ Local lRet := .f.
 	dbselectarea("SB1")
 	dbsetorder(1)
 	dbseek(xFilial("SB1")+_cCod,.F.)
+
+/* Inibibito dia 15/06/2022   jose ----------------------
 	if found()
 		dbselectarea("SB2")
 		dbsetorder(1)
@@ -1615,9 +1808,17 @@ Local lRet := .f.
 			if !empty(trim(SB2->B2_LOCALIZ))
 				lRet := .t. // É PRODUTO DE ESTOQUE QUANDO HÁ LOCALIZAÇÃO!!
 			endif 
-		endif
+ 		endif
 	endif       
-	
+--------------------  até aqui 15/06/2022 --------------*/
+//   acrescentei aqui 16/06/2022 ---------------------------------
+
+	if (SB1->B1_ESTOQUE = "S")
+		lRet := .t. // É PRODUTO DE ESTOQUE QUANDO HÁ LOCALIZAÇÃO!!
+	endif 
+
+//---------------------------- até aqui 15/06/2022  ------------------
+
 	U_VoltaArea(aArea)	
 	restarea(aAlias)
 return(lRet)

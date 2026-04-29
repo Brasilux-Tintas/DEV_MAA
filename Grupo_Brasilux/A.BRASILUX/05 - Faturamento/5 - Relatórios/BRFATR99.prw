@@ -12,7 +12,7 @@
 //                                                     //
 // Variaveis utilizadas para parametros                //         
 //                                                     //        
-// mv_par01     // Per. de                             //
+// mv_par01     // Per de                             //
 // mv_par02     // Per Ate                             //
 // mv_par03     // Repres de                           //
 // mv_par04     // Repres Ate                          //
@@ -92,7 +92,6 @@ If nLastKey == 27
    Return
 Endif
 
-
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Inicio do Processamento do Relatorio                         ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -103,8 +102,6 @@ Return
 
 Static Function RptDetail()
 Local cQuery,nCont,nVlrTotal
-
-
 
 dbselectarea("SC5")
 cQuery := "WITH TMP AS (SELECT DISTINCT C5_CLIENTE AS CODCLI "+;
@@ -125,7 +122,8 @@ cQuery := "WITH TMP AS (SELECT DISTINCT C5_CLIENTE AS CODCLI "+;
 "LEFT OUTER JOIN "+RetSqlName("SA3")+" SA3 WITH (NOLOCK) ON (SA3.D_E_L_E_T_ <> '*') AND (A3_FILIAL = '"+xFilial("SA3")+"') AND (A3_COD = A1_VEND) "+;
 "LEFT OUTER JOIN "+RetSqlName("SX5")+" SX5 WITH (NOLOCK) ON (SX5.D_E_L_E_T_ <> '*') AND (X5_TABELA = 'T3') AND (X5_CHAVE = A1_SATIV2) "+;
 "LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND (C5_FILIAL = '"+xFilial("SC5")+"') AND (C5_TIPO = 'N') AND (C5_LIBCRE = 'T') AND (C5_APROVA IN ('0','1')) AND (C5_CLIENTE = CODCLI) "+;
-"WHERE (SC5.C5_VLRDUP > 0.0) "
+"WHERE (SC5.C5_VLRDUP > 0.0) "+;
+"AND (SC5.C5_EMISSAO BETWEEN '"+DTOS(MV_PAR01)+"' AND '"+DTOS(MV_PAR02)+"') "
 if !EMPTY(MV_PAR04) .AND. (MV_PAR04 >= MV_PAR03)
 	cQuery += "AND (A1_VEND BETWEEN '"+MV_PAR03+"' AND '"+MV_PAR04+"') "
 endif 
@@ -152,7 +150,6 @@ TCQuery cQuery NEW ALIAS "TCQ"
    	  		Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)
 	   	  	nLin := 09
   	 	Endif   
-
 
       	@nLin,00 psay SUBSTR(TCQ->CODCLI+'-'+TCQ->RAZAO,1,46)
     	@nLin,48 psay TCQ->UF 
@@ -181,7 +178,6 @@ TCQuery cQuery NEW ALIAS "TCQ"
 //³                      FIM DA IMPRESSAO                        ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-
 dbSelectArea("TCQ")
 dbCloseArea()
 
@@ -194,7 +190,6 @@ Endif
 
 Return
 
-
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³                   FUNCOES ESPECIFICAS                        ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -206,12 +201,10 @@ Descricao : Grava Perguntas
 Static Function ValidPerg()
 Local _sAlias := Alias()
 
-u_xPutSX1(cPerg,"01","Data Emissao De  ?"      ,"Data Emissao De  ?" ,"Data Emissao De  ?"  ,"mv_ch1" ,"D",08,0,0,"G",""  ,"","","","MV_PAR01",""     ,""     ,""     ,"",""     ,""     ,""     ,"","","","","","","","","",Nil         ,Nil         ,Nil         ,cPerg)
-u_xPutSX1(cPerg,"02","Data Emissao Ate ?"      ,"Data Emissao Ate ?" ,"Data Emissao Ate ?"  ,"mv_ch2" ,"D",08,0,0,"G",""  ,"","","","MV_PAR02",""     ,""     ,""     ,"",""     ,""     ,""     ,"","","","","","","","","",Nil         ,Nil         ,Nil         ,cPerg)
-u_xPutSx1(cPerg,"03","Repres. De  ?", "Repres. De  ?", "Repres. De  ?", "mv_ch3", "C",  6, 0, 0, "G", " ", "SA3", " ", " ", "MV_PAR03", ""                , " ", " "     , " "   , ""                , " "     , " "     , ""                , " "     , " "     , " "               , " "     , " "     , " "           ,  " ",  " "     , Nil  , Nil     , Nil     ,cPerg)
-u_xPutSx1(cPerg,"04","Repres Ate ?" , "Repres Ate ?"       , "Repres Ate ?"       , "mv_ch4", "C",  6, 0, 0, "G", " ", "SA3", " ", " ", "MV_PAR04", ""                , " ", " "     , " "   , ""                , " "     , " "     , ""                , " "     , " "     , " "               , " "     , " "     , " "           ,  " ",  " "     , Nil  , Nil     , Nil     ,cPerg)
-
+u_xPutSX1(cPerg,"01","Data Emissao De  ?" ,"Data Emissao De  ?" ,"Data Emissao De  ?" ,"mv_ch1","D",08,0,0,"G","" ,""   ,"" ,"" ,"MV_PAR01","","" ,"" ,"" ,"","" ,"" ,"","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,Nil,Nil,Nil,cPerg)
+u_xPutSX1(cPerg,"02","Data Emissao Ate ?" ,"Data Emissao Ate ?" ,"Data Emissao Ate ?" ,"mv_ch2","D",08,0,0,"G","" ,""   ,"" ,"" ,"MV_PAR02","","" ,"" ,"" ,"","" ,"" ,"","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,Nil,Nil,Nil,cPerg)
+u_xPutSx1(cPerg,"03","Repres De  ?"       , "Repres De  ?"      , "Repres De  ?"      ,"mv_ch3","C",06,0,0,"G"," ","SA3"," "," ","MV_PAR03",""," "," "," ",""," "," ",""," "," "," "," "," "," "," "," ",Nil,Nil,Nil,cPerg)
+u_xPutSx1(cPerg,"04","Repres Ate ?"       , "Repres Ate ?"      , "Repres Ate ?"      ,"mv_ch4","C",06,0,0,"G"," ","SA3"," "," ","MV_PAR04",""," "," "," ",""," "," ",""," "," "," "," "," "," "," "," ",Nil,Nil,Nil,cPerg)
 
 dbSelectArea(_sAlias)
 Return
-

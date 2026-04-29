@@ -127,7 +127,7 @@ Static Function fVerLocal()
 		If Alltrim(cGet5Env) = 'P1'
 		 	cGet6Env :='03'	
 		ElseIf Alltrim(cGet5Env) = 'P2'
-		 	cGet6Env :='30'
+		 	cGet6Env :='03'
 		ElseIf Alltrim(cGet5Env) = '30'
 		 	cGet6Env :='03'
 		ElseIf Alltrim(cGet5Env) = '10'

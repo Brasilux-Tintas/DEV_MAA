@@ -74,10 +74,10 @@ Static Function Consult( oDlg, cBordero, odbTree )
        Local _nX        := 0
        Local _nContPed  := 0 
        Local oFontTree  := TFont():New( "Courier New", 0, -12, , .T., 0, , 700, .F., .F., , , , , , )
-       Private cPedidos := Array(200,2)
+       Private cPedidos := Array(500,2)
        Private cBip     := Array(1)
-       Private cBips    := Array(200,5)
-       Private cBipPed  := Array(200,8)
+       Private cBips    := Array(500,5)
+       Private cBipPed  := Array(500,8)
        Private cLastDate[1]
        Private x        := 1  
        Private CBIPT    := ""

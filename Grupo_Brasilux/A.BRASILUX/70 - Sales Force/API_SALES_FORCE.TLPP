@@ -1,0 +1,1737 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+#include "tlpp-rest.th"
+#include "topconn.ch"
+
+/*±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Função    ³ API_SALES_FORCE  ³ Autor ³ Nelieder M Corneta   ³ Data ³ 01/10/24    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄ´±±
+±±³Descrição ³ API de integração com Sales Force                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄßßßßßßßßßßßß*/
+
+class salesforce from fwAdapterBaseV2
+
+	public method new() constructor
+
+ 	/* API que retorna o saldo do produto */
+    @post('/salesforce/saldo')
+	public method saldo() as logical
+
+    @post('/salesforce/tabela')
+	public method tabela() as logical
+
+    @post('/salesforce/produtos')
+	public method produtos() as logical
+
+    @post('/salesforce/reservar')
+	public method reserva() as logical
+
+    @get('/salesforce/listareserva')
+	public method listareserva() as logical
+
+    @get('/salesforce/listarclientes')
+	public method listarclientes() as logical
+
+    @get('/salesforce/listarpagamento')
+	public method listarpagamento() as logical
+    
+end class
+
+method new() class salesforce; return self
+
+
+/* API que retorna o saldo do produto */
+method saldo() class salesforce
+
+	Local jBodyReq  as json
+    Local cPagIni   as numeric
+    Local cCodTab   as character
+	
+    Local oError         as object
+
+    Private lMsErroAuto as logical
+    Private err as object
+   
+    Try //inicio do bloco de código contendo o controle de erro
+    
+            jBodyReq := jsonObject():new()
+            // retornar o body da requisição HTTP
+            jBodyReq:fromJson(oRest:getBodyRequest())
+        
+            // retornar os parâmetros informados na requisição via URI (query param)
+            jQueryStr := oRest:getQueryRequest()
+
+
+            If Empty(jBodyReq["codigotabelapreco"])        
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar a variavel codigotabelapreco !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            Else
+                cCodTab := jBodyReq["codigotabelapreco"]
+            EndIf
+
+
+            If Empty(jBodyReq["deposito"])
+                
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar deposito !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+                
+                If ( UPPER(jBodyReq["deposito"]) == "ARARAQUARA")
+                    cDeposito := "A3"                                                                                       
+                Elseif ( UPPER(jBodyReq["deposito"]) == "GUARULHOS")
+                    cDeposito := "G3"
+                endif
+                
+            EndIf       
+
+    
+   
+	
+            If Empty(jBodyReq["empresa"])
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+
+                If ( UPPER(jBodyReq["empresa"]) == "DISSOLTEX")
+                    cFil := "060101"
+                Elseif ( UPPER(jBodyReq["empresa"]) == "BRASILUX") 
+                    cFil := "010101"
+                else
+                    
+                    jResp           := jsonObject():new()
+                    jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                    oRest:setStatusCode(402)
+                    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                    oRest:setResponse(jResp:toJson())
+                    return .T.
+
+                EndIF
+
+            EndIf 
+
+            // Seta Empresa 
+            RpcSetEnv("01",cFil,"","","","",{"DA0","DA1","SB1","SB2"})
+
+            cSQL := "SELECT "                                                                       + CRLF
+            
+            If cDeposito == "A3"
+                cSQL += "  'ARARAQUARA' DEPOSITO,  "                                                 + CRLF
+            else
+                cSQL += "  'GUARULHOS' DEPOSITO,  "                                                 + CRLF
+            EndIF
+            
+            /*cSQL += "CASE  "                                                                        + CRLF
+            cSQL += "        WHEN DA0_X_DP = 'A' THEN 'ARARAQUARA' "                                + CRLF
+            cSQL += "        WHEN DA0_X_DP = 'G' THEN 'GUARULHOS'  "                                + CRLF
+            cSQL += "END DEPOSITO, "                                                               + CRLF*/ 
+
+
+            cSQL += "CASE  "                                                                        + CRLF
+            cSQL += "        WHEN B1_MSBLQL = '1' THEN 'Sim' "                                      + CRLF
+            cSQL += "        WHEN B1_MSBLQL = '2' THEN 'Não'  "                                     + CRLF
+            cSQL += "END BLOQUEADO, "                                                               + CRLF
+
+            /*cSQL += "CASE "                                                                         + CRLF
+            cSQL += " WHEN DA0_X_DP = 'A' THEN  (SELECT ( ((B2_QATU) - (B2_RESERVA)- (B2_QEMP)- (B2_QACLASS)- (B2_QEMPSA) - (B2_QEMPPRJ)-(B2_QTNP)) + (B2_QNPT) - (B2_QEMPPRE) ) FROM SB2010 WHERE B2_COD = B1_COD AND B2_FILIAL = B1_FILIAL AND B2_LOCAL = 'A3')  " + CRLF
+            cSQL += " WHEN DA0_X_DP = 'G' THEN  (SELECT ( ((B2_QATU) - (B2_RESERVA)- (B2_QEMP)- (B2_QACLASS)- (B2_QEMPSA) - (B2_QEMPPRJ)-(B2_QTNP)) + (B2_QNPT) - (B2_QEMPPRE) ) FROM SB2010 WHERE B2_COD = B1_COD AND B2_FILIAL = B1_FILIAL AND B2_LOCAL = 'G3')  " + CRLF
+            cSQL += " END saldo, "*/
+            
+            cSQL += " (SELECT ( ((B2_QATU) - (B2_RESERVA)- (B2_QEMP)- (B2_QACLASS)- (B2_QEMPSA) - (B2_QEMPPRJ)-(B2_QTNP)) + (B2_QNPT) - (B2_QEMPPRE) ) FROM SB2010 WHERE B2_COD = B1_COD AND B2_FILIAL = B1_FILIAL AND B2_LOCAL = '"+cDeposito+"') saldo, "    + CRLF
+            
+            cSQL += "B1_DESC,DA1_PRCVEN,"                                                           + CRLF
+            cSQL += " DA1_CODTAB,DA0_DESCRI,DA1_CODPRO "                                            + CRLF
+            cSQL += " FROM "+RetSqlName("DA0")+" DA0 "                                              + CRLF
+            cSQL += "INNER JOIN "+RetSqlName("DA1")+" DA1 ON DA1.D_E_L_E_T_ = '' AND DA1_FILIAL = DA0_FILIAL AND DA1_CODTAB = DA0_CODTAB "  + CRLF
+            cSQL += "INNER JOIN "+RetSqlName("SB1")+" SB1 ON SB1.D_E_L_E_T_ = '' AND B1_FILIAL = DA0_FILIAL AND B1_COD = DA1_CODPRO "       + CRLF
+            cSQL += "WHERE DA0.D_E_L_E_T_ = '' AND DA0_FILIAL = '"+xFilial("DA1")+"' "                                                      + CRLF
+            cSQL += "AND DA0_ATIVO = '1'  "                                                                                                 + CRLF
+            cSQL += "AND DA0_CODTAB = '"+cCodTab+"' "                                                                                       + CRLF
+            cSQL += "AND convert(varchar, getdate(), 112) >= DA0_DATDE   "                                                                  + CRLF
+            cSQL += "AND convert(varchar, getdate(), 112) <= DA0_DATATE "                                                                   + CRLF
+
+            If .not. Empty(jBodyReq["produto"])
+                cListProd :=   lista_produtos(jBodyReq)
+                cSQL            += "AND DA1_CODPRO IN "+cListProd+" "                                                                       + CRLF
+            EndIf    
+
+            If .not. Empty(jBodyReq["bloqueado"])
+                
+                cBloqueado := DecodeUTF8(jBodyReq["bloqueado"], "cp1252")
+                cBloqueado := UPPER(cBloqueado) 
+
+                If ( cBloqueado == "NÃO") .OR. ( cBloqueado == "NAO")
+                    cSQL += "AND B1_MSBLQL <> '1' "                                                                                         + CRLF
+                elseif ( cBloqueado == "SIM") 
+                    cSQL += "AND B1_MSBLQL = '1' "                                                                                          + CRLF
+                EndIF
+                
+                
+            EndIf    
+
+            // Alterado conforme solicitado por Rodrigo 06/12/24
+            /*If .not. Empty(jBodyReq["deposito"])
+
+                If ( UPPER(jBodyReq["deposito"]) == "ARARAQUARA")
+                    cSQL += "AND DA0_X_DP = 'A' "                                                                                           + CRLF
+                Elseif ( UPPER(jBodyReq["deposito"]) == "GUARULHOS")
+                    cSQL += "AND DA0_X_DP = 'G' "                                                                                           + CRLF    
+                endif
+                
+            EndIf*/       
+
+            cSQL += " ORDER BY DA1_CODPRO "                                                                                                 + CRLF
+            nStatus := TCSqlExec(cSQL)
+            // valida consulta SQL e informa erro
+            if (nStatus < 0)
+                jResp           := jsonObject():new()
+                jResp['Erro']  := 'Erro na consulta SQL !'
+                
+                // Gera Log com erro
+                //         cStatus, cRotina          , Funcao    , cPedido, cLog
+                U_API_LOGS("A"    , "API_SALES_FORCE", ProcName(), ''     , TCSQLERROR())
+                U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][SALDO] - Erro API_SALES_FORCE",TCSQLERROR(),"neliedercorneta@brasilux.com.br","","")
+                oRest:setStatusCode(500)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+                 MemoWrite("\ws_logs\salesforce\saldo\SaldoQuery.txt",cSQL)
+                cAliasSQL       := getNextAlias()  
+            endif
+                 
+            dbUseArea(.T.,"TOPCONN",tcGenQry(,,cSQL),cAliasSQL,.T.,.T.)    
+            Count To nTotal
+            (cAliasSQL)->(DbGoTop())
+
+            /* Busca relação de nomes dos campos */
+            aNomes := {}
+            aNomes := U_API_NOMES()
+
+            nPage := jQueryStr['page']
+            nSize := jQueryStr['pagesize']
+
+            nPage   := if(empty(nPage),1 ,val(nPage))
+            nSize   := if(empty(nSize),10,val(nSize))
+
+            nConta := 1
+            cLoop := (nPage * nSize)
+            
+            nPage   := nPage - 1
+            
+            cPagIni := (nPage*nSize)
+            cPagIni := if(cPagIni==0,1,cPagIni)
+
+            jResp             := jsonObject():new()
+            jResp['produtos'] := array(0)
+            
+            If nPage >= 1
+                (cAliasSQL)->(dbSkip(cPagIni))
+            EndIF
+
+            While .not. (cAliasSQL)->(eof()) .AND. nConta <= nSize 
+
+                jSaldo                       := jsonObject():new()
+                
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "DA1_CODTAB"})==0,1,aScan(aNomes, {|x| x[1] == "DA1_CODTAB"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DA1_CODTAB ))
+                
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "DA0_DESCRI"})==0,1,aScan(aNomes, {|x| x[1] == "DA0_DESCRI"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DA0_DESCRI ))
+
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "DA1_CODPRO"})==0,1,aScan(aNomes, {|x| x[1] == "DA1_CODPRO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DA1_CODPRO ))
+                
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "B1_DESC"})==0,1,aScan(aNomes, {|x| x[1] == "B1_DESC"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_DESC ))
+                
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "PROBLOQUEADO"})==0,1,aScan(aNomes, {|x| x[1] == "PROBLOQUEADO"}))
+                
+                If (cAliasSQL)->(alltrim(BLOQUEADO )) == "Sim"
+                    jSaldo[aNomes[cPos][2]] := .T.
+                else
+                    jSaldo[aNomes[cPos][2]] := .F.
+                EndIF
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "DA1_PRCVEN"})==0,1,aScan(aNomes, {|x| x[1] == "DA1_PRCVEN"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(DA1_PRCVEN)
+                
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "DEPOSITO"})==0,1,aScan(aNomes, {|x| x[1] == "DEPOSITO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DEPOSITO ))
+                
+                cPos                    := IIf(aScan(aNomes, {|x| x[1] == "Saldo"})==0,1,aScan(aNomes, {|x| x[1] == "Saldo"}))
+                jSaldo[aNomes[cPos][2]] := Val((cAliasSQL)->(alltrim(str(Saldo) )))
+
+                aadd(jResp['produtos'],jSaldo)  
+                nConta++
+                (cAliasSQL)->(dbSkip())
+
+            End
+
+            If cLoop > nTotal   
+                jResp['hasNext'] := .F.
+            else
+                jResp['hasNext'] := .T.
+                jResp['remainingRecords'] := AllTrim(str(nTotal-cLoop))
+            Endif    
+
+            (cAliasSQL)->(dbCloseArea())
+            
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução '+oError:description
+
+        // Gera Log com erro
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , oError:description)
+              
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][SALDO] - Erro API_SALES_FORCE",oError:description,"neliedercorneta@brasilux.com.br","","")
+        
+        oRest:setStatusCode(501)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY  
+
+
+    RpcClearEnv()
+
+return .T.
+
+
+method tabela() class salesforce
+
+	Local jBodyReq      as json
+    
+    Local oError         as object
+
+	Private lMsErroAuto as logical
+
+    jBodyReq := jsonObject():new()
+    jBodyReq:fromJson(oRest:getBodyRequest())
+
+    
+    Try
+    
+            // valida se campo obrigatorio empresa foi enviado no body
+            If Empty(jBodyReq["empresa"])
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+                // obrigatorio informar empresas brasilux ou dissoltex
+                If ( UPPER(jBodyReq["empresa"]) == "DISSOLTEX")
+                    cFil := "060101"
+                Elseif ( UPPER(jBodyReq["empresa"]) == "BRASILUX") 
+                    cFil := "010101"
+                else
+                    // caso não seja selecionado nenhuma das empresa informa
+                    jResp           := jsonObject():new()
+                    jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                    oRest:setStatusCode(402)
+                    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                    oRest:setResponse(jResp:toJson())
+                    return .T.
+
+                EndIF
+
+            EndIf    
+
+            // Seta Empresa 
+            RpcSetEnv("01",cFil,"","","","",{"DA0","DA1","SB1","SB2"})
+
+            cSQL := "SELECT " + CRLF 
+            cSQL += "CASE   " + CRLF 
+            cSQL += "    WHEN DA0_X_DP = 'A' THEN 'ARARAQUARA'  " + CRLF 
+            cSQL += "    WHEN DA0_X_DP = 'G' THEN 'GUARULHOS'   " + CRLF 
+            cSQL += "    ELSE ''  " + CRLF 
+            cSQL += "END DEPOSITO,  " + CRLF 
+            cSQL += "DA0_DESCRI,DA0_CODTAB   " + CRLF 
+            cSQL += "FROM "+RetSqlName("DA0")+" DA0  " + CRLF 
+            cSQL += "WHERE DA0.D_E_L_E_T_ = '' AND DA0_FILIAL = '"+xFilial("DA1")+"'  " + CRLF 
+            cSQL += "AND DA0_ATIVO = '1'   " + CRLF 
+            //cSQL += "AND DA0_X_DP <> ''  " + CRLF 
+            cSQL += "AND convert(varchar, getdate(), 112) >= DA0_DATDE    " + CRLF 
+            cSQL += "AND convert(varchar, getdate(), 112) <= DA0_DATATE  " + CRLF 
+
+            
+
+            nStatus := TCSqlExec(cSQL)
+            // valida consulta SQL e informa erro
+            if (nStatus < 0)
+                jResp           := jsonObject():new()
+                jResp['Erro']  := 'Erro na consulta SQL !'
+
+                // Gera Log com erro
+                //         cStatus, cRotina          , Funcao    , cPedido, cLog
+                U_API_LOGS("A"    , "API_SALES_FORCE", ProcName(), ''     , TCSQLERROR())
+                U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][TABELA] - Erro API_SALES_FORCE",TCSQLERROR(),"neliedercorneta@brasilux.com.br","","")
+
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+                cAliasSQL       := getNextAlias()
+                dbUseArea(.T.,"TOPCONN",tcGenQry(,,cSQL),cAliasSQL,.T.,.T.)   
+            endif
+
+            
+
+            jResp             := jsonObject():new()
+            jResp['tabela']   := array(0)
+            
+            aNomes := {}
+            aNomes := U_API_NOMES()
+
+    
+
+            While .not. (cAliasSQL)->(eof())
+                
+                jSaldo                       := jsonObject():new()
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "DEPOSITO"})==0,1,aScan(aNomes, {|x| x[1] == "DEPOSITO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DEPOSITO ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "DA0_DESCRI"})==0,1,aScan(aNomes, {|x| x[1] == "DA0_DESCRI"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DA0_DESCRI ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "DA0_CODTAB"})==0,1,aScan(aNomes, {|x| x[1] == "DA0_CODTAB"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DA0_CODTAB ))
+            
+                //jBodyReq['hasNext'] := .T.
+                aadd(jResp['tabela'],jSaldo)  
+
+                (cAliasSQL)->(dbSkip())
+
+            End
+
+    
+            (cAliasSQL)->(dbCloseArea())
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução parte 1, '+oError:description
+
+        
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][TABELA] - Erro API_SALES_FORCE",oError:description,"neliedercorneta@brasilux.com.br","","")
+        
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY  
+
+    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+    oRest:setResponse(jResp:toJson())
+
+    RpcClearEnv()
+
+return .T.
+
+
+
+method listareserva() class salesforce
+Local nError        as numeric
+Local cError        as character
+
+Local jQueryStr     as json
+Local jResp         as json
+
+Local cSQL          as character
+Local cWhere        as character
+Local nSize         as numeric
+Local nPage         as numeric
+Local cOrder        as character
+Local cReserva      as character
+Local cSku          as character
+
+
+	try
+
+		jQueryStr           := oRest:getQueryRequest()
+
+		cReserva            := jQueryStr['reserva']
+        cReserva            := jQueryStr['codigoreserva']
+        cSku                := jQueryStr['sku']
+
+		cSQL                := "SELECT #QueryFields# FROM " + retSqlName("SC0") + " SC0"
+		cSQL                += CRLF + "WHERE #QueryWhere# "
+
+		cWhere              := "D_E_L_E_T_ = ' ' "
+
+		IF .not. empty(cReserva)
+			cWhere          += CRLF + "AND C0_XIDSF = '" + cReserva + "' "
+		EndIF
+
+        IF .not. empty(cSku)
+			cWhere          += CRLF + "AND C0_PRODUTO = '" + cSku + "' "
+		EndIF
+
+        nSize               := if(empty(nSize),100,nSize)
+		nPage               := if(empty(nPage),1 ,nPage)
+        
+
+		_Super:new('GET',.T.)
+		::addMapFields('CodigoReserva'  ,'C0_XIDSF'     ,.T.)
+		::addMapFields('Sku'            ,'C0_PRODUTO'   ,.T.)
+		::addMapFields('Local'          ,'C0_LOCAL'     ,.T.)
+		::addMapFields('Quantidade'     ,'C0_QUANT'     ,.T.)
+		::addMapFields('Validade'       ,'C0_VALIDA'    ,.T.)
+        ::addMapFields('Emissao'        ,'C0_EMISSAO'   ,.T.)
+
+		::setQuery(cSQL)
+		::setWhere(cWhere)
+		::setPageSize(nSize)
+		::setPage(nPage)
+		::setOrder(cOrder)
+
+		IF ::execute()
+			::fillGetResponse()
+            oRest:appendKeyHeaderResponse("Content-Type","application/json") // altera para json
+			oRest:setResponse(::getJsonResponse())
+		Else
+
+			nError := ::getCode()
+			cError := ::getMessage()
+
+			jResp := jsonObject():new()
+			jResp['error'] := cError
+
+			oRest:setFault(jResp:toJson())
+
+		EndIF
+
+	catch err
+
+		cError          := err:errorstack
+
+		jResp           := jsonObject():new()
+		jResp['error']  := cError
+
+		oRest:setFault(jResp:toJson())
+
+	endtry
+
+	
+
+return .T.
+
+
+method listarclientes() class salesforce
+Local nError        as numeric
+Local cError        as character
+
+Local jQueryStr     as json
+Local jResp         as json
+
+Local cSQL          as character
+Local cWhere        as character
+Local nSize         as numeric
+Local nPage         as numeric
+Local cOrder        as character
+Local cID           as character
+Local cCGC          as character
+Local aNomes        as array
+
+
+	try
+
+		jQueryStr           := oRest:getQueryRequest()
+
+		cID     := jQueryStr['id']
+        cCGC    := jQueryStr['cpf_cnpj']
+
+        nPage   := jQueryStr['page']
+        nSize   := jQueryStr['pagesize']
+
+        nPage   := if(empty(nPage),1 ,val(nPage))
+        nSize   := if(empty(nSize),100,val(nSize))
+
+		cSQL                := "SELECT #QueryFields# FROM " + retSqlName("SA1") + " SA1"
+        cSQL                += CRLF + " LEFT JOIN " + retSqlName("SYA") + " SYA ON SYA.D_E_L_E_T_ = '' AND YA_CODGI = A1_PAIS " 
+		cSQL                += CRLF + "WHERE #QueryWhere# "
+
+		cWhere              := " SA1.D_E_L_E_T_ = ' ' "
+
+		IF .not. empty(cID)
+			cWhere          += CRLF + "AND A1_COD = '" + cID + "' "
+		EndIF
+
+        IF .not. empty(cCGC)
+			cWhere          += CRLF + "AND A1_CGC = '" + cCGC + "' "
+		EndIF
+
+        
+        aNomes := {}
+        aNomes := U_API_SX3()
+
+                
+		_Super:new('GET',.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_FILIAL"})==0,1,aScan(aNomes, {|x| x[1] == "A1_FILIAL"}))
+        ::addMapFields(aNomes[cPos][2]  ,'A1_FILIAL'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_COD"})==0,1,aScan(aNomes, {|x| x[1] == "A1_COD"}))
+        ::addMapFields(aNomes[cPos][2]  ,'A1_COD'   ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_LOJA"})==0,1,aScan(aNomes, {|x| x[1] == "A1_LOJA"}))		
+        ::addMapFields(aNomes[cPos][2]  ,'A1_LOJA'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_NOME"})==0,1,aScan(aNomes, {|x| x[1] == "A1_NOME"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_NOME'     ,.T.)
+        
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_PESSOA"})==0,1,aScan(aNomes, {|x| x[1] == "A1_PESSOA"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_PESSOA'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_NREDUZ"})==0,1,aScan(aNomes, {|x| x[1] == "A1_NREDUZ"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_NREDUZ'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_TIPO"})==0,1,aScan(aNomes, {|x| x[1] == "A1_TIPO"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_TIPO'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CLAS"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CLAS"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CLAS'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_END"})==0,1,aScan(aNomes, {|x| x[1] == "A1_END"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_END'     ,.T.)
+        
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CODCID"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CODCID"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CODCID'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_EST"})==0,1,aScan(aNomes, {|x| x[1] == "A1_EST"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_EST'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_COD_MUN"})==0,1,aScan(aNomes, {|x| x[1] == "A1_COD_MUN"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_COD_MUN'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_MUN"})==0,1,aScan(aNomes, {|x| x[1] == "A1_MUN"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_MUN'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_NATUREZ"})==0,1,aScan(aNomes, {|x| x[1] == "A1_NATUREZ"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_NATUREZ'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_BAIRRO"})==0,1,aScan(aNomes, {|x| x[1] == "A1_BAIRRO"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_BAIRRO'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ESTADO"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ESTADO"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ESTADO'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CEP"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CEP"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CEP'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ATIVIDA"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ATIVIDA"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ATIVIDA'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CXPOSTA"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CXPOSTA"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CXPOSTA'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_DDD"})==0,1,aScan(aNomes, {|x| x[1] == "A1_DDD"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_DDD'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_TEL"})==0,1,aScan(aNomes, {|x| x[1] == "A1_TEL"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_TEL'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_TELEX"})==0,1,aScan(aNomes, {|x| x[1] == "A1_TELEX"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_TELEX'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_FAX"})==0,1,aScan(aNomes, {|x| x[1] == "A1_FAX"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_FAX'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_PAIS"})==0,1,aScan(aNomes, {|x| x[1] == "A1_PAIS"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_PAIS'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "YA_DESCR"})==0,1,aScan(aNomes, {|x| x[1] == "YA_DESCR"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'YA_DESCR'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ENDCOB"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ENDCOB"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ENDCOB'     ,.T.)
+		        
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_COMPLC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_COMPLC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_COMPLC'     ,.T.)
+		
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_MUNC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_MUNC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_MUNC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CEPC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CEPC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CEPC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_BAIRROC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_BAIRROC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_BAIRROC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ESTC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ESTC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ESTC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ENDENT"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ENDENT"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ENDENT'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_MUNE"})==0,1,aScan(aNomes, {|x| x[1] == "A1_MUNE"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_MUNE'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_BAIRROE"})==0,1,aScan(aNomes, {|x| x[1] == "A1_BAIRROE"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_BAIRROE'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CEPE"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CEPE"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CEPE'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ENDREC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ENDREC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ENDREC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ESTE"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ESTE"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ESTE'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_MUNREC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_MUNREC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_MUNREC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_ESTREC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_ESTREC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_ESTREC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CGC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CGC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CGC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_INSCR"})==0,1,aScan(aNomes, {|x| x[1] == "A1_INSCR"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_INSCR'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_INSCRM"})==0,1,aScan(aNomes, {|x| x[1] == "A1_INSCRM"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_INSCRM'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_VEND"})==0,1,aScan(aNomes, {|x| x[1] == "A1_VEND"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_VEND'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_SATIV2"})==0,1,aScan(aNomes, {|x| x[1] == "A1_SATIV2"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_SATIV2'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_EMAIL"})==0,1,aScan(aNomes, {|x| x[1] == "A1_EMAIL"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_EMAIL'     ,.T.)
+
+/*        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_PAIS"})==0,1,aScan(aNomes, {|x| x[1] == "A1_PAIS"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_PAIS'     ,.T.)*/
+
+
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_MSBLQL"})==0,1,aScan(aNomes, {|x| x[1] == "A1_MSBLQL"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_MSBLQL'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CONTRIB"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CONTRIB"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CONTRIB'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_CNAE"})==0,1,aScan(aNomes, {|x| x[1] == "A1_CNAE"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_CNAE'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_LC"})==0,1,aScan(aNomes, {|x| x[1] == "A1_LC"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_LC'     ,.T.)
+
+        cPos := IIf(aScan(aNomes, {|x| x[1] == "A1_SALDUP"})==0,1,aScan(aNomes, {|x| x[1] == "A1_SALDUP"}))        
+        ::addMapFields(aNomes[cPos][2]  ,'A1_SALDUP'     ,.T.)
+
+        //Aliqinterna(cUF)
+    
+        ::setQuery(cSQL)
+		::setWhere(cWhere)
+		::setPageSize(nSize)
+		::setPage(nPage)
+		::setOrder(cOrder)
+
+		IF ::execute()
+			::fillGetResponse()
+            oRest:appendKeyHeaderResponse("Content-Type","application/json") // altera para json
+			oRest:setResponse(::getJsonResponse())
+		Else
+
+			nError := ::getCode()
+			cError := ::getMessage()
+
+			jResp := jsonObject():new()
+			jResp['error'] := cError
+
+			oRest:setFault(jResp:toJson())
+
+		EndIF
+
+	catch err
+
+		cError          := err:errorstack
+
+		jResp           := jsonObject():new()
+		jResp['error']  := cError
+
+		oRest:setFault(jResp:toJson())
+
+	endtry
+
+	
+
+return .T.
+
+
+
+method reserva() class salesforce
+
+	Local oError := ErrorClass():New()
+    
+    Local i             as numeric
+    Local nProdutos     as numeric
+    Local QtdReserva    as numeric
+
+    Local cErro         as character
+    Local nSaldo        as numeric
+    Local dValid        as date
+    
+    Local cCampo        as character    
+    Local aArray        as array
+    Local aProdutos     as array
+    Local aReserva      as array
+    Local cOpera        as character
+
+    Local jBodyReq      as json
+    Local jResp         as json
+    Local jTemp         as json
+
+    Local cRet          as logical
+
+	Private lMsErroAuto as logical
+    Private SC0_Reserva as character
+    Private nPorc       as numeric
+    
+    Try  
+    
+    jBodyReq := jsonObject():new()
+    jBodyReq:fromJson(oRest:getBodyRequest())
+
+    cCampo := ""
+   
+    // verifica se campos do cabeçalho foram preenchidos
+    do case
+        case Empty(jBodyReq[1]['cabecalho']['empresa']) .OR. ValType(jBodyReq[1]['cabecalho']['empresa']) == "U"
+            cCampo := "empresa"
+
+        case Empty(jBodyReq[1]['cabecalho']['deposito']) .OR. ValType(jBodyReq[1]['cabecalho']['deposito']) == "U"
+            cCampo := "deposito"
+
+        case Empty(jBodyReq[1]['cabecalho']['codigoreserva']) .OR. ValType(jBodyReq[1]['cabecalho']['codigoreserva']) == "U"
+            cCampo := "codigoreserva"
+
+        case Empty(jBodyReq[1]['cabecalho']['operacao']) .OR. ValType(jBodyReq[1]['cabecalho']['operacao']) == "U"
+            cCampo := "operacao"
+    endcase
+
+
+    // retorna informando obrigatoriedade dos campos
+    If !Empty(cCampo)
+        jResp               := jsonObject():new()
+        jResp['Requerido']  := 'Necessário informar a variavel '+cCampo+' !'
+        oRest:setStatusCode(402)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+    EndIF   
+    
+
+    cEmpresa  := UPPER(jBodyReq[1]['cabecalho']['empresa'])
+    cDeposito := UPPER(jBodyReq[1]['cabecalho']['deposito'])
+    cReserva  := jBodyReq[1]['cabecalho']['codigoreserva']
+    cOpera    := jBodyReq[1]['cabecalho']['operacao']
+
+    // verifica se empresa enviada está cadastrada
+    If !(cEmpresa == "BRASILUX") .OR. (cEmpresa == "DISSOLTEX")
+        jResp               := jsonObject():new()
+        jResp['Requerido']  := 'Empresa informada não cadastrada ('+cEmpresa+') !'
+        oRest:setStatusCode(402)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+    EndIF 
+
+    If len(cReserva) > 18
+        jResp               := jsonObject():new()
+        jResp['Requerido']  := 'Codigo da Reserva não pode ser maior que 18 Caracteres !'
+        oRest:setStatusCode(402)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+    EndIF
+
+    
+   
+    
+    // verifica se deposito enviado está cadastrado
+    If !(cDeposito == "ARARAQUARA") 
+        If ! (cDeposito == "GUARULHOS")
+            jResp               := jsonObject():new()
+            jResp['Requerido']  := 'Deposito informado não cadastrado ('+cDeposito+') !'
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+        EndIF    
+    EndIF
+
+    // verificar se reserva está cadastrada
+    cFil      := RetEmp(cEmpresa)
+    RpcSetEnv("01",cFil,"","","","MATA430",{"SC0"})
+    
+    // verifica se possui itens
+    aProdutos := {}
+    nProdutos := len(jBodyReq[1]['itens'])
+    For i := 1 to nProdutos
+        aArray := {jBodyReq[1]['itens'][i]['sku'],jBodyReq[1]['itens'][i]['quantidade']}   
+        aadd(aProdutos,aArray) 
+    Next
+
+      
+    If nProdutos == 0 
+        jResp               := jsonObject():new()
+        jResp['Requerido']  := 'Favor informar um produto !'
+        oRest:setStatusCode(402)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+    Endif 
+
+
+    // Verifica se reserva já existe para outro deposito
+    DbSelectArea("SC0")
+    SC0->(DbSetOrder(4))
+    IF  SC0->(DbSeek(xFilial("SC0")+cReserva))
+        If AllTrim(SC0->C0_LOCAL) <> AllTrim(Iif(cDeposito == "ARARAQUARA","A3","G3"))
+            
+            jResp               := jsonObject():new()
+            jResp['Requerido']  := 'Essa reserva já está registrada no Deposito '+Iif(AllTrim(SC0->C0_LOCAL) == "A3","Araraquara","Guarulhos")
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+
+        End
+    EndIf
+    
+
+
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução, '+oError:description
+
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][RESERVA1] - Erro API_SALES_FORCE",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY      
+
+
+    Try  
+
+    
+
+    aReserva := {}
+    dValid := cTod("  /  /  ")
+    For i := 1 to nProdutos
+        aArray := {}
+        cProduto := aProdutos[i][1]
+        nQuant   := aProdutos[i][2]
+        cLocal   := Iif(cDeposito == "ARARAQUARA","A3","G3") 
+        cErro    := ""
+        nSaldo   := 0 
+        cRet     := EXE_RESERVA(cReserva ,cProduto ,cLocal ,nQuant ,cOpera ,@cErro ,@nSaldo, @dValid,@nPorc , @QtdReserva )
+        
+        aArray := {cReserva ,cProduto , cLocal , nQuant  , cErro,   cRet, nSaldo, dValid , nPorc , QtdReserva}
+        aadd(aReserva,aArray)  
+    Next
+
+    
+
+     CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução, '+oError:description
+
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][RESERVA2] - Erro API_SALES_FORCE",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY  
+
+   
+    try
+
+		// Variavel recebe objeto Json
+        jResp                   := JsonObject():New()
+        jResp['Cabecalho']      := array(0)
+        
+        jTemp                   := jsonObject():new()
+        jTemp["empresa"]        := jBodyReq[1]['cabecalho']['empresa']
+        jTemp["deposito"]       := jBodyReq[1]['cabecalho']['deposito']
+        jTemp["codigoreserva"]  := jBodyReq[1]['cabecalho']['codigoreserva']
+        jTemp["operacao"]       := jBodyReq[1]['cabecalho']['operacao']
+        
+        aadd(jResp['Cabecalho'] ,jTemp)
+        
+        // Adicionar um array Itens dentro do JPedido
+        jResp['itens']        := array(0)
+
+       
+
+        For i := 1 to len(aReserva)
+            
+            nSaldo := 0
+            DbSelectArea("SB2")
+            DbSetorder(1)
+  	        If dbSeek(xFilial("SB2")+PadR(aReserva[i][2],TamSx3("D4_COD")[1])+PadR(aReserva[i][3],TamSx3("D4_LOCAL")[1]))            
+               nSaldo := SaldoSb2() 
+            EndIf
+            
+            
+            jTemp                           := jsonObject():new()
+            jTemp['sku']                    := aReserva[i][2]
+            jTemp['local']                  := aReserva[i][3]
+            jTemp['quantidade']             := aReserva[i][4]
+            jTemp['quantidadeReservada']    := aReserva[i][10]
+            jTemp['saldo']                  := nSaldo
+            jTemp['validade']               := aReserva[i][8]
+            jTemp['retorno']                := aReserva[i][5]
+            jTemp['PorcentagemReservada']   := aReserva[i][9]
+            jTemp['status']                 := aReserva[i][6]
+            aadd(jResp['itens'] ,jTemp)     
+        Next 
+        
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+      
+        
+        
+	catch err
+
+		cError          := err:errorstack
+
+         //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , cError)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][RESERVA3] - Erro API_SALES_FORCE",cError,"neliedercorneta@brasilux.com.br","","")
+
+		jResp           := jsonObject():new()
+		jResp['error']  := cError
+
+		oRest:setFault(jResp:toJson())
+
+	endtry
+
+    
+    RpcClearEnv()
+
+return .T.
+
+
+
+
+
+Static Function lista_produtos(jBodyReq)
+Local i
+
+retorna := '('
+For i := 1 to len(jBodyReq["produto"]) 
+    retorna := retorna + "'"+jBodyReq["produto"][i]+"'"
+        if (i < len(jBodyReq["produto"]))
+            retorna := retorna + ','
+        endif
+Next
+
+retorna := retorna + ')'
+
+
+
+return(retorna)
+
+
+method produtos() class salesforce
+
+	Local jBodyReq      as json
+    Local oError         as object
+
+	Private lMsErroAuto as logical
+
+
+    Try
+
+            jBodyReq := jsonObject():new()
+            jBodyReq:fromJson(oRest:getBodyRequest())
+
+            jQueryStr := oRest:getQueryRequest()
+
+            nPage := jQueryStr['page']
+            nSize := jQueryStr['pagesize']
+
+            nPage   := if(empty(nPage),1 ,val(nPage))
+            nSize   := if(empty(nSize),10,val(nSize))
+
+            nConta := 1
+            cLoop := (nPage * nSize)
+            
+            nPage   := nPage - 1
+            
+            cPagIni := (nPage*nSize)
+            cPagIni := if(cPagIni==0,1,cPagIni)
+            
+            // valida se campo obrigatorio empresa foi enviado no body
+            If Empty(jBodyReq["empresa"])
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+                // obrigatorio informar empresas brasilux ou dissoltex
+                If ( UPPER(jBodyReq["empresa"]) == "DISSOLTEX")
+                    cFil := "060101"
+                Elseif ( UPPER(jBodyReq["empresa"]) == "BRASILUX") 
+                    cFil := "010101"
+                else
+                    // caso não seja selecionado nenhuma das empresa informa
+                    jResp           := jsonObject():new()
+                    jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                    oRest:setStatusCode(402)
+                    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                    oRest:setResponse(jResp:toJson())
+                    return .T.
+
+                EndIF
+
+            EndIf    
+
+    // Seta Empresa 
+    RpcSetEnv("01",cFil,"","","","",{"DA0","DA1","SB1","SB2"})
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução, '+oError:description
+
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][PRODUTOS1] - Erro API_SALES_FORCE",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY         
+
+    
+    
+    Try
+    
+            cSQL := " SELECT   " + CRLF 
+            
+            //cSQL += " DISTINCT TOP "+Str(cTop)+" (DA1.DA1_CODPRO),  " + CRLF 
+
+            cSQL += " DISTINCT  (DA1.DA1_CODPRO),  " + CRLF 
+            
+            cSQL += " B1_FILIAL,B1_TIPO,B1_DESC,B1_VEND,B1_UM,B1_LOCPAD,B1_GRUPO,B1_POSIPI,B1_GRUPO2, " + CRLF 
+            cSQL += " B1_EX_NCM,B1_IPI,B1_SEGUM,B1_PICMRET,B1_CONV,B1_TIPCONV, " + CRLF 
+            cSQL += " B1_PESO,B1_PESBRU,B1_ORIGEM,CAST(B1_DTREFP1 as date) as B1_DTREFP1,B1_COMIS,B1_GRTRIB, " + CRLF 
+            cSQL += " B1_CATALIS,B1_ESTOQUE,B1_MSBLQL,B1_CODGTIN, " + CRLF 
+            cSQL += " CAST(B1_X_DTATU as date)B1_X_DTATU,B5_COMPRLC,B5_LARGLC,B5_ALTURLC,B5_X_QTDE, " + CRLF 
+            cSQL += " B5_XDETVOL AS RELVOL,B5_XDETCUB,"
+            //cSQL += " B1_RELVOL,B1_RELCAT1,
+            //cSQL += " dbo.DetVol(B1_FILIAL,DA1.DA1_CODPRO) AS RELVOL, " + CRLF
+            
+            
+            cSQL += " CASE   " + CRLF 
+            cSQL += "     WHEN B1_MSBLQL = '1' THEN 'Sim'  " + CRLF 
+            cSQL += "     WHEN B1_MSBLQL <> '1' THEN 'Não'   " + CRLF 
+            cSQL += " END BLOQUEADO  " + CRLF 
+            
+            
+            cSQL += " FROM "+RetSqlName("DA0")+" DA0  " + CRLF 
+            cSQL += " INNER JOIN "+RetSqlName("DA1")+" DA1 ON DA1.D_E_L_E_T_ = '' AND DA1_FILIAL = DA0_FILIAL AND DA1_CODTAB = DA0_CODTAB  " + CRLF 
+            cSQL += " INNER JOIN "+RetSqlName("SB1")+" SB1 ON SB1.D_E_L_E_T_ = '' AND B1_FILIAL = DA0_FILIAL AND B1_COD = DA1_CODPRO  " + CRLF 
+            cSQL += " LEFT  JOIN "+RetSqlName("SB5")+" SB5 ON SB5.D_E_L_E_T_ = '' AND B5_FILIAL = DA0_FILIAL AND B5_COD = DA1_CODPRO  " + CRLF 
+            cSQL += " WHERE DA0.D_E_L_E_T_ = '' AND DA0_FILIAL = '"+xFilial("DA0")+"'  " + CRLF 
+            cSQL += " AND DA0_ATIVO = '1'   " + CRLF 
+            cSQL += " AND convert(varchar, getdate(), 112) >= DA0_DATDE    " + CRLF 
+            cSQL += " AND convert(varchar, getdate(), 112) <= DA0_DATATE  " + CRLF 
+
+
+
+            If !Empty(jBodyReq["TipodeProduto"])
+                cSQL += " AND B1_TIPO = '"+jBodyReq["TipodeProduto"]+"' 
+            EndIF
+
+            If !Empty(jBodyReq["Sku"])
+                cSQL += " AND B1_COD = '"+jBodyReq["Sku"]+"' 
+            EndIF
+
+            If !Empty(jBodyReq["ProdutoBloqueado"])
+
+                cBloqueado := DecodeUTF8(jBodyReq["ProdutoBloqueado"], "cp1252")
+                cBloqueado := UPPER(cBloqueado) 
+                
+                If ( cBloqueado == "NÃO") .OR. ( cBloqueado == "NAO")
+                    cSQL += "AND B1_MSBLQL <> '1' " + CRLF
+                elseif ( cBloqueado == "SIM") 
+                    cSQL += "AND B1_MSBLQL = '1' " + CRLF
+                EndIF
+                
+            EndIF
+
+            If !Empty(jBodyReq["PodeVender"])
+                cSQL += " AND B1_VEND = '"+jBodyReq["PodeVender"]+"' 
+            EndIF
+            
+            cSQL += " ORDER BY DA1.DA1_CODPRO " + CRLF 
+
+            
+            MemoWrite("\ws_logs\salesforce\produtos\query.txt",cSQL)
+            nStatus := TCSqlExec(cSQL)
+            // valida consulta SQL e informa erro
+            if (nStatus < 0)
+                MemoWrite("\ws_logs\salesforce\produtos\query.txt",cSQL)
+                jResp           := jsonObject():new()
+                jResp['Erro']  := 'Erro na consulta SQL !'
+
+                // Gera Log com erro
+                //         cStatus, cRotina          , Funcao    , cPedido, cLog
+                U_API_LOGS("A"    , "API_SALES_FORCE", ProcName(), ''     , TCSQLERROR())
+                U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][PRODUTOS2] - Erro API_SALES_FORCE",TCSQLERROR(),"neliedercorneta@brasilux.com.br","","")
+
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            else
+                cAliasSQL       := getNextAlias()
+                dbUseArea(.T.,"TOPCONN",tcGenQry(,,cSQL),cAliasSQL,.T.,.T.) 
+                Count To nTotal
+                (cAliasSQL)->(DbGoTop())  
+            endif
+
+            jResp             := jsonObject():new()
+            jResp['produtos']   := array(0)
+            
+
+            aNomes := {}
+            aNomes := U_API_NOMES()
+            
+            If nPage >= 1
+                (cAliasSQL)->(dbSkip(cPagIni))
+            EndIF
+
+            While .not. (cAliasSQL)->(eof()) .AND. nConta <= nSize 
+                
+            
+                jSaldo                       := jsonObject():new()
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "DA1_CODPRO"})==0,1,aScan(aNomes, {|x| x[1] == "DA1_CODPRO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(DA1_CODPRO ))
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_DESC"})==0,1,aScan(aNomes, {|x| x[1] == "B1_DESC"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_DESC ))
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "PROBLOQUEADO"})==0,1,aScan(aNomes, {|x| x[1] == "PROBLOQUEADO"}))
+                //jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(BLOQUEADO ))
+                If (cAliasSQL)->(alltrim(BLOQUEADO )) == "Sim"
+                    jSaldo[aNomes[cPos][2]] := .T.
+                else
+                    jSaldo[aNomes[cPos][2]] := .F.
+                EndIF
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_TIPO"})==0,1,aScan(aNomes, {|x| x[1] == "B1_TIPO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_TIPO ))
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_VEND"})==0,1,aScan(aNomes, {|x| x[1] == "B1_VEND"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_VEND ))
+
+                
+
+                //DetVolEmba(cEmba,nQtde)
+                cLoteMin := 0
+                cProd := (cAliasSQL)->(alltrim(DA1_CODPRO )) 
+                
+                If len(cProd) >= 12
+                    If !Empty( (cAliasSQL)->(alltrim(B5_X_QTDE)) )
+                        cLoteMin := (cAliasSQL)->(alltrim(B5_X_QTDE))
+                    else    
+                        dbselectarea("ZA8")
+                        dbsetorder(3)
+                        If dbseek(xFilial("ZA8")+SUBSTR(cProd,4,2)+SUBSTR(cProd,11,2))
+                            cLoteMin := ZA8->ZA8_QTD
+                        endif
+
+                    EndIf 
+                EndIf
+
+                jSaldo["LoteMinimo"] := cLoteMin
+
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "RELVOL"})==0,1,aScan(aNomes, {|x| x[1] == "RELVOL"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(RELVOL)
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_UM"})==0,1,aScan(aNomes, {|x| x[1] == "B1_UM"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_UM ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_LOCPAD"})==0,1,aScan(aNomes, {|x| x[1] == "B1_LOCPAD"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_LOCPAD ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_GRUPO"})==0,1,aScan(aNomes, {|x| x[1] == "B1_GRUPO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_GRUPO ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_POSIPI"})==0,1,aScan(aNomes, {|x| x[1] == "B1_POSIPI"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_POSIPI ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_GRUPO2"})==0,1,aScan(aNomes, {|x| x[1] == "B1_GRUPO2"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_GRUPO2 ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_EX_NCM"})==0,1,aScan(aNomes, {|x| x[1] == "B1_EX_NCM"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_EX_NCM ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_IPI"})==0,1,aScan(aNomes, {|x| x[1] == "B1_IPI"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_IPI ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_SEGUM"})==0,1,aScan(aNomes, {|x| x[1] == "B1_SEGUM"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_SEGUM ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_PICMRET"})==0,1,aScan(aNomes, {|x| x[1] == "B1_PICMRET"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_PICMRET ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_CONV"})==0,1,aScan(aNomes, {|x| x[1] == "B1_CONV"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_CONV ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_TIPCONV"})==0,1,aScan(aNomes, {|x| x[1] == "B1_TIPCONV"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_TIPCONV ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_PESO"})==0,1,aScan(aNomes, {|x| x[1] == "B1_PESO"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(B1_PESO)
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_PESBRU"})==0,1,aScan(aNomes, {|x| x[1] == "B1_PESBRU"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(B1_PESBRU)
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_ORIGEM"})==0,1,aScan(aNomes, {|x| x[1] == "B1_ORIGEM"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_ORIGEM ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_DTREFP1"})==0,1,aScan(aNomes, {|x| x[1] == "B1_DTREFP1"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(B1_DTREFP1)
+                
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_COMIS"})==0,1,aScan(aNomes, {|x| x[1] == "B1_COMIS"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_COMIS ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_GRTRIB"})==0,1,aScan(aNomes, {|x| x[1] == "B1_GRTRIB"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_GRTRIB ))
+
+                /*cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_RELCAT1"})==0,1,aScan(aNomes, {|x| x[1] == "B1_RELCAT1"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_RELCAT1 ))*/
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_CATALIS"})==0,1,aScan(aNomes, {|x| x[1] == "B1_CATALIS"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_CATALIS ))
+
+                /*cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_RELVOL"})==0,1,aScan(aNomes, {|x| x[1] == "B1_RELVOL"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_RELVOL ))*/
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_ESTOQUE"})==0,1,aScan(aNomes, {|x| x[1] == "B1_ESTOQUE"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_ESTOQUE ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_CODGTIN"})==0,1,aScan(aNomes, {|x| x[1] == "B1_CODGTIN"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B1_CODGTIN ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B1_X_DTATU"})==0,1,aScan(aNomes, {|x| x[1] == "B1_X_DTATU"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(B1_X_DTATU)
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B5_XDETCUB"})==0,1,aScan(aNomes, {|x| x[1] == "B5_XDETCUB"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(B5_XDETCUB)
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B5_COMPRLC"})==0,1,aScan(aNomes, {|x| x[1] == "B5_COMPRLC"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B5_COMPRLC ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B5_LARGLC"})==0,1,aScan(aNomes, {|x| x[1] == "B5_LARGLC"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B5_LARGLC ))
+
+                cPos := IIf(aScan(aNomes, {|x| x[1] == "B5_ALTURLC"})==0,1,aScan(aNomes, {|x| x[1] == "B5_ALTURLC"}))
+                jSaldo[aNomes[cPos][2]] := (cAliasSQL)->(alltrim(B5_ALTURLC ))
+                
+                
+                aadd(jResp['produtos'],jSaldo)  
+                nConta++
+                (cAliasSQL)->(dbSkip())
+
+            End
+            If cLoop > nTotal   
+                jResp['hasNext'] := .F.
+            else
+                jResp['hasNext'] := .T.
+                jResp['remainingRecords'] := AllTrim(str(nTotal-cLoop))
+            Endif    
+            
+            (cAliasSQL)->(dbCloseArea())
+
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+
+            RpcClearEnv()
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução, '+oError:description
+
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_FORCE", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][PRODUTOS3] - Erro API_SALES_FORCE",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY    
+
+return .T.
+
+Static Function EXE_RESERVA(cNumero,cProduto,cLocal,nQuant,nOpc,cErro,nSaldo,dValid,nPorc,QtdReserva) //cProd,cLoc,cQtd,cOp
+
+Local aOperacao   := {}
+Local aLote       := {"","","",""}
+Local lReservOk   := .T.
+Local cParcial    := .F.
+Private aHeader := {}
+Private aCols := {}
+
+    // MV_PZRESER Prazo padrao de validade das reservas (em dias).  
+    cProduto := padr(cProduto,TamSx3("C0_PRODUTO")[1]," ")
+
+    DbSelectArea("SB1")
+    DbSetorder(1)
+    If DbSeek(xFilial("SB1")+cProduto)
+        
+        If SB1->B1_MSBLQL == "1"
+            cErro := "Produto Bloqueado !"
+            lReservOk:=.F.
+            Return lReservOk
+        Endif
+
+    else
+        
+        cErro := "Produto não Localizado !"
+        lReservOk:=.F.
+        Return lReservOk
+    
+    EndIF
+
+    
+   
+
+    If (nOpc == 1) .OR. (nOpc == 2) //INCLUIR REGISTRO
+        
+        DbSelectArea("SB2")
+        DbSetorder(1)
+        If DbSeek(xFilial("SB2")+cProduto+cLocal)
+            nSaldo := SaldoSb2() 
+            
+            If nSaldo < nQuant
+
+                QtdReserva  := nSaldo
+                nPorc := ROUND( ( (nSaldo/nQuant) * 100 ) , 2)
+                //nQuant      := nSaldo
+                cParcial    := .T.
+                //cErro := "Quantidade da reserva maior que o saldo disponivel ! "
+                //lReservOk:=.F.
+                //Return lReservOk
+            else
+                QtdReserva  := nQuant
+            EndIf
+
+
+
+            /*If nSaldo < nQuant
+
+                cErro := "Quantidade da reserva maior que o saldo disponivel ! "
+                lReservOk:=.F.
+                Return lReservOk
+
+            EndIf*/
+
+        else
+            
+            cErro := "Produto não Localizado no estoque "+cLocal
+            lReservOk:=.F.
+            Return lReservOk
+
+        EndIF
+
+        DbSelectArea("SC0")
+        SC0->(DbSetOrder(4))
+        IF  SC0->(DbSeek(xFilial("SC0")+cNumero+cProduto+cLocal))
+            SC0_Reserva := SC0->C0_NUM
+        Else    
+            // recebe nova sequencia
+            SC0_Reserva := GetSxeNum("SC0", "C0_NUM")
+            
+            SC0->(DbSetOrder(1))
+            IF  SC0->(DbSeek(xFilial("SC0")+SC0_Reserva))
+                
+                RollbackSx8() // cancela uso da GetSxeNum("SC0", "C0_NUM")
+                
+                IF SELECT("TCQ") > 0
+                    TCQ->(dbCloseArea())
+                EndIf
+
+                cQry1 := ""
+                cQry1 += " SELECT MAX(C0_NUM) AS LAST "
+		        cQry1 += " FROM  "+RetSqlName("SC0")+" WITH (NOLOCK) WHERE D_E_L_E_T_ = '' "
+        		TCQUERY cQry1 ALIAS "TCQ" NEW
+                cNovo := Val(TCQ->LAST) + 1
+                SC0_Reserva := StrZero(cNovo,6) 
+                U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][RESERVA-GetSxeNum]","Reserva pulando numeração","neliedercorneta@brasilux.com.br","","")
+            Endif
+
+        EndIf
+        
+        
+        
+        If Empty(cErro)
+            aOperacao:= {   nOpc,;                //[1] -> [Operacao : 1 Inclui,2 Altera,3 Exclui]
+                            "VD",;                //[2] -> [Tipo da Reserva] LB = Liberado, VD = Vendedor incluiu, CL = Cliente incluiu, PD = Pedido (vinculou a algum pedido de venda), NF = Nota fiscal, LJ = SIGALOJA (Equipe Protheus Automação Comercial)
+                            "",;                  //[3] -> [Documento que originou a Reserva]
+                            "neliedercorneta",;   //[4] -> [Solicitante]
+                            xFilial("SC0")}       //[5] -> [Filial da Reserva]
+
+            If cParcial
+                lReservOk := a430Reserv(aOperacao,SC0_Reserva,cProduto,cLocal,nSaldo,aLote,aHeader,aCols)
+            else
+                lReservOk := a430Reserv(aOperacao,SC0_Reserva,cProduto,cLocal,nQuant,aLote,aHeader,aCols)
+            EndIF
+
+            
+        
+        EndIf
+       
+        If lReservOk
+            
+            If !cParcial
+                 nPorc := 100
+            EndIF
+
+            nSaldo := nSaldo - nQuant
+            cErro := "Sucesso"    
+            DbSelectArea("SC0")
+            SC0->(DbSetOrder(1))
+            IF  SC0->(DbSeek(xFilial("SC0")+SC0_Reserva+cProduto+cLocal))
+                Reclock("SC0",.F.)
+                    SC0->C0_XIDSF  := cNumero
+                    SC0->C0_XORIGI := nQuant 
+                    SC0->C0_VALIDA := DaySum( Date(),GETMV("MV_PZRESER") ) 
+                    dValid         := DaySum( Date(),GETMV("MV_PZRESER") )  
+                Msunlock()
+            EndIf
+        
+        Else
+            
+            cErro := "Erro na rotina a430Reserv"
+            DbCloseArea()
+            RollbackSx8() // cancela uso da GetSxeNum("SC0", "C0_NUM")
+            lReservOk:=.F.
+            Return lReservOk
+
+        EndIf 
+
+    
+    ElseIf nOPC == 3 //EXCLUIR REGISTRO
+
+        //SELECIONAR ITEM PARA EXCLUIR
+        DbSelectArea("SC0")
+        SC0->(DbSetOrder(4))
+        IF  !SC0->(DbSeek(xFilial("SC0")+cNumero+cProduto+cLocal))
+            ConOut("Nao localizado o item para excluir")
+            lReservOk:=.F.
+            Return lReservOk
+        EndIf
+
+        aOperacao:= {nOpc,; //[1] -> [Operacao : 1 Inclui,2 Altera,3 Exclui]
+                        SC0->C0_TIPO,; //[2] -> [Tipo da Reserva]
+                        SC0->C0_DOCRES,; //[3] -> [Documento que originou a Reserva]
+                        SC0->C0_SOLICIT,; //[4] -> [Solicitante]
+                        SC0->C0_FILIAL} //[5] -> [Filial da Reserva]
+
+        nQuant:= SC0->C0_QUANT
+
+        lReservOk := a430Reserv(aOperacao,SC0->C0_NUM,cProduto,cLocal,nQuant,aLote,aHeader,aCols)
+
+        If lReservOk
+            cErro := 'Reserva excluida com Sucesso!'
+        Else
+            cErro := 'Problemas ao excluir reserva'
+        EndIf
+    
+
+
+    EndIF   
+
+    
+
+Return lReservOk
+
+
+method listarpagamento() class salesforce
+Local nError                as numeric
+Local cError                as character
+
+Local jQueryStr             as json
+Local jResp                 as json
+
+Local cSQL                  as character
+Local cWhere                as character
+Local nSize                 as numeric
+Local nPage                 as numeric
+Local cOrder                as character
+Local cId                   as character
+Local cCondicaoPagamento    as character
+Local cFormaPagamento       as character
+
+
+	try
+
+		jQueryStr           := oRest:getQueryRequest()
+
+        cId                 := jQueryStr['id']
+        cCondicaoPagamento  := jQueryStr['condicaopagamento']
+        cFormaPagamento     := jQueryStr['formapagamento']
+        cDescricaopagamento := jQueryStr['descricaopagamento']
+
+        nPage   := jQueryStr['page']
+        nSize   := jQueryStr['pagesize']
+
+        nPage   := if(empty(nPage),1 ,val(nPage))
+        nSize   := if(empty(nSize),100,val(nSize))
+
+		cSQL                := "SELECT #QueryFields# FROM " + retSqlName("SE4") + " SE4"
+        cSQL                += CRLF + " INNER JOIN " + retSqlName("SX5") + " SX5 ON SX5.D_E_L_E_T_ = '' AND X5_TABELA = '24' AND X5_CHAVE = E4_FORMA " 
+		cSQL                += CRLF + "WHERE #QueryWhere# "
+
+		cWhere              := "SE4.D_E_L_E_T_ = ' '
+        
+        cWhere              += CRLF + " AND E4_MSBLQL <> '1' "
+        
+        // Flag do SFA
+        //cWhere          += CRLF + " AND E4_X_SIM3G = 'S' "
+
+		IF .not. empty(cId)
+			cWhere          += CRLF + "AND E4_CODIGO = '" + cId + "' "
+		EndIF
+
+        IF .not. empty(cCondicaoPagamento)
+			cWhere          += CRLF + "AND E4_COND = '" + cCondicaoPagamento + "' "
+		EndIF
+
+        IF .not. empty(cFormaPagamento)
+			cWhere          += CRLF + "AND E4_FORMA = '" + cFormaPagamento + "' "
+		EndIF
+
+         IF .not. empty(cDescricaopagamento)
+			cWhere          += CRLF + "AND X5_DESCRI = '" + cDescricaopagamento + "' "
+		EndIF
+
+        cOrder := " ORDER BY SE4.E4_COND "
+                
+		_Super:new('GET',.T.)
+		
+        ::addMapFields("id"                 ,'E4_CODIGO'        ,.T.)
+        ::addMapFields("condicaopagamento"  ,'E4_COND'          ,.T.)
+        ::addMapFields("descriçãopagamento" ,'E4_DESCRI'        ,.T.)
+        ::addMapFields("formapagamento"     ,'E4_FORMA'         ,.T.)
+        ::addMapFields("descricaopagamento" ,'X5_DESCRI'        ,.T.)
+
+        
+        
+        ::setQuery(cSQL)
+		::setWhere(cWhere)
+		::setPageSize(nSize)
+		::setPage(nPage)
+		::setOrder(cOrder)
+
+		IF ::execute()
+			::fillGetResponse()
+            oRest:appendKeyHeaderResponse("Content-Type","application/json") // altera para json
+			oRest:setResponse(::getJsonResponse())
+		Else
+
+			nError := ::getCode()
+			cError := ::getMessage()
+
+			jResp := jsonObject():new()
+			jResp['error'] := "Erro :"+cError
+
+			oRest:setFault(jResp:toJson())
+
+		EndIF
+
+	catch err
+
+		cError          := err:errorstack
+
+		jResp           := jsonObject():new()
+		jResp['error']  := cError
+
+		oRest:setFault(jResp:toJson())
+
+	endtry
+
+return .T.
+
+Static Function RetEmp(cEmpresa)
+ 
+    If ( UPPER(cEmpresa) == "DISSOLTEX")
+        cFil := "060101"
+    Elseif ( UPPER(cEmpresa) == "BRASILUX") 
+        cFil := "010101"
+
+    EndIF
+
+ 
+return(cFil)
+
+Static Function AliqICM(cUf) 
+
+cEstIcm := RTRIM(GETMV("MV_ESTICM"))
+nPosAliq := At(cUf, cEstIcm)+2
+nPosFim := nPosAliq-1
+cAliq := ""
+do while nPosAliq > 2       
+	nPosFim++
+	if nPosFim > len(cEstIcm)
+		exit
+	endif          
+	cDig := substr(cEstIcm,nPosFim,1)
+	if isalpha(cDig)
+		exit
+	endif 
+	cAliq += cDig
+enddo 
+
+return(cAliq)

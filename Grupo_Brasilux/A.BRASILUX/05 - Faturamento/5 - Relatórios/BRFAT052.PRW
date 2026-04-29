@@ -24,9 +24,6 @@
 /////////////////////////////////////////////////////////
 User Function BRFAT052()
      Local _cUser
-
-     
-
      Private cxEntrega := "", cPerg := ""
      SetPrvt("CBTXT,CBCONT,NORDEM,ALFA,Z,M")
      SetPrvt("TAMANHO,LIMITE,TITULO,CDESC1,CDESC2,CDESC3")
@@ -36,56 +33,66 @@ User Function BRFAT052()
      SetPrvt("CQUERY,_TOTALG,_TOTFIN,_TOTESTE,_TOTESTS,LIMPEST")
      SetPrvt("LIMPFIN,_DTGERAD,_NRAVAR,_TOTAL,_SALIAS,AREGS")
 
-  if !u_VldAcesso(funname())
-      MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
-      return 
-  endif 
+    If !u_VldAcesso(funname())
+		MessageBox( "Acesso não autorizado!---->" + FunName(), "Atenção", 48 )
+        Return 
+    Endif 
 
-     nOrdem   := 0
-     Alfa     := 0
-     Z        := 0
-     M        := 0
-     tamanho  := "P"
-     limite   := 80
-     titulo   := "PEDIDOS - RELATORIO P/ PRODUCAO"
-     cDesc1   := PADC("Programa para emitir Pedidos",74)
-     cDesc2   := PADC(" ",74)
-     cDesc3   := PADC(" ",74)
-     cCabec   := PADC("PEDIDOS - RELATÓRIO P/ PRODUCAO",27)
-     cCabPro  := ""
-     cNatureza:= ""
-     aReturn  := { "Especial", 1,"Administracao", 1, 2, 1,"",1 }
-     nomeprog := "BRFAT052"
-     cPerg    := "BRFT52"
-     nLastKey := 0
-     lContinua:= .T.
-     nLin     := 90
-     nCol     := 60
-     wnrel    := "BRFAT052"
-     nTipo    := 18
-     m_pag    := 01
+   nOrdem   := 0
+   Alfa     := 0
+   Z        := 0
+   M        := 0
+   tamanho  := "P"
+   limite   := 80
+   titulo   := "PEDIDOS - RELATORIO P/ PRODUCAO"
+   cDesc1   := PADC("Programa para emitir Pedidos",74)
+   cDesc2   := PADC(" ",74)
+   cDesc3   := PADC(" ",74)
+   cCabec   := PADC("PEDIDOS - RELATÓRIO P/ PRODUCAO",27)
+   cCabPro  := ""
+   cNatureza:= ""
+   aReturn  := { "Especial", 1,"Administracao", 1, 2, 1,"",1 }
+   nomeprog := "BRFAT052"
+   cPerg    := "BRFT52"
+   nLastKey := 0
+   lContinua:= .T.
+   nLin     := 90
+   nCol     := 60
+   wnrel    := "BRFAT052"
+   nTipo    := 18
+   m_pag    := 01
      //           012345678901234567890123456789012345678901234567890123456789012345678901234567890
-     cCabec1  := "PRODUTO "
-     cCabec2  := "PEDIDO    CLIENTE                                  REG/REGTR QUANTIDADE LOCALIZ."
-     cCabec3  := ""
-     nTamNf   := 83     // Apenas Informativo
-     cString  := "SC9"
+   cCabec1  := "PRODUTO "
+   cCabec2  := "PEDIDO    CLIENTE                                  REG/REGTR QUANTIDADE LOCALIZ."
+   cCabec3  := ""
+   nTamNf   := 83     // Apenas Informativo
+   cString  := "SC9"
 
-     //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-     //³ Envia controle para a funcao SETPRINT                        ³
-     //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-     u_zcfga01( 'BRFAT052' ) //LGS#2021201 - Gravação de log de utilização da rotina
+   //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   //³ Envia controle para a funcao SETPRINT                        ³
+   //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-     _cUser := upper(alltrim(cUserName))
+   _cUser := upper(alltrim(cUserName))
 
-     //ValidPerg()
-     Pergunte("BRFT52",.F.)
+   //ValidPerg()
+   Pergunte(cPerg,.F.)
 
+	wnrel:=SetPrint(cString,NomeProg,cPerg,@titulo,cDesc1, cDesc2, cDesc3,.F.,.F.,.F.,Tamanho,,.F.)
+ 
+   If nLastKey <> 27
+      SetDefault(aReturn,cString)
+      If nLastKey <> 27
+         RptStatus({|| RptDetail()})
+      EndIf
+   EndIf
+
+/*
      wnrel := SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3,.T.,,.F.,Tamanho)
 
      If nLastKey == 27
         Return
      Endif
+
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Verifica Posicao do Formulario na Impressora                 ³
      //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -101,11 +108,13 @@ User Function BRFAT052()
      //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
      RptStatus({|| RptDetail()})
+*/
 
+
+
+Return
 
 Static Function RptDetail()
-
-
 
      //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
      //³ Inicializa  regua de impressao                            ³
@@ -135,14 +144,18 @@ Static Function RptDetail()
        		"LEFT OUTER JOIN "+RetSqlName("SB1")+" B1E WITH (NOLOCK) ON (B1E.D_E_L_E_T_ = '') AND (G1_FILIAL = B1E.B1_FILIAL) AND (G1_COMP = B1E.B1_COD) "+;
        		"WHERE (SG1.D_E_L_E_T_ = '') AND (G1_FILIAL = SC6.C6_FILIAL) AND (G1_COD = SC6.C6_PRODUTO) AND (B1E.B1_GRUPO LIKE 'E%') AND (B1E.B1_GRUPO2 > '')),'99') "
        	ENDIF 
-//     cQuery += "ORDEM = CASE WHEN SUBSTRING(C6_PRODUTO, 1, 2) = 'BM' THEN SC6.C6_NUM+'ZZ'+SUBSTRING(C6_PRODUTO,4,9)+SUBSTRING(C6_PRODUTO,1,3) ELSE SC6.C6_NUM+SUBSTRING(C6_PRODUTO,4,9)+SUBSTRING(C6_PRODUTO,1,3) END "
+//   cQuery += "ORDEM = CASE WHEN SUBSTRING(C6_PRODUTO, 1, 2) = 'BM' THEN SC6.C6_NUM+'ZZ'+SUBSTRING(C6_PRODUTO,4,9)+SUBSTRING(C6_PRODUTO,1,3) ELSE SC6.C6_NUM+SUBSTRING(C6_PRODUTO,4,9)+SUBSTRING(C6_PRODUTO,1,3) END "
      cQuery += "FROM "+retsqlname("SC6")+" SC6 WITH (NOLOCK) "     
      if !empty(MV_PAR09)
 	     cQuery += "LEFT OUTER JOIN "+retsqlname("SZG")+" SZG WITH (NOLOCK) ON (C6_FILIAL = ZG_FILIAL) AND (C6_NUM = SUBSTRING(ZG_PEDIDO,3,6)) AND (SZG.D_E_L_E_T_ <> '*') "
      endif 	
      cQuery += "LEFT OUTER JOIN "+retsqlname("SC5")+" A WITH (NOLOCK) ON (C6_FILIAL = C5_FILIAL) AND (A.C5_NUM = SC6.C6_NUM) AND (A.D_E_L_E_T_ <> '*') "
      cQuery += "LEFT OUTER JOIN "+retsqlname("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (C6_FILIAL = B1_FILIAL) AND (C6_PRODUTO = B1_COD) "
-     cQuery += "LEFT OUTER JOIN "+retsqlname("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_LOCPAD = B2_LOCAL) AND (B1_COD = B2_COD) "
+     IF cEmpresa = "06" // jOSE 14/04/2025
+        cQuery += "LEFT OUTER JOIN "+retsqlname("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B1_FILIAL = B2_FILIAL) AND (B1_LOCPAD = B2_LOCAL) AND (B1_COD = B2_COD) "
+     Else // jOSE 14/04/2025
+        cQuery += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B2_FILIAL = '010101') AND (CASE WHEN SC6.C6_LOCAL IN('G3') THEN 'A3' ELSE SC6.C6_LOCAL END = B2_LOCAL) AND (B1_COD = B2_COD) " // Jose 11/04/2025
+     Endif // jOSE 14/04/2025
      cQuery += "WHERE "
      cQuery += "  (SC6.C6_FILIAL = '"+xFilial("SC6")+"') "
      cQuery += "  AND SC6.C6_NUM BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' "
@@ -224,7 +237,7 @@ Static Function RptDetail()
 
            cabecalho()
            If !lGeraDuplic
-              nLin++
+              //nLin++    Jose 23/07/2025
               @nLin,00 psay "              ***********************************************"
               nLin++
               @nLin,00 psay "              *           PEDIDO SEM DUPLICATA!!            *"
@@ -260,7 +273,7 @@ Static Function RptDetail()
                  DbSelectArea("SB1")
                  DbSeek(xFilial("SB1")+TCQ->C6_PRODUTO)
                  If !found()
-                    Alert("Erro! Nao Achado o produto "+TCQ->C6_PRODUTO+"!")
+                    Alert("Erro! Produto nao localizado "+TCQ->C6_PRODUTO+"!")
                  else
                     lEstoque := iif(SB1->B1_ESTOQUE = "S",.T.,.F.)
                  Endif
@@ -300,15 +313,15 @@ Static Function RptDetail()
                        cUn := "("+ALLTRIM(SZ5->Z5_DESCR)+")" // Guardar a descrição da Embalagem
                     Endif
                  Endif
-                 nLin+=1
+                 nLin+=1   
                  @nLin,000 psay ALLTRIM(TCQ->C6_PRODUTO)+iif(lEstoque,"*","")
-                 @nLin,013 psay substr(TCQ->C6_DESCRI,1,29)
-                 @nLin,043 psay TCQ->C6_QTDVEN picture "@E 99,999"  //*IIF(LEN(ALLTRIM(TCQ->C5_ESPECI4)) > 0,2,1)
-                 @nLin,050 psay substr(cUn,1,10)
+                 @nLin,013 psay substr(TCQ->C6_DESCRI,1,20) // Jose 14/04/2025 ,1,29)
+                 @nLin,033 psay TCQ->C6_QTDVEN picture "@E 99,999"  //*IIF(LEN(ALLTRIM(TCQ->C5_ESPECI4)) > 0,2,1) // Jose 14/04/2025 ,1,43)
+                 @nLin,040 psay substr(cUn,1,10) // Jose 14/04/2025 ,1,50)
                  If !Empty(TCQ->B2_LOCALIZ)           
                     cAux = alltrim(alltrim(TCQ->B2_LOCALIZ))
-                    cAux = substr(cAux,1,9)
-                    @nLin,061 psay cAux
+                    cAux = substr(cAux,1,14) // Jose 14/04/2025 ,1,9)
+                    @nLin,051 psay cAux // Jose 14/04/2025 ,1,61)
                  Endif 
                  @nLin, 70 psay TCQ->C6_PRCVEN picture "@E 999,999.99"
                  nValorProd+=TCQ->C6_QTDVEN*TCQ->C6_PRCVEN
@@ -385,7 +398,7 @@ Static Function RptDetail()
     	   Endif
 
            //cMens = u_tiraacento(alltrim(SC5->C5_OBS))
-           cMens = u_tiraacento(alltrim(MSMM(SC5->C5_OBSSC5)))
+           cMens = (Trim(U_TiraAcento(SC5->C5_X_OBSFA)))+' '+(u_tiraacento(alltrim(MSMM(SC5->C5_OBSSC5))))
     	   If nDescZFR > 0
     	      cMens += Iif(!empty(cMens),"**","")+"Desc. Zona Franca(7%) R$ "+Alltrim(Transform(nDescZFR,"999,999.99"))
     	   Endif
@@ -504,7 +517,11 @@ Static Function RptDetail()
            ZZB->ZZB_HORLOG := Time()
         MsUnLock()
      Endif
+     
+     MS_FLUSH()
+
 Return
+
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³                   FUNCOES ESPECIFICAS                        ³
@@ -618,7 +635,7 @@ Static Function Cabecalho()
        Endif
 
        nLin += 1
-       @nLin,000 psay "CLIENTE : "+SC5->C5_CLIENTE+"-"+iif(SC5->C5_TIPO $ "D_B",SA2->A2_NOME,SA1->A1_NOME)+"   "+cClas //iif(SC5->C5_TIPO $ "D_B","",cCLAS)
+       @nLin,000 psay "CLIENTE : "+SC5->C5_CLIENTE+"-"+iif(SC5->C5_TIPO $ "D_B",SA2->A2_NOME,SUBSTR(SA1->A1_NOME,1,40))+"   "+cClas //iif(SC5->C5_TIPO $ "D_B","",cCLAS)
        nLin += 1
        @nLin,000 psay "FONE: "+iif(SC5->C5_TIPO $ "D_B",SA2->A2_DDD+'-'+SA2->A2_TEL,SA1->A1_DDD+'-'+SA1->A1_TEL)
        @nLin,030 psay "CIDADE: "+AllTrim(iif(SC5->C5_TIPO $ "D_B",SUBSTR(SA2->A2_MUN,1,35),SUBSTR(SA1->A1_MUN,1,35))) + "-" + iif(SC5->C5_TIPO $ "D_B",SA2->A2_EST,SA1->A1_EST)
@@ -657,11 +674,12 @@ Static Function Cabecalho()
        nLin += 1
        @nLin,000 psay "COD PRODUTO"
        @nLin,013 PSAY "DESCRICAO"
-       @nLin,028 psay "B.P->("+Alltrim(Posicione("SZG", 2, xFilial("SZG")+'01'+cPedido, "ZG_CODIGO"))+")"
-       @nLin,044 psay "  QTDE"
-       @nLin,051 psay "UNIDADE"
-       @nLin,062 psay "QUADRTE"
-       @nLin,070 psay "  PR. UNIT."
+              nLin += 1  // Jose 23/07/2025
+       @nLin,003 psay "B.P->("+Alltrim(Posicione("SZG", 2, xFilial("SZG")+'01'+cPedido, "ZG_CODIGO"))+")"  // Jose 14/04/2025 @nLin, 28)
+       @nLin,036 psay "QTDE" // Jose 14/04/2025 @nLin,43)         23/07/2025   @nLin,015
+       @nLin,043 psay "UNIDADE" // Jose 14/04/2025 @nLin,51)      23/07/2025   @nLin,020
+       @nLin,054 psay "QUADRANTE" // Jose 14/04/2025 @nLin,62)    23/07/2025   @nLin,030
+       @nLin,073 psay "PR.UNIT."  // Jose 14/04/2025 @nLin,70)    23/07/2025   @nLin,050
        nLin+=1
        @nLin,000 psay replicate("=",80)
        nLin+=1

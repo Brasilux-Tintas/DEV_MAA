@@ -22,19 +22,19 @@
 
 */         
 User Function WFPesoAp()
-   
-    Local cPara    	:= "pcp@brasilux.com.br;andre@brasilux.com.br"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0074")) //"pcp@brasilux.com.br;andre@brasilux.com.br"
     Local cAssunto  := "Ordens de Produção Encerradas em "+Dtoc(ddatabase)
     Local cMsg		:= ""
 
     // Tolerância 0.4 Kg para Ops até 200 Kgs e 0.2% para Ops Maiores do que 200 Kgs
 
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-     
+    cPara 	:= TRIM(GETMV("ZP_PAR0074"))
 
      /**	Monta a query para buscar os dados	**/   
-	cTmp := U_NovoCursor()    
-    cQuery := ""
+	cTmp 	:= U_NovoCursor()    
+    cQuery 	:= ""
     
     cQuery += " WITH TMP AS( "
     cQuery += " SELECT ZZA_ORDEM, ZZA_LOTE, ZZA_PRODUT, B1_DESC, (ZZA_PESFIN+ZZA_TARA) AS 'PESOFINAL',ZZA_PESAPU AS 'PESOENVASE', "

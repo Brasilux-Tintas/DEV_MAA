@@ -9,6 +9,8 @@ User Function MTA650E()
      //Local cSeqOp   := SC2->C2_SEQUEN
      Local lRet     := .t.
      Local cQry1    := ""
+     Local cFilia   := ""   //  Jose 23/02/2024
+
      Local aAutoSC2 := {}
 
      Private lMSErroAuto := .f.
@@ -32,20 +34,34 @@ If FWCodEmp() <> '11'
         ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
         ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
         ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-		aAreaAnt := u_PegaArea({"SC2","ZZA","SZZ"})
+        aAreaAnt := u_PegaArea({"SC2","ZZA","SZZ"})
         dbselectarea("SC2")
+
         If !Empty(SC2->C2_LOTE)
            If SELECT("TCQ") == 0
-              cQry1 += "SELECT C2_FILIAL,C2_NUM,C2_ITEM,C2_SEQUEN,C2_ITEMGRD,C2_OP,C2_LOTE,C2_PRODUTO "
-              cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
-              cQry1 += "WHERE SC2.C2_FILIAL = '"+xFilial("SC2")+"' "
-              cQry1 += "  AND SC2.D_E_L_E_T_ = '' "
-              cQry1 += "  AND SC2.C2_LOTE = '"+SC2->C2_LOTE+"' "
-              cQry1 += "  AND SC2.C2_PRODUTO NOT IN('"+SC2->C2_PRODUTO+"') "
-              cQry1 += "  AND SC2.C2_OP      NOT IN('"+SC2->C2_OP+"') "
-              cQry1 += "  AND SC2.C2_DATRF = '' "
-              TCQuery cQry1 ALIAS "TCQ" NEW
-              DbSelectArea("TCQ")
+              cFilia := SC2->C2_FILIAL   // Jose 23/02/2024
+              If cFilia <> '010101'     // Jose 23/02/2024
+                 cQry1 += "SELECT C2_FILIAL,C2_NUM,C2_ITEM,C2_SEQUEN,C2_ITEMGRD,C2_OP,C2_LOTE,C2_PRODUTO "
+                 cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
+                 cQry1 += "WHERE SC2.C2_FILIAL = '"+xFilial("SC2")+"' "
+                 cQry1 += "  AND SC2.D_E_L_E_T_ = '' "
+                 cQry1 += "  AND SC2.C2_LOTE = '"+SC2->C2_LOTE+"' "
+                 cQry1 += "  AND SC2.C2_PRODUTO NOT IN ('"+SC2->C2_PRODUTO+"') "  
+                 cQry1 += "  AND SC2.C2_OP      NOT IN ('"+SC2->C2_OP+"') "   
+                 cQry1 += "  AND SC2.C2_DATRF = '' "
+              Else    // Jose 23/02/2024
+                 cQry1 += "SELECT C2_FILIAL,C2_NUM,C2_ITEM,C2_SEQUEN,C2_ITEMGRD,C2_OP,C2_LOTE,C2_PRODUTO "     //  Jose 23/02/2024
+                 cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "    //  Jose 23/02/2024
+                 cQry1 += "WHERE SC2.C2_FILIAL = '"+xFilial("SC2")+"' "      //  Jose 23/02/2024
+                 cQry1 += "  AND SC2.D_E_L_E_T_ = '' "                       //  Jose 23/02/2024
+                 cQry1 += "  AND SC2.C2_LOTE = '"+SC2->C2_LOTE+"' "          //  Jose 23/02/2024
+                 cQry1 += "  AND SC2.C2_PRODUTO = ('"+SC2->C2_PRODUTO+"') "  //  Jose 23/02/2024
+                 cQry1 += "  AND SC2.C2_OP      = ('"+SC2->C2_OP+"') "       //  Jose 23/02/2024
+                 cQry1 += "  AND SC2.C2_DATRF = '' "                        //  Jose 23/02/2024
+              EndIF   // Jose 23/02/2024
+              TCQuery cQry1 ALIAS "TCQ" NEW        
+              DbSelectArea("TCQ")                 
+
               While !Eof()
                     //Apaga Ordens de produção vinculadas ao lote selecionado.
                     aAutoSC2 := {}

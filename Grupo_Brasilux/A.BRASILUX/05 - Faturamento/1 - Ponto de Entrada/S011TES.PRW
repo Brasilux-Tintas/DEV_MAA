@@ -5,7 +5,8 @@ User Function S011TES()
      Local cTES  := ParamIXB[1]
      Local cAux, cMens
      u_zcfga01( 'S011TES' ) //LGS#2021201 - Gravação de log de utilização da rotina
-     If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
+     //If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
+     If cEmpAnt <> '11'
         //ConOut("PE S011TES") release 12.1.25
         cMens := "PE S011TES"
         FwLogMSG( "INFO", , 'SIGAFAT', funname(), '', '01', cMens, 0 )

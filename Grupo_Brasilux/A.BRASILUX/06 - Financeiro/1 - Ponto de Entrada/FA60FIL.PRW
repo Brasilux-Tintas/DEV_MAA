@@ -18,8 +18,18 @@
 //30/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function FA60FIL()
      Local cString := ".T." //(Cleber 21/01/20, coloquei o ".T.")
-     u_zcfga01( 'FA60FIL' ) //LGS#2021214 - Gravação de log de utilização da rotina
-     If alltrim(FWGrpCompany()) = '01' //Empresas do grupo BRASILUX
-        cString := " Iif(Empty(Alltrim(mv_par15)), !Empty(Alltrim(E1_BCO)) .and. ((E1_VENCTO - E1_EMISSAO) > 5) .and. Empty(Alltrim(E1_NUMBCO)), (Alltrim(E1_BCO) == mv_par15) .and. ((E1_VENCTO - E1_EMISSAO) > 5) .AND. Empty(Alltrim(E1_NUMBCO))) "
+     Local xBanco := cPort060 
+     
+     If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
+        // Linha comentada por Nelieder em 09/02/2023
+        //cString := " Iif(Empty(Alltrim(mv_par15)), !Empty(Alltrim(E1_BCO)) .and. ((E1_VENCTO - E1_EMISSAO) > 5) .and. Empty(Alltrim(E1_NUMBCO)), (Alltrim(E1_BCO) == mv_par15) .and. ((E1_VENCTO - E1_EMISSAO) > 5) .AND. Empty(Alltrim(E1_NUMBCO))) "
+        
+        // Incluido por Nelieder em 09/02/2023
+        if (alltrim(cNumEmp) == "01060101")
+           cString := "  ((E1_VENCTO - E1_EMISSAO) > 5) .AND. Empty(Alltrim(E1_NUMBCO)) "
+         
+        else
+           cString := "  ((E1_VENCTO - E1_EMISSAO) > 5) .AND. (SE1->E1_BCO $ '"+xBanco+"') .AND. Empty(Alltrim(E1_NUMBCO)) "
+        Endif  
      Endif
 Return (cString)

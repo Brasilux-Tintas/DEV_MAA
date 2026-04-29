@@ -16,19 +16,21 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function BREST003()
-     Local cTabela, nArq, cPlanilha, nLidos, cLinha, lOk, aAux, cVar, _cUser ,dAux, i
+     Local nArq, cPlanilha, nLidos, cLinha, lOk, aAux, cVar, dAux, i
      Private cPerg, mv_par01, aPrazos
      Private cRotina := "BREST003  "
      Private cCodUsr := RetCodUsr()
      Private lAcsAtv := .t.
 
-	If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) != 0
+     //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+	//If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) != 0
+     //If PSWADMIN( , , cCodUsr ) != 0
 		lAcsAtv := Iif(SubStr(Posicione("SZW", 4, xFilial("SZW")+cRotina+cCodUsr+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS"), 9, 1) $ '*', .t., .f.)
 		If !lAcsAtv
 			MsgBox("Usuário não autorizado!!!", "Atenção", "STOP")
 			Return
 		Endif
-	ENDIF
+	//ENDIF
      u_zcfga01( 'BREST003' ) //LGS#2021119 - Gravação de log de utilização da rotina
      aPrazos  := {}
      aAdd(aPrazos,0) 
@@ -154,7 +156,7 @@ User Function BREST003()
      // aC[n,5] = Validacao
      // aC[n,6] = F3
      // aC[n,7] = Se campo e' editavel .t. se nao .f.
-     AADD(aC,{"cProduto"  ,{15, 010}, "Cod. do Produto"  , "@R XXX99.99.999.99", 'EXECBLOCK("BRES031", .F., .F.    )',"SB1",    })
+     AADD(aC,{"cProduto"  ,{15, 010}, "Cod. do Produto"  , "@R XXX99.99.999.XX", 'EXECBLOCK("BRES031", .F., .F.    )',"SB1",    })
      AADD(aC,{"nCusto"    ,{15, 150}, "Custo"            , "@E 999,999.9999"   , 'EXECBLOCK("BRES03" , .F., .F., "")',     , .f.})
      AADD(aC,{"nMo"       ,{15, 230}, "Mao-de-Obra"      , "@E 999,999.99"     , 'EXECBLOCK("BRES03" , .F., .F., "")',     ,    })
      AADD(aC,{"nDolar"    ,{15, 310}, "Vlr do Dolar"     , "@E 999,999.99"     , 'EXECBLOCK("BRES03" , .F., .F., "")',"SB1",    })

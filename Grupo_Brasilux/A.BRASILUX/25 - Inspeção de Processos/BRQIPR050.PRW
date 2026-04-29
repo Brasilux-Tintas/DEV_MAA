@@ -119,7 +119,7 @@ Static Function R050Imp()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Par„metros para a fun‡„o SetPrint () ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-LOCAL wnrel		:="QIPR050"
+LOCAL wnrel		:="BRQIPR050"
 LOCAL cString	:="QPR"
 LOCAL cDesc1	:="Neste relatório será impresso os Certificado de Análise de Qualidade de produtos Brasilux"
 LOCAL cDesc2	:=""
@@ -136,7 +136,7 @@ Local cImprCQ   := GETMV("MV_QIMPRCQ")
 // ³ Par„metros para a fun‡„o Cabec()  ³
 // ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 PRIVATE cTitulo 	:="CERTIFICADO DE QUALIDADE BRASILUX"	
-PRIVATE cRelatorio	:="QIPR050"
+PRIVATE cRelatorio	:="BRQIPR050"
 PRIVATE nTamanho	:="M"
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -300,12 +300,14 @@ Local cTxt			:=""
 Local cLabor		:=""
 Local cRevi			:= If(Empty(mv_par08),QA_UltRevEsp(mv_par03,,,,"QIP"), mv_par08) 
 Local cLote			:=""
+Local cProdut       :=""
 Local cLaborat		:=""
+Local dValidade
 Local aTexto		:={}
 Local aTxtRes		:={}
 Local aLinha		:={}
 Local cImpLinha	:={}
-Local cbCont		:=00
+//Local cbCont		:=00
 Local nVlrMin		:=999999
 Local nVlrMax		:=-999999
 Local nVlrUnic		:=0
@@ -320,7 +322,7 @@ Local nContador	:=1
 Local cOp			:=mv_par12
 Local cOperacao	:=""
 Local cRoteiro 	:=""
-Local CbTxt
+//Local CbTxt
 Local cNomArq		:=""
 Local cPrd 			:=mv_par03
 Local dDatOP		:=mv_par04
@@ -347,7 +349,7 @@ Local nRecQPR       := 0
 Private Titulo 	 := cTitulo
 Private Cabec1 	 := ""
 Private Cabec2	 := ""
-Private	nomeprog := "QIPR050"
+Private	nomeprog := "BRQIPR050"
 Private cTamanho := "M"
 Private nTipo	 := 0
 
@@ -614,7 +616,7 @@ For nContador := 1 To mv_par07
 						QPR->QPR_ENSAIO+cRoteiro+QPR->QPR_OPERAC))
 				dbSkip()
 				Loop
-			EndIf	
+			EndIf
 		EndIf
 		
 		If  cOperacao == QPR->QPR_OPERAC .AND. cLabor == QPR->QPR_LABOR	.AND. cEnsaio == QPR->QPR_ENSAIO
@@ -689,8 +691,8 @@ For nContador := 1 To mv_par07
 				If mv_par01 ==1 .And. QP1->QP1_TPCART <> "X"
 					@Li,077 PSAY "MÍNIMO"		//"Minimo"
 					@Li,093 PSAY "MÁXIMO"		//"Maximo"
-					@Li,108 PSAY "MÍNIMO"		//"Minimo"
-					@Li,125 PSAY "MÁXIMO"		//"Maximo"
+					//@Li,108 PSAY "MÍNIMO"		//"Minimo"
+					//@Li,125 PSAY "MÁXIMO"		//"Maximo"
 				Else
 					If QP1->QP1_CARTA$"XBR/XBS/XMR/IND/HIS"
 						@Li,077 PSAY "MINIMO"		//"Minimo"
@@ -699,8 +701,8 @@ For nContador := 1 To mv_par07
 					Else
 						@Li,077 PSAY "MÍNIMO"		//"Minimo"
 						@Li,093 PSAY "MÁXIMO"		//"Maximo"
-						@Li,108 PSAY "MÍNIMO"		//"Minimo"
-						@Li,125 PSAY "MÁXIMO"		//"Maximo"
+						//@Li,108 PSAY "MÍNIMO"		//"Minimo"
+						//@Li,125 PSAY "MÁXIMO"		//"Maximo"
 					EndIf
 				EndIf
 				Li++
@@ -774,6 +776,7 @@ For nContador := 1 To mv_par07
 		EndIf
 		dDat		:= QPR->QPR_DTMEDI
 		cLote		:= QPR->QPR_LOTE
+		cProdut     := QPR->QPR_PRODUT
 		cLaborat	:= QPR->QPR_LABOR
 		cEnsaio		:= QPR->QPR_ENSAIO
 		cOp			:= QPR->QPR_OP
@@ -818,8 +821,8 @@ For nContador := 1 To mv_par07
 									
 										nVlrMin:=IIF(SuperVal(QPS->QPS_MEDICA)<SuperVal(nVlrMin) .Or. ;
 														SuperVal(nVlrMin)==0,QPS->QPS_MEDICA,nVlrMin)
-										nVlrMax:=IIF(SuperVal(QPS->QPS_MEDICA)>SuperVal(nVlrMax),QPS->QPS_MEDICA,nVlrMax)
-	
+//	jose 30/05/2023  					nVlrMax:=IIF(SuperVal(QPS->QPS_MEDICA)>SuperVal(nVlrMax),QPS->QPS_MEDICA,nVlrMax)
+                                        nVlrMAx:= ''   //  jose 30/05/2023
 				 						If mv_par01 == 2 // Valor Unico
 											nVlrUnic := Alltrim(Str(SuperVal(nVlrUnic) + SuperVal(QPS->QPS_MEDICA)))
 											nMedia ++
@@ -841,7 +844,8 @@ For nContador := 1 To mv_par07
 								If dbSeek(xFilial("QPS")+cChave)
 									While QPS->(!Eof()) .And. 	QPS->QPS_FILIAL == xFilial("QPS") .And. QPS->QPS_CODMED == cChave
 																
-										nVlrMax:=IIF(SuperVal(QPS->QPS_MEDICA)>SuperVal(nVlrMax),QPS->QPS_MEDICA,nVlrMax)
+//										nVlrMax:=IIF(SuperVal(QPS->QPS_MEDICA)>SuperVal(nVlrMax),QPS->QPS_MEDICA,nVlrMax)  // Jose 30/05/2023
+	                                    nVlrMAx:= ''   //  jose 30/05/2023
 	
 										dbSkip()
 									EndDo
@@ -866,7 +870,8 @@ For nContador := 1 To mv_par07
 									While QPS->(!Eof()) .And. 	QPS->QPS_FILIAL == xFilial("QPS") .And. ;
 															QPS->QPS_CODMED == cChave
 										If nV == 2
-											nVlrMax:=IIF(SuperVal(QPS->QPS_MEDICA)>SuperVal(nVlrMax),QPS->QPS_MEDICA,nVlrMax)
+//											nVlrMax:=IIF(SuperVal(QPS->QPS_MEDICA)>SuperVal(nVlrMax),QPS->QPS_MEDICA,nVlrMax) //Jose 30/05/2023
+                                            nVlrMAx:= ''   //  jose 30/05/2023
 											nV:=0
 											If mv_par01 == 2 .And. lUnic
 												nVlrUnic := QPS->QPS_MEDICA
@@ -896,7 +901,8 @@ For nContador := 1 To mv_par07
 											nPorcent := QPS->QPS_MEDICA
 										EndIf
 										If !Empty(nAmostra) .And. !Empty(nPorcent)
-											nVlrMax:= IIF(SuperVal(nAmostra) * (SuperVal(nPorcent) / 100 ) > SuperVal(nVlrMax),SuperVal(nAmostra) * (SuperVal(nPorcent) / 100 ),nVlrMax)
+//    jose 30/05/2023						nVlrMax:= IIF(SuperVal(nAmostra) * (SuperVal(nPorcent) / 100 ) > SuperVal(nVlrMax),SuperVal(nAmostra) * (SuperVal(nPorcent) / 100 ),nVlrMax)
+                                            nVlrMAx:= ''   //  jose 30/05/2023
 											nAmostra:= ""
 											nPorcent:= ""
 											If mv_par01 == 2 // Valor Unico
@@ -1050,9 +1056,26 @@ For nContador := 1 To mv_par07
 			If mv_par03 == 1
 				@Li,01 PSAY "JUSTIFICATIVA LAUDO"+Replicate(".",12-Len(AllTrim(TitSX3("QPL_JUSTLA")[1])))+": "+QPL->QPL_JUSTLA
 				Li+=2
-			EndIf      
+			EndIf   
+//---- Jose 09/02/2024 --------------------------
+            If xFilial("QPL") <> '010104'
+//-----------------------------------------------   
+//----jose 25/07/2022 ---------------------------
+               dValidade := U_ValidProd(cLote,cProdut) 
+//-----------------------------------------------
+//----- jOSE 09/02/2024 -------------------------
+            Else
+			   dValidade := QPL->QPL_DTVAL
+			Endif
+//-----------------------------------------------
+// inibido por Jose 22/02/2023			@Li,01 PSAY "DATA VALIDADE"+Replicate(".",12-Len(AllTrim(TitSX3("QPL_DTVAL")[1])))+": "+Dtoc(QPL->QPL_DTVAL)
+//          @Li,01 PSAY "DATA VALIDADE"+Replicate(".",12-Len(AllTrim(TitSX3("dValidade")[1])))+": "+Dtoc(dValidade)
+            @Li,01 PSAY "DATA VALIDADE"+"."+": "+Dtoc(dValidade)
+			Li+=2
+//-----------------------------------------------
 		Endif
 	EndIf
+	
 	
 	Li+=2
 

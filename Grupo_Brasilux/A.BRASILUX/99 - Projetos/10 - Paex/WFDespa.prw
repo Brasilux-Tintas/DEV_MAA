@@ -22,14 +22,14 @@
 
 */         
 User Function WFDespa()
-   
-    Local cPara    	:= "deposito@brasilux.com.br;coletas@brasilux.com.br;danilo@brasilux.com.br;expedicao@brasilux.com.br;vendas@brasilux.com.br"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0072")) //"deposito@brasilux.com.br;coletas@brasilux.com.br;danilo@brasilux.com.br;expedicao@brasilux.com.br;vendas@brasilux.com.br"
     Local cAssunto  := "Pedidos faturados com 4 ou mais dias sem coleta no Depósito"
     Local cMsg		:= ""
 
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
      
-
+     cPara    	:= Alltrim( GETMV( "ZP_PAR0072" ) ) //LGS#20221219 - troca do local para carga do parâmetros.
      /**	Monta a query para buscar os dados	**/   
 	cTmp := U_NovoCursor()    
     cQuery := ""

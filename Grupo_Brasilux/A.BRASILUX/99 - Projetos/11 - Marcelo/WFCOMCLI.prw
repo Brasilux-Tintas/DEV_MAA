@@ -14,16 +14,15 @@
 	+-----------+----------+-------+-----------------------+------+-------------+
 	|                                                                           |
     | Descricao:	Função de WorkFlow para envio de mensagem por email	 	  	|
-    |               dos pedidos que estão endereçados e deletados ou ainda dos  |
-    |               pedidos que foram faturados e ainda não despachados a 4 dias| 
+    |               das maquinas em comodato com vendas negativas  				|
 	+-----------+------------------------------------------+------+-------------+ 
 	| USO  AP        				    									   	|                                      						    
 	+---------------------------------------------------------------------------+  
 
 */
 User Function WFCOMCLI()
-
-    Local cPara    	:= "vendas@brasilux.com.br;andre@brasilux.com.br"
+ 
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0075")) //"vendas@brasilux.com.br;andre@brasilux.com.br"
     Local cAssunto  := "Maquinas comodato com vendas negativas ( Mês referência "+SUBSTR(DTOS(date()),5,2)+'/'+SUBSTR(DTOS(date()),1,4)+" )" 
     Local cMsg		:= ""
 	Local cAuxCli	:= ""
@@ -37,10 +36,9 @@ User Function WFCOMCLI()
     Local cQuery    := ""
     
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-     
+    cPara	:= TRIM(GETMV("ZP_PAR0075"))
 
      /**	Monta a query para buscar os dados	**/   
-	
     cQuery := "EXEC BRCOMODATODETVEND '','','' "                                                                             	
     
 	TcQuery cQuery ALIAS "TCQ" NEW   

@@ -35,10 +35,13 @@ User Function BRPCP036()
     Private    nJanAltu    := 850
 
     Private oData
-    
     Private cData := cTod("  /  /  ")
-
     cData := Date()
+
+    Private oLote
+    Private cLote := SPACE(6)
+    
+
 
     Private FlagMarc := .F.
 
@@ -67,7 +70,11 @@ User Function BRPCP036()
     DEFINE MSDIALOG oDlgPvt TITLE "Estorno Produção de Produtos Especificos" FROM 000, 000  TO nJanAltu, nJanLarg COLORS 0, 16777215 PIXEL
     @ 006, (nJanLarg/2-001)-(0052*01.2) BUTTON oBtnFech  PROMPT "Fechar (ESC)"        SIZE 060, 018 OF oDlgPvt ACTION oDlgPvt:End()                               FONT oFontBtn PIXEL
     @ 006, (nJanLarg/2-001)-(0052*03) BUTTON oBtnPesq  PROMPT "Buscar Produtos (F5)"        SIZE 080, 018 OF oDlgPvt ACTION MsAguarde({|| PCP036_01(nTipo) },"Pesquisando...","Aguarde...")                               FONT oFontBtn PIXEL
-    @ 008, (nJanLarg/2-001)-(0052*10.8) MSGET oData VAR cData PICTURE "@!" SIZE 50,10 COLOR CLR_BLUE PIXEL OF oDlgPvt FONT oFontBtn
+    
+	@ 008, (nJanLarg/2-001)-(0052*8.8) MSGET oLote VAR clote PICTURE "999999" SIZE 50,10 COLOR CLR_BLUE PIXEL OF oDlgPvt FONT oFontBtn
+    @ 010, (nJanLarg/2-001)-(0052*9.3) SAY OemToAnsi("Lote: ") SIZE 060,009  PIXEL OF oDlgPvt FONT oFontSub
+
+	@ 008, (nJanLarg/2-001)-(0052*10.8) MSGET oData VAR cData PICTURE "@!" SIZE 50,10 COLOR CLR_BLUE PIXEL OF oDlgPvt FONT oFontBtn
     @ 010, (nJanLarg/2-001)-(0052*11.3) SAY OemToAnsi("Dia: ") SIZE 060,009  PIXEL OF oDlgPvt FONT oFontSub
          
         //Grid dos grupos
@@ -147,6 +154,13 @@ cQuery += " LEFT OUTER JOIN "+RETSQLNAME("SA1")+" SA1 WITH (NOLOCK) ON (C5_CLIEN
 cQuery += " WHERE (ESPECIFICOS.EMPRESA = '"+ALLTRIM(cNumEmp)+"')   "
 //cQuery += " AND (ESPECIFICOS.EMISSAO = '"+DTOS(cData)+"' ) AND (LEN(ESPECIFICOS.LOTE) = 0)  "
 cQuery += " AND (ESPECIFICOS.EMISSAO = '"+DTOS(cData)+"' )   "
+
+/* alterado em 17/03/2022 */
+cQuery += " AND LOTE = ''    "
+
+if  !Empty(cLote)
+	cQuery += " AND LOTE = '"+clote+"'    "
+endif	
 
 cQuery += " ORDER BY ESPECIFICOS.PRODUTO "
 
@@ -323,7 +337,9 @@ Static Function PCP036_04()
 				return()
 			endif
             MsProcTxt('Excluindo Ordem de Produção Aguarde... !')
-            PCP036_03(vLOTE)
+            
+			/* alterado em 17/03/2022 */
+			//PCP036_03(vLOTE)
 
 		end
 	Next

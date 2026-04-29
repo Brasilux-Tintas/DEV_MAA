@@ -728,7 +728,7 @@ User Function FATA06_1(cAlias, nReg, nOpcX, aCamEnc, cTipo, cRegiao, aAuxDes, aQ
                               //Enviar informação para o Brasrepres
                               If ((cNumEmp = "01010101") .OR. (cNumEmp = "01060101")) .and. (SubStr(SZB->ZB_PEDIDO, 1, 2) $ "01_03")
 //                                 U_EnviaRec("SC5", SubStr(SZB->ZB_PEDIDO, 3, 6), .F.)
-                              		U_EnviaRec("SC5", SubStr(SZB->ZB_PEDIDO, 3, 6), .F.,Posicione("SC5", 1, xFilial("SC5")+SubStr(SZB->ZB_PEDIDO, 3, 6), "C5_VEND1"))
+                             		  U_EnviaRec("SC5", SubStr(SZB->ZB_PEDIDO, 3, 6), .F.,Posicione("SC5", 1, xFilial("SC5")+SubStr(SZB->ZB_PEDIDO, 3, 6), "C5_VEND1"))
                               Endif
                            Endif
                            //Baixar Pedido da Retirada de pedidos
@@ -863,8 +863,10 @@ User Function FATA06_2()
         Local nY
         For nY := 1 To Len(aCols)
             If !NwDeleted(oGetDados1, nY)
-               nPesBor += Posicione("SC5", 1, aCols[nY][NwFieldPos(oGetDados1, 'ZB_PEDIDO')], "C5_PBRUTO")
-               nVolBor += Posicione("SC5", 1, aCols[nY][NwFieldPos(oGetDados1, 'ZB_PEDIDO')], "C5_VOLUME1")
+//             nPesBor += Posicione("SC5", 1, aCols[nY][NwFieldPos(oGetDados1, 'ZB_PEDIDO')], "C5_PBRUTO")   Jose 02/10/2024
+//             nVolBor += Posicione("SC5", 1, aCols[nY][NwFieldPos(oGetDados1, 'ZB_PEDIDO')], "C5_VOLUME1")  Jose 02/10/2024
+               nPesBor += Posicione("SC5", 1, xFilial("SC5")+NwFieldPos(substr(oGetDados1:aCols[nY][1],3,6)), "C5_PBRUTO")  // Jose 02/10/2024
+               nVolBor -= Posicione("SC5", 1, xFilial("SC5")+NwFieldPos(Substr(oGetDados1:aCols[nY][1],3,6)), "C5_VOLUME1") // Jose 02/10/2024
             Endif
         Next
         onPesBor:Refresh()
@@ -1185,7 +1187,7 @@ Return Nil
 ±±ÚÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
 ±±³Programa   ³   C()   ³ Autores ³ Norbert/Ernani/Mansano ³ Data ³10/05/2005³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descricao  ³ Funcao responsave por manter o Layout independente da       ³±±
+±±³Descricao  ³ Funcao responsavel por manter o Layout independente da       ³±±
 ±±³           ³ resolucao horizontal do Monitor do Usuario.                  ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -1748,6 +1750,7 @@ Static Function NwDeleted(oObjeto, nLinha)
        // Se nLinha nao for preenchida Retorna a Posicao de nAt do Objeto
        Default nLinha := oObjeto:nAt
        // Alimenta Celula com novo Valor
+
        lRet := oObjeto:aCols[nLinha][nCol]
 Return(lRet)
 
@@ -1759,6 +1762,7 @@ Static Function fBorJaE()
        Local aMatReg  := {}
        Local aButtons := {}
        Local nOpcA    := 0
+       Local cBorDes  := "" // Jose 11/04/2025
        Local aQtdReg  := {}
        Private aMarCar:= {}
        Private oMarCar
@@ -1786,6 +1790,7 @@ Static Function fBorJaE()
                  fListBox2()
           ACTIVATE MSDIALOG _oDlg1 CENTERED  ON INIT EnchoiceBar(_oDlg1, {||nOpcA := 1, _oDlg1:End()}, {|| _oDlg1:End()},, aButtons)
           If nOpcA == 1
+             cBorDes:= ""  // Jose 11/04/2025
              For nA := 1 To Len(aMarCar)
                  If aMarCar[nA][1]
                     cBorDes := aMarCar[nA][2]

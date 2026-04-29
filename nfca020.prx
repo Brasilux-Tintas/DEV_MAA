@@ -1,0 +1,685 @@
+#INCLUDE 'PROTHEUS.CH'
+#INCLUDE 'FWMVCDEF.CH'
+#INCLUDE "FWEVENTVIEWCONSTS.CH"
+#INCLUDE 'FWLIBVERSION.CH'
+#INCLUDE 'TOPCONN.ch'
+
+/*/{Protheus.doc} NFCA020
+Ponto de entrada para gravacao no NFC MVC
+1) Uso para logo de alterações na cotação antes da finalização
+@type function Ponto de Entrada
+@version  1.00
+@author marioantonaccio
+@since 22/01/2026
+@return Logical, continua ou nao algum processo
+/*/
+User Function NFCA020()
+    Local aParam     := PARAMIXB
+    Local lRet       := .T.
+    Local oObj       := ''
+    Local cIdPonto   := ''
+    Local cIdModel   := ''
+    Local lIsGrid    := .F.
+    Local nLinha     := 0
+    Local nQtdLinhas := 0
+    //Local cMsg       := ''
+    Local cClasse    := ''
+
+    If ( aParam <> NIL )
+        oObj       := aParam[1]
+        cIdPonto   := aParam[2]
+        cIdModel   := aParam[3]
+        lIsGrid    := If(aParam[3] == "SC8DETAIL", .T., .F.)
+        cClasse    := oObj:ClassName()
+
+        If ( lIsGrid )
+            nQtdLinhas := oObj:GetQtdLine()
+            nLinha     := oObj:nLine
+        EndIf
+
+        If ( cIdPonto == 'MODELPOS' )
+
+            //Chamada na validação total do modelo (MODELPOS).
+            If ALTERA
+                U_BRLOGCOT()
+            End
+
+        ElseIf ( cIdPonto == 'MODELPRE' )
+            //Antes da alteração de qualquer campo do modelo.
+
+            U_BRSCSCC()
+
+        ElseIf ( cIdPonto == 'FORMPOS' )
+            //Chamada na validação total do formulário (FORMPOS)
+            /* If ( cClasse == 'FWFORMGRID' )
+                cMsg += 'É um FORMGRID com ' + Alltrim( Str( nQtdLinhas ) ) + ' linha(s).' + CRLF
+                cMsg += 'Posicionado na linha ' + Alltrim( Str( nLinha     ) ) + CRLF
+            ElseIf ( cClasse == 'FWFORMFIELD' )
+                cMsg += 'É um FORMFIELD' + CRLF
+            EndIf
+            */
+
+        ElseIf ( cIdPonto == 'FORMLINEPRE' )
+            /*
+            If ( aParam[5] == 'DELETE' )
+                cMsg := 'Chamada na pre validação da linha do formulário (FORMLINEPRE).' + CRLF
+                cMsg += 'Onde esta se tentando deletar uma linha' + CRLF
+                cMsg += 'É um FORMGRID com ' + Alltrim( Str( nQtdLinhas ) ) + ' linha(s).' + CRLF
+                cMsg += 'Posicionado na linha ' + Alltrim( Str( nLinha     ) ) + CRLF
+                cMsg += 'ID ' + cIdModel + CRLF
+
+                If !( xRet := ApMsgYesNo( cMsg + 'Continua ?' ) )
+                    Help( ,, 'Help',, 'O FORMLINEPRE retornou .F.', 1, 0 )
+                EndIf
+
+             EndIf
+            */
+        ElseIf ( cIdPonto == 'FORMLINEPOS' )
+            //Chamada na validação da linha do formulário (FORMLINEPOS)
+
+        ElseIf ( cIdPonto == 'MODELCOMMITTTS' )
+            //Chamada apos a gravação total do modelo e dentro da transação (MODELCOMMITTTS)
+
+        ElseIf ( cIdPonto == 'MODELCOMMITNTTS' )
+            //Chamada apos a gravação total do modelo e fora da transação (MODELCOMMITNTTS)
+
+        ElseIf ( cIdPonto == 'FORMCOMMITTTSPOS' )
+            // Chamada apos a gravação da tabela do formulário (FORMCOMMITTTSPOS)
+
+        ElseIf ( cIdPonto == 'MODELCANCEL' )
+            //Chamada no Botão Cancelar (MODELCANCEL)
+
+        ElseIf cIdPonto == 'BUTTONBAR'
+            // Adicionando Botao na Barra de Botoes (BUTTONBAR)
+            //   xRet := {}
+            //  aAdd(xRet, {"* Atualizar Tela",        "", {|| aLERT("OK")}, "Atu. Tela"})
+        EndIf
+
+    EndIf
+
+Return lRet
+
+/*/{Protheus.doc} BRLOGCOT
+Rotina que faz a verificação de alteração de campos na cotação
+@type function Processamento
+@version  1.0
+@author marioantonaccio
+@since 27/01/2026
+@return logical, se processou tudo  ou nao
+/*/
+User Function BRLOGCOT()
+
+    //Local oModelImp   as Object
+    Local aArea       := FWGetArea() as Array
+    Local aAreaSC8                   as Array
+    Local aSaveLines                 as Array
+    Local lFEndEnt    := .F.         as Logical
+    Local lRet        := .T.         as Logical
+    Local nLinha                     as Numeric
+    Local oModelGrid                 as Object
+    Local oModelPad                  as Object
+    Local oModelTela                 as Object
+    Private aAlterCpo := {}          as Array
+    Private cNumCot                  as Character
+
+    //Define as variáveis que serão usadas
+    aAreaSC8   := SC8->(FWGetArea())
+    aSaveLines := FWSaveRows()
+
+    //Pegando os modelos de dados
+    oModelPad  := FWModelActive()
+    If oModelPad <> NIL
+        oModelTela := oModelPad:GetModel("DHUMASTER")
+        If oModelTela == NIL
+            FWAlertError("Nao há Objeto (DHUMASTER) MVC disponivel","Sem Objetos")
+            Return (.F.)
+        End
+        oModelGrid := oModelPad:GetModel('SC8DETAIL')
+        If oModelTela == NIL
+            FWAlertError("Nao há Objeto (SC8DETAIL) MVC disponivel","Sem Objetos")
+            Return(.F.)
+        End
+        //oModelImp := oModelPad:GetModel('IMPETRB')
+    Else
+        FWAlertError("Nao há Objetos MVC disponiveis","Sem Objetos")
+        Return (.F.)
+    End
+
+    cNumCot    :=  oModelTela:GetValue("DHU_NUM")
+
+    DHU->(DbSetOrder(1)) //DHU_FILIAL+DHU_NUM
+    DHU->(DbSeek(FWxFilial('DHU')+cNumCot))
+
+    SC8->(DbSetOrder(3)) //C8_FILIAL+C8_NUM+C8_PRODUTO+C8_FORNECE+C8_LOJA+C8_NUMPED+C8_ITEMPED+C8_ITSCGRD
+
+    //Percorrendo a grid com os itens
+    For nLinha := 1 To oModelGrid:Length()
+
+        //Posicionando na linha atual
+        oModelGrid:GoLine(nLinha)
+
+        //Se a linha tiver deletada loop
+        If oModelGRID:IsDeleted()
+            /* ... */
+            Loop
+            //se não for inserção
+
+        ElseIf .NOT. oModelGRID:IsInserted()
+            //Posiciona na tabela SC8  //DHU_FILIAL+DHU_CODFOR+DHU_LOJAFOR+
+            SC8->(DbSeek(FWxFilial('SC8') + cNumCot + oModelGrid:GetValue("C8_PRODUTO")+ oModelGrid:GetValue("C8_FORNECE")+oModelGrid:GetValue("C8_LOJA") ))
+
+            //Endereco Entrega
+            If .NOT. lFEndEnt
+                If AllTrim(DHU->DHU_ENTREG) != AllTrim(oModelTela:GetValue("DHU_ENTREG"))
+                    U_MemoDiff(DHU->DHU_ENTREG, oModelTela:GetValue("DHU_ENTREG"),"DHU_ENTREG",nLinha  )
+                    lFEndEnt:=.T.
+                End
+            End
+
+            //Tela
+            // %  Desconto DHU_DESC
+            If SC8->C8_DESC  != oModelTela:GetValue("DHU_DESC")
+                AADD(aAlterCpo,{ "C8_DESC",SC8->C8_DESC,oModelTela:GetValue("DHU_DESC") ,"E" ,nLinha })
+            EndIf
+
+            // Valor Desconto
+            If SC8->C8_VLDESC  != oModelTela:GetValue("DHU_VLDESC")
+                AADD(aAlterCpo,{ "C8_VLDESC",SC8->C8_VLDESC, oModelTela:GetValue("DHU_VLDESC"),"E",nLinha})
+            EndIf
+
+            // Valor Frete  dhu_valfre
+            If SC8->C8_TOTFRE  != oModelTela:GetValue("DHU_VALFRE")
+                AADD(aAlterCpo,{ "C8_TOTFRE",SC8->C8_TOTFRE,oModelTela:GetValue("DHU_VALFRE"),"" ,nLinha })
+            EndIf
+
+            // Tipo Frete DHU_FRETE
+            If SC8->C8_TPFRETE  != oModelTela:GetValue("DHU_FRETE")
+                AADD(aAlterCpo,{ "C8_TPFRETE",SC8->C8_TPFRETE,oModelTela:GetValue("DHU_FRETE") ,"",nLinha })
+            EndIf
+
+            // Condicao Pagamento DHU_COND
+            If SC8->C8_COND  != oModelTela:GetValue("DHU_COND")
+                AADD(aAlterCpo,{ "C8_COND",SC8->C8_COND,oModelTela:GetValue("DHU_COND") ,"" ,nLinha})
+            EndIf
+
+            //Moeda
+            If SC8->C8_MOEDA  != Val(oModelTela:GetValue("DHU_MOEDA"))
+                AADD(aAlterCpo,{ "C8_MOEDA",SC8->C8_MOEDA,oModelTela:GetValue("DHU_MOEDA") ,"",nLinha })
+            EndIf
+
+            // Taxa Moeda
+            If SC8->C8_TXMOEDA  !=  oModelTela:GetValue("DHU_TXMOEDA")
+                AADD(aAlterCpo,{ "C8_TXMOEDA",SC8->C8_TXMOEDA,oModelTela:GetValue("DHU_TXMOEDA") ,"",nLinha  })
+            EndIf
+
+            //Despesas DHU_DESPESA
+            If SC8->C8_DESPESA  != oModelTela:GetValue("DHU_DESPESA")
+                AADD(aAlterCpo,{ "C8_DESPESA",SC8->C8_DESPESA,oModelTela:GetValue("DHU_DESPESA") ,"",nLinha  })
+            EndIf
+
+            //Seguro DHU_SEGURO
+            If SC8->C8_SEGURO  != oModelTela:GetValue("DHU_SEGURO")
+                AADD(aAlterCpo,{ "C8_SEGURO",SC8->C8_SEGURO,oModelTela:GetValue("DHU_SEGURO"),"",nLinha  })
+            EndIf
+
+            //WF "DHU_COMPWF"
+            If AlLtrim(cValToChar(SC8->C8_WF))  != AlLtrim(cValToChar(If(oModelTela:GetValue( "DHU_COMPWF")=="2",.F.,.T.)))
+                AADD(aAlterCpo,{ "C8_WF",SC8->C8_WF,If(oModelTela:GetValue( "DHU_COMPWF")=="2",.F.,.T.) ,"",nLinha  })
+            EndIf
+
+            //Grid
+            //Situacao
+            If SC8->C8_SITUAC  != oModelGrid:GetValue("C8_SITUAC")
+                AADD(aAlterCpo,{ "C8_SITUAC",SC8->C8_SITUAC,oModelGrid:GetValue("C8_SITUAC"), "",nLinha  })
+            EndIf
+
+            // Quantidade Disponivel
+            If SC8->C8_QTDISP  != oModelGrid:GetValue("C8_QTDISP")
+                AADD(aAlterCpo,{ "C8_QTDISP",SC8->C8_QTDISP,oModelGrid:GetValue("C8_QTDISP") ,"",nLinha })
+            EndIf
+
+            // Preco
+            If SC8->C8_PRECO  != oModelGrid:GetValue("C8_PRECO")
+                AADD(aAlterCpo,{ "C8_PRECO",SC8->C8_PRECO,oModelGrid:GetValue("C8_PRECO"),"" ,nLinha  })
+            EndIf
+            // %  Desconto
+            //Valida tela
+            If oModelTela:GetValue("DHU_DESC") <> oModelGrid:GetValue("C8_DESC")
+                If SC8->C8_DESC  != oModelGrid:GetValue("C8_DESC")
+                    AADD(aAlterCpo,{ "C8_DESC",SC8->C8_DESC,oModelGrid:GetValue("C8_DESC"), "G" ,nLinha  })
+                EndIf
+            End
+            // Valor Desconto
+            //valida tela
+            If oModelGrid:GetValue("C8_VLDESC") <> oModelTela:GetValue("DHU_VLDESC")
+                If SC8->C8_VLDESC  != oModelGrid:GetValue("C8_VLDESC")
+                    AADD(aAlterCpo,{ "C8_VLDESC",SC8->C8_VLDESC,oModelGrid:GetValue("C8_VLDESC"),"G" ,nLinha  })
+                EndIf
+            End
+
+            // TES
+            If SC8->C8_TES  != oModelGrid:GetValue("C8_TES")
+                AADD(aAlterCpo,{ "C8_TES",SC8->C8_TES,oModelGrid:GetValue("C8_TES") ,"",nLinha  })
+            EndIf
+            // CF
+            If SC8->C8_CF  != oModelGrid:GetValue("C8_CF")
+                AADD(aAlterCpo,{ "C8_CF",SC8->C8_CF,oModelGrid:GetValue("C8_CF") ,"",nLinha })
+            EndIf
+            // Obs
+            If SC8->C8_OBS  != oModelGrid:GetValue("C8_OBS")
+                U_MemoDiff(SC8->C8_OBS, oModelGrid:GetValue("C8_OBS"),"C8_OBS",nLinha )
+            EndIf
+            // Aliquota IPI
+            If SC8->C8_ALIIPI  != oModelGrid:GetValue("C8_ALIIPI")
+                AADD(aAlterCpo,{ "C8_ALIIPI",SC8->C8_ALIIPI,oModelGrid:GetValue("C8_ALIIPI") ,"" ,nLinha })
+            EndIf
+            // Valor IPI DHU_VALIPI
+            If SC8->C8_VALIPI  != oModelGrid:GetValue("C8_VALIPI")
+                AADD(aAlterCpo,{ "C8_VALIPI",SC8->C8_VALIPI,oModelGrid:GetValue("C8_VALIPI") ,"" ,nLinha })
+            EndIf
+            // Base IPI
+            If SC8->C8_BASEIPI  != oModelGrid:GetValue("C8_BASEIPI")
+                AADD(aAlterCpo,{ "C8_BASEIPI",SC8->C8_BASEIPI,oModelGrid:GetValue("C8_BASEIPI"),"" ,nLinha  })
+            EndIf
+
+            // % ICMS
+            If SC8->C8_PICM  != oModelGrid:GetValue("C8_PICM")
+                AADD(aAlterCpo,{ "C8_PICM",SC8->C8_PICM,oModelGrid:GetValue("C8_PICM"),"" ,nLinha  })
+            EndIf
+
+            // Valor ICMS DHU_TOTICM
+            If SC8->C8_VALICM  != oModelGrid:GetValue("C8_VALICM")
+                AADD(aAlterCpo,{ "C8_VALICM",SC8->C8_VALICM,oModelGrid:GetValue("C8_VALICM") ,"",nLinha  })
+            EndIf
+
+            // Valor ICMS SOL DHU_TOTISO
+            If SC8->C8_VALSOL  != oModelGrid:GetValue("C8_VALSOL")
+                AADD(aAlterCpo,{ "C8_VALSOL",SC8->C8_VALSOL,oModelGrid:GetValue("C8_VALSOL") ,"",nLinha  })
+            EndIf
+
+            // Aliq ICMS Complementar DHU_TOTICO
+            If SC8->C8_ALIQCMP  != oModelGrid:GetValue("C8_ALIQCMP")
+                AADD(aAlterCpo,{ "C8_ALIQCMP",SC8->C8_ALIQCMP,oModelGrid:GetValue("C8_ALIQCMP") ,"",nLinha  })
+            EndIf
+
+            // VALOR ICMS Complementar DHU_TOTICO
+            If SC8->C8_ICMSCOM  != oModelGrid:GetValue("C8_ICMSCOM")
+                AADD(aAlterCpo,{ "C8_ICMSCOM",SC8->C8_ICMSCOM,oModelGrid:GetValue("C8_ICMSCOM"),"" ,nLinha  })
+            EndIf
+
+            // Aliq ISS
+            If SC8->C8_ALIQISS  != oModelGrid:GetValue("C8_ALIQISS")
+                AADD(aAlterCpo,{ "C8_ALIQISS",SC8->C8_ALIQISS,oModelGrid:GetValue("C8_ALIQISS") ,"",nLinha  })
+            EndIf
+
+            // Valor ISS DHU_VALISS
+            If SC8->C8_VALISS  != oModelGrid:GetValue("C8_VALISS")
+                AADD(aAlterCpo,{ "C8_VALISS",SC8->C8_VALISS,oModelGrid:GetValue("C8_VALISS"),"",nLinha  })
+            EndIf
+
+            // VALOR DIFAL DHU_TOTDIF
+            If SC8->C8_DIFAL  != oModelGrid:GetValue("C8_DIFAL")
+                AADD(aAlterCpo,{ "C8_DIFAL",SC8->C8_DIFAL,oModelGrid:GetValue("C8_DIFAL") ,"",nLinha  })
+            EndIf
+
+            // Data Entrega
+            If SC8->C8_DATPRF  != oModelGrid:GetValue("C8_DATPRF")
+                AADD(aAlterCpo,{ "C8_DATPRF",SC8->C8_DATPRF,oModelGrid:GetValue("C8_DATPRF"),"",nLinha  })
+            EndIf
+
+            // Codigo Tabela
+            If SC8->C8_CODTAB  != oModelGrid:GetValue("C8_CODTAB")
+                AADD(aAlterCpo,{ "C8_CODTAB",SC8->C8_CODTAB,oModelGrid:GetValue("C8_CODTAB"),"" ,nLinha  })
+            EndIf
+
+        EndIf
+    Next
+
+    //Se houve alteração de linhas
+    If Len(aAlterCpo) > 0
+        ZAJ->(dbSetOrder(1))
+        For nLinha:=1 To Len(aAlterCpo)
+            oModelGrid:GoLine(aAlterCpo[nLinha][5])
+            RecLock("ZAJ",.T.)
+            ZAJ->ZAJ_FILIAL := FWxFilial( 'ZAJ' )
+            ZAJ->ZAJ_NUMERO := cNumCot
+            ZAJ->ZAJ_FORNEC := oModelTela:GetValue("DHU_CODFOR")
+            ZAJ->ZAJ_LOJA   := oModelTela:GetValue("DHU_LOJAFOR")
+            ZAJ->ZAJ_PROD   := oModelGrid:GetValue("C8_PRODUTO")
+            ZAJ->ZAJ_CAMPO  := aAlterCpo[nLinha][1]
+            ZAJ->ZAJ_DE     := cValToChar(aAlterCpo[nLinha][2])
+            ZAJ->ZAJ_PARA   := cValToChar(aAlterCpo[nLinha][3])
+            ZAJ->ZAJ_SEQ    := aAlterCpo[nLinha][4]
+            ZAJ->ZAJ_DTALT  := dDataBase
+            ZAJ->ZAJ_HORA   := Time()
+            ZAJ->ZAJ_USRALT := cUserName
+            ZAJ->ZAJ_TIPO   := "CT"
+            MsUnLock()
+        Next
+        ALTERA:=.F.
+    End
+
+    U_BRULTPRC()
+
+    FWRestRows(aSaveLines)
+    FWRestArea(aAreaSC8)
+    FWRestArea(aArea)
+
+Return (lRet)
+
+/*/{Protheus.doc} MemoDiff
+Retorna as linhas diferentes entre dois campos MEMO
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 27/01/2026
+@param cMemo1, character, campo com o MEMO 01 para compracao
+@param cMemo2, character, campo com o MEMO 02 para compracao
+@param cCampo, character, Nome do campo que esta sendo feita a compração
+@param nLin, numeric, Numero da Linha da Ocorrencia
+@return character, sem retorno
+/*/
+User Function MemoDiff(cMemo1, cMemo2,cCampo,nLin)
+    //    Local aDiff    := {}
+    Local aLinhas1 := {} as Array
+    Local aLinhas2 := {} as Array
+    Local nI             as Numeric
+
+    // Quebra os MEMOs em arrays de linhas
+    aLinhas1 := U_MemoToArray(cMemo1,80)
+    aLinhas2 := U_MemoToArray(cMemo2,80)
+
+    // Compara linha a linha
+    For nI := 1 To Max(Len(aLinhas1), Len(aLinhas2))
+        If nI > Len(aLinhas1)
+            AADD(aAlterCpo,{ cCampo,'Em Branco ',aLinhas2[nI] ,"L"+StrZero(nI,3,0),nLin})
+            //  AAdd(aDiff, "Linha nova em MEMO2: " + aLinhas2[nI])
+        ElseIf nI > Len(aLinhas2)
+            AADD(aAlterCpo,{ cCampo,aLinhas1[nI],'Em Branco ',"L"+StrZero(nI,3,0),nLin})
+            //  AAdd(aDiff, "Linha removida em MEMO2: " + aLinhas1[nI])
+        ElseIf aLinhas1[nI] <> aLinhas2[nI]
+            AADD(aAlterCpo,{ cCampo,aLinhas1[nI],aLinhas2[nI],,"L"+StrZero(nI,3,0),nLin})
+            // AAdd(aDiff, "Alterada: " + aLinhas1[nI] + " => " + aLinhas2[nI])
+        EndIf
+    Next
+
+Return (NIL)
+
+/*/{Protheus.doc} MemoToArray
+Função auxiliar para quebrar MEMO em linhas
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 27/01/2026
+@param cMemo, character, campo memo para separação de linhas
+@param nTam, numeric, tamanho da linha
+@return array, array com as linhas separadas
+/*/
+User Function MemoToArray(cMemo,nTam)
+    Local aRet := {} as Array
+    Local nI         as Numeric
+    Local nLin       as Numeric // 255 = largura máxima da linha
+
+    nTam:=If(nTam==NIL,80,nTam)
+    nLin := MLCount(cMemo, nTam) // 255 = largura máxima da linha
+
+    For nI := 1 To nLin
+        AAdd(aRet, MemoLine(cMemo, nTam, nI))
+    Next
+
+Return (aRet)
+
+/*/{Protheus.doc} BRSCSCC
+Mostra mensagem de SC sem CC e os itens que nao tem CC
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 02/02/2026
+@return logical, sempre retorna verdadeiro
+/*/
+User Function BRSCSCC()
+    Local aArea:=FWGetarea()
+    Local aNSC:={}
+    Local cMsg:=""
+    Local nI
+
+    If .NOT. Empty(SC8->C8_NUM)
+        BeginSQL Alias "XSC1"
+            SELECT
+                C1_ITEM,
+                C1_PRODUTO,
+                C1_NUM
+            FROM
+                %TABLE:SC1%
+            WHERE
+                %NOTDEL%
+                AND C1_FILIAL = %XFILIAL:SC1%
+                AND C1_COTACAO = %EXP:SC8->C8_NUM%
+                AND C1_CC = ' '
+        EndSQL
+
+        While (.NOT. XSC1->(EOF()))
+            AADD(aNSC,{XSC1->C1_NUM,XSC1->C1_ITEM,XSC1->C1_PRODUTO})
+            XSC1->(dbSkip())
+        End
+        XSC1->(dbCloseArea())
+        If Len(aNSC) > 0
+            cMsg:= "SC "+aNSC[1][1]+ " sem CC Cadastrados nos itens:"+CRLF+CRLF
+            For nI:=1 to Len(aNSC)
+                cMsg+="Item "+aNSC[nI][2]+" Produto: "+aNSC[nI][3]+CRLF
+            Next
+            cMsg+=CRLF+CRLF+" Obs.: Itens podem ser liberados automaticamente sem passar por aprovação"
+            FWAlertWarning(cMsg,"SC Sem CC")
+        End
+    End
+
+    FWRestArea(aArea)
+
+Return (.T.)
+
+/*/{Protheus.doc} BRULTPRC
+Mostra mesngaem caso preco digitado ultrapasse a tolerancia do ultimo preco
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 02/02/2026
+@return logical, sempre retorna verdadeiro
+/*/
+User Function  BRULTPRC()
+
+    Local aArea:=FWGetArea()
+    Local aPC:={}
+
+    If .NOT. Empty(SC8->C8_NUM)
+
+        BeginSQL Alias "XSD1"
+            %noparser%
+
+            WITH SC8_FILTRADA AS (
+                SELECT
+                    SC8.C8_FILIAL,
+                    SC8.C8_PRODUTO,
+                    SC8.C8_FORNECE,
+                    SC8.C8_LOJA,
+                    SC8.C8_NUM,
+                    SC8.C8_PRECO,
+                    SC8.C8_NUMPED,
+                    SC8.R_E_C_N_O_
+                FROM
+                    SC8010 SC8
+                WHERE
+                    SC8.%NOTDEL%
+                    AND SC8.C8_FILIAL = %XFILIAL:SC8%
+                    AND SC8.C8_NUM = %EXP:SC8->C8_NUM%
+            ),
+            SC8_MAIS_RECENTE_POR_PROD AS (
+                SELECT
+                    S.C8_FILIAL,
+                    S.C8_PRODUTO,
+                    S.C8_FORNECE,
+                    S.C8_LOJA,
+                    S.C8_NUM,
+                    S.C8_PRECO,
+                    S.C8_NUMPED,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY S.C8_PRODUTO
+                        ORDER BY
+                            S.R_E_C_N_O_ DESC
+                    ) AS RN_PROD
+                FROM
+                    SC8_FILTRADA S
+            ),
+            SD1_ULTIMO_POR_PROD AS (
+                SELECT
+                    SD1.D1_FILIAL,
+                    SD1.D1_COD,
+                    SD1.D1_VUNIT,
+                    SD1.D1_FORNECE,
+                    SD1.D1_LOJA,
+                    SD1.D1_DTDIGIT,
+                    SD1.D1_PEDIDO,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY SD1.D1_COD
+                        ORDER BY
+                            SD1.D1_DTDIGIT DESC,
+                            SD1.R_E_C_N_O_ DESC
+                    ) AS RN_PROD
+                FROM
+                    SD1010 SD1
+                WHERE
+                    SD1.%NOTDEL%
+                    AND SD1.D1_FILIAL = %XFILIAL:SD1%
+                    AND SD1.D1_PEDIDO <> ' '
+            )
+            SELECT
+                S8.C8_FILIAL AS FILIAL,
+                S8.C8_PRODUTO AS PRODUTO,
+                S8.C8_NUM AS COTACAO,
+                S8.C8_NUMPED AS NUMPED_SC8,
+                S8.C8_PRECO AS PRC_COT,
+                S1.D1_FILIAL AS FILIAL_SD1,
+                S1.D1_VUNIT AS ULT_PRECO,
+                S1.D1_FORNECE AS FORNECEDOR,
+                S1.D1_LOJA AS LOJA,
+                S1.D1_DTDIGIT AS ULT_DATA,
+                S1.D1_PEDIDO AS PEDIDO,
+                (1 - (S1.D1_VUNIT / NULLIF(S8.C8_PRECO, 0))) * 100.0 AS PERC
+            FROM
+                SC8_MAIS_RECENTE_POR_PROD S8
+            INNER JOIN SD1_ULTIMO_POR_PROD S1
+            ON S1.RN_PROD = 1
+                AND S1.D1_COD = S8.C8_PRODUTO
+                AND S1.D1_FILIAL = S8.C8_FILIAL
+            WHERE
+                S8.RN_PROD = 1
+            ORDER BY
+                S8.C8_PRODUTO
+        EndSQL
+
+        While .NOT. (XSD1->(EOF()))
+            If XSD1->PERC >  SuperGetMv("BR_TOLPRC",.F.,5)
+                AADD(aPC,{ XSD1->PRODUTO,;
+                    XSD1->FORNECEDOR,;
+                    XSD1->LOJA,;
+                    XSD1->ULT_PRECO,;
+                    XSD1->PEDIDO,;
+                    XSD1->ULT_DATA,;
+                    XSD1->PERC  })
+            End
+            XSD1->(dbSkip())
+        End
+        XSD1->(dbCloseArea())
+
+        If Len(aPC) > 0
+            U_FMOSTPRC(@aPC)
+        End
+
+    End
+    FwRestArea(aArea)
+
+Return (.T.)
+
+/*/{Protheus.doc} FMOSTRAPRC
+Mostra tela de preco superior
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 05/02/2026
+@param aPC, array, array com os dados acima do permitido
+@return character, sem retorno
+/*/
+User Function FMOSTPRC(aPC)
+    Local nDlgW := 900
+    Local nDlgH := 420
+    Local oDlg
+    Local oBtnSair
+    Local oFwBrowse
+    Local nI
+    Local nTol := SuperGetMv("BR_TOLPRC", .F., 5)
+    Local aColumns := {}
+    Local aCols := {;
+        {"D1_COD"    , TamSX3("D1_COD")[3]    , TamSX3("D1_COD")[1]    , TamSX3("D1_COD")[2]    , PesqPict("SD1","D1_COD")},;
+        {"A3_FORNECE", TamSX3("D1_FORNECE")[3], TamSX3("D1_FORNECE")[1], TamSX3("D1_FORNECE")[2], PesqPict("SD1","D1_FORNECE")},;
+        {"D1_LOJA"   , TamSX3("D1_LOJA")[3]   , TamSX3("D1_LOJA")[1]   , TamSX3("D1_LOJA")[2]   , PesqPict("SD1","D1_LOJA")},;
+        {"D1_VUNIT"  , TamSX3("D1_VUNIT")[3]  , TamSX3("D1_VUNIT")[1]  , TamSX3("D1_VUNIT")[2]  , PesqPict("SD1","D1_VUNIT")},;
+        {"D1_PEDIDO" , TamSX3("D1_PEDIDO")[3] , TamSX3("D1_PEDIDO")[1] , TamSX3("D1_PEDIDO")[2] , PesqPict("SD1","D1_PEDIDO")},;
+        {"D1_DTDIGIT", TamSX3("D1_DTDIGIT")[3], TamSX3("D1_DTDIGIT")[1], TamSX3("D1_DTDIGIT")[2], PesqPict("SD1","D1_DTDIGIT")},;
+        {"AFZ_PERC " , TamSX3("AFZ_PERC")[3]  , TamSX3("AFZ_PERC ")[1] , TamSX3("AFZ_PERC")[2]  , PesqPict("AFZ","AFZ_PERC")}}
+
+    //o(1=Tamanho do campo,2=Tamanho do decimal do campo,3=Tipo de dado do campo)
+
+    oFWBrowse := FWBrowse():New()
+    For nI:=1 To Len(aCols)
+        If nI == 4 .or. nI == 7
+            nAlin:=2
+        Else
+            nAlin:=1
+        End
+
+        aAdd(aColumns, {;
+            RetTitle(aCols[nI][1]),;                // [n][01] Título da coluna
+            &('{|oFWBrowse| aPC[oFWBrowse:At(),'+cValToChar(nI)+']}'),; // [n][02] Code-Block de carga dos dados
+            aCols[nI][2],;                          // [n][03] Tipo de dados
+            aCols[nI][5],;                          // [n][04] Máscara
+            nAlin,;                                 // [n][05] Alinhamento (0=Centralizado, 1=Esquerda ou 2=Direita)
+            aCols[nI][3],;                          // [n][06] Tamanho
+            aCols[nI][4],;                          // [n][07] Decimal
+            .F.,;                                   // [n][08] Indica se permite a edição
+            {|| },;                                 // [n][09] Code-Block de validação da coluna após a edição
+            .F.,;                                   // [n][10] Indica se exibe imagem
+            Nil,;                                   // [n][11] Code-Block de execução do duplo clique
+            " ",;                                   // [n][12] Variável a ser utilizada na edição (ReadVar)
+            {|| AlwaysTrue()},;                     // [n][13] Code-Block de execução do clique no header
+            .F.,;                                   // [n][14] Indica se a coluna está deletada
+            .F.,;                                   // [n][15] Indica se a coluna será exibida nos detalhes do Browse
+            {},;                                    // [n][16] Opções de carga dos dados (Ex: 1=Sim, 2=Não)
+            "ID"+StrZero(nI,1,0)})                  // [n][17] Id da coluna
+    Next
+
+    For nI := 1 To Len(aColumns )        
+        oFwBrowse:AddColumn( aColumns[nI] )
+    Next
+
+    DEFINE MSDIALOG oDlg TITLE "Preco acima Ultima compra" FROM 0,0 TO nDlgH, nDlgW  PIXEL
+
+    @ 05,10 SAY "Itens cujo preco excedeu a tolerancia de "+cValToChar(nTol) + " %" SIZE 400,14 PIXEL OF oDlg
+    //  @ 15,05 SAY "Ponto 1" SIZE 400,14 PIXEL OF oDlg
+    //  @ 165,430 SAY "Ponto 1" SIZE 400,14 PIXEL OF oDlg
+
+    oPanGrid := tPanel():New(15, 05, "", oDlg, , , , RGB(000,000,000), RGB(254,254,254), 165,430)
+    oFWBrowse:SetOwner(oPanGrid)
+    oFwBrowse:SetDataArrayoBrowse()  //Define utilização de array
+    oFwBrowse:SetArray(aPC)
+    oFwBrowse:SetOwner(oDlg)
+    //oFwBrowse:SetDescription( "Browse com Array" )
+    oFwBrowse:OBROWSEUI:LUSEPRINT := .F.
+ 
+    oFwBrowse:Activate()
+
+    @ 180,350 BUTTON oBtnSair PROMPT "Sair"  SIZE 80,22  PIXEL OF oDlg ACTION oDlg:End()
+
+    oDlg:SetKey( VK_ESCAPE, {|| oDlg:End() } )
+
+    ACTIVATE MSDIALOG oDlg CENTERED
+
+Return (NIL)

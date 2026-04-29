@@ -1,4 +1,4 @@
-#INCLUDE "rwmake.ch"
+#Include "Protheus.ch"
 #INCLUDE "topconn.ch"
 #include 'avprint.ch'
 #include 'font.ch'
@@ -28,15 +28,14 @@ User Function BREST010
      Local   cDesc1      := "Este programa tem como objetivo imprimir relatorio "
      Local   cDesc2      := "de acordo com os parametros informados pelo usuario."
      Local   cDesc3      := "Relatorio de Consumo Mensal"
-     Local   cPict       := ""
      Local   titulo      := "Relatorio de Consumo Mensal"
-     Local   nLin        := 80
-     Local   Cabec1      := "    CODIGO                     DESCRICAO                 TP LC UM  "
+     Local   nLin        := 70
+     Local   Cabec1      := "    CODIGO             DESCRICAO                         TP LC UM     "
      Local   Cabec2      := ""
-     Local   imprime     := .T.
-
-     Private cString
-     Private CbTxt       := ""
+     //Local   cPict       := ""
+     //Local   imprime     := .T.
+     //Private cString
+     //Private CbTxt       := ""
      Private lEnd        := .F.
      Private lAbortPrint := .F.
      Private limite      := 220
@@ -46,7 +45,7 @@ User Function BREST010
      Private aReturn     := { "Zebrado", 1, "Administracao", 1, 2, 1, "", 1}
      Private nLastKey    := 0
      Private cPerg       := "EST010"
-     Private cbtxt       := Space(10)
+     Private Cbtxt       := Space(10)
      Private cbcont      := 00
      Private CONTFL      := 01
      Private m_pag       := 01
@@ -59,7 +58,7 @@ User Function BREST010
       MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
       return 
   endif 
-     u_zcfga01( 'BREST010' ) //LGS#2021119 - Gravação de log de utilização da rotina
+
      dbSelectArea("SB1")
      dbSetOrder(1)
 
@@ -83,10 +82,10 @@ User Function BREST010
         Return
      Endif
 
-if mv_par07 > 12
-      MsgBox("Qtde de Meses Anteriores Deverá ser Menor que 13!!","Atenção","Alert")
-      return 
-endif 
+	if mv_par07 > 12
+      	MsgBox("Qtde de Meses Anteriores Deverá ser Menor que 13!!","Atenção","Alert")
+      	return 
+	endif 
      	
 
      nTipo := If(aReturn[4]==1,15,18)
@@ -113,20 +112,20 @@ Return
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
-       Local aCons   := {}  // Array com dados da impressao
+       //Local aCons   := {}  // Array com dados da impressao
        Local aMeses  := {}  // Array com os meses a serem impressos
        Local cQry1   := ""  // Variavel para guardar a query da tabela SB1
        Local cQry2   := ""  // Variavel para guardar a query da tabela SD3
-       Local cQry3   := ""  // Variavel para guardar a query da tabela SD2 
-       Local cQry4   := ""  // Variavel para guardar a query da tabela SD1
-       Local cPriDia := ""  // Primeiro dia do mes
-       Local cUltDia := ""  // Ultimo dia do mes
+       //Local cQry3   := ""  // Variavel para guardar a query da tabela SD2 
+       //Local cQry4   := ""  // Variavel para guardar a query da tabela SD1
+       //Local cPriDia := ""  // Primeiro dia do mes
+       //Local cUltDia := ""  // Ultimo dia do mes
        Local nMesAtu := 0   // Variavel para guardar mes atual
        Local nAnoAtu := 0   // Variavel para guardar ano atual
        Local nMesIni := 0   // Variavel para guardar mes inicial
-       Local nAnoAnt := 0   // Variavel para guardar ano anterior
-       Local nNumMes := 0   // Variavel para guardar numero de meses ano anterior
-       Local nNumAux := 0   // Variavel para guardar numero de meses ano anterior (Auxiliar)
+       //Local nAnoAnt := 0   // Variavel para guardar ano anterior
+       //Local nNumMes := 0   // Variavel para guardar numero de meses ano anterior
+       //Local nNumAux := 0   // Variavel para guardar numero de meses ano anterior (Auxiliar)
        Local nQuantR := 0   // Quantidade reservada em estoque
        Local nQuant  := 0   // Quantidade atual no estoque
        Local nQtdeMeses,nAuxAno,nAuxMes,cPerIni,cPerFinal,i,x
@@ -177,61 +176,96 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
        For i := 1 to Len(aMeses)
            Cabec1 := Cabec1 + SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[i],1,2)))),1,3)+'/'+SubStr(Alltrim(SubStr(aMeses[i],3,4)),3,2)+'     '
        Next
-
        If mv_par08 == 1
           Cabec1 := Cabec1 + 'MEDIAS    '
        Endif
        If mv_par11 == 1
-          Cabec1 := Cabec1 + 'SAL. ATUAL   '
+          Cabec1 := Cabec1 + 'SAL. ATUAL    '
        Endif
        If mv_par09 == 1
           Cabec1 := Cabec1 + 'DISPONIVEL'
        Endif
-       //    CODIGO                     DESCRICAO                 TP LC UM   XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     XXX/99     MEDIAS    SAL. ATUAL   DISPONIVEL
-       //999999999999999 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XX 99 XX 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 999,999.99 9,999,999.99 9,999,999.99
-       //012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234
-       //0         1         2         3         4         5         6         7         8         9         10        11        12        13        14        15        16        17        18        19        20        10        20
+
        dbSelectArea(cString)
        dbSetOrder(1)
-       #IFDEF TOP            
+        #IFDEF TOP            
        		
 			cQry1 := "WITH CONSUMO AS ( "
 			if mv_par18 <> 1
 				cQry1 += "SELECT D1_COD AS CODPRO,SUBSTRING(D1_DTDIGIT,1,6) AS MES, SUM(D1_QUANT*-1) AS SOMA "+;
-				"FROM "+RetSqlName("SD1")+" SD1 WITH (NOLOCK) "+;
-				"LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (D1_FILIAL = B1_FILIAL) AND (D1_COD = B1_COD) "+;
-				"LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.D_E_L_E_T_ <> '*') AND (SA1.A1_FILIAL = '"+xFilial("SA1")+"') AND (D1_FORNECE = A1_COD) "+;
-				"WHERE (SD1.D_E_L_E_T_  = '') "+;
-				"AND (SD1.D1_FILIAL = '"+xFilial("SD1")+"') "
+					"FROM "+RetSqlName("SD1")+" SD1 WITH (NOLOCK) "+;
+					"LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (D1_FILIAL = B1_FILIAL) AND (D1_COD = B1_COD) "+;
+					"LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.D_E_L_E_T_ <> '*') AND (SA1.A1_FILIAL = '"+xFilial("SA1")+"') AND (D1_FORNECE = A1_COD) "+;
+					"WHERE (SD1.D_E_L_E_T_  <> '*') "+;
+					"AND (SD1.D1_FILIAL = '"+xFilial("SD1")+"') "
+					IF !EMPTY(MV_PAR02)  
+						cQry1 += "AND (SD1.D1_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+					ENDIF 
+					cQry1 += "AND (SD1.D1_DTDIGIT BETWEEN '"+cPerIni+"' AND '"+cPerFinal+"') "+;
+					"AND (SD1.D1_TIPO = 'D') "+;
+					"AND (SD1.D1_XESTOQU = 'S') "
+					IF !EMPTY(MV_PAR06)  
+						cQry1 += "AND (SB1.B1_TIPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"') "
+					ENDIF 
+					IF !EMPTY(MV_PAR04)
+						cQry1 += "AND (B1_LOCPAD BETWEEN '"+mv_par03+"' and '"+mv_par04+"') "
+					ENDIF 
+					IF !EMPTY(MV_PAR15)
+						cQry1 += "AND (SB1.B1_GRUPO BETWEEN '"+mv_par14+"' AND '"+mv_par15+"') "
+					ENDIF 
+              		cQry1 += IIf(mv_par12 == 1,"AND (SB1.B1_ESTOQUE IN ('S')) ","")+;
+              			 IIf(mv_par16 == 1,"AND (SB1.B1_ATIVO <> 'N') ","")+;
+              			 IIf(mv_par17 == 1,"AND (SB1.B1_MSBLQL <> '1') ","")+;  
+              		"AND "+IIF(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),"(((LEN(A1_CGC) = 14) AND (SUBSTRING(A1_CGC ,1,8) <> '"+SUBSTR(ALLTRIM(SM0->M0_CGC),1,8)+"')) OR (LEN(A1_CGC) <> 14)) ","(A1_CGC <> '"+ALLTRIM(SM0->M0_CGC)+"') ")+;
+					"GROUP BY D1_COD,SUBSTRING(D1_DTDIGIT,1,6) "+;
+						"UNION ALL "+;
+					"SELECT D3_COD AS CODPRO, SUBSTRING(D3_EMISSAO,1,6) AS MES,SUM(SD3.D3_QUANT) AS SOMA "+;
+					"FROM "+RetSqlName("SD3")+" SD3 WITH (NOLOCK) "+;
+					"LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (D3_FILIAL = B1_FILIAL) AND (D3_COD = B1_COD) "+;
+					"WHERE (SD3.D_E_L_E_T_ <> '*') "+;
+					"AND (SD3.D3_FILIAL = '"+xFilial("SD3")+"') "
+					IF !EMPTY(MV_PAR02)  
+						cQry1 += "AND (SD3.D3_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+					ENDIF
+					IF !EMPTY(MV_PAR06)  
+						cQry1 += "AND (SB1.B1_TIPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"') "
+					ENDIF 
+					IF !EMPTY(MV_PAR04)  
+						cQry1 += "AND (B1_LOCPAD BETWEEN '"+mv_par03+"' and '"+mv_par04+"') "
+					ENDIF 
+					IF !EMPTY(MV_PAR15)  
+						cQry1 += "AND (SB1.B1_GRUPO BETWEEN '"+mv_par14+"' AND '"+mv_par15+"') "
+					ENDIF 
+              		cQry1 += IIf(mv_par12 == 1,"AND (SB1.B1_ESTOQUE = 'S') ","")
+              		cQry1 += IIf(mv_par20 == 1,"AND (SB1.B1_MCUSTD = '2') ","")+; //Chamado 020483 (Caio), filtrar apenas produtos dolarizados :
+              		IIf(mv_par16 == 1,"AND (SB1.B1_ATIVO <> ('N')) ","")+;
+              		IIf(mv_par17 == 1,"AND (SB1.B1_MSBLQL <> '1') ","")+;
+					"AND (SD3.D3_EMISSAO BETWEEN '"+cPerIni+"' AND '"+cPerFinal+"') "+;
+					"AND (SD3.D3_DOC <> 'INVENT') "+;
+					"AND (SD3.D3_ESTORNO <> 'S') "+;
+					"AND (SUBSTRING(SD3.D3_CF,1,2) = 'RE') "+;
+					"AND (SUBSTRING(SD3.D3_CF,3,1) IN('0', '1', '2', '3')) "+;
+					"AND (SD3.D3_TM NOT IN('600', '200', '110','120','520')) "
+					//Chamado 006041 de 15/12/16, Gustavo pedido para entrarem todos os produtos no consumo Mes a Mes, não somente produtos de OP
+					cQry1 += "GROUP BY D3_COD,SUBSTRING(D3_EMISSAO,1,6) "+;
+						"UNION ALL "
+			ENDIF 
+
+			cQry1 += "SELECT D2_COD AS CODPRO,SUBSTRING(SD2.D2_EMISSAO,1,6) AS MES, SUM(SD2.D2_QUANT) AS SOMA "+;
+				"FROM "+RetSqlName("SD2")+" SD2 WITH (NOLOCK) "+;
+				"LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (D2_FILIAL = B1_FILIAL) AND (D2_COD = B1_COD) "+;
+				"LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.D_E_L_E_T_ <> '*') AND (D2_CLIENTE = A1_COD) "+;
+				"WHERE (SD2.D_E_L_E_T_  <> '*') "+;
+				"AND (SD2.D2_FILIAL = '"+xFilial("SD2")+"') "
 				IF !EMPTY(MV_PAR02)  
-					cQry1 += "AND (SD1.D1_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
+					cQry1 += "AND (SD2.D2_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
 				ENDIF 
-				cQry1 += "AND (SD1.D1_DTDIGIT BETWEEN '"+cPerIni+"' AND '"+cPerFinal+"') "+;
-				"AND (SD1.D1_TIPO = 'D') "+;
-				"AND (SD1.D1_XESTOQU = 'S') "
-				IF !EMPTY(MV_PAR06)  
-					cQry1 += "AND (SB1.B1_TIPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"') "
-				ENDIF 
-				IF !EMPTY(MV_PAR04)
-					cQry1 += "AND (B1_LOCPAD BETWEEN '"+mv_par03+"' and '"+mv_par04+"') "
-				ENDIF 
-				IF !EMPTY(MV_PAR15)
-					cQry1 += "AND (SB1.B1_GRUPO BETWEEN '"+mv_par14+"' AND '"+mv_par15+"') "
-				ENDIF 
-              	cQry1 += IIf(mv_par12 == 1,"AND (SB1.B1_ESTOQUE = 'S') ","")+;
-              	IIf(mv_par16 == 1,"AND (SB1.B1_ATIVO <> 'N') ","")+;
-              	IIf(mv_par17 == 1,"AND (SB1.B1_MSBLQL <> '1') ","")+;  
-              	"AND "+IIF(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),"(((LEN(A1_CGC) = 14) AND (SUBSTRING(A1_CGC ,1,8) <> '"+SUBSTR(ALLTRIM(SM0->M0_CGC),1,8)+"')) OR (LEN(A1_CGC) <> 14)) ","(A1_CGC <> '"+ALLTRIM(SM0->M0_CGC)+"') ")+;
-				"GROUP BY D1_COD,SUBSTRING(D1_DTDIGIT,1,6) "+;
-				"UNION ALL "+;
-				"SELECT D3_COD AS CODPRO,SUBSTRING(D3_EMISSAO,1,6) AS MES,SUM(SD3.D3_QUANT) AS SOMA "+;
-				"FROM "+RetSqlName("SD3")+" SD3 WITH (NOLOCK) "+;
-				"LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (D3_FILIAL = B1_FILIAL) AND (D3_COD = B1_COD) "+;
-				"WHERE (SD3.D_E_L_E_T_ = '') "+;
-				"AND (SD3.D3_FILIAL = '"+xFilial("SD3")+"') "
-				IF !EMPTY(MV_PAR02)  
-					cQry1 += "AND (SD3.D3_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
-				ENDIF
+			
+			cQry1 += "AND (SD2.D2_EMISSAO BETWEEN '"+cPerIni+"' AND '"+cPerFinal+"') "+;
+				"AND (SD2.D2_TIPO <> 'D') "+;
+				"AND (SD2.D2_ESTOQUE = 'S') "+;
+           		IIf(mv_par12 == 1,"AND (SB1.B1_ESTOQUE = 'S') ","")+;
+            	IIf(mv_par20 == 1,"AND (SB1.B1_MCUSTD = '2') ","") //Chamado 020483 (Caio), filtrar apenas produtos dolarizados :
 				IF !EMPTY(MV_PAR06)  
 					cQry1 += "AND (SB1.B1_TIPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"') "
 				ENDIF 
@@ -241,83 +275,48 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
 				IF !EMPTY(MV_PAR15)  
 					cQry1 += "AND (SB1.B1_GRUPO BETWEEN '"+mv_par14+"' AND '"+mv_par15+"') "
 				ENDIF 
-              	cQry1 += IIf(mv_par12 == 1,"AND (SB1.B1_ESTOQUE = 'S') ","")
-              	cQry1 += IIf(mv_par20 == 1,"AND (SB1.B1_MCUSTD = '2') ","")+; //Chamado 020483 (Caio), filtrar apenas produtos dolarizados :
-              	IIf(mv_par16 == 1,"AND (SB1.B1_ATIVO NOT IN('N')) ","")+;
-              	IIf(mv_par17 == 1,"AND (SB1.B1_MSBLQL <> '1') ","")+;
-				"AND (SD3.D3_EMISSAO BETWEEN '"+cPerIni+"' AND '"+cPerFinal+"') "+;
-				"AND (SD3.D3_DOC <> 'INVENT') "+;
-				"AND (SD3.D3_ESTORNO <> 'S') "+;
-				"AND (SUBSTRING(SD3.D3_CF,1,2) = 'RE') "+;
-				"AND (SUBSTRING(SD3.D3_CF,3,1) IN('0', '1', '2', '3')) "+;
-				"AND (SD3.D3_TM NOT IN('600', '200', '110','120','520')) "
-				//Chamado 006041 de 15/12/16, Gustavo pedido para entrarem todos os produtos no consumo Mes a Mes, não somente produtos de OP
-				//cQry1 += "AND (((SB1.B1_TIPO IN ('MP','PI')) AND (SD3.D3_OP <> '')) OR (B1_TIPO NOT IN('MP','PI') OR B1_XREQUIS ='S')) " //				"AND (((SB1.B1_TIPO <> 'PA') AND (SD3.D3_OP <> '')) OR (B1_TIPO = 'PA')) "
-				cQry1 += "GROUP BY D3_COD,SUBSTRING(D3_EMISSAO,1,6) "+;
-				"UNION ALL "
-			endif 
-
-			cQry1 += "SELECT D2_COD AS CODPRO,SUBSTRING(SD2.D2_EMISSAO,1,6) AS MES, SUM(SD2.D2_QUANT) AS SOMA "+;
-			"FROM "+RetSqlName("SD2")+" SD2 WITH (NOLOCK) "+;
-			"LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (D2_FILIAL = B1_FILIAL) AND (D2_COD = B1_COD) "+;
-			"LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH (NOLOCK) ON (SA1.D_E_L_E_T_ <> '*') AND (D2_CLIENTE = A1_COD) "+;
-			"WHERE (SD2.D_E_L_E_T_  = '') "+;
-			"AND (SD2.D2_FILIAL = '"+xFilial("SD2")+"') "
-			IF !EMPTY(MV_PAR02)  
-				cQry1 += "AND (SD2.D2_COD BETWEEN '"+mv_par01+"' AND '"+mv_par02+"') "
-			ENDIF 
-			cQry1 += "AND (SD2.D2_EMISSAO BETWEEN '"+cPerIni+"' AND '"+cPerFinal+"') "+;
-			"AND (SD2.D2_TIPO <> 'D') "+;
-			"AND (SD2.D2_ESTOQUE = 'S') "+;
-           	IIf(mv_par12 == 1,"AND (SB1.B1_ESTOQUE = 'S') ","")+;
-            IIf(mv_par20 == 1,"AND (SB1.B1_MCUSTD = '2') ","") //Chamado 020483 (Caio), filtrar apenas produtos dolarizados :
-
-			IF !EMPTY(MV_PAR06)  
-				cQry1 += "AND (SB1.B1_TIPO BETWEEN '"+mv_par05+"' AND '"+mv_par06+"') "
-			ENDIF 
-			IF !EMPTY(MV_PAR04)  
-				cQry1 += "AND (B1_LOCPAD BETWEEN '"+mv_par03+"' and '"+mv_par04+"') "
-			ENDIF 
-			IF !EMPTY(MV_PAR15)  
-				cQry1 += "AND (SB1.B1_GRUPO BETWEEN '"+mv_par14+"' AND '"+mv_par15+"') "
-			ENDIF 
-   			cQry1 += IIf(mv_par16 == 1,"AND (SB1.B1_ATIVO <> 'N') ","")+;
-			IIf(mv_par17 == 1,"AND (SB1.B1_MSBLQL <> '1') ","")+;
-   			"AND "+IIF(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),"(((LEN(A1_CGC) = 14) AND (SUBSTRING(A1_CGC ,1,8) <> '"+SUBSTR(ALLTRIM(SM0->M0_CGC),1,8)+"')) OR (LEN(A1_CGC) <> 14)) ","(A1_CGC <> '"+ALLTRIM(SM0->M0_CGC)+"') ")+;
-			"GROUP BY D2_COD,SUBSTRING(SD2.D2_EMISSAO,1,6) "+;
-			"), TMP AS ( SELECT "+;
-			"CODPRO,MES,SUM(SOMA) AS QTDE "+;
-			"FROM CONSUMO GROUP BY CODPRO,MES), "+;
-			"CONSFINAL AS (SELECT CODPRO,"+;
-			"ROUND(SUM(QTDE)/"+alltrim(str(Len(aMeses)))+",4) AS MEDIA "
-	       	For i := 1 to Len(aMeses) 
-	       		cQry1 += ",'M_"+SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[i],1,2)))),1,3)+"' = (SELECT QTDE FROM TMP WHERE (CODPRO = A.CODPRO) AND (MES = '"+SubStr(aMeses[i],3,4)+SubStr(aMeses[i],1,2)+"'))"
-       		Next	
-       		cQry1 += " FROM TMP A GROUP BY CODPRO) "+;
-       		"SELECT ROW_NUMBER() OVER(ORDER BY "+IIF(mv_par13 == 1,"CODPRO","MEDIA")+" DESC) AS LINHA,CODPRO AS CODIGO, SB1.B1_LOCPAD AS LOCAL, SB1.B1_TIPO AS TIPO,"+;   
-       		"SB1.B1_DESC AS DESCRICAO, SB1.B1_UM AS UNIDADE, SB1.B1_POSIPI AS NCM, SB1.B1_MCUSTD AS MOEDA, SB1.B1_UPRC AS ULTPRECO, SB1.B1_CUSTD AS CUSTODOLAR, "     
-	       	For i := 1 to Len(aMeses) 
-	       		cAux := SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[i],1,2)))),1,3)
-       			cQry1 += "ISNULL(M_"+cAux+",0) AS 'M_"+cAux+"',"
-			next  
+   			
+			cQry1 += IIf(mv_par16 == 1,"AND (SB1.B1_ATIVO <> 'N') ","")+;
+					 IIf(mv_par17 == 1,"AND (SB1.B1_MSBLQL <> '1') ","")+;
+   				"AND "+IIF(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),"(((LEN(A1_CGC) = 14) AND (SUBSTRING(A1_CGC ,1,8) <> '"+SUBSTR(ALLTRIM(SM0->M0_CGC),1,8)+"')) OR (LEN(A1_CGC) <> 14)) ","(A1_CGC <> '"+ALLTRIM(SM0->M0_CGC)+"') ")+;
+				"GROUP BY D2_COD,SUBSTRING(SD2.D2_EMISSAO,1,6) "+;
+				"), TMP AS ( SELECT "+;
+				"CODPRO,MES,SUM(SOMA) AS QTDE "+;
+				"FROM CONSUMO GROUP BY CODPRO,MES), "+;
+				"CONSFINAL AS (SELECT CODPRO,"+;
+				"ROUND(SUM(QTDE)/"+alltrim(str(Len(aMeses)))+",4) AS MEDIA "
+	       		For i := 1 to Len(aMeses) 
+	       			cQry1 += ",'M_"+SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[i],1,2)))),1,3)+"' = (SELECT QTDE FROM TMP WHERE (CODPRO = A.CODPRO) AND (MES = '"+SubStr(aMeses[i],3,4)+SubStr(aMeses[i],1,2)+"'))"
+       			Next	
+       			cQry1 += " FROM TMP A GROUP BY CODPRO) "+;
+       			"SELECT ROW_NUMBER() OVER(ORDER BY "+IIF(mv_par13 == 1,"CODPRO","MEDIA")+" DESC) AS LINHA,CODPRO AS CODIGO, SB1.B1_LOCPAD AS LOCALEST, SB1.B1_TIPO AS TIPO,"+;   
+       			"SUBSTRING(SB1.B1_DESC,1,40) AS DESCRICAO, SB1.B1_UM AS UNIDADE, SB1.B1_POSIPI AS NCM, SB1.B1_MCUSTD AS MOEDA, SB1.B1_UPRC AS ULTPRECO, SB1.B1_CUSTD AS CUSTODOLAR, "     
+	       		For i := 1 to Len(aMeses) 
+	       			cAux := SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[i],1,2)))),1,3)
+       				cQry1 += "ISNULL(M_"+cAux+",0) AS 'M_"+cAux+"',"
+				next  
+			
 			cQry1 += "MEDIA"
-			iF (mv_par11 == 1) .or. (mv_par09 == 1)
-				cQry1 += ",SALDOATUAL = (SELECT SUM(B2_QATU) FROM SB2010 WITH (NOLOCK) WHERE (D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND (B2_COD = CONSFINAL.CODPRO))"
-			endif      
-			if (mv_par09 == 1)
-				cQry1 += ",QTDDISP = CASE WHEN SB1.B1_TIPO IN ('MP','MC') THEN "+;
-				"(SELECT SUM(B2_QEMP+B2_RESERVA+B2_QEMPSA) FROM "+RetSqlName("SB2")+" WITH (NOLOCK) WHERE (D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND (B2_COD = CONSFINAL.CODPRO)) ELSE "+;
-				"(SELECT SUM(C9_QTDLIB) FROM "+RetSqlName("SC9")+" WITH (NOLOCK) WHERE (D_E_L_E_T_ <> '*') AND (C9_FILIAL = '"+xFilial("SC9")+"') AND (C9_NFISCAL = '') AND (C9_BLCRED  = '') AND (C9_PRODUTO = CONSFINAL.CODPRO)) END "
-			endif  
+				iF (mv_par11 == 1) .or. (mv_par09 == 1)
+					cQry1 += ",SALDOATUAL = (SELECT SUM(B2_QATU) FROM SB2010 WITH (NOLOCK) WHERE (D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND (B2_COD = CONSFINAL.CODPRO))"
+				endif      
+				if (mv_par09 == 1)
+					//cQry1 += ",QTDDISP = CASE WHEN SB1.B1_TIPO IN ('MP','MC') THEN "+;
+					cQry1 += ",QTDDISP = CASE WHEN SB1.B1_TIPO NOT IN ('') THEN "+;
+					"(SELECT SUM(B2_QEMP+B2_RESERVA+B2_QEMPSA) FROM "+RetSqlName("SB2")+" WITH (NOLOCK) WHERE (D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND (B2_COD = CONSFINAL.CODPRO)) ELSE "+;
+					"(SELECT SUM(C9_QTDLIB) FROM "+RetSqlName("SC9")+" WITH (NOLOCK) WHERE (D_E_L_E_T_ <> '*') AND (C9_FILIAL = '"+xFilial("SC9")+"') AND (C9_NFISCAL = '') AND (C9_BLCRED  = '') AND (C9_PRODUTO = CONSFINAL.CODPRO)) END "
+				endif  
+			
 			cQry1 += " FROM CONSFINAL "+;
-			"LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (B1_FILIAL = '"+xFilial("SB1")+"') AND (CODPRO = B1_COD) "
-			If (mv_par19 == 1)
-				cQry1 += " WHERE SB1.B1_MCUSTD ='2' "
-			Endif	
+				"LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.D_E_L_E_T_ <> '*') AND (B1_FILIAL = '"+xFilial("SB1")+"') AND (CODPRO = B1_COD) "
+				If (mv_par19 == 1)
+					cQry1 += " WHERE SB1.B1_MCUSTD ='2' "
+				Endif	
+			
 			cQry1 += "ORDER BY "+IIF(mv_par13 == 1,"CODIGO","MEDIA")
 
               TCQUERY cQry1 NEW ALIAS "TMPSB1"
-/*              DbSelectArea("TMPSB1")
+			/*DbSelectArea("TMPSB1")
               DbGoTop()
               If mv_par05 $ 'MP' .or. mv_par06 $ 'MP'
                  ProcRegua(1000)
@@ -330,12 +329,13 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
               Endif
               
               While !eof()
-                     aadd(aCons,{CODIGO, DESCRICAO, TIPO, LOCAL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIDADE, 0})
+                     aadd(aCons,{CODIGO, DESCRICAO, TIPO, LOCALEST, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIDADE, 0})
                      IncProc("Selecionando registro conforme filtro.")
                      dbSkip()
               Enddo
               DbSelectArea("TMPSB1")
-              DbCloseArea()*/
+              DbCloseArea()
+			*/
        #ENDIF
        
 //       ProcRegua(Len(aCons) * Len(aMeses))
@@ -355,7 +355,7 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
 				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 				If lAbortPrint
-					@nLin,00 PSAY "*** CANCELADO PELO OPERADOR ***"
+					@nLin,000 PSAY "*** CANCELADO PELO OPERADOR ***"
 					Exit
 				Endif
 
@@ -363,15 +363,15 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
 				//³ Impressao do cabecalho do relatorio. . .                            ³
 				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-				If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
+				//If nLin > 55 // Salto de Página. Neste caso o formulario tem 55 linhas...
+				If 	nLin > 65 // Salto de Página. Neste caso o formulario tem 80 linhas...
 					Cabec(Titulo,Cabec1,Cabec2,NomeProg,Tamanho,nTipo)
 					nLin := 8
 				Endif
-
 				@ nLin,000 PSAY TMPSB1->CODIGO Picture "@R XXX99.99.999-99"
 				@ nLin,016 PSAY TMPSB1->DESCRICAO Picture "@!"
 				@ nLin,057 PSAY TMPSB1->TIPO Picture "@!"
-				@ nLin,060 PSAY TMPSB1->LOCAL Picture "XX"
+				@ nLin,060 PSAY TMPSB1->LOCALEST Picture "XX"
 				@ nLin,063 PSAY TMPSB1->UNIDADE Picture "@!"
 				nCol := 066
 				For x := 1 to Len(aMeses)
@@ -381,20 +381,20 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
 				Next
 				// Imprime Média de Quantidade dos Produtos
 				If mv_par08 == 1
-					@ nLin,nCol PSAY TMPSB1->MEDIA Picture "@E 999,999.99"
+					@ nLin,nCol PSAY (TMPSB1->MEDIA) Picture "@E 999,999.99"
 					nCol := nCol + 11
 				Endif
 				nQuantR := 0
 				nQuant  := 0   
 				// Imprime Saldo Atual
 				If mv_par11 == 1
-					@ nLin,nCol PSAY TMPSB1->SALDOATUAL Picture "@E 9,999,999.99"
+					@ nLin,nCol PSAY (TMPSB1->SALDOATUAL) Picture "@E 9,999,999.99"
 					nCol := nCol + 14
 				Endif
 				// Imprime Saldo Disponivel
 				If mv_par09 == 1
 				//  @ nLin,nCol PSAY (nQuant - nQuantR) Picture "@E 9,999,999.99"
-					@ nLin,nCol PSAY TMPSB1->SALDOATUAL - TMPSB1->QTDDISP Picture "@E 9,999,999.99"
+					@ nLin,nCol PSAY ((TMPSB1->SALDOATUAL) - (TMPSB1->QTDDISP)) Picture "@E 9,999,999.99"
 				Endif
 				nLin := nLin + 1    // Avanca a linha de impressao
 				IncProc("Imprimindo relatorio !!!")
@@ -424,17 +424,20 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
 
         MS_FLUSH()
 
-   Else  // gerar planilha excel
+    Else  // gerar planilha excel
 
         aCabExcel := {}
         AADD(aCabExcel, {"CODIGO"       ,"C", 15, 0}) 
-        AADD(aCabExcel, {"DESCRIÇÃO"    ,"C", 30, 0}) 
+        AADD(aCabExcel, {"DESCRIÇÃO"    ,"C", 40, 0}) 
         AADD(aCabExcel, {"TIPO" 		,"C", 04, 0}) 
         AADD(aCabExcel, {"LOCAL"        ,"C", 05, 0}) 
         AADD(aCabExcel, {"NCM"          ,"C", 12, 0}) 
         AADD(aCabExcel, {"UM"           ,"C", 02, 0}) 
         AADD(aCabExcel, {"CUSTO DOLAR"  ,"N", 09, 2})
         AADD(aCabExcel, {"ULT. PREÇO"   ,"N", 09, 2})
+	
+		/* adicionado nelieder */
+		//FORNECEDOR	COBERTURA	CONSUMO 6 MÊS	SALDO	OBS
                  	
         For x := 1 to Len(aMeses)
         	cAux = "MES_"+SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[x],1,2)))),1,3)
@@ -450,39 +453,81 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
        		AADD(aCabExcel, {"QTD DISPO"        ,"N", 09, 2})
        	Endif
 
+		/* adicionado nelieder 15/07/2022
+		  calculo = QTD DISPO/MEDIA
+		*/
+		If mv_par08 == 1 .AND. mv_par09 == 1
+			AADD(aCabExcel, {"COBERTURA"		,"C", 09, 0})
+		Endif	
+
+			AADD(aCabExcel, {"FORNECEDOR"		,"C", 09, 0})
+    		AADD(aCabExcel, {"CONSUMO 6 MÊS"	,"C", 09, 0})
+			AADD(aCabExcel, {"SALDO"			,"C", 09, 0})
+
        	aMatDad := {}
        	//aMatDad := Array(1,Len(aMeses)+12)
         nLin    := 1
 
     	While !eof()
     		If nLin == 1
-    			aMatDad := Array(TMPSB1->LINHA,Len(aMeses)+12)
+    			aMatDad := Array(TMPSB1->LINHA,Len(aMeses)+16)
     		End
     		
     		aMatDad[nLin][1] := CHR(160)+TMPSB1->CODIGO
-    		aMatDad[nLin][2] := CHR(160)+SUBSTR(TMPSB1->DESCRICAO,1,30)	
+    		aMatDad[nLin][2] := CHR(160)+SUBSTR(TMPSB1->DESCRICAO,1,40)
         	aMatDad[nLin][3] := CHR(160)+TMPSB1->TIPO
-        	aMatDad[nLin][4] := CHR(160)+TMPSB1->LOCAL
-        	aMatDad[nLin][5] := CHR(160)+TMPSB1->NCM 
+        	aMatDad[nLin][4] := CHR(160)+TMPSB1->LOCALEST
+        	aMatDad[nLin][5] := CHR(160)+TMPSB1->NCM
         	aMatDad[nLin][6] := CHR(160)+TMPSB1->UNIDADE
-        	aMatDad[nLin][7] := Transform(TMPSB1->CUSTODOLAR, "@E 999,999.99") 
-        	aMatDad[nLin][8] := Transform(TMPSB1->ULTPRECO, "@E 999,999.99") 
+        	aMatDad[nLin][7] := Transform(TMPSB1->CUSTODOLAR, "@E 999,999.99")
+        	aMatDad[nLin][8] := Transform(TMPSB1->ULTPRECO, "@E 999,999.99")
         	
         	For x := 1 to Len(aMeses)
         		cAux = "TMPSB1->M_"+SubStr(UPPER(MesExtenso(Val(SubStr(aMeses[x],1,2)))),1,3) 
-                aMatDad[nLin][x+8] := Transform(&cAux, "@E 999,999.99")
+                aMatDad[nLin][x+08] := Transform(&cAux, "@E 999,999.99")
        		Next
-       		If mv_par08 == 1
-       			aMatDad[nLin][x+8] := Transform(TMPSB1->MEDIA, "@E 999,999.99")
-       		Endif                        
+       		/* média */
+			If mv_par08 == 1
+       			aMatDad[nLin][x+08] := Transform(TMPSB1->MEDIA, "@E 999,999.99")
+       		Endif    
+
+			/*saldo atual */                    
        		If mv_par11 == 1
        			aMatDad[nLin][x+09] := Transform(TMPSB1->SALDOATUAL, "@E 9,999,999.99")
        		Endif
+
+			/* qtd disponivel */
        		If mv_par09 == 1
        			aMatDad[nLin][x+10] := Transform((TMPSB1->SALDOATUAL - TMPSB1->QTDDISP), "@E 9,999,999.99")
        		Endif
-            aMatDad[nLin][x+11] := CHR(160)+space(30)
+
+			/* Incluido por Nelieder em 13/07/2022 Cobertura */
+			If mv_par08 == 1 .AND. mv_par09 == 1
+				aMatDad[nLin][x+11] := Transform(val(aMatDad[nLin][x+10])/val(aMatDad[nLin][x+8]), "@E 9,999,999.99")
+			endif
+
+			cQry2 := ""
+			cQry2 += "SELECT TOP 1 A5_NOMEFOR FROM "+RetSqlName("SA5")+" WHERE D_E_L_E_T_ = '' AND A5_PRODUTO = '"+Alltrim(TMPSB1->CODIGO)+"' "
+			cQry2 += "AND A5_FILIAL = '"+xFilial("SA5")+"' ORDER BY R_E_C_N_O_ DESC"
+
+			cQry2 := ChangeQuery(cQry2)
+            dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQry2),"TMPSA5",.T.,.T.)
+            DbSelectArea("TMPSA5")
+
+			/* Fornecedor */
+            aMatDad[nLin][x+12] := CHR(300)+TMPSA5->A5_NOMEFOR
+
+            /* Consumo 6 Meses */
+			aMatDad[nLin][x+13] := Transform(val(aMatDad[nLin][x+8])*6, "@E 9,999,999.99")
+
+			/* Saldo */
+			aMatDad[nLin][x+14] := Transform(val(aMatDad[nLin][x+10]) - val(aMatDad[nLin][x+13]), "@E 9,999,999.99")
+
+			dbselectarea("TMPSA5")
+	        dbCloseArea()
+
             nLin := (nLin + 1)
+
 
             dbselectarea("TMPSB1")     
             dbSkip()            // Avanca o ponteiro do registro no arquivo
@@ -496,7 +541,7 @@ Static Function EST0101(Cabec1,Cabec2,Titulo,nLin)
 	    
 	    dbselectarea("TMPSB1")     
         DbCloseArea()
-   Endif
+    Endif
    
 Return
 
@@ -532,7 +577,7 @@ Static Function ValidPerg
        aAdd(aRegs,{cPerg,"06","Ate o tipo        	","","","mv_ch6","C",02,0,0,"G","","mv_par06","","","","","","","","","","","","","","","","","","","","","","","","","02",""})
        aAdd(aRegs,{cPerg,"07","Meses Anteriores  	","","","mv_ch7","N",02,0,0,"G","","mv_par07","","","","","","","","","","","","","","","","","","","","","","","","","",""})
        aAdd(aRegs,{cPerg,"08","Calcula Media     	","","","mv_ch8","N",01,0,0,"C","","mv_par08","Sim"             ,"","","","","Nao"    ,"","","","","","","","","","","","","","","","","","","",""})
-       aAdd(aRegs,{cPerg,"09","Saldo Disponivel  	","","","mv_ch9","N",01,0,0,"C","","mv_par09","Sim"             ,"","","","","Nao"    ,"","","","","","","","","","","","","","","","","","","",""})
+       aAdd(aRegs,{cPerg,"09","Saldo Disponivel     ","","","mv_ch9","N",01,0,0,"C","","mv_par09","Sim"             ,"","","","","Nao"    ,"","","","","","","","","","","","","","","","","","","",""})
        aAdd(aRegs,{cPerg,"10","Consid. Mes Atual 	","","","mv_cha","N",01,0,0,"C","","mv_par10","Sim"             ,"","","","","Nao"    ,"","","","","","","","","","","","","","","","","","","",""})
        aAdd(aRegs,{cPerg,"11","Saldo Atual       	","","","mv_chb","N",01,0,0,"C","","mv_par11","Sim"             ,"","","","","Nao"    ,"","","","","","","","","","","","","","","","","","","",""})
        aAdd(aRegs,{cPerg,"12","Somente           	","","","mv_chc","N",01,0,0,"C","","mv_par12","Itens de Estoque","","","","","Todos"  ,"","","","","","","","","","","","","","","","","","","",""})

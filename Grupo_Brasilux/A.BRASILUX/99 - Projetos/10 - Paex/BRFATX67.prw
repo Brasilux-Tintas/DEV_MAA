@@ -1,4 +1,4 @@
-#INCLUDE 'PROTHEUS.CH'                                          
+#INCLUDE 'PROTHEUS.CH'                                           
 #INCLUDE "TBICONN.CH"
 #INCLUDE "TOPCONN.CH"
 #INCLUDE 'RWMAKE.CH'
@@ -6,6 +6,7 @@
 #INCLUDE 'FONT.CH'
 #INCLUDE 'INKEY.CH'
 #INCLUDE 'vkey.CH'
+
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -18,14 +19,24 @@
 ±±ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 
-User Function BRFATX67()
-     Private cGet1Env   := Space(12) //"       /    "	Carga
+User Function BRFATX67() 
+
+// Jose 11/11/2024   Acesso empresas 010101
+     If !(alltrim(cNumEmp) == "01010101")
+          cMens1 := "Acesso deverá ser feito pela Matriz!"
+          MessageBox( cMens1, "Atenção", 48 )
+          return
+     Endif 
+// Jose 11/11/2024 até aqui
+
+	 Private cGet1Env   := Space(12) //"       /    "	Carga
      Private cSay1Env   := Space(01)
      Private cSay2Env   := Space(01)
      Private cSay4Env   := Space(20)
      Private cSay3Env   := Space(30)
      Private cGet5Env   := Space(02)
-     Private cGet6Env   := '023818' // CLIENTE BRASILUX SP
+	 Private nCBox1Co   := ""
+     Private cGet6Env   := ""//{"", "023818", "000521"}//'023818' // CLIENTE BRASILUX SP
      Private cCor4EnB   := CLR_BLUE
      Private cCor4EnR   := CLR_RED
      Private cCor4Env   := 0
@@ -42,7 +53,7 @@ User Function BRFATX67()
      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
      SetPrvt("oFontEnv", "oFon3Env", "oDlg1Env", "oGrp1Env", "oSay1Env", "oSay2Env", "oGet1Env", "oGet2Env", "oBtn1Env", "oBtn2Env")
      SetPrvt("oBtn3Env", "oBtn4Env", "oBtn5Env", "oBtn6Env", "oBtn7Env", "oBrw1Env", "oGrp3Env", "oSay4Env", "oBtn6Env", "oSay3Env")
-     SetPrvt("oSay7Env", "oSay8Env", "oSay9Env", "oSayAEnv")
+     SetPrvt("oSay7Env", "oSay8Env", "oSay9Env", "oSayAEnv", "oSay2Env")
 
  	 If !u_VldAcesso(funname())
       	MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
@@ -57,25 +68,35 @@ User Function BRFATX67()
      oFon2Env   := TFont():New( "Courier New"  , 0,  19, , .T., 0, , 400, .F., .F., , , , , , )
      oFon3Env   := TFont():New( "Courier New"  , 0,  25, , .T., 0, , 400, .F., .F., , , , , , )
      
-     oDlg1Env   := MSDialog():New( 140, 264, 680, 980, "Gera Pedido de Transferência", , , .F., , , , , , .T., , , .T. )
-     oGrp1Env   := TGroup():New( 003, 004, 048, 356, "Dados da Carga", oDlg1Env, CLR_RED, CLR_WHITE, .T., .F. )
+     oDlg1Env   := MSDialog():New( 140, 264, 750, 1100, "Gera Pedido de Transferência", , , .F., , , , , , .T., , , .T. )  // Jose 11/04/2025  140, 264, 680, 980,
+     oGrp1Env   := TGroup():New( 003, 004, 055, 500, "Dados da Carga", oDlg1Env, CLR_RED, CLR_WHITE, .T., .F. )  // Jose 11/04/2025   003, 004, 048, 356, 
      oSay1Env   := TSay():New( 012, 008, { || "Carga :"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
-     oGet1Env   := TGet():New( 010, 040, { |u| If(PCount() > 0, cGet1Env := u, cGet1Env)}, oGrp1Env, 073, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet1Env", , ) 
+     oGet1Env   := TGet():New( 010, 041, { |u| If(PCount() > 0, cGet1Env := u, cGet1Env)}, oGrp1Env, 073, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet1Env", , ) 
      oGet1Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet1Env)),fInfCarga(),"")}
 
      //oSay2Env   := TSay():New( 012, 008, { || "Carro :"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
      //oGet2Env   := TGet():New( 010, 040, { |u| If(PCount() > 0, cGet2Env := u, cGet2Env)}, oGrp1Env, 073, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet2Env", , ) 
      
      oSay4Env   := TSay():New( 030, 152, { || cSay4Env  }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., cCor4Env, CLR_WHITE, 106, 012)
-     oBtn1Env   := TButton():New( 009, 297, "Confirma", oGrp1Env, {|| fTrPLote()}, 052, 016, , oFontEnv, , .T., , "", , , , .T. )
-     oBtn2Env   := TButton():New( 030, 297, "Abandona", oGrp1Env, {|| fSairTPa()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oGrp2Env   := TGroup():New( 050, 004, 268, 356, "", oDlg1Env, CLR_BLACK, CLR_WHITE, .T., .F. )
+     oBtn1Env   := TButton():New( 009, 350, "Confirma", oGrp1Env, {|| fTrPLote()}, 052, 016, , oFontEnv, , .T., , "", , , , .T. ) // Jose 11/04/2025    009, 297,
+     oBtn2Env   := TButton():New( 030, 350, "Abandona", oGrp1Env, {|| fSairTPa()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. ) // Jose 11/04/2025    030, 297, 
+     oGrp2Env   := TGroup():New( 059, 004, 268, 356, "", oDlg1Env, CLR_BLACK, CLR_WHITE, .T., .F. ) // Jose 11/04/2025 050, 004, 268, 356,
 
      oBtn3Env   := TButton():New( 068, 290, "<- Incluir ->" , oGrp2Env, {|| fMLocPall(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
      oBtn4Env   := TButton():New( 088, 290, "<- Excluir ->" , oGrp2Env, {|| fMLocPall(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+	 
+	 
+	 oSay2Env   := TSay():New( 138, 290, { || "Impressora"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012) // 138
+     oCBox1Co   := TComboBox():New( 148, 290, {|u| If(PCount() > 0, nCBox1Co := u, nCBox1Co)}, {"", "ZEBRA S4M", "ZEBRA ZT230"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Co ) // 138
+     oBtn6Env   := TButton():New( 169, 290, "<- Imp.Etq ->" , oGrp2Env, {|| fIEtPallet(nCBox1Co) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 148
 
-     oSay6Env   := TSay():New( 012, 202, {|| "Destino :"     }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 035, 012)
-     oGet6Env   := TGet():New( 010, 242, {|u| If(PCount() > 0, cGet6Env := u, cGet6Env)}, oDlg1Env, 036, 012, '@R 999999'          , , CLR_BLACK, CLR_WHITE, oFontEnv, , , .T., "", , , .F., .F., , .F. , .F., "SA1"    ,"cGet6Env", , )
+     oSay6Env   := TSay():New( 012, 120, {|| "Destino:"     }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 035, 012)  // Jose 11/04/2025   012, 202,
+
+//   oSay6Env   := TSay():New( 030, 120, {|| "023818-Brasilux X Guarulhos"     }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 137, 030)  // Jose 11/04/2025  
+//	 oSay6Env   := TSay():New( 040, 120, {|| "052817-Brasilux X Araraquara"    }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 137, 030)  // Jose 11/04/2025  
+   //oGet6Env   := TGet():New( 010, 242, {|u| If(PCount() > 0, cGet6Env := u, cGet6Env)}, oDlg1Env, 036, 012, '@R 999999'          , , CLR_BLACK, CLR_WHITE, oFontEnv, , , .T., "", , , .F., .F., , .F. , .F., "SA1"    ,"cGet6Env", , )
+   //oGet6Env   := TComboBox():New( 010, 159, {|u| If(PCount() > 0, cGet6Env := u, cGet6Env)}, {"", "023818", "052817"}, 050, 030, oGrp1Env, , , , CLR_BLACK, CLR_WHITE, .T., oFontEnv, "", , , , ,  , , cGet6Env )   // Jose 11/04/2025   010, 142,   050, 016,
+     oGet6Env   := TComboBox():New( 010, 159, {|u| If(PCount() > 0, cGet6Env := SubStr(u, 1, 6), cGet6Env)}, {"", "023818 - Brasilux X Guarulhos", "052817 - Brasilux X Araraquara"}, 150, 030, oGrp1Env, , , , CLR_BLACK, CLR_WHITE, .T., oFontEnv, "", , , , ,  , , cGet6Env )   // Jose 11/04/2025    050, 030,
 
      oSay8Env   := TSay():New( 222, 283, { || "Pallets:"}, oGrp2Env, , oFon3Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 050, 020)
      oSay7Env   := TSay():New( 222, 338, { || nCount    }, oGrp2Env, , oFon3Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 020, 020)
@@ -89,14 +110,18 @@ User Function BRFATX67()
      //oBtn7Env 	:= TButton():New( 128, 288, "<-Res Pallet->" , oGrp2Env, {|| U_fResPallet(2) }, 064, 016, , oFon2Env, , .T., , "", , , , .F. )
  	 //oBtn7Env:lVisibleControl := .f.	
 
-     oBtn6Env 	:= TButton():New( 188, 288, "<-Res  Carga->" , oGrp2Env, {|| fImpRel()       }, 064, 016, , oFon2Env, , .T., , "", , , , .F. )
+     oBtn6Env 	:= TButton():New( 188, 288, "<-Res  Carga->"  , oGrp2Env, {|| fImpRel()       }, 064, 014, , oFon2Env, , .T., , "", , , , .F. ) // 064,016    
+
+	 // Jose 09/10/2024  acrescentado 
+     oBtn6Env 	:= TButton():New( 205, 284, "<-Dest.Pallet->" , oGrp2Env, {|| fDesPla()       }, 070, 014, , oFon2Env, , .T., , "", , , , .F. )
+	 // Jose 09/10/2024  até aqui               
  	 //oBtn6Env:lVisibleControl := .f.	
 
      oTblTrans()
      DbSelectArea("TMPTRANS")
      DbSetOrder(1)
      DbGoTop()
-     oBrw1Env   := MsSelect():New( "TMPTRANS", "", "", { {"TMPPAL", "", "Pallet", "@!"}, { "TMPVOL", "", "Volume", "@!"},{ "TMPUNI", "", "Qtd. Unit", "@!"},{ "TMPPES", "", "Peso", "@E 999,999.99"} ,{ "TMPSTA", "", "Pedidos", "@!"}}, .F., , {056, 007, 266, 280}, , , oGrp2Env ) 
+     oBrw1Env   := MsSelect():New( "TMPTRANS", "", "", { {"TMPPAL", "", "Pallet", "@!"}, { "TMPVOL", "", "Volume", "@!"},{ "TMPUNI", "", "Qtd. Unit", "@!"},{ "TMPPES", "", "Peso", "@E 999,999.99"} ,{ "TMPSTA", "", "Pedidos", "@!"}}, .F., , {065, 007, 266, 280}, , , oGrp2Env ) // Jose 11/04/2025   056, 007, 266, 280
      
      oBrw1Env:oBrowse:oFont          := oFon2Env
      oBrw1Env:oBrowse:lAdjustColSize := .t.
@@ -110,6 +135,59 @@ User Function BRFATX67()
      Endif
      oTempTbl1:Delete()
 Return  
+
+/*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function  ³ fIEtPallet() - Impressão da Etiqueta do Pallet
+ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+Static Function fIEtPallet(cModelo)
+    
+
+    If Empty(Alltrim(cModelo))
+   		Messagebox("Escolha o modelo da impressora antes de mandar a impressão !!!","Atenção...",48)
+		Return
+    Endif
+	
+    If Alltrim(cModelo) $ "ZEBRA S4M" 
+		cModelo   := "S4M"
+    Elseif Alltrim(cModelo) $ "ZEBRA ZT230"
+		cModelo   := "ZEBRA"
+    Endif
+    cPorta    := "LPT1" //Porta da impressora
+    nTam      := 120    //Tamanho da etiqueta
+    lTipo     := .f.    //.f.=Local; .t.=Servidor ou Outro Servidor
+    lDrvWin   := .f.    //Usa Drive do Windows
+	
+	MSCBPRINTER(cModelo, cPorta, , nTam, lTipo, , , , , , lDrvWin)
+
+    If !MSCBIsPrinter('LPT1')
+    	Messagebox("Impressora não encontrada!","Atenção",48)
+        MSCBCLOSEPRINTER()
+		Return
+  	Endif  
+	DbSelectArea("TMPTRANS")
+    DbSetOrder(1)
+    DbGoTop()
+	
+	While (TMPTRANS->(!Eof()))
+
+
+	    MSCBBEGIN(1, 6, , .f.)
+        MSCBSAYBAR(05, 03, StrTran(TMPTRANS->TMPPAL,"/","")	       ,"N", "MB07", 15, .F., .T., .F., , 3, 2)
+        MSCBSay(06,25,"VOL. "+Alltrim(str(TMPTRANS->TMPVOL)) 	   ,"N", "0"	,"30,30")
+      //MSCBSay(28,25,"P. "+Alltrim(str(TMPTRANS->TMPPES))   	   ,"N", "0"	,"30,30")
+        MSCBSay(32,25,"PEDIDO "+Alltrim(Substr(TMPTRANS->TMPSTA,1,9))+U_fNumNf(Substr(TMPTRANS->TMPSTA,1,6)) ,"N", "0"	,"30,30")
+        MSCBCHKSTATUS(.f.)
+        cText := MSCBEND()
+        MSCBCLOSEPRINTER()
+		
+
+
+		DbSelectArea("TMPTRANS")
+		DbSkip()
+    Enddo
+
+	
+Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ fSairTPa() Função para perguntar antes de fechar a tela
@@ -153,6 +231,9 @@ Private lMsHelpAuto := .T.
 Private lMsErroAuto := .F.
 //Private lCancelaTran:= .F.
 
+	If Empty(Alltrim(cGet6Env))
+		Return
+	Endif
 	If !Empty(Alltrim(cGet1Env))
 		Return
 	Endif
@@ -166,7 +247,7 @@ Private lMsErroAuto := .F.
 	Endif
 
     cPallets := "('"
-    cObs     :=	"REMESSA ENTRE MATRIZ -> DEPÓSITO SP (PALLETS BIPADOS) "
+    cObs     :=	"REMESSA ENTRE MATRIZ -> DEPÓSITO "+cGet6Env+" - (PALLETS BIPADOS) "
     
 	DbSelectArea("TMPTRANS")
 	DbGotop()
@@ -201,12 +282,11 @@ Private lMsErroAuto := .F.
 	cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) ON ZZJ_FILIAL = ZZK_FILIAL AND ZZJ_CODIGO = ZZK_CODIGO AND ZZJ.D_E_L_E_T_ ='' "
 	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = B1_FILIAL AND B2_COD = B1_COD AND B2_LOCAL = CASE WHEN B1_TIPO ='MP' THEN '01' ELSE CASE WHEN B1_TIPO ='PI' THEN '02' ELSE CASE WHEN B1_TIPO ='PA' THEN '03' ELSE CASE WHEN B1_TIPO ='MC' THEN '04' ELSE B1_LOCPAD END END END END AND SB2.D_E_L_E_T_ ='' "
 	cQry1 += " WHERE ZZK.D_E_L_E_T_ ='' " 
-	cQry1 += " AND ZZK_CODIGO IN "+cPallets
-	cQry1 += " AND ZZJ_FLAG IN('3','4') "
+	cQry1 += " AND ZZK_CODIGO IN "+cPallets "
+	cQry1 += " AND ZZJ_FLAG IN('1','2','3','4') " 
 	cQry1 += " AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
 	cQry1 += " GROUP BY ZZK_PRODUT, B1_MSBLQL, B1_VEND, B1_TIPO, B2_CM1, B1_PRV1 " //, B1_DESC" //, B1_UM "  
 	cQry1 += " ORDER BY SUBSTRING(ZZK_PRODUT,4,2), ZZK_PRODUT "
-
 
 	TCQuery cQry1 ALIAS "TCQ" NEW
 	DbSelectArea("TCQ")
@@ -214,20 +294,26 @@ Private lMsErroAuto := .F.
 	
 	aTrPallet 	:= {} 
 
-   	While !(TCQ->(EOF()))  
-    	aAdd(aTrPallet, {TCQ->ZZK_PRODUT ,TCQ->ZZK_QUANT, TCQ->B1_TIPO, TCQ->B2_CM1, TCQ->B1_PRV1 }) //, TCQ->B1_DESC, TCQ->B1_UM})
-	   	If TCQ->B1_MSBLQL ='1'
-			aAdd(aProdBloq, {Alltrim(TCQ->ZZK_PRODUT)} )	
-	   	Endif
-	   	If TCQ->B1_VEND ='N'
-			aAdd(aProdNVend, {Alltrim(TCQ->ZZK_PRODUT)} )		   	
-	   	Endif
-	   	DbSelectArea("TCQ")
-   	  	DbSkip()
-	Enddo
-	DbSelectArea("TCQ")
-	DbCloseArea()
-
+	If TCQ->(EOF())  
+   		Messagebox("Não encontrado produtos dentro dos pallets informados ! ","Atenção...",48)  
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		Return
+	Else
+		While !(TCQ->(EOF()))  
+    		aAdd(aTrPallet, {TCQ->ZZK_PRODUT ,TCQ->ZZK_QUANT, TCQ->B1_TIPO, TCQ->B2_CM1, TCQ->B1_PRV1 }) //, TCQ->B1_DESC, TCQ->B1_UM})
+	   		If TCQ->B1_MSBLQL ='1'
+				aAdd(aProdBloq, {Alltrim(TCQ->ZZK_PRODUT)} )	
+		   	Endif
+		   	If TCQ->B1_VEND ='N'
+				aAdd(aProdNVend, {Alltrim(TCQ->ZZK_PRODUT)} )		   	
+	   		Endif
+	   		DbSelectArea("TCQ")
+   	  		DbSkip()
+		Enddo
+		DbSelectArea("TCQ")
+		DbCloseArea()
+	Endif
 
 	Begin Transaction    
 
@@ -259,21 +345,23 @@ Private lMsErroAuto := .F.
 	       	aItens    := {}
  		    _cItem    := 0
  		    nY 		  := 1
- 		    //_cNumPed  := GetSxeNum("SC5","C5_NUM")
+ 		  //_cNumPed  := GetSxeNum("SC5","C5_NUM")
 
- 		    //aAdd(aCabec,{"C5_FILIAL"     ,		xFilial("SC5")     										,Nil})
-  	   	    //aAdd(aCabec,{"C5_LOJACLI"    ,		Posicione("SA1", 1, xFilial("SA1")+cGet6Env, "A1_LOJA")	,Nil})
-		    //aAdd(aCabec,{"C5_NUM"        ,		_cNumPed												,.f.})
+ 		  //aAdd(aCabec,{"C5_FILIAL"     ,		xFilial("SC5")     										,Nil})
+  	   	  //aAdd(aCabec,{"C5_LOJACLI"    ,		Posicione("SA1", 1, xFilial("SA1")+cGet6Env, "A1_LOJA")	,Nil})
+		  //aAdd(aCabec,{"C5_NUM"        ,		_cNumPed												,.f.})
        		aAdd(aCabec,{"C5_TIPO"       ,		"N"              										,Nil})
 	       	aAdd(aCabec,{"C5_CLIENTE"    ,		cGet6Env     											,Nil})
        		aAdd(aCabec,{"C5_EMISSAO"    ,		dDatabase          										,Nil})
        		aAdd(aCabec,{"C5_CONDPAG"    ,		"001"            									  	,Nil})
-   	   	    aAdd(aCabec,{"C5_TPFRETE"    , 		"C"                             					    ,NIL})       
- 		    aAdd(aCabec,{"C5_DEPOSI"     , 		"N"   							                        ,NIL})  
+   	   	aAdd(aCabec,{"C5_TPFRETE"    , 		"C"                             					    ,NIL})       
+ 		aAdd(aCabec,{"C5_DEPOSI"     , 		"N"   							                        ,NIL})  
        		aAdd(aCabec,{"C5_TRANSP"     ,		"00250"      	   										,Nil})
 	       	//aAdd(aCabec,{"C5_REDESP"     ,		"" 		  	   											,Nil})
     	   	aAdd(aCabec,{"C5_OBS"        ,		cObs      												,Nil})
-			aAdd(aCabec,{"C5_OBSNF"      , 		"Transferência de Mercadorias para DEPÓSITO FECHADO!!"	,NIL})
+		aAdd(aCabec,{"C5_X_OBSFA"    ,		cObs      												,Nil})
+		aAdd(aCabec,{"C5_OBSNF"      , 		"Transferência de Mercadorias para DEPÓSITO FECHADO!!"	,NIL})
+
 
 			DbSelectArea("SX3")
 			SX3->( DbSetOrder(1) )
@@ -288,7 +376,7 @@ Private lMsErroAuto := .F.
 			For _nY := 1 To Len( aCabec )
 			    Private &( "M->" + aCabec[_nY][1] ) := aCabec[_nY][2]
 			Next
-			//cNPedidos += _cNumPed+" / " 
+		  //cNPedidos += _cNumPed+" / " 
 	    			//  (Limite definido para quebra dos pedidos de transferência)   
 			For nI:= (nDe + 1) To Iif((150 + nDe) <= Len(aTrPallet), (150 + nDe), Len(aTrPallet))
 
@@ -355,7 +443,7 @@ Private lMsErroAuto := .F.
     	    DbSetOrder(1)
 
             //MsgRun("Gerando pedido de transferência por Pallets !!", "Aguarde", {|| MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3) } )
-MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3)
+			MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3)
     	   	If lMsErroAuto
 	            DisarmTransaction()
         	    MostraErro()
@@ -369,7 +457,7 @@ MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3)
 	        Endif
 
 			cNPedidos += SC5->C5_NUM+" / " 
-	
+		
 		Next nX
 		
 		DbSelectArea("TMPTRANS")
@@ -396,15 +484,15 @@ MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3)
     	DbGoTop()
 	
 	    cCodCARGA := Iif(Empty(TCQ->ZZJ_CARGA), 'C'+SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CARGA, 1, 8)+StrZero(Val(SubStr(TCQ->ZZJ_CARGA, 9, 4))+1, 4) )
-        //             Iif(Empty(TCQ->ZZJ_CARGA),     SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CARGA, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CARGA, 8, 4))+1, 4) )
+        //           Iif(Empty(TCQ->ZZJ_CARGA),     SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CARGA, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CARGA, 8, 4))+1, 4) )
 
     	DbSelectArea("TCQ")
 	    DbCloseArea()
 
 
    		cQry1 := " "
-   		cQry1 += " UPDATE "+RetSqlName("ZZJ")+" SET ZZJ_FLAG ='5', ZZJ_OBSPED ='"+cNPedidos+"', ZZJ_CARGA ='"+cCodCARGA+"' FROM "+RetSqlName("ZZJ")+"  WHERE ZZJ_CODIGO IN "+cPallets 
-   		cQry1 += " AND D_E_L_E_T_ ='' AND ZZJ_FLAG IN('3','4') AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
+   		cQry1 += " UPDATE "+RetSqlName("ZZJ")+" SET ZZJ_FLAG ='5', ZZJ_OBSPED ='"+cNPedidos+"', ZZJ_CARGA ='"+cCodCARGA+"' FROM "+RetSqlName("ZZJ")+"  WHERE ZZJ_CODIGO IN "+cPallets "
+   		cQry1 += " AND D_E_L_E_T_ ='' AND ZZJ_FLAG IN('1','2','3','4') AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
    		XXX := TCSQLExec(cQry1) 
         If XXX <> 0
 	        cNomArq := 'C:\TEMP\ERR'+DTOS(MsDate())+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+'.ERR'
@@ -452,7 +540,7 @@ MSExecAuto({|x,y,z| Mata410(x,y,z)},aCabec,aItens,3)
 	cGet1Env := cCodCARGA 
 	
     Messagebox("Pedido(s) de transferência por Pallet(s) gerado(s) com Sucesso !! ","Atenção...",48)    		
-    cSay3Env := "Pedido(s) de transferência por Pallet(s) gerado(s) !!"
+    cSay3Env := "Pedido(s) de transferência por Pallet(s) gerado(s) com Sucesso !!"
     
     oSay3Env:Refresh()
     
@@ -479,8 +567,8 @@ Static Function fInfCarga()
 	If Empty(Alltrim(cGet1Env))
 		Return
 	Endif
-	If Len(Alltrim(cGet1Env)) = 11
-		cGet1Env  := Substr(cGet1Env,1,7)+'/'+Substr(cGet1Env,7,4)
+	If Len(Alltrim(cGet1Env)) = 11 
+		cGet1Env  := Substr(cGet1Env,1,7)+'/'+Substr(cGet1Env,7,4) 
 	Endif
 	cSay3Env := ""
 	cSay5Env := ""
@@ -497,9 +585,9 @@ Static Function fInfCarga()
     cQry1 += "SELECT ZZJ_CODIGO, ZZJ_OBSPED "
     cQry1 += "FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
     cQry1 += " WHERE (ZZJ.ZZJ_FILIAL = '"+XFILIAL("ZZJ")+"') "
-    cQry1 += "  AND (ZZJ.D_E_L_E_T_ = '') "
-    cQry1 += "  AND ZZJ.ZZJ_CARGA = '"+cGet1Env+"' "
-    cQry1 += " ORDER BY ZZJ_CODIGO"
+    cQry1 += "   AND (ZZJ.D_E_L_E_T_ = '') "
+    cQry1 += "   AND ZZJ.ZZJ_CARGA = '"+cGet1Env+"' "
+    cQry1 += "ORDER BY ZZJ_CODIGO"
 
     TCQuery cQry1 ALIAS "TCC" NEW
     DbSelectArea("TCC")
@@ -594,8 +682,8 @@ Static Function oTblTrans()
 	Endif
 
     aAdd( aFds , {"TMPPAL"  ,"C", 011, 000} )   // PALLET
-	aAdd( aFds , {"TMPVOL"  ,"N", 004, 000} )   // TOTAL DE VOLUMES DO PALLET
-	aAdd( aFds , {"TMPUNI"  ,"N", 004, 000} )   // TOTAL DE PRODUTOS UNITARIO    
+	aAdd( aFds , {"TMPVOL"  ,"N", 006, 000} )   // TOTAL DE VOLUMES DO PALLET
+	aAdd( aFds , {"TMPUNI"  ,"N", 006, 000} )   // TOTAL DE PRODUTOS UNITARIO    
     aAdd( aFds , {"TMPPES"  ,"N", 009, 002} )   // PESO TOTAL PALLET
 	aAdd( aFds , {"TMPSTA"  ,"C", 040, 000} )   // STATUS
     
@@ -642,7 +730,16 @@ Static Function fMLocPall(nOpcMnt) // 1 - Inclui / 2 - Exclui
     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
     ±± Definicao do Dialog e todos os seus componentes.                        ±±
     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-    oFontTr1  := TFont():New( "MS Sans Serif", 0, -19, , .T., 0, , 700, .F., .F., , , , , , )
+    
+
+	
+	If Empty(Alltrim(cGet6Env))
+		Messagebox("Escolha o código da filial que será gerada a nota fiscal de transferência (Guarulhos / Araraquara) !!","Atenção...",48)
+		Return
+	Endif
+	oGet6Env:disable()
+	
+	oFontTr1  := TFont():New( "MS Sans Serif", 0, -19, , .T., 0, , 700, .F., .F., , , , , , )
     oFontTr2  := TFont():New( "MS Sans Serif", 0, -19, , .F., 0, , 400, .F., .F., , , , , , )
     oDlg1Tr   := MSDialog():New( 258, 232, 383, 570, "Transferência de Pallet", , , .F., , , , , , .T., , , .T. )
 
@@ -662,6 +759,9 @@ Function  ³ FtrPallet()  Salvar Dados nas Tabelas Temporárias (Inclusão e Exclus
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ*/
 
 Static Function FtrPallet(_cPallet,nOpcMnt)
+	
+	Local cPallets := ""
+	Local cQry1    := ""
 
 	If Empty(Alltrim(_cPallet))
 		Return
@@ -676,6 +776,7 @@ Static Function FtrPallet(_cPallet,nOpcMnt)
 		DbSetOrder(1)
 		DbSeek(xFilial("ZZJ")+(_cPallet), .t.)   
 		If Found() .and. (ZZJ->ZZJ_FILIAL == XFilial("ZZJ"))
+			/*
 			If ZZJ->ZZJ_FLAG $ '1'
 				Messagebox("Pallet de movimentação interna, aguardando transferência !! ","Atenção...",48)
 				oGet1Tr:Setfocus()
@@ -685,44 +786,176 @@ Static Function FtrPallet(_cPallet,nOpcMnt)
 			Elseif ZZJ->ZZJ_FLAG $ '5' 
 				Messagebox("Pallet de Compra de pedidos por Borderô, com pedido de transferência gerado !! ","Atenção...",48)		
 				oGet1Tr:Setfocus()
-			Elseif ZZJ->ZZJ_FLAG $ '3.4' 
-				If (ZZJ->ZZJ_TIPBOR $ '2.4.5') .OR. (ZZJ->ZZJ_BORDER <> 'VARIOS ' .AND. Posicione("SZF", 1, xFilial("SZF")+ZZJ->ZZJ_BORDER, "ZF_TIPOBOR")='2')
-					DbSelectArea("TMPTRANS")
-					DbSetOrder(1)
-				    DbSeek(Alltrim(ZZJ->ZZJ_CODIGO), .t.)  
-					If !(TMPTRANS->(eof())) .and. (Alltrim(ZZJ->ZZJ_CODIGO) == Alltrim(TMPTRANS->TMPPAL))
-						Messagebox("Pallet -->"+(_cPallet)+" já foi bipado / digitado !!","Atenção...",48)    	
-						oGet1Tr:Setfocus()
-					Else
-						RecLock("TMPTRANS", .T.)
-							TMPTRANS->TMPPAL := (_cPallet)
-							TMPTRANS->TMPSTA := "Não Transferido"
-							TMPTRANS->TMPUNI := U_fTotUnit(_cPallet,1)
-							TMPTRANS->TMPVOL := U_fTotUnit(_cPallet,2)
-							TMPTRANS->TMPPES := round(u_fPesPallet(_cPallet),2)
-						MsUnLock()
-						nCount   := (nCount +1) 
-						oSay7Env:Refresh()
-						nPeso    += TMPTRANS->TMPPES
-						nPesoTot := Transform(nPeso, "@E 999,999.99")
-						oSay9Env:Refresh()
-					Endif
-		       	ElseIf Alltrim(ZZJ->ZZJ_TIPBOR)='' .AND. Alltrim(ZZJ->ZZJ_BORDER) <> 'VARIOS'		       		
-		       		Reclock("ZZJ",.f.)
-		       			ZZJ->ZZJ_TIPBOR := Posicione("SZF", 1, xFilial("SZF")+ZZJ->ZZJ_BORDER, "ZF_TIPOBOR")
-		       		MsUnlock()
-		       	Else
+			*/
+// acrescentado por Jose 25/09/2024 -------------
+		If ZZJ->ZZJ_FLAG $ '5' 
+				Messagebox("Pallet de Compra de pedidos por Borderô, com pedido de transferência gerado e Gerou Nota Fiscal de Transferência !! ","Atenção...",48)		
+				oGet1Tr:Setfocus()
+				Return
+			Endif
 
-					Messagebox("Pallet -->"+(_cPallet)+" tem o tipo de borderô inválido, se for pallet Depósito deve ser alterado o tipo, verifique !!","Atenção...",48)    	
+//---  até aqui 25/09/2024 ----------------------
+
+			If ZZJ->ZZJ_FLAG $ '1.2'
+				DbSelectArea("TMPTRANS")
+				DbSetOrder(1)
+				DbSeek(Alltrim(ZZJ->ZZJ_CODIGO), .t.)  
+				If !(TMPTRANS->(eof())) .and. (Alltrim(ZZJ->ZZJ_CODIGO) == Alltrim(TMPTRANS->TMPPAL))
+					Messagebox("Pallet -->"+(_cPallet)+" já foi bipado / digitado !!","Atenção...",48)    	
 					oGet1Tr:Setfocus()
-		       	Endif
-		   Endif
+					Return
+				Else
+					RecLock("TMPTRANS", .T.)
+						TMPTRANS->TMPPAL := (_cPallet)
+						TMPTRANS->TMPSTA := "Não Transferido"
+						TMPTRANS->TMPUNI := U_fTotUnit(_cPallet,1)
+						TMPTRANS->TMPVOL := U_fTotUnit(_cPallet,2)
+						TMPTRANS->TMPPES := round(u_fPesPallet(_cPallet),2)
+					MsUnLock()
+					nCount   := (nCount +1) 
+					oSay7Env:Refresh()
+					nPeso    += TMPTRANS->TMPPES
+					nPesoTot := Transform(nPeso, "@E 999,999.99")
+					oSay9Env:Refresh()
+				Endif
+			Elseif ZZJ->ZZJ_FLAG $ '3.4' 
+				If (ZZJ->ZZJ_LOCALI) $ 'FAB2' .AND. (ZZJ->ZZJ_FLAG $ '3')
+					Messagebox("Pallet Montado na Fabrica 2 / Deve ser transferido de almoxarifado antes da geração da nota fiscal.", "Atenção...",48)			
+					oGet1Tr:Setfocus()
+					Return
+				Else
+					If (ZZJ->ZZJ_TIPBOR $ '2.4.5') .OR. (ZZJ->ZZJ_BORDER <> 'VARIOS ' .AND. Posicione("SZF", 1, xFilial("SZF")+ZZJ->ZZJ_BORDER, "ZF_TIPOBOR")='2')
+						DbSelectArea("TMPTRANS")
+						DbSetOrder(1)
+						DbSeek(Alltrim(ZZJ->ZZJ_CODIGO), .t.)  
+						If !(TMPTRANS->(eof())) .and. (Alltrim(ZZJ->ZZJ_CODIGO) == Alltrim(TMPTRANS->TMPPAL))
+							Messagebox("Pallet -->"+(_cPallet)+" já foi bipado / digitado !!","Atenção...",48)    	
+							oGet1Tr:Setfocus()
+							Return
+						Else
+							RecLock("TMPTRANS", .T.)
+								TMPTRANS->TMPPAL := (_cPallet)
+								TMPTRANS->TMPSTA := "Não Transferido"
+								TMPTRANS->TMPUNI := U_fTotUnit(_cPallet,1)
+								TMPTRANS->TMPVOL := U_fTotUnit(_cPallet,2)
+								TMPTRANS->TMPPES := round(u_fPesPallet(_cPallet),2)
+							MsUnLock()
+							nCount   := (nCount +1) 
+							oSay7Env:Refresh()
+							nPeso    += TMPTRANS->TMPPES
+							nPesoTot := Transform(nPeso, "@E 999,999.99")
+							oSay9Env:Refresh()
+						Endif
+					ElseIf Alltrim(ZZJ->ZZJ_TIPBOR)='' .AND. Alltrim(ZZJ->ZZJ_BORDER) <> 'VARIOS'		       		
+						Reclock("ZZJ",.f.)
+							ZZJ->ZZJ_TIPBOR := Posicione("SZF", 1, xFilial("SZF")+ZZJ->ZZJ_BORDER, "ZF_TIPOBOR")
+						MsUnlock()
+					Else
+						Messagebox("Pallet -->"+(_cPallet)+" tem o tipo de borderô inválido, se for pallet Depósito deve ser alterado o tipo, verifique !!","Atenção...",48)    	
+						oGet1Tr:Setfocus()
+						Return
+					Endif
+				Endif
+		    Endif
 	    Else
 			Messagebox("Pallet -->"+(_cPallet)+" não cadastrado !!","Atenção...",48)
-			oSay1Tr:Setfocus()    		    
+			oSay1Tr:Setfocus() 
+			Return   		    
 	    Endif
 	    DbSelectArea("ZZJ")
 	    DbCloseArea()
+	
+
+		If ChkFile("TMPTRANS") 
+			DbSelectArea("TMPTRANS")
+	    	DbSetOrder(1)
+		    DbGotop()
+		Endif
+
+		cPallets := "('"
+    
+		DbSelectArea("TMPTRANS")
+		DbGotop()
+
+		While (TMPTRANS->(!Eof()))
+			cPallets += TMPTRANS->TMPPAL+"', '"
+			DbSelectArea("TMPTRANS")
+			DbSkip()
+		Enddo
+
+		cPallets := SubStr(cPallets, 1, Len(cPallets)-3)+")"
+
+		cQry := " "
+		cQry += " SELECT DISTINCT ZZK_CODIGO AS PALLET, ZZK_LOTE AS LOTE "
+		cQry += " FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "
+		cQry += " LEFT OUTER JOIN "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) ON ZZJ_FILIAL = ZZK_FILIAL AND ZZJ_CODIGO = ZZK_CODIGO AND ZZJ.D_E_L_E_T_ ='' "
+		cQry += " LEFT OUTER JOIN "+RetSqlName("ZAE")+" ZAE WITH (NOLOCK) ON ZAE_FILIAL = ZZK_FILIAL AND ZAE_PRODUT = ZZK_PRODUT AND ZAE_LOTE = ZZK_LOTE AND ZAE.D_E_L_E_T_ ='' "
+		cQry += " WHERE ZZK.D_E_L_E_T_ ='' " 
+		cQry += " AND ZZK_CODIGO IN "+cPallets "
+		cQry += " AND ZZJ_FLAG IN('1','2','3','4') "
+		cQry += " AND ZZK_LOTE <>'' "
+		cQry += " AND ZAE_TIPO = '1' "
+		cQry += " AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
+
+		TCQuery cQry ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+
+		If !TCQ->(EOF()) 
+			Messagebox("Pallet -->"+(TCQ->PALLET)+" não será incluído pois o lote "+(TCQ->LOTE)+" esta bloqueado !!","Atenção...",48)
+			DbSelectArea("TMPTRANS")
+	    	DbSetOrder(1)
+	    	DbSeek(TCQ->PALLET, .t.)   
+			If Found()
+				RecLock("TMPTRANS", .F.)
+					DbDelete()
+				MsUnlock()		
+				nCount   := (nCount -1)
+				oSay7Env:Refresh()
+				nPeso    := (nPeso - round(u_fPesPallet(_cPallet),2))
+				nPesoTot := Transform(nPeso, "@E 999,999.99")
+				oSay9Env:Refresh()
+			Endif
+		Endif
+		DbSelectArea("TCQ")
+		DbCloseArea()
+
+
+		cQry1 := " "
+		cQry1 += " SELECT COUNT(*) AS TOTALITEM
+		cQry1 += " FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "
+		cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON ZZK_FILIAL = B1_FILIAL  AND ZZK_PRODUT = B1_COD AND SB1.D_E_L_E_T_ ='' "
+		cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) ON ZZJ_FILIAL = ZZK_FILIAL AND ZZJ_CODIGO = ZZK_CODIGO AND ZZJ.D_E_L_E_T_ ='' "
+		cQry1 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = B1_FILIAL AND B2_COD = B1_COD AND B2_LOCAL = CASE WHEN B1_TIPO ='MP' THEN '01' ELSE CASE WHEN B1_TIPO ='PI' THEN '02' ELSE CASE WHEN B1_TIPO ='PA' THEN '03' ELSE CASE WHEN B1_TIPO ='MC' THEN '04' ELSE B1_LOCPAD END END END END AND SB2.D_E_L_E_T_ ='' "
+		cQry1 += " WHERE ZZK.D_E_L_E_T_ ='' " 
+		cQry1 += " AND ZZK_CODIGO IN "+cPallets "
+		cQry1 += " AND ZZJ_FLAG IN('1','2','3','4') "
+		cQry1 += " AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
+
+		TCQuery cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+	
+		aTrPallet 	:= {} 
+		If !TCQ->(EOF()) .AND. (TCQ->TOTALITEM > 150)
+			Messagebox("Pallet -->"+(_cPallet)+" não será incluído pois ultrapassa 150 itens na nota de transferência !!","Atenção...",48)
+			DbSelectArea("TMPTRANS")
+	    	DbSetOrder(1)
+	    	DbSeek(_cPallet, .t.)   
+			If Found()
+				RecLock("TMPTRANS", .F.)
+					DbDelete()
+				MsUnlock()		
+				nCount   := (nCount -1)
+				oSay7Env:Refresh()
+				nPeso    := (nPeso - round(u_fPesPallet(_cPallet),2))
+				nPesoTot := Transform(nPeso, "@E 999,999.99")
+				oSay9Env:Refresh()
+	    	Endif	
+		Endif
+
+		DbSelectArea("TCQ")
+		DbCloseArea()
 	ElseIf (nOpcMnt == 2)  
 		DbSelectArea("TMPTRANS")
 	    DbSetOrder(1)
@@ -835,6 +1068,28 @@ Static Function fVCodPall(nOpcMnt)  //1 - Inclui 2- Exclui
 Return*/
 
 
+User Function fNumNf(Pedido)
+
+	Local cNumNf := ""
+	Local cQry1  :=""    
+
+	cQry1 := " "
+	cQry1 += " SELECT F2_DOC AS NUMNF "	
+	cQry1 += " FROM "+RetSqlName("SF2")+" 
+	cQry1 += " WHERE D_E_L_E_T_ ='' " 
+	cQry1 += " AND F2_FILIAL ='"+xFilial("SF2")+"'"
+	cQry1 += " AND F2_PEDIDO ='"+Pedido+"'"
+    TCQuery cQry1 ALIAS "TCQ" NEW
+	
+	If !Eof()
+		cNumNf := TCQ->NUMNF
+	Endif		
+    
+    DbSelectArea("TCQ")
+    DbCloseArea()
+    
+Return(cNumNf)   
+
 User Function fTotUnit(cPallet,nOpc)
 
 	Local nTotal :=0
@@ -869,6 +1124,11 @@ User Function fPesPallet(cPallet)
 
 	Local cQry1  :=""    
 	Local nPeso  :=0
+    
+	If ChkFile("TCQ")
+		DbSelectArea("TCQ")
+		DbClosearea()
+	Endif
 
 	cQry1 += " SELECT ZZK_CODIGO, SUM(ZZK_QUANT * B1_PESBRU) AS PESO "
 	cQry1 += " FROM "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON B1_FILIAL = ZZK_FILIAL AND B1_COD = ZZK_PRODUT AND SB1.D_E_L_E_T_ ='' "
@@ -1058,3 +1318,318 @@ AAdd(aHelp, {{"Ordenar Por:"},  {""}, {""}})
 PutSX1(cPerg,"01","Ordernar por: " ,"","","mv_ch1","N",1,00,00,"C","","","","","MV_PAR01","Pallet","","","","Peso","","","","","","","","","","","",aHelp[1,1],aHelp[1,2],aHelp[1,3],"")
 
 Return*/
+
+/*ÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ
+Function  ³ fDesPla() - Relatório de Destino do Paletts
+ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+
+// Jose 09/10/2024 Acrescentado
+Static Function fDesPla()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+PRIVATE Titulo 	:=""
+PRIVATE cDesc1	:=""
+PRIVATE cDesc2	:=""
+PRIVATE cDesc3 	:="" 
+PRIVATE cCabec1 := ""
+PRIVATE cCabec2 := ""  
+PRIVATE nTipo 	:= 18
+PRIVATE M_Pag   := 01
+PRIVATE Tamanho	:= "P"
+PRIVATE Limite 	:= 80
+PRIVATE cString	:= "ZZK"
+PRIVATE Cabec1,Cabec2,WnRel
+PRIVATE aReturn := {"Zebrado", 1,"Administracao", 2, 2, 1, "",1 }
+PRIVATE nomeprog:= "BRPCPX67"
+PRIVATE aLinha  := { },nLastKey := 0
+PRIVATE cPerg   := "BRPCPX67"
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+DbSelectArea("TMPTRANS")
+DbSetOrder(1)
+If Eof() 
+	Messagebox("Bipe os Pallets para montar a carga antes de tentar emitir o relatório !!","Atenção...",48) 
+	Return
+Endif
+    
+//CriaSX1(cPerg)  //LGS#20200210 - Adequação de release 12.1.25 e posteriores
+Pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:= "BRPCPX67"            //Nome Default do relatorio em Disco
+wnrel:=SetPrint(cString,wnrel,cPerg,@titulo,cDesc1,cDesc2,cDesc3,.F.,"",,Tamanho)
+
+If nLastKey==27
+	dbClearFilter()
+   Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If nLastKey==27
+	dbClearFilter()
+   Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Inicio do Processamento do Relatorio de Pallets              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+RptStatus({|| RptDetaip()})
+
+Return
+
+Static Function RptDetaip()
+Local _zCodigo := ''
+Local _zPedido := ''
+Local _zLocal  := ''
+Local _zPallet := ''
+Local _zNotas  := ''
+
+DbSelectArea("TMPTRANS")
+If Mv_Par01 == 1
+	DbSetOrder(1)
+Else
+	DbSetOrder(2)
+Endif	
+DbGoTop()	
+
+If Eof() 
+	Messagebox("Bipe os Pallets para montar a carga antes de tentar emitir o relatório !!","Atenção...",48) 
+	Return
+Endif
+
+Titulo := "Destino e Endereçamento dos Pallets "   
+//cCabec1 :="Pallet               Qtd. Unit.      Volume             Peso"
+
+SetRegua( RECCOUNT( ) ) 
+
+//Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)         
+//Cabec(titulo,cCabec2,nomeprog,tamanho,nTipo)                   
+_nLin := 04  
+cTotalCount := cTotalPallet := cTotalVol := cTPeso := cFlag:= 0      
+
+
+While !Eof()
+
+//	If _nLin > 55                                                                    	
+//		@ _nLin,000 psay replicate("_",80)
+//		Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)			
+//		_nLin := 08
+//	Endif 
+
+	If !Eof() .and. cFlag = 1
+//		@ _nLin,000 psay replicate("-",80)
+		@ _nLin++
+	EndIf 
+
+////////
+
+    DbSelectArea("TCP")
+    DbCloseArea()
+/*            José 10/10/2024
+    cQry11 := " "
+    cQry11 += " SELECT ZZJ_CARGA, ZZJ_CODIGO, ZZK_PEDIDO, ZZK_PRODUT, ZZK_QUANT, B2_LOCALIZ, C5_NOTA
+    cQry11 += " FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "
+    cQry11 += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON ZZK_FILIAL = C5_FILIAL  AND ZZK_PEDIDO = C5_NUM AND SC5.D_E_L_E_T_ ='' "
+    cQry11 += " LEFT OUTER JOIN "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) ON ZZJ_FILIAL = ZZK_FILIAL AND ZZJ_CODIGO = ZZK_CODIGO AND ZZJ.D_E_L_E_T_ ='' "
+    cQry11 += " LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = ZZK_FILIAL AND B2_COD = ZZK_PRODUT AND SB2.D_E_L_E_T_ =''  " //AND B2_LOCAL = CASE WHEN B1_TIPO ='MP' THEN '01' ELSE CASE WHEN B1_TIPO ='PI' THEN '02' ELSE CASE WHEN B1_TIPO ='PA' THEN '03' ELSE CASE WHEN B1_TIPO ='MC' THEN '04' ELSE B1_LOCPAD END END END END "
+    cQry11 += " WHERE ZZK.D_E_L_E_T_ ='' " 
+    cQry11 += " AND ZZK_CODIGO IN ('"+TMPTRANS->TMPPAL+"') "
+    cQry11 += " AND ZZJ_CARGA = '"+cGet1Env+"' " 
+    cQry11 += " AND ZZJ_FLAG IN('1','2','3','4',5) "
+    cQry11 += " AND ZZJ_FILIAL ='"+xFilial("ZZJ")+"'"
+    Jose 10/10/2024 até aqui */
+
+	If cGet6Env = '023818'
+	   _zLocal = 'G3'
+	Else
+	   _zLocal = 'A3'
+	EndIf
+    cQry11 := " "
+    cQry11 += " SELECT ZZJ_CARGA, "
+    cQry11 += "        ZZJ_CODIGO, "
+    cQry11 += " 	   ZZJ_OBSPED, "
+    cQry11 += " 	   ZZK_PRODUT, "
+    cQry11 += "        SUM(ZZK_QUANT) AS ZZK_QUANT, "
+    cQry11 += "        B2_LOCALIZ, "
+
+    cQry11 += "	       SC51.C5_NOTA AS NOTA1, "
+    cQry11 += "	       SC52.C5_NOTA AS NOTA2, "
+    cQry11 += "   	   SC53.C5_NOTA AS NOTA3, "
+    cQry11 += "   	   SC54.C5_NOTA AS NOTA4 "
+
+    cQry11 += "  FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK)  "
+    cQry11 += " 	    LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) ON ZZK_FILIAL = ZZJ_FILIAL "
+    cQry11 += " 	                                                           AND ZZK_CODIGO = ZZJ_CODIGO "
+    cQry11 += " 									                           AND ZZK.D_E_L_E_T_ = '' "
+    cQry11 += " 	    LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = ZZK_FILIAL "
+    cQry11 += " 	                                                           AND B2_COD = ZZK_PRODUT "
+    cQry11 += "      							     		                   AND B2_LOCAL = '"+_zLocal+"'
+    cQry11 += " 										                 	   AND SB2.D_E_L_E_T_ = '' "
+
+    cQry11 += "	   LEFT OUTER JOIN SC5010 SC51 WITH (NOLOCK) ON SC51.C5_FILIAL = ZZK_FILIAL " 	    
+    cQry11 += "	                                            AND SC51.C5_NUM    = SUBSTRING(ZZJ_OBSPED,1,6)     "
+    cQry11 += "											    AND SC51.D_E_L_E_T_ = '' "
+    cQry11 += "	   LEFT OUTER JOIN SC5010 SC52 WITH (NOLOCK) ON SC52.C5_FILIAL = ZZK_FILIAL " 	    
+    cQry11 += "	                                            AND SC52.C5_NUM    = SUBSTRING(ZZJ_OBSPED,10,6) "    
+    cQry11 += "	        								    AND SC52.D_E_L_E_T_ = '' "
+    cQry11 += "	   LEFT OUTER JOIN SC5010 SC53 WITH (NOLOCK) ON SC53.C5_FILIAL = ZZK_FILIAL  "	    
+    cQry11 += "	                                            AND SC53.C5_NUM    = SUBSTRING(ZZJ_OBSPED,19,6) "    
+    cQry11 += "											    AND SC53.D_E_L_E_T_ = '' "
+    cQry11 += "    LEFT OUTER JOIN SC5010 SC54 WITH (NOLOCK) ON SC54.C5_FILIAL = ZZK_FILIAL " 	    
+    cQry11 += "	                                            AND SC54.C5_NUM    = SUBSTRING(ZZJ_OBSPED,28,6) "    
+    cQry11 += "											    AND SC54.D_E_L_E_T_ = '' "
+
+
+    cQry11 += " WHERE ZZJ_FILIAL = '"+xFilial("ZZJ")+"' "
+    cQry11 += "   AND ZZJ.D_E_L_E_T_ = '' "
+    cQry11 += "   AND ZZJ_CARGA = '"+cGet1Env+"' " 
+    cQry11 += "   AND ZZJ_FLAG IN ('1','2','3','4') "
+    cQry11 += " GROUP BY ZZJ_CARGA, ZZJ_CODIGO, ZZK_PRODUT, ZZK_QUANT, ZZJ_OBSPED, B2_LOCALIZ, "
+    cQry11 += " 	     SC51.C5_NOTA, SC52.C5_NOTA, SC53.C5_NOTA, SC54.C5_NOTA  "
+    cQry11 += " ORDER BY ZZJ_CARGA, ZZJ_CODIGO, ZZK_PRODUT "
+
+    TCQuery cQry11 ALIAS "TCP" NEW
+    DbSelectArea("TCP")
+    DbGoTop()
+    While (TCP->(!Eof()))
+ 		  If TCP->ZZJ_CODIGO <> _zCodigo
+		     _zCodigo := TCP->ZZJ_CODIGO
+//			 _nLin := 60
+//		     If _nLin > 55                                                                    	
+//	            @ _nLin,000 psay replicate("_",80)
+//		        Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)			
+	    	    _nLin := 04 //08
+//	         Endif
+	         @_nLin,000 PSAY "DESTINO :-"
+			 If cGet6Env = '023818'
+			    @_nLin,022 PSAY "CD GUARULHOS"
+			 Else
+		        @_nLin,022 PSAY "CD ARARAQUARA"
+			 EndIf
+			 If TCP->ZZJ_CODIGO <> _zPallet
+			    _zPallet := TCP->ZZJ_CODIGO
+			    _zPedido := TCP->ZZJ_OBSPED
+			    @_nLin := _nLin+2	
+	            @_nLin,000 PSAY "PALLET :-"
+		 	    @_nLin,022 PSAY TCP->ZZJ_CODIGO	
+			    @_nLin := _nLin+2		
+	            @_nLin,000 PSAY "PEDIDO :-"
+		 	    @_nLin,022 PSAY TCP->ZZJ_OBSPED
+
+			    @ _nLin++
+				_zNotas  = Alltrim(TCP->NOTA1)
+				_zNotas += ' / '
+				_zNotas += Alltrim(TCP->NOTA2)
+				_zNotas += ' / '
+				_zNotas += Alltrim(TCP->NOTA3)
+				_zNotas += ' / '
+				_zNotas += Alltrim(TCP->NOTA4)
+	            @_nLin,000 PSAY "NOTA(S) FISCAL(IS):-"
+		 	    @_nLin,022 PSAY _zNotas 
+
+			    @_nLin := _nLin+2	
+			    @_nLin,000 PSAY "PRODUTO             QTDE            LOCALIZAÇÃO"
+			    @ _nLin++	
+			 EndIf
+		  EndIf
+		  If TCP->ZZJ_OBSPED <> _zPedido
+		     _zPedido := TCP->ZZJ_OBSPED
+		     @ _nLin++		
+	         @_nLin,000 PSAY "PEDIDO :-"
+		 	 @_nLin,022 PSAY TCP->ZZJ_OBSPED
+/*
+			 @ _nLin++
+	         @_nLin,000 PSAY "NOTA(S) FISCAL(IS):-"
+		 	 @_nLin,022 PSAY TCP->NOTA1
+			 @_nLin,028 PSAY "/"
+		 	 @_nLin,031 PSAY TCP->NOTA2
+			 @_nLin,038 PSAY "/"
+			 @_nLin,040 PSAY TCP->NOTA3
+			 @_nLin,047 PSAY "/"
+			 @_nLin,049 PSAY TCP->NOTA4
+*/
+//	         @_nLin,036 PSAY " / "	
+//			 @_nLin,045 PSAY TCP->C5_NOTA
+			 @_nLin := _nLin+2		
+			 @_nLin,000 PSAY "PRODUTO             QTDE            LOCALIZAÇÃO"
+			 @ _nLin++
+		  EndIf
+	      @_nLin,000 PSAY TCP->ZZK_PRODUT
+	      @_nLin,021 PSAY TCP->ZZK_QUANT
+	      @_nLin,036 PSAY TCP->B2_LOCALIZ
+	      @ _nLin++	
+	      If _nLin > 55
+	 	     cFlag := 0
+	      Else
+		     cFlag := 1
+	      EndIf
+
+	      DbSelectArea("TCP")	 
+	      DbSkip()
+  
+    EndDo        
+
+/////////
+//	@_nLin,000 PSAY TMPTRANS->TMPPAL
+//	@_nLin,021 PSAY Transform(TMPTRANS->TMPUNI,"@E 999999")
+//	@_nLin,036 PSAY Transform(TMPTRANS->TMPVOL,"@E 999999")
+//	@_nLin,050 PSAY Transform(TMPTRANS->TMPPES,"@E 999,999.99")
+//	@ _nLin++		
+	
+//	cTotalCount  += TMPTRANS->TMPUNI
+//	cTotalPallet += 1 
+//	cTotalVol	 += TMPTRANS->TMPVOL
+//	cTPeso       += TMPTRANS->TMPPES
+ If _nLin > 55
+		cFlag := 0
+	Else
+		cFlag := 1
+	EndIf
+
+	DbSelectArea("TMPTRANS")	 
+	DbSkip()
+  
+EndDo        
+//  	If _nLin > 55                                                                    	
+//		@ _nLin,000 psay replicate("_",80)
+//		Cabec(titulo,cCabec1,cCabec2,nomeprog,tamanho,nTipo)			
+//		_nLin := 08
+//	Endif
+
+//	@ _nLin,000 psay replicate("_",80)
+//	@ _nLin++		
+//	@_nLin,000 PSAY "Qtd. Unit Total:"
+// 	@_nLin,022 PSAY Transform(cTotalCount,"@E 999999")
+//	@_nLin,050 PSAY "Total Pallets..:"
+//	@_nLin,072 PSAY Transform(cTotalPallet,"@E 999")
+//	@ _nLin++
+//	@_nLin,000 PSAY "Volume Total...:"
+//	@_nLin,022 PSAY Transform(cTotalVol,"@E 999999")    
+//	@ _nLin++
+//	@_nLin,000 PSAY "Peso Total.....:"
+//	@_nLin,020 PSAY Transform(cTPeso,"@E 999,999.99")    
+
+	Set Device To Screen
+
+	If aReturn[5] == 1
+   		Set Printer TO
+	    dbcommitAll()
+   		ourspool(wnrel)
+	Endif
+
+	DbSelectArea("TMPTRANS")
+	DbSetOrder(1)
+	DbGoTop()
+		
+Return

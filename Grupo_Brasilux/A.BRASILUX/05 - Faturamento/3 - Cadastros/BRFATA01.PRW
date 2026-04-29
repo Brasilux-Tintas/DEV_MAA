@@ -55,9 +55,12 @@ User Function BRFATA01()
  	     aadd(aRotina,    { OemToAnsi('Excluir')      , 'U_FATA01_1("E")', 0 , 5 } )
  	     aadd(aRotina,    { OemToAnsi('Baixar ')      , 'U_FATA01_1("B")', 0 , 6 } )
  	     aadd(aRotina,    { OemToAnsi('Cancela Baixa'), 'U_FATA01_1("C")', 0 , 7 } )
- 	     aadd(aRotina,    { OemToAnsi('Conferência')  , 'U_FATA01_3()'   , 0 , 8 } )
- 	     aadd(aRotina,    { OemToAnsi('Retirada')     , 'U_FATA01_4()'   , 0 , 9 } )
-		 aadd(aRotina,    { OemToAnsi('Imp Endereços'), 'U_fImpLocl()'   , 0 , 9 } )
+ 	    
+        /* Nelieder - alterado conforme solicitado por André dia 28/06/2022 */
+        /*aadd(aRotina,    { OemToAnsi('Conferência')  , 'U_FATA01_3()'   , 0 , 8 } )
+ 	     aadd(aRotina,    { OemToAnsi('Retirada')     , 'U_FATA01_4()'   , 0 , 9 } )*/
+		  
+        aadd(aRotina,    { OemToAnsi('Imp Endereços'), 'U_fImpLocl()'   , 0 , 9 } )
 	 Endif       
      If Substr(cAcessos, 3, 1) $ '*' // Re-Monta Desp.
  	     aadd(aRotina,    { OemToAnsi('Re-monta Desp.'), 'U_FATA06_6()', 0 , 9 } )
@@ -71,6 +74,7 @@ User Function BRFATA01()
  	     aadd(aRotina,    { OemToAnsi('Solicita Coleta Depósito?'), 'U_WFMAILTR()', 0 , 9 } ) 	        
  	 Endif
 	 aadd(aRotina,    { OemToAnsi('Rel. de Faltas')  , 'U_BRFATR12("M")', 0 , 9 } )
+    aadd(aRotina,    { OemToAnsi('Int. Polifrete')  , 'U_BRAIT01()', 0 , 9 } )
 	 aadd(aRotina,    { OemToAnsi('Legenda')         , 'U_FATA01_2()'   , 0 , 9 } )
 
     
@@ -186,6 +190,12 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
      Local aAltGetDados := {"ZB_PEDIDO"}
      Local cCodigo      := CriaVar("ZA_CODIGO")
      Local dEmissa      := CriaVar("ZA_EMISSAO")
+     Local aButtons := {} as array 
+
+     /* NELIEDE */
+     Local cMuni := SPACE(60)
+    
+     
      //Local cTpIncl      := ""
      //Local aTpIncl      := {"Automatica", "Manual"}
      Local nOpcA        := 0
@@ -231,9 +241,18 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
      Endif
      cVeicul := Iif(cOpc $ 'I', space(08)                    , SZA->ZA_CODVEI)
      cMotori := Iif(cOpc $ 'I', space(06)                    , SZA->ZA_CODMOT)
+     
+     /* NELIEDER retorna codigo IBGE */ 
+     cIBGE   := Iif(cOpc $ 'I', space(06)                    , SZA->ZA_COD_MUN)
+     cMuni   := Iif(cOpc $ 'I', space(07)                    , SZA->ZA_MUN)
+
      cDesVei := Iif(cOpc $ 'I', space(40)                    , SubStr(Posicione("DA3", 1, xFilial("DA3")+SZA->ZA_CODVEI, "DA3_DESC"), 1, 40)  )
      cDesMot := Iif(cOpc $ 'I', space(40)                    , SubStr(Posicione("DA4", 1, xFilial("DA4")+SZA->ZA_CODMOT, "DA4_NOME"), 1, 40)  )
-     
+
+     /* NELIEDER retorna nome do municipio */
+     //cMuni   := Iif(cOpc $ 'I', space(60)                    , SubStr(Posicione("CC2", 3, xFilial("CC2")+SZA->ZA_COD_MUN, "CC2_MUN"), 1, 60)  )
+
+
      If cOpc $ 'L'
       	u_FATA01LI(cCodigo)
       	cOpc := 'V'
@@ -254,8 +273,10 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
         fMonCol(1, @aHeader, @nUsado, @aCols, cOpc, cCodigo, @nTotPes, @nTotVol, @oTotPes, @oTotVol)
      Endif
 
-     DEFINE MSDIALOG oDlg FROM 000,000 TO 027,085 TITLE OemToAnsi(cCadastro) OF oMainWnd
-            @ 032,001 GROUP oGrp1 TO 115,322 LABEL  OemToAnsi('')                                    PIXEL OF oDlg
+      /*Adicionado por Lucas - 18-09-2025. Chamado R8434*/
+     aadd(aButtons,{ 'AUTOM',{||u_BRFATR00() },"Produtos do Borderô","Produtos do Borderô"} ) 
+
+     DEFINE MSDIALOG oDlg FROM 000,000 TO 033,085 TITLE OemToAnsi(cCadastro) OF oMainWnd
             @ 037,005 SAY OemToAnsi("Codigo:")                          COLOR CLR_HBLUE SIZE 030,009 PIXEL OF oDlg
             @ 036,035 MSGET oCodigo  VAR cCodigo  Picture "999999"                      SIZE 020,009 PIXEL OF oDlg
             @ 037,085 SAY OemToAnsi("Emissão:")                         COLOR CLR_HBLUE SIZE 030,009 PIXEL OF oDlg
@@ -283,7 +304,17 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
             @ 100,035 MSGET oMotori  VAR cMotori Picture "@!"  F3 "DA4"                 SIZE 030,009 PIXEL OF oDlg
             @ 100,075 MSGET oDesMot  VAR cDesMot               WHEN .F.                 SIZE 140,008 PIXEL OF oDlg
 
-            oGetD         := MsGetDados():New( 115, 020, 200, 286, nOpcG, cLinOk, cTudoOk, "", If(cOpc $ 'V.E.S', .f., .t.), aAltGetDados,  ,   , nLinhas, cFieldOk,   ,  , cDeleOk,   )
+            /* incluido por Nelieder em  03/06/2022 */
+            cIBGE := PADR(cIBGE,7) 
+            cMuni := PADR(cMuni,60) 
+            @ 114,005 SAY OemToAnsi("Destino:")                        COLOR CLR_HBLUE SIZE 030,009 PIXEL OF oDlg
+            @ 115,035 MSGET oIBGE  VAR cIBGE  Picture "@!"  F3 "CCSSZA"   SIZE 038,009 PIXEL OF oDlg
+            @ 115,075 MSGET oMuni  VAR cMuni                WHEN .T.                 SIZE 140,008 PIXEL OF oDlg    
+
+            /*Adicionado por Lucas - 19-09-2025. Chamado R8434*/
+            @ 115,265 BUTTON "Produtos do Borderô" SIZE 060, 015 PIXEL OF oDlg ACTION u_BRFATR00() PIXEL OF oDlg
+
+            oGetD         := MsGetDados():New( 140, 002, 245, 320, nOpcG, cLinOk, cTudoOk, "", If(cOpc $ 'V.E.S', .f., .t.), aAltGetDados,  ,   , nLinhas, cFieldOk,   ,  , cDeleOk,   )
             //                                  |    |    |    |     |      |       |      |                 |                    |        |   |     |        |      |   |     |    |
             //                                 01º  02º  03º  04º   05º    06º     07º    08º               09º                  10º      11º 12º   13º      14º    15º 16º   17º  18º
             //                                  |    |    |    |     |      |       |      |                 |                    |        |   |     |        |      |   |     |    |
@@ -300,6 +331,10 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
             oRegiao:bValid := {|| fValCam(1, @cRegiao, @cDescri)}
             oVeicul:bValid := {|| fValCam(2, @cVeicul, @cDesVei)}
             oMotori:bValid := {|| fValCam(3, @cMotori, @cDesMot)}
+           
+            /* NELIEDER */
+            oMotori:bValid := {|| fValCam(4, @cIBGE, @cMuni)}
+            
             If !cOpc $ 'I.A'
                oPrevis:bWhen := {|| .f. } ; oDescri:bWhen := {|| .f. } ; oRegiao:bWhen := {|| .f. }
                oVeicul:bWhen := {|| .f. } ; oMotori:bWhen := {|| .f. }
@@ -308,7 +343,7 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
             If cOpc $ 'B'
                oDespac:bWhen := {|| .t. }
             Endif
-     ACTIVATE MSDIALOG oDlg CENTERED VALID lSaida ON INIT EnchoiceBar( oDlg, {|| Iif(oGetD:TudoOk(), nOpcA := 1, nOpcA := 0), Iif(nOpcA == 1, lSaida := .t., nOpcA := 0), Iif(nOpcA == 1, oDlg:End(), nOpcA := 0) }, {|| nOpcA := 0, lSaida := .t., oDlg:End()} )
+     ACTIVATE MSDIALOG oDlg CENTERED VALID lSaida ON INIT EnchoiceBar( oDlg, {|| Iif(oGetD:TudoOk(), nOpcA := 1, nOpcA := 0), Iif(nOpcA == 1, lSaida := .t., nOpcA := 0), Iif(nOpcA == 1, oDlg:End(), nOpcA := 0) }, {|| nOpcA := 0, lSaida := .t., oDlg:End()},,aButtons )
      SetKey(VK_F10, {|| fAtvF10()})
      If nOpcA == 1
         If cOpc == "I"
@@ -327,6 +362,16 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
               SZA->ZA_NOMVEI  := cDesVei
               SZA->ZA_CODMOT  := cMotori
               SZA->ZA_NOMMOT  := cDesMot
+              
+              /* NELEIDER */
+              SZA->ZA_COD_MUN := cIBGE
+
+              if !Empty(cIBGE) 
+                  SZA->ZA_MUN     := SUBSTR(cMUNI,1,60)
+              else
+                  SZA->ZA_MUN     := ""
+              endif
+
               //SZA->ZA_LOCALIZ := cLocali
            MsUnLock()
            //Inclui na tabela de itens do pedido
@@ -398,6 +443,16 @@ User Function FATA01_1(cOpc, aColNew, nPesNew, nVolNew, cRegNew)
                   SZA->ZA_NOMVEI  := cDesVei
                   SZA->ZA_CODMOT  := cMotori
                   SZA->ZA_NOMMOT  := cDesMot
+                  /* NELEIDER */
+                  SZA->ZA_COD_MUN := cIBGE
+
+                  if !Empty(cIBGE) 
+                     SZA->ZA_MUN     := SUBSTR(cMUNI,1,60)
+                  else
+                     SZA->ZA_MUN     := ""
+                  endif
+                 
+
                   //SZA->ZA_LOCALIZ := cLocali
                MsUnLock()
                //Altera na tabela de itens do bordero
@@ -2138,3 +2193,10 @@ User Function WFMAILTR()
     
   //  RESET ENVIRONMENT
   Return() 	  
+
+User Function consBord()
+
+
+
+
+Return 

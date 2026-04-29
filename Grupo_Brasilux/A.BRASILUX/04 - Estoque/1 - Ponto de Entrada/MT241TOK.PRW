@@ -15,7 +15,8 @@ User Function MT241TOK()
      Local cAlias := Alias()
      Local aArea := U_PegaArea({"SB2"})
      Local cAuxDoc, cFlag, cTexto, i, cAssunto, saldoAtual, saldoEmpenhado, saldoDisponivel
-     u_zcfga01( 'MT241TOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
+     //---------------- LGS#20231023 ----- RETIRADA DA GRAVAÇÃO DO LOG DE ROTINA PARA MELHORA DE PERFORMANCE.
+     //u_zcfga01( 'MT241TOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         cAuxDoc := M->CDOCUMENTO
         cFlag := 0

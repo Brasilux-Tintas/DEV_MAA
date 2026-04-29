@@ -1,24 +1,21 @@
 #include "TOTVS.CH"
-/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ MT440GR  บAutor  ณ Cleber O. Dominguesบ Data ณ  10/02/04   บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDesc.     ณ Permitir libera็ใo apenas para usuแrios autorizados para o บฑฑ
-ฑฑบ          ณ caso de pedidos que nใo respeitam a polํtica de vendas.    บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ BRASILUX TINTAS TษCNICAS LTDA                              บฑฑ
-ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿*/
-//25/09/2019 - Luํs Gustavo - Adequa็ใo para release 12.1.25
+
+/*/{Protheus.doc} MT440GR
+10/02/2004 - Permitir libera็ใo apenas para usuแrios autorizados para o caso de pedidos que nใo respeitam a polํtica de vendas.
+25/09/2019 - Luํs Gustavo - Adequa็ใo para release 12.1.25
+@type function
+@version v.2022.04.13
+@author Cleber Orati Domingues
+@since 13/04/2022
+@return Logical, Retorna verdadeiro se o pedido respeita a politica comercial.
+/*/
 User Function MT440GR()
      Local lRet := .t.
      u_zcfga01( 'MT440GR' ) //LGS#2021201 - Grava็ใo de log de utiliza็ใo da rotina
      If FWCodEmp() <> '11' //Empresas que nใo sใo do grupo 11(Tecpolpa).
         If SC5->C5_NAOCONF == "S"
-           MsgBox("Atencao! Pedido NAO RESPEITA as Politicas Comerciais Para Revenda! Liberacao Nao Permitida!", "ATENวรO", "STOP")
+           MessageBox( "Atencao! Pedido NAO RESPEITA as Politicas Comerciais Para Revenda! Liberacao Nao Permitida!", "ATENวรO", 16 )
            lRet := .f.
         Endif
      Endif 
-Return(lRet)
+Return lRet

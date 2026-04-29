@@ -10,10 +10,11 @@ Movim. Estoque Guarulhos
 */
 User Function BRESTX06()
      Local aSays:={}, aButtons := {}
-     Local cMens1,nOpca
+     Local cMens1, nOpca
+     //If (!u_VldAcesso(funname()) .and. !FWIsAdmin() )
      If !u_VldAcesso(funname())
         /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
-        //MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
+        //MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert") 
         MessageBox( "Acesso não autorizado!---->" + FunName(), "Atenção", 48 )
         Return 
      Endif 
@@ -25,10 +26,11 @@ User Function BRESTX06()
         //FwLogMSG( "INFO", , 'SIGAEST', FunName(), '', '01', cMens1, 0 )
         MessageBox( cMens1, "Atenção!", 48 )
         return
-     Endif 
-     u_zcfga01( 'BRESTX06' ) //LGS#2021118 - Gravação de log de utilização da rotina
+     Endif
+     //------------ LGS#20231023 ----- RETIRADA DA GRAVAÇÃO DO LOG DE ROTINA PARA MELHORA DE PERFORMANCE.
+     //u_zcfga01( 'BRESTX06' ) //LGS#2021118 - Gravação de log de utilização da rotina
      nOpca	  := 0
-     AADD(aSays,"Este programa ira atualizar o estoque do Deposito Fechado     ")
+     AADD(aSays,"Este programa ira atualizar o estoque do Deposito Fechado")
      AADD(aSays,"com as movimentacoes de entrada e saida do periodo.")
      cCadastro:=OemToAnsi("Estoq Dep. Fechado")
 
@@ -41,121 +43,97 @@ User Function BRESTX06()
      endif 
 Return 
 
-User Function ESTX06(_xOpcao)
-local _cFilial,i,nOpcao
-DEFAULT _xOpcao := 2         
+// ESTX06 = 1 - (Etapa de selecão de Filial )
+// ESTX06 = 2 - (Etapa de processamento e execução / usado para agendamento de schedule )
+User Function ESTX06(_xOpcao )
+     Local _cFilial, i, nOpcao
+     DEFAULT _xOpcao := 2         
 
-_cFilial := alltrim(FWCodFil())
-If ValType(_xOpcao) <> "N"
-   _xOpcao := 2
-Endif 
-nOpcao := _xOpcao
-if nOpcao == 1
-   PESTX06(nOpcao,_cFilial)
-else 
-   for i := 1 to iif(nOpcao == 1,1,2)
-      if i == 1
-         _cFilial := "010101"
-      else
-         _cFilial := "010104"
-      endif 
-      PESTX06(nOpcao,_cFilial)
-   next 
-endif 
-
-return(.t.)
+     If ValType( _xOpcao ) <> "N"
+        _xOpcao := 2
+     Endif
+     nOpcao := _xOpcao
+     If nOpcao == 1
+        _cFilial := Alltrim( FWCodFil() )
+        PESTX06(nOpcao,_cFilial)
+     Else 
+        For i := 1 to Iif( nOpcao == 1, 1, 2 )
+            If i == 1
+               _cFilial := "010101"
+            Else
+               _cFilial := "010104"
+            Endif
+            PESTX06( nOpcao, _cFilial )
+        Next 
+     Endif 
+Return(.t.)
 
 Static Function PESTX06(_xOpcao,_cFilial)
-     Local ExpA1    := {}
-     Local ExpN2    := 3
-     Local cProd    := ""
-     Local cUnidade := ""
-     Local cArmazem := ""
-     Local cQuery,cTPMovimento,nCont,cAuxMail,lSucesso,cAux
-     Local cArqBloq, aBloq
-     Local cEstNeg,cLocMatriz,_cDoc,cNumSeri,_cLocOri,_cLocDest,cCmpCgc,lTransf,cMens,_cDescri
-     //Local aCampos  := {}
-     Local _aAuto   := {}
-     Local _aItem   := {}
-     Local _cAuxMens
+       Local ExpA1    := {}
+       Local ExpN2    := 3
+       Local cProd    := ""
+       Local cUnidade := ""
+       Local cArmazem := ""
+       Local cQuery, cTPMovimento, nCont, lSucesso, cAux /* cAuxMail*/
+       Local cArqBloq, aBloq
+       Local cEstNeg, cLocMatriz, _cDoc, cNumSeri, _cLocOri, _cLocDest, cCmpCgc, lTransf, cMens, _cDescri
+       //Local aCampos  := {}
+       Local cPara    := ( Alltrim( GetMV('ZP_PAR0130') ) )
+       Local _aAuto   := {}
+       Local _aItem   := {}
+       Local _cAuxMens
+       PRIVATE lMsErroAuto := .F.          
+       If _xOpcao == 2
+          //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+          //| Abertura do ambiente                                         |
+          //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+           If _cFilial == Nil
+              _cFilial := ""
+           Endif 
+           If Empty( _cFilial )
+              _cFilial := "010101"
+           Endif 
 
-     PRIVATE lMsErroAuto := .F.          
- /*
-     If ValType(_xOpcao) <> "N"
-        _xOpcao := 2
-     Endif 
-*/     
-     If _xOpcao == 2
-        //RPCSetType(3)  // Nao utilizar licenca
-        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-        //| Abertura do ambiente                                         |
-        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-         if _cFilial == Nil
-            _cFilial := ""
-         endif 
-         if empty(_cFilial)
-            _cFilial := "010101"
-         endif 
+           RESET ENVIRONMENT
+           RpcSetType(3) //seta tipo de consumo de licença
+           PREPARE ENVIRONMENT EMPRESA "01" FILIAL _cFilial MODULO "EST" TABLES "SD3","SB1","SB2"
 
+           /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
+           //ConOut(Repl("-",80))
+           //ConOut(PadC("****************************",80))
+           //ConOut(PadC("Movimentação Prods Depositos",80))
+           //ConOut(PadC("****************************",80))
+           //ConOut("Inicio: "+Time())
+           _cAuxMens := Repl( "-", 80 )                + CHR( 13 ) + CHR( 10 )
+           _cAuxMens += "****************************" + CHR( 13 ) + CHR( 10 )
+           _cAuxMens += "Movimentação Prods Depositos" + CHR( 13 ) + CHR( 10 )
+           _cAuxMens += "****************************" + CHR( 13 ) + CHR( 10 )
+           _cAuxMens += "Inicio: " + Time() + CHR( 13 ) + CHR( 10 )
+           FwLogMSG( "INFO", , 'SIGAEST', FunName(), '', '01', _cAuxMens, 0 )
 
-		   RESET ENVIRONMENT
-		   RpcSetType(3) //seta tipo de consumo de licença
-         PREPARE ENVIRONMENT EMPRESA "01" FILIAL _cFilial MODULO "EST" TABLES "SD3","SB1","SB2"
-
-
-        /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
-        //ConOut(Repl("-",80))
-        //ConOut(PadC("****************************",80))
-        //ConOut(PadC("Movimentação Prods Depositos",80))
-        //ConOut(PadC("****************************",80))
-        //ConOut("Inicio: "+Time())
-        _cAuxMens := Repl( "-", 80 )                + CHR( 13 ) + CHR( 10 )
-        _cAuxMens += "****************************" + CHR( 13 ) + CHR( 10 )
-        _cAuxMens += "Movimentação Prods Depositos" + CHR( 13 ) + CHR( 10 )
-        _cAuxMens += "****************************" + CHR( 13 ) + CHR( 10 )
-        _cAuxMens += "Inicio: " + Time() + CHR( 13 ) + CHR( 10 )
-        FwLogMSG( "INFO", , 'SIGAEST', FunName(), '', '01', _cAuxMens, 0 )
-  
-         if (_xOpcao == 2) .and. (alltrim(FWCodFil()) == "010104")
-            U_EnvMail("Funcionando trf dep Resina!","Processamento ZZY para a Resina via Schedule esta funcionando!","cleber@brasilux.com.br",'','') //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
-         endif 
-
-     Endif 
-
-  	   cArqBloq := "BRESTX06"+Substr(ALLTRIM(cNumEmp),3,6) //Cleber (13/02/20)  -> Reajuste da função  BloqProg
-   	aBloq := U_BloqProg(cArqBloq) //Retorna matriz com primeira coluna verdadeiro ou falso se tá bloqueado e segunda coluna com nome de quem está bloqueando ou nome da área de trabalho gerada
-   	
-   	if aBloq[1,1] //Já estava bloqueado?
-   		cAux := "O programa já está sendo usado por: "+aBloq[1,2]
-   		If _xOpcao == 1
-			   Messagebox(cAux,"Atenção!",48) 		
-		   else
-			   FwLogMSG( "WARN", , 'SIGAEST', funname(), '', '01', cAux, 0 )
-		   endif 
-		   Return
-	   endif
-/*     
-     If !Empty( Alltrim( GetMV( 'ZP_PAR0010' ) ) )
-     
-        cAux := "O programa já está sendo usado por: " + Alltrim( GetMV( 'ZP_PAR0010' ) )
-        If _xOpcao == 1
-           // Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 
-           //MsgBox(cAux, "Atenção!", "STOP")
-           MessageBox( cAux, "Atenção!", 16 )
-        Else
-           FwLogMSG( "WARN", , 'SIGAEST', funname(), '', '01', cAux, 0 )
+           If ( _xOpcao == 2 ) .and. ( Alltrim( FWCodFil() ) == "010104" )
+              U_EnvMail("Funcionando TRF dep Resina!","Processamento ZZY para a Resina via Schedule esta funcionando!",cPara,'','') //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
+           Endif 
         Endif
-        return
-     Else
-        PutMV( "ZP_PAR0010", Iif( _xOpcao == 1, RTRIM( cUserName ), "AGENDAMENTO" ) )
-     Endif
-*/     
 
+        cArqBloq := "BRESTX06" + Substr( Alltrim( cNumEmp ), 3, 6 ) //Cleber (13/02/20)  -> Reajuste da função  BloqProg 
+        aBloq    := U_BloqProg( cArqBloq ) //Retorna matriz com primeira coluna verdadeiro ou falso se tá bloqueado e segunda coluna com nome de quem está bloqueando ou nome da área de trabalho gerada
+
+        If aBloq[1,1] //Já estava bloqueado?
+           cAux := "O programa já está sendo usado por: " + aBloq[1,2]
+           If _xOpcao == 1
+              Messagebox(cAux,"Atenção!",48) 		
+           Else
+              FwLogMSG( "WARN", , 'SIGAEST', funname(), '', '01', cAux, 0 )
+           Endif 
+           Return
+        Endif
+       
      /********************************************************************************************************************************/
-
-     cQuery := "SELECT ZZY_TIPO AS TIPO,ZZY.R_E_C_N_O_ AS REG, "+;
-               "DIA = CASE WHEN ZZY_TAB = 'SD1' THEN D1_DTDIGIT ELSE D2_EMISSAO END, "+;
-               "LOC = CASE WHEN ZZY_TAB = 'SD1' THEN D1_LOCAL ELSE D2_LOCAL END, "+;
+     cQuery := "SELECT FILIAL = ZZY_FILIAL +'  p/  '+ (CASE WHEN ZZY_TAB = 'SD1' THEN D1_FILIAL ELSE D2_FILIAL END ), "+;
+               "DIA = CASE WHEN ZZY_TAB = 'SD1' THEN convert(varchar, cast(D1_DTDIGIT as smalldatetime),103) ELSE convert(varchar, cast(D2_EMISSAO as smalldatetime),103) END, "+;
+               "LOC = CASE WHEN ZZY_TAB = 'SD1' THEN D1_LOCAL+' '+(CASE WHEN D1_LOCAL LIKE 'A%' OR D1_LOCAL LIKE 'G%' THEN '' ELSE '**' END) 		ELSE D2_LOCAL+' '+(CASE WHEN D2_LOCAL LIKE 'A%' OR D2_LOCAL LIKE 'G%' THEN '' ELSE '**' END) END,  "+;
+               "ZZY_TIPO AS TIPO, ZZY.R_E_C_N_O_ AS REG, "+;
                "DOC = CASE WHEN ZZY_TAB = 'SD1' THEN D1_DOC ELSE D2_DOC END, "+;
                "SERIE = CASE WHEN ZZY_TAB = 'SD1' THEN D1_SERIE ELSE D2_SERIE END, "+;
                "CUSTO = CASE WHEN ZZY_TAB = 'SD1' THEN D1_CUSTO ELSE CASE WHEN D2_CUSTO1 > 0 THEN D2_CUSTO1 ELSE D2_TOTAL END END, "+;
@@ -169,8 +147,8 @@ Static Function PESTX06(_xOpcao,_cFilial)
                "LEFT OUTER JOIN "+RetSqlName("SD1")+" SD1 WITH (NOLOCK) ON (ZZY_TAB = 'SD1') AND (SD1.R_E_C_N_O_ = ZZY_DOC) "+;
                "LEFT OUTER JOIN "+RetSqlName("SD2")+" SD2 WITH (NOLOCK) ON (ZZY_TAB = 'SD2') AND (SD2.R_E_C_N_O_ = ZZY_DOC) "+;
                "WHERE (ZZY.D_E_L_E_T_ <> '*') "+;
-               "ORDER BY REG"
-               TCQuery cQuery NEW ALIAS "TCQ" 
+               "ORDER BY LOC, FILIAL, DIA, CODPRO"
+               TCQuery cQuery NEW ALIAS "TCQ"
 
      nCont    := 0
      lSucesso := .t.
@@ -178,9 +156,9 @@ Static Function PESTX06(_xOpcao,_cFilial)
      _cDoc	:=  nextnumero("SD3",2,"D3_DOC",.t.) //GetSxENum("SD3","D3_DOC",1) //
 
      cEstNeg := GETMV("MV_ESTNEG")
-     dbselectarea("TCQ")
-     dbgotop()
-     DO WHILE lSucesso .and. !eof()   
+     DbSelectArea("TCQ")
+     DbGoTop()
+     DO WHILE lSucesso .and. !eof()
         /*
         IF (TCQ->DIA <> DTOS(dDataBase))
            dbselectarea("TCQ")
@@ -189,16 +167,15 @@ Static Function PESTX06(_xOpcao,_cFilial)
         ENDIF
         */
 
-        lMSErroAuto = .F.
-	    lTransf := .t. //Define se efetiva a transferência, caso falso apenas exclui o lcto de ZZY
-
-	    cCmpCgc	:= TCQ->TABCLIFOR+"->A"+substr(TCQ->TABCLIFOR,3,1)+"_CGC"
+        lMSErroAuto := .F.
+        lTransf     := .t. //Define se efetiva a transferência, caso falso apenas exclui o lcto de ZZY
+        cCmpCgc     := TCQ->TABCLIFOR+"->A"+substr(TCQ->TABCLIFOR,3,1)+"_CGC"
 
         dbselectarea(TCQ->TABCLIFOR)
         dbsetorder(1)
         dbseek(xFilial(TCQ->TABCLIFOR)+TCQ->CLIFOR)
         If !found()     
-           cMens := iif(TCQ->TABCLIFOR = "SA1","Cliente ","Fornecedor ")+TCQ->CLIFOR+" NÃO ENCONTRATO!"
+           cMens := iif(TCQ->TABCLIFOR = "SA1","Cliente ","Fornecedor ")+TCQ->CLIFOR+" NÃO ENCONTRADO!"
            IF _xOpcao == 2
               /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
               //Conout(cMens)
@@ -227,7 +204,6 @@ Static Function PESTX06(_xOpcao,_cFilial)
            loop
         Endif
 
-
         If lTransf
            dbSelectArea("SB1")
            dbSetOrder(1)
@@ -235,9 +211,9 @@ Static Function PESTX06(_xOpcao,_cFilial)
            If !found()     
               cMens := "Produto "+TCQ->CODPRO+" NÃO ENCONTRADO!"
               If _xOpcao == 2
-				/*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
-				//Conout(cMens)
-				FwLogMSG( "ERROR", , 'SIGAEST', funname(), '', '01', cMens, 0 )
+                 /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
+                 //Conout(cMens)
+                 FwLogMSG( "ERROR", , 'SIGAEST', funname(), '', '01', cMens, 0 )
               Else
                  /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
                  //MsgBox(cMens, "Atenção!", "STOP")
@@ -252,11 +228,9 @@ Static Function PESTX06(_xOpcao,_cFilial)
         If lTransf
            cProd    := SB1->B1_COD
            cUnidade := SB1->B1_UM
-           _cDescri	:= SB1->B1_DESC
+           _cDescri := SB1->B1_DESC
            cArmazem := TCQ->LOC
-
-           cLocMatriz := iif(substr(cArmazem,1,1) $ "G_M","0"+SUBSTR(cArmazem,2,1),cArmazem)
-
+           cLocMatriz := iif(substr(cArmazem,1,1) $ "G_M_A","0"+SUBSTR(cArmazem,2,1),cArmazem)
            _cLocOri := IIF(TCQ->TIPO = "S",cArmazem,cLocMatriz)
            _cLocDest := IIF(TCQ->TIPO = "S",cLocMatriz,cArmazem)
 
@@ -286,12 +260,10 @@ Static Function PESTX06(_xOpcao,_cFilial)
         begin transaction 
               If lTransf
                  If TCQ->TABELA = "SD1"  
-
                     //Cabecalho a Incluir	
                     _aAuto := {}  
                     _aItem := {}
                     aadd(_aAuto,{_cDoc,dDataBase})  	//Cabecalho
-
                     //Begin Transaction   	
                     cNumSeri := TCQ->TABELA+"->"+TCQ->DOC
                     //Itens a Incluir		
@@ -330,7 +302,6 @@ Static Function PESTX06(_xOpcao,_cFilial)
                  Else
                     //Begin Transaction   	
                     cTPMovimento := iif(TCQ->TIPO = "S","520","120")
-
                     ExpA1 := {} 		
                     aadd(ExpA1,{"D3_FILIAL",xFilial("SD3"),})	
                     aadd(ExpA1,{"D3_DOC",TCQ->TIPO+"-"+TCQ->NUMSEQ,})	
@@ -342,7 +313,6 @@ Static Function PESTX06(_xOpcao,_cFilial)
                     aadd(ExpA1,{"D3_EMISSAO",dDataBase,})		        
                     aadd(ExpA1,{"D3_TIPO",SB1->B1_TIPO,})		        
                     //aadd(ExpA1,{"D3_CUSTO1",TCQ->CUSTO,})		      RETIRADO EM 14/01/21 - CONFORME REUNIÃO (TI BRASILUX - TOTVS - CONTABILIDADE) MOVIMENTAÇÕES NÃO SERÃO VALORIZADAS (120 / 520)
-
                     PutMv( "MV_ESTNEG", "S" )
                     lMsErroAuto := .f.
                     dbselectarea("SD3")
@@ -368,10 +338,14 @@ Static Function PESTX06(_xOpcao,_cFilial)
                  //lSucesso := .f.
                  /*** Substituido em 30/01/2020 por LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25 ***/
                  //ConOut("Erro na inclusao!")
-                 FwLogMSG( "ERROR", , 'SIGAEST', funname(), '', '01', "Erro na inclusao!", 0 )	    
-                 cAux := MostraErro()    
-                 cAuxMail := alltrim(UsrRetMail("000000"))
-                 U_EnvMail("Erro BRESTX06","Erro ao tentar lançar no estoque registro "+ALLTRIM(STR(TCQ->REG))+" da tabela ZZY"+chr(13)+chr(10)+cAux,cAuxMail,'','') //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
+                 FwLogMSG( "ERROR", , 'SIGAEST', funname(), '', '01', "Erro na inclusao!", 0 )
+                 cAux := ""
+                 If _xOpcao == 1
+                    cAux     := MostraErro()    
+                 Endif
+                 //cAuxMail := Alltrim( UsrRetMail("000000") )                 
+                 //U_EnvMail( "Erro BRESTX06", "Erro ao tentar lançar no estoque registro " + Alltrim( Str( TCQ->REG ) ) + " da tabela ZZY" + chr(13) + chr(10) + cAux, cAuxMail, '', '' ) //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
+                 U_EnvMail( "Erro BRESTX06", "Erro ao tentar lançar no estoque registro " + Alltrim( Str( TCQ->REG ) ) + " da tabela ZZY" + chr(13) + chr(10) + cAux, cPara, '', '' ) //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
               EndIf	
         End transaction 
 

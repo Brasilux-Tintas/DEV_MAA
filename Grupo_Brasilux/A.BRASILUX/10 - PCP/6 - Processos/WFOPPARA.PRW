@@ -20,16 +20,17 @@
 	+---------------------------------------------------------------------------+  
 */         
 User Function WFOPPARA()
-   
-    Local cPara    	:= "gustavo@brasilux.com.br,michelly@brasilux.com.br,paulo@brasilux.com.br,marciononis@brasilux.com.br,marcosmagalhaes@brasilux.com.br,antoniocarlos@brasilux.com.br,tiagobianchi@brasilux.com.br,jonatas@brasilux.com.br,ricardo@brasilux.com.br"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0069")) //"gustavo@brasilux.com.br,michelly@brasilux.com.br,paulo@brasilux.com.br,marciononis@brasilux.com.br,marcosmagalhaes@brasilux.com.br,antoniocarlos@brasilux.com.br,tiagobianchi@brasilux.com.br,jonatas@brasilux.com.br,ricardo@brasilux.com.br"
     Local cAssunto  := "OPS com PI Finalizado e Envase nao iniciado (Intervalo minimo de 4 horas)"
     Local cMsg		:= ""
     Local cQuery    := ""
     //Local TM1
 
-    
+
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-     u_zcfga01( 'WFOPPARA' ) //LGS#2021201 - Gravação de log de utilização da rotina
+	cPara  := TRIM(GETMV("ZP_PAR0069"))
+    u_zcfga01( 'WFOPPARA' ) //LGS#2021201 - Gravação de log de utilização da rotina
     cQuery := ""
     cQuery += " SELECT SC2.C2_LOTE AS 'LOTE', SC2.C2_PRODUTO AS 'PRODUTO', SB1.B1_DESC AS 'DESCRICAO', "
     cQuery += " SUBSTRING(ZZAPI.ZZA_DTFIM,7,2)+'/'+SUBSTRING(ZZAPI.ZZA_DTFIM,5,2)+'/'+SUBSTRING(ZZAPI.ZZA_DTFIM,1,4) AS 'DTENCERRA'," 

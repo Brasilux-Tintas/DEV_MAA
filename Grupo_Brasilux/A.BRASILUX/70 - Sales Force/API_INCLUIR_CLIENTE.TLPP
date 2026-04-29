@@ -1,0 +1,428 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+#include 'tlpp-rest.th'
+#include 'tlpp-object.th'
+#include "topconn.ch"
+
+/*±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Função    ³ API_INCLUIR_CLIENTE³ Autor ³ Nelieder M Corneta   ³ Data ³ 01/10/24  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄ´±±
+±±³Descrição ³ API de integração de Clientes com Sales Force                        ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄßßßßßßßßßßßß*/
+
+
+class salesforce_clientes from fwAdapterBaseV2
+
+	public method new() constructor
+
+	@post('/salesforce/incluirclientes')
+	public method incluir_clientes() as logical
+
+    @post('/salesforce/alterarcliente')
+	public method alterar_clientes() as logical
+ 
+end class
+
+method new() class salesforce_clientes; return self
+
+
+method incluir_clientes() class salesforce_clientes
+Local oError            as object
+Local nconta            as numeric
+
+Private jBodyReq        as json
+Private cCampo          as character
+Private cError          as character
+Private cCodCliente     as character 
+    
+Try
+    
+    jBodyReq := jsonObject():new()
+    jBodyReq:fromJson(oRest:getBodyRequest())
+
+    aNomes := {}
+    aNomes := U_API_SX3()
+		
+    // Variavel recebe objeto Json
+    jCliente := JsonObject():New()
+
+    jCliente['Clientes']   := array(0)
+    
+    For nconta := 1 to  len(jBodyReq["clientes"])
+        jResp                     := jsonObject():new()
+
+        // Valida Campos Obrigatório
+        cCampo := ValidaCampos(nconta)
+
+        If Empty(cCampo)
+
+            If U_MyCRMA980(nconta)
+                jResp['status']          := .F.
+                jResp['erro']            := cError
+            else
+                jResp['status']          := .T.
+                jResp['codigo_cliente']  := cCodCliente
+            EndIf    
+           
+        Else
+
+            jResp['status']              := .F.
+            jResp['erro']                := cCampo
+
+        EndIF
+
+         aadd(jCliente['Clientes'] ,jResp)
+    
+    Next
+
+
+    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+    oRest:setResponse(jCliente:toJson())
+    return .T.
+    
+    
+    
+    
+    /*If !Empty(cCampo)
+        jResp               := jsonObject():new()
+        jResp['Requerido']  := 'Necessário informar a variavel '+cCampo+' !'
+        oRest:setStatusCode(402)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+    EndIF*/
+
+CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']       := 'Erro na execução, '+oError:description
+
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro API_INCLUIR_CLIENTE",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:setStatusCode(501)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+ENDTRY 
+      
+
+return .T.
+
+
+User Function MyCRMA980(nconta)
+ 
+Local aSA1Auto      := {}
+Local aAI0Auto      := {}
+Local nOpcAuto      := 3  //MODEL_OPERATION_INSERT (3-Inclusão, 4-Alteração, 5-Exclusão)
+Local lMsErroAuto   := .F.    
+
+    lRet := RpcSetEnv("01","010101","")  //Empresa "99", Filial "01" 
+
+    If lRet
+       
+        IF nOpcAuto = 3  //Inclusão
+
+            // verifica se cliente já está cadastrado
+            IF SELECT("TCQ") > 0
+                TCQ->(dbCloseArea())
+            EndIf
+
+            cQry1 := " SELECT A1_CGC FROM "+RetSqlName("SA1")+" WHERE D_E_L_E_T_ = '' AND A1_CGC = '"+jBodyReq["clientes"][nconta]["CpfCnpj"]+"' "
+            TCQUERY cQry1 ALIAS "TCQ" NEW
+            Count To nTotal
+
+            If nTotal > 0
+                cError := AllTrim(TCQ->A1_CGC) + " CNPJ/CPF já Cadastrado ! "
+                Return .T.
+            EndIf
+
+
+            TCQ->(dbCloseArea())
+        
+            cQry1 := " SELECT MAX(A1_COD)LAST FROM "+RetSqlName("SA1")+" WHERE D_E_L_E_T_ = ''  "
+            TCQUERY cQry1 ALIAS "TCQ" NEW
+            nCodCliente := Val(TCQ->LAST) + 1
+            cCodCliente := StrZero(nCodCliente,6) 
+            TCQ->(dbCloseArea())
+     
+            aAdd(aSA1Auto,{"A1_COD"    , cCodCliente                                                                                    ,Nil}) // 40
+            
+            aAdd(aSA1Auto,{"A1_NOME"    ,Substr(jBodyReq["clientes"][nconta]["NomeDoCliente"]             ,1,TamSX3("A1_NOME")[1])    ,Nil}) // 40
+
+            aAdd(aSA1Auto,{"A1_NREDUZ"  ,Substr(jBodyReq["clientes"][nconta]["NomeReduzidoDoCliente"]    ,1,TamSX3("A1_NREDUZ")[1])  ,Nil}) // 20
+
+            aAdd(aSA1Auto,{"A1_PESSOA"  ,Substr(jBodyReq["clientes"][nconta]["PessoaFisicaJuridica"]      ,1,TamSX3("A1_PESSOA")[1])  ,Nil}) // 1
+
+            aAdd(aSA1Auto,{"A1_CGC"     ,Substr(jBodyReq["clientes"][nconta]["CpfCnpj"]                    ,1,TamSX3("A1_CGC")[1])     ,Nil}) // 14    
+
+            aAdd(aSA1Auto,{"A1_TIPO"    ,Substr(jBodyReq["clientes"][nconta]["TipoDoCliente"]             ,1,TamSX3("A1_TIPO")[1])    ,Nil}) // 1
+
+            aAdd(aSA1Auto,{"A1_CLAS"    ,Substr(jBodyReq["clientes"][nconta]["TipoDeConsumidor"]          ,1,TamSX3("A1_CLAS")[1])    ,Nil}) // 1
+
+            aAdd(aSA1Auto,{"A1_END"     ,Substr(jBodyReq["clientes"][nconta]["EnderecoDoCliente"]         ,1,TamSX3("A1_END")[1])     ,Nil}) // 40
+
+            aAdd(aSA1Auto,{"A1_EST"     ,Substr(jBodyReq["clientes"][nconta]["EstadoDoCliente"]           ,1,TamSX3("A1_EST")[1])     ,Nil}) // 2
+
+            aAdd(aSA1Auto,{"A1_MUN"     ,Substr(jBodyReq["clientes"][nconta]["MunicipioDoCliente"]        ,1,TamSX3("A1_MUN")[1])     ,Nil}) // 60
+
+            aAdd(aSA1Auto,{"A1_BAIRRO"  ,Substr(jBodyReq["clientes"][nconta]["bairroDoCliente"]           ,1,TamSX3("A1_BAIRRO")[1])  ,Nil}) // 30 
+
+            aAdd(aSA1Auto,{"A1_CEP"     ,Substr(jBodyReq["clientes"][nconta]["Cep"]                         ,1,TamSX3("A1_CEP")[1])     ,Nil}) // 8  
+
+            aAdd(aSA1Auto,{"A1_DDD"     ,Substr(jBodyReq["clientes"][nconta]["CodigoDdd"]                  ,1,TamSX3("A1_DDD")[1])     ,Nil}) // 3  
+
+            aAdd(aSA1Auto,{"A1_TEL"     ,Substr(jBodyReq["clientes"][nconta]["TelefoneDoCliente"]         ,1,TamSX3("A1_TEL")[1])     ,Nil}) // 15  
+            
+            
+
+            aAdd(aSA1Auto,{"A1_CODCID"  ,"085294"                                                                                       ,Nil}) // 6             // analisar
+            aAdd(aSA1Auto,{"A1_COD_MUN" ,"50308"                                                                                        ,Nil}) // 5             // analisar 
+            aAdd(aSA1Auto,{"A1_PAIS"    ,"105"                                                                                          ,Nil}) // 3             // analisar    
+            
+            aAdd(aSA1Auto,{"A1_INSCR"   ,Substr(jBodyReq["clientes"][nconta]["InscricaoEstadual"]          ,1,TamSX3("A1_INSCR")[1])   ,Nil}) // 18
+            aAdd(aSA1Auto,{"A1_EMAIL"   ,Substr(jBodyReq["clientes"][nconta]["Email"]                       ,1,TamSX3("A1_EMAIL")[1])   ,Nil}) // 90
+            
+            aAdd(aSA1Auto,{"A1_MSBLQL"  ,"2"                                                                                            ,Nil}) // 1
+
+            aAdd(aSA1Auto,{"A1_CNAE"    ,Substr(jBodyReq["clientes"][nconta]["Cnae"]                        ,1,TamSX3("A1_CNAE")[1])    ,Nil}) // 9
+
+            aAdd(aSA1Auto,{"A1_ATIVIDA" ,Substr(jBodyReq["clientes"][nconta]["CodigoAtividade"]            ,1,TamSX3("A1_ATIVIDA")[1]) ,Nil}) // 7
+
+            aAdd(aSA1Auto,{"A1_VEND"    ,Substr(jBodyReq["clientes"][nconta]["Vendedor"]                    ,1,TamSX3("A1_VEND")[1])    ,Nil}) // 6
+
+            aAdd(aSA1Auto,{"A1_NATUREZ" ,Substr(jBodyReq["clientes"][nconta]["Natureza"]                    ,1,TamSX3("A1_NATUREZ")[1]) ,Nil}) // 10
+
+            aAdd(aSA1Auto,{"A1_CODPAIS" ,Substr(jBodyReq["clientes"][nconta]["CodigoPais"]                 ,1,TamSX3("A1_CODPAIS")[1]) ,Nil}) // 5
+
+            aAdd(aSA1Auto,{"A1_CONTRIB" ,Substr(jBodyReq["clientes"][nconta]["Contribuinte"]                ,1,TamSX3("A1_CONTRIB")[1]) ,Nil}) // 1
+
+            aAdd(aSA1Auto,{"A1_SATIV2"  ,Substr(jBodyReq["clientes"][nconta]["Segmento"]                    ,1,TamSX3("A1_SATIV2")[1])  ,Nil}) // 6
+           
+            do case
+
+                case !Empty(jBodyReq["clientes"][nconta]["EnderecoEntrega"])           .OR. ValType(jBodyReq["clientes"][nconta]["EnderecoEntrega"]) == "C"
+                     aAdd(aSA1Auto,{"A1_ENDENT"  ,Substr(jBodyReq["clientes"][nconta]["Segmento"]                    ,1,TamSX3("A1_ENDENT")[1])  ,Nil}) //
+                
+    
+                
+                
+                /*A1_ENDENT EnderecoEntrega
+                A1_BAIRROE	BairroEntrega
+                A1_ESTE	EstadoEntrega
+                A1_COMPENT	CompldoEnddeEntrega
+                A1_CEPE	CepdeEntrega	
+                A1_MUNE	MunicipiodeEntrega*/
+
+            endcase
+            
+            
+            
+            
+            MSExecAuto({|a,b,c| CRMA980(a,b,c)},aSA1Auto,nOpcAuto,aAI0Auto)        
+
+            If lMsErroAuto
+                cError := MostraErro("/ws_logs/salesforce", "error.log") // ARMAZENA A MENSAGEM DE ERRO
+                U_EnvMail("[SALES FORCE]["+GetEnvServer()+"][INCLUIR-CLIENTE]",cError,"neliedercorneta@brasilux.com.br","","")
+
+            EndIf
+            
+        EndIF
+    
+    EndIF        
+ 
+    RpcClearEnv()
+              
+Return lMsErroAuto
+
+
+Static Function ValidaCampos(nconta)
+Local cCampo as character
+
+cCampo := ""
+
+    do case
+
+        case Empty(jBodyReq["clientes"][nconta]["NomeDoCliente"])           .OR. ValType(jBodyReq["clientes"][nconta]["NomeDoCliente"]) == "U"
+        cCampo := "NomeDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["NomeReduzidoDoCliente"])   .OR. ValType(jBodyReq["clientes"][nconta]["NomeReduzidoDoCliente"]) == "U"
+        cCampo := "NomeReduzidoDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["PessoaFisicaJuridica"])    .OR. ValType(jBodyReq["clientes"][nconta]["PessoaFisicaJuridica"]) == "U"
+        cCampo := "PessoaFisicaJuridica"
+
+        case Empty(jBodyReq["clientes"][nconta]["CpfCnpj"])                 .OR. ValType(jBodyReq["clientes"][nconta]["CpfCnpj"]) == "U"
+        cCampo := "CpfCnpj"
+
+        case Empty(jBodyReq["clientes"][nconta]["TipoDoCliente"])           .OR. ValType(jBodyReq["clientes"][nconta]["TipoDoCliente"]) == "U"
+        cCampo := "TipoDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["TipoDeConsumidor"])        .OR. ValType(jBodyReq["clientes"][nconta]["TipoDeConsumidor"]) == "U"
+        cCampo := "TipoDeConsumidor"
+
+        case Empty(jBodyReq["clientes"][nconta]["EnderecoDoCliente"])       .OR. ValType(jBodyReq["clientes"][nconta]["EnderecoDoCliente"]) == "U"
+        cCampo := "EnderecoDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["EstadoDoCliente"])         .OR. ValType(jBodyReq["clientes"][nconta]["EstadoDoCliente"]) == "U"
+        cCampo := "EstadoDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["MunicipioDoCliente"])      .OR. ValType(jBodyReq["clientes"][nconta]["MunicipioDoCliente"]) == "U"
+        cCampo := "MunicipioDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["BairroDoCliente"])         .OR. ValType(jBodyReq["clientes"][nconta]["BairroDoCliente"]) == "U"
+        cCampo := "BairroDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["Cep"])                     .OR. ValType(jBodyReq["clientes"][nconta]["Cep"]) == "U"
+        cCampo := "Cep"
+
+        case Empty(jBodyReq["clientes"][nconta]["CodigoDdd"])               .OR. ValType(jBodyReq["clientes"][nconta]["CodigoDdd"]) == "U"
+        cCampo := "CodigoDdd"
+
+        case Empty(jBodyReq["clientes"][nconta]["TelefoneDoCliente"])       .OR. ValType(jBodyReq["clientes"][nconta]["TelefoneDoCliente"]) == "U"
+        cCampo := "TelefoneDoCliente"
+
+        case Empty(jBodyReq["clientes"][nconta]["InscricaoEstadual"])       .OR. ValType(jBodyReq["clientes"][nconta]["InscricaoEstadual"]) == "U"
+        cCampo := "InscricaoEstadual"
+
+        case Empty(jBodyReq["clientes"][nconta]["Email"])                   .OR. ValType(jBodyReq["clientes"][nconta]["Email"]) == "U"
+        cCampo := "Email"
+
+        case Empty(jBodyReq["clientes"][nconta]["Cnae"])                    .OR. ValType(jBodyReq["clientes"][nconta]["Cnae"]) == "U"
+        cCampo := "Cnae"
+
+        case Empty(jBodyReq["clientes"][nconta]["Vendedor"])                .OR. ValType(jBodyReq["clientes"][nconta]["Vendedor"]) == "U"
+        cCampo := "Vendedor"
+
+        case Empty(jBodyReq["clientes"][nconta]["Natureza"])                .OR. ValType(jBodyReq["clientes"][nconta]["Natureza"]) == "U"
+        cCampo := "Natureza"
+
+        case Empty(jBodyReq["clientes"][nconta]["CodigoPais"])              .OR. ValType(jBodyReq["clientes"][nconta]["CodigoPais"]) == "U"
+        cCampo := "CodigoPais"
+
+        case Empty(jBodyReq["clientes"][nconta]["Contribuinte"])            .OR. ValType(jBodyReq["clientes"][nconta]["Contribuinte"]) == "U"
+        cCampo := "Contribuinte"
+
+        case Empty(jBodyReq["clientes"][nconta]["Segmento"])                .OR. ValType(jBodyReq["clientes"][nconta]["Segmento"]) == "U"
+        cCampo := "Segmento"
+
+            
+    endcase     
+
+
+return(cCampo)
+
+
+
+method alterar_clientes() class salesforce_clientes
+Local oError            as object
+Local nconta            as numeric
+Local cCodigo           as character
+Local cObs              as character
+
+Private jBodyReq        as json
+Private cCampo          as character
+Private cError          as character
+Private cCodCliente     as character 
+
+    
+    
+
+    jBodyReq := jsonObject():new()
+    jBodyReq:fromJson(oRest:getBodyRequest())
+		
+    jCliente := JsonObject():New()
+    jCliente['clientes']   := array(0)
+    
+    For nconta := 1 to  len(jBodyReq["clientes"])
+        
+        jResp   := jsonObject():new()
+        cCodigo := jBodyReq["clientes"][nconta]["codigo"]
+
+        cObs := ""    
+        dbSelectArea("SA1")
+        dbSetOrder(1)
+        If SA1->(MsSeek(xFilial("SA1") + PadR(cCodigo,TamSX3("A1_COD")[1]) + "01" ,.T.))
+        
+            jResp['status']     := .T.
+            
+            Try
+                cObs                := Alterar(nconta)
+                jResp['Observacao'] := cObs
+                jResp['Erro']       := "1"
+            CATCH oError
+                jResp['Observacao'] := cObs
+                jResp['Erro']       := 'Erro na execução, '+oError:description
+        
+            ENDTRY 
+
+            
+        
+        Else
+        
+            jResp['status']     := .F.
+            jResp['Observacao'] := "Cliente não Localizado!"
+            jResp['Erro']       := "2"
+        
+        Endif
+
+        aadd(jCliente['clientes'] ,jResp)
+
+    Next
+
+      /*A1_ENDENT EnderecoEntrega
+                A1_BAIRROE	BairroEntrega
+                A1_ESTE	EstadoEntrega
+                A1_COMPENT	CompldoEnddeEntrega
+                A1_CEPE	CepdeEntrega	
+                A1_MUNE	MunicipiodeEntrega*/
+
+    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+    oRest:setResponse(jCliente:toJson())
+
+
+
+
+return .T.
+
+Static Function Alterar(cLinha)
+Local aSA1Auto      := {}
+Local aAI0Auto      := {}
+Local nOpcAuto      := 4  //MODEL_OPERATION_INSERT (3-Inclusão, 4-Alteração, 5-Exclusão)
+Local lMsErroAuto   := .F.  
+
+    
+  
+    aAdd(aSA1Auto,{"A1_COD"         ,SA1->A1_COD             ,Nil}) // Codigo
+    aAdd(aSA1Auto,{"A1_LOJA"        ,SA1->A1_LOJA            ,Nil}) // Loja
+
+    aAdd(aSA1Auto,{"A1_ENDENT"      ,jBodyReq["clientes"][cLinha]["EnderecoCobranca"]       ,Nil}) // EnderecoEntrega
+    aAdd(aSA1Auto,{"A1_BAIRROE"     ,jBodyReq["clientes"][cLinha]["BairroCobranca"]         ,Nil}) // A1_BAIRROE
+    aAdd(aSA1Auto,{"A1_ESTE"        ,jBodyReq["clientes"][cLinha]["UFCobranca"]             ,Nil}) // A1_ESTE
+    aAdd(aSA1Auto,{"A1_COMPENT"     ,jBodyReq["clientes"][cLinha]["ComplementoCobranca"]    ,Nil}) // A1_COMPENT
+    aAdd(aSA1Auto,{"A1_CEPE"        ,jBodyReq["clientes"][cLinha]["CepCobranca"]            ,Nil}) // A1_CEPE
+    aAdd(aSA1Auto,{"A1_MUNE"        ,jBodyReq["clientes"][cLinha]["CidadeCobranca"]         ,Nil}) // A1_MUNE
+
+
+
+    /*A1_ENDENT EnderecoEntrega
+                A1_BAIRROE	BairroEntrega
+                A1_ESTE	EstadoEntrega
+                A1_COMPENT	CompldoEnddeEntrega
+                A1_CEPE	CepdeEntrega	
+                A1_MUNE	MunicipiodeEntrega*/
+    
+    
+    MSExecAuto({|a,b,c| CRMA980(a,b,c)},aSA1Auto,nOpcAuto,aAI0Auto)        
+
+    If lMsErroAuto
+        cError := MostraErro("/ws_logs/salesforce", "error.log") // ARMAZENA A MENSAGEM DE ERRO
+    Else
+        cError := "Cliente Alterado com Sucesso"
+    EndIf
+
+
+return(cError)
+

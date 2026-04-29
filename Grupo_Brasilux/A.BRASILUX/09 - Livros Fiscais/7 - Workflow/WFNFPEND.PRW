@@ -16,23 +16,24 @@
     | Descricao:	Função de WorkFlow para envio de mensagem por email	 	  	|
     |               dos Status das NFS entre filiais 							|
 	+-----------+------------------------------------------+------+-------------+ 
-	| USO  AP        				    									   	|                                      						    
+	| USO  AP        	 			    									   	|                                      						    
 	+---------------------------------------------------------------------------+  
 */         
 User Function WFNFPEND()
-   
-    Local cPara    	:= "contabilidade@brasilux.com.br;andre@brasilux.com.br;jean@brasilux.com.br;edevilson@brasilux.com.br;resina@brasilux.com.br;danilo@brasilux.com.br;faturamento@brasilux.com.br;deposito@brasilux.com.br"
-    Local cAssunto  := "Nfs Simbólicas ou Transferência pendentes"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0068")) //"contabilidade@brasilux.com.br;andre@brasilux.com.br;jean@brasilux.com.br;edevilson@brasilux.com.br;resina@brasilux.com.br;danilo@brasilux.com.br;faturamento@brasilux.com.br;deposito@brasilux.com.br"
+    Local cAssunto  := "NFs Simbolicas e/ou de Transferências Pendentes"
     Local cMsg		:= ""
     Local cQuery    := ""
-    Local TM1
+    //Local TM1 
 
-    
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-     u_zcfga01( 'WFNFPEND' ) //LGS#2021201 - Gravação de log de utilização da rotina
+
+	u_zcfga01( 'WFNFPEND' ) //LGS#2021201 - Gravação de log de utilização da rotina
+	cPara  := TRIM(GETMV("ZP_PAR0068"))
     cQuery := ""
-    cQuery += " SELECT CASE WHEN C5_PEDDEP <>'' THEN 'SIMB.' ELSE 'TRANSF.' END AS 'TIPONF',F2_FILIAL, F2_DOC, F2_SERIE, F2_PEDIDO, C5_USRCAD, "
-    cQuery += " F2_CLIENTE,ISNULL(A1_NREDUZ,A2_NREDUZ) AS 'DESTINO', SUBSTRING(F2_EMISSAO,7,2)+'/'+SUBSTRING(F2_EMISSAO,5,2)+'/'+SUBSTRING(F2_EMISSAO,1,4) AS EMISSAO, DATEDIFF(DAY,F2_EMISSAO, GETDATE()) AS 'DIFEMISSAO', DATEDIFF(DAY,GETDATE(),DATEADD(ms ,-3 ,DATEADD(mm, DATEDIFF(mm, 0, GETDATE()) + 1, 0))) AS 'DIFFIMMES', "
+    cQuery += " SELECT DISTINCT CASE WHEN C5_PEDDEP <>'' THEN 'SIMB.' ELSE 'TRANSF.' END AS 'TIPONF',F2_FILIAL, F2_DOC, F2_SERIE, F2_PEDIDO, C5_USRCAD, "
+    cQuery += " F2_CLIENTE,ISNULL(A1_NREDUZ,A2_NREDUZ) AS 'DESTINO', SUBSTRING(F2_EMISSAO,7,2)+'/'+SUBSTRING(F2_EMISSAO,5,2)+'/'+SUBSTRING(F2_EMISSAO,1,4) AS EMISSAO, DATEDIFF(DAY,F2_EMISSAO, GETDATE()) AS 'DIFEMISSAO', DATEDIFF(DAY,GETDATE(),DATEADD(ms ,-3 ,DATEADD(mm, DATEDIFF(mm, 0, GETDATE()) + 1, 0))) AS 'DIFFIMMES', C5_PEDDEP, "
     cQuery += " CASE WHEN F1_STATUS ='A' THEN 'OK' ELSE "
     cQuery += " CASE WHEN F1_STATUS =''  THEN 'A CLASSIFICAR' ELSE "
     cQuery += " CASE WHEN F2_CHVNFE =''  THEN 'VERIF. NOTA SAIDA' ELSE 'PUXAR XML' END END END AS 'STATUS', F2_CHVNFE, F2_EMISSAO, "
@@ -40,7 +41,7 @@ User Function WFNFPEND()
     cQuery += " FROM "+RetSqlName("SF2")+" SF2 WITH(NOLOCK) "
     cQuery += " LEFT OUTER JOIN "+RetSqlName("SA2")+" SA2 WITH(NOLOCK) ON A2_FILIAL = '"+xFilial("SA2")+"' AND F2_CLIENTE = A2_COD AND SA2.D_E_L_E_T_ ='' "
     cQuery += " LEFT OUTER JOIN "+RetSqlName("SA1")+" SA1 WITH(NOLOCK) ON A1_FILIAL = '"+xFilial("SA1")+"' AND F2_CLIENTE = A1_COD AND SA1.D_E_L_E_T_ ='' "
-    cQuery += " LEFT OUTER JOIN "+RetSqlName("SF1")+" SF1 WITH(NOLOCK) ON F1_FILIAL = (CASE WHEN F2_CLIENTE IN('023818','05200') THEN '010106' ELSE CASE WHEN F2_CLIENTE IN('00354','000521') THEN '010101' ELSE CASE WHEN F2_CLIENTE IN('00401','010181') THEN '010104' ELSE '010107' END END END) AND F2_CHVNFE = F1_CHVNFE AND F2_SERIE = F1_SERIE AND SF1.D_E_L_E_T_ ='' "
+    cQuery += " LEFT OUTER JOIN "+RetSqlName("SF1")+" SF1 WITH(NOLOCK) ON F1_FILIAL = (CASE WHEN F2_CLIENTE IN('27232','052817') THEN '010108' ELSE CASE WHEN F2_CLIENTE IN('023818','05200') THEN '010106' ELSE CASE WHEN F2_CLIENTE IN('00354','000521') THEN '010101' ELSE CASE WHEN F2_CLIENTE IN('00401','010181') THEN '010104' ELSE '010107' END END END END) AND F2_CHVNFE = F1_CHVNFE AND F2_SERIE = F1_SERIE AND SF1.D_E_L_E_T_ ='' "
 	//cQuery += " LEFT OUTER JOIN "+RetSqlName("SF1")+" SF1 WITH(NOLOCK) ON F1_FILIAL = (CASE WHEN F2_CLIENTE IN('023818','05200') THEN '010106' ELSE CASE WHEN F2_CLIENTE IN('00354','000521') THEN '010101' ELSE CASE WHEN F2_CLIENTE IN('00401','010181') THEN '010104' ELSE '010107' END END END) AND F2_DOC = SUBSTRING(F1_DOC,4,6) AND F2_SERIE = F1_SERIE AND F1_FORNECE IN('00354','00401','05200','10950','07212','023818') AND SF1.D_E_L_E_T_ ='' "
     cQuery += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH(NOLOCK) ON C5_FILIAL = F2_FILIAL AND C5_NUM = F2_PEDIDO AND C5_NOTA = F2_DOC AND C5_SERIE = F2_SERIE AND SC5.D_E_L_E_T_ ='' "
     cQuery += " WHERE SF2.D_E_L_E_T_ ='' "

@@ -89,7 +89,7 @@ Static Function incluir()
 
 if empty(cQtde)
     MsgAlert('Favor informar a quantidade das Etiquetas', 'Atenção')
-    cQtde:SetFocus()
+    oQtde:SetFocus()
     return()
 endif
 
@@ -162,8 +162,6 @@ local produto
 local descricao
 Local cModelo 	:= "ZEBRA"
 local cLPT := "LPT1"
-Local nCarac
-Local cposic
 
 For n := 1 to linhas
     produto   := aBrowse[n][1]
@@ -175,15 +173,13 @@ For n := 1 to linhas
             MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
             MSCBCHKSTATUS(.F.)
             MSCBLOADGRF("SIGA.GRF")
-            MSCBBEGIN(1,6)
+            MSCBBEGIN(1,4)
 
             //MSCBSAY(horizontal,vertical)
-            MSCBSAY(26,20   ,produto  , "N", "0", "170,210") // negrito
+            MSCBSAY(021,15   ,produto  , "N", "0", "260,260") // negrito
 
-            nCarac := len(AllTrim(descricao))
-            cposic := 72
-            MSCBSAY(26,40   ,descricao, "N", "0", "025,025",,,,,.T.) // negrito
-            MSCBSAY(26,45   ,"Usuário Sistema : "+PswChave(RetCodUsr()), "N", "0", "015,015",,,,,.T.) // negrito
+            MSCBSAY(005,43   ,descricao, "N", "0", "035,035",,,,,.T.) // negrito
+            MSCBSAY(005,48   ,"Usuário Sistema : "+PswChave(RetCodUsr()), "N", "0", "035,035",,,,,.T.) // negrito
 
             MSCBEND()
             MSCBCLOSEPRINTER()

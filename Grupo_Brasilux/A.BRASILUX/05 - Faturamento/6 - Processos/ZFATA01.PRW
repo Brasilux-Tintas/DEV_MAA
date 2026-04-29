@@ -7,7 +7,7 @@
 /*/{Protheus.doc} ZFATF01
 Liberação de Pedidos de Vendas
 @type function
-@version  v.2021.001
+@version v.2021.001
 @author Luís Gustavo de Souza
 @since 27/09/2021
 /*/
@@ -52,14 +52,19 @@ User Function ZFATA01()
      Public _aTotal := {}
      Public _aItens := {}
      Public _aPedidos := {}
-
+     
+     Public _cGrpEmp := cEmpAnt
+     Public _cFilial := cFilAnt
+     Public _cNumEmp := _cGrpEmp + Alltrim( _cFilial )
      Default cFilDef    := ""
      Default aAddFil    := {}
      Default cVDefault  := ""
 
      /****************************************************************************************************/
      /***                                     VERIFICAÇÃO DE ACESSO                                    ***/
-     lAdmin := ( PSWADMIN( cUsername, SubStr( cUsuario, 1, 6), cCodUsr ) == 0 )
+     //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+     //lAdmin := ( PSWADMIN( cUsername, SubStr( cUsuario, 1, 6), cCodUsr ) == 0 )
+     lAdmin := .f. //( PSWADMIN( , , cCodUsr ) == 0 )
      If lAdmin
         cAcesso := '*****   * '		
      Else
@@ -69,7 +74,7 @@ User Function ZFATA01()
         If Found()
            cAcesso := SZW->ZW_ACESSOS
         Else
-           MessageBox( "Usuário não autorizado!!! Entre em contato com o administrador do sistema", "Atenção", 48 )
+           MessageBox( "Usuário não autorizado !!! Entre em contato com o Administrador do sistema", "Atenção", 48 )
            Return
         Endif 
      EndIf
@@ -81,7 +86,7 @@ User Function ZFATA01()
         lAcsDir := Iif(SubStr(cAcesso, 5, 1) == '*', .t., .f.) // Itens a serem liberados pela diretoria
         lAcsOut := Iif(SubStr(cAcesso, 6, 1) == '*', .t., .f.) // Outros pedidos a serem Liberados.
      Else
-        MessageBox( "Usuário não autorizado!!! Entre em contato com o administrador do sistema", "Atenção", 48 )
+        MessageBox( "Usuário não autorizado!!! Entre em contato com o Administrador do sistema", "Atenção", 48 )
         Return
      Endif
      /*************************?***************************************************************************/
@@ -102,10 +107,10 @@ Static Function BrowseDef( oMBrowse, cFilDef, aAddFil, cVDefault )
        Local nScan		:= 0
        Local lWidget	:= .F.
        Local aCores 	:=	{ { "Empty(C5_LIBEROK).And.Empty(C5_NOTA) .And. Empty(C5_BLQ)", 'ENABLE'    , "Pedido em Aberto"          },;
-                                { "!Empty(C5_NOTA).Or.C5_LIBEROK=='E' .And. Empty(C5_BLQ)"  , 'DISABLE'   , "Pedido Encerrado"          },;
-                                { "!Empty(C5_LIBEROK).And.Empty(C5_NOTA).And. Empty(C5_BLQ)", 'BR_AMARELO', "Pedido Liberado"           },;
-                                { "C5_BLQ == '1'"                                           , 'BR_AZUL'   , "Pedido Bloquedo por regra" },;
-                                { "C5_BLQ == '2'"                                           , 'BR_LARANJA', "Pedido Bloquedo por verba" } }
+                          { "!Empty(C5_NOTA).Or.C5_LIBEROK=='E' .And. Empty(C5_BLQ)"  , 'DISABLE'   , "Pedido Encerrado"          },;
+                          { "!Empty(C5_LIBEROK).And.Empty(C5_NOTA).And. Empty(C5_BLQ)", 'BR_AMARELO', "Pedido Liberado"           },;
+                          { "C5_BLQ == '1'"                                           , 'BR_AZUL'   , "Pedido Bloquedo por Regra" },;
+                          { "C5_BLQ == '2'"                                           , 'BR_LARANJA', "Pedido Bloquedo por Verba" } }
        Local nColor		:= 0
        Local nQtdCorNew	:= 0
        Local nTamCorNew	:= 0
@@ -242,32 +247,6 @@ Static Function BrowseDef( oMBrowse, cFilDef, aAddFil, cVDefault )
           oMBrowse:Activate()
        EndIf			
 
-/*
-     _oBrowse := FWMBrowse():New()
-     _oBrowse:SetAlias( 'SC5' )
-     _oBrowse:SetUseFilter( .T. )
-     _oBrowse:SetAttach( .T. )
-     _oBrowse:lOptionConfig := .f.
-     _oBrowse:lOptionReport := .f.
-     //_oBrowse:SetViewsDefault( _oVision:aViews )
-     _oBrowse:SetDescription( "Liberação de Pedidos Vendas" )
-
-     //Desligado a exibição dos detalhes
-     _oBrowse:DisableDetails()
-
-     //Adiciona legenda de cores
-     _oBrowse:AddLegend( "C5_APROVA == '0' .and. C5_LIBCAD == 'F' .and. C5_LIBPED == 'F' .and. C5_LIBCRE == 'F' .and. C5_LIBDIR == 'F'", "RED"  , "Analise de Cadastro"     )
-     _oBrowse:AddLegend( "C5_APROVA == '0' .and. C5_LIBCAD == 'T' .and. C5_LIBPED == 'F' .and. C5_LIBCRE == 'F' .and. C5_LIBDIR == 'F'", "GRAY" , "Analise de Vendas"       )
-     _oBrowse:AddLegend( "C5_APROVA == '0' .and. C5_LIBCAD == 'T' .and. C5_LIBPED == 'T' .and. C5_LIBCRE == 'F' .and. C5_LIBDIR == 'F'", "PINK" , "Analise de Crédito"      )
-     _oBrowse:AddLegend( "C5_APROVA == '0' .and. C5_LIBCAD == 'T' .and. C5_LIBPED == 'T' .and. C5_LIBCRE == 'T' .and. C5_LIBDIR == 'F'", "BLUE" , "Analise da Diretoria"    )
-     _oBrowse:AddLegend( "C5_APROVA == '1' .and.  EMPTY(C5_NOTA)"                                                                      , 'BROWN', "Aprovado e não faturado" )
-     _oBrowse:AddLegend( "C5_APROVA == '1' .and. !EMPTY(C5_NOTA)"                                                                      , 'GREEN', "Aprovado e faturado"     )
-     _oBrowse:AddLegend( "C5_APROVA == '2'"                                                                                            , 'BLACK', "Recusado"                )
-
-     //Ativação da Classe
-     _oBrowse:SetMainProc("MATA410")
-     _oBrowse:Activate()
-*/
 Return
 
 /*/{Protheus.doc} MenuDef
@@ -280,21 +259,24 @@ Menu principal do FWMBrowse com as opções padrões e particulares para o log do a
 /*/
 Static Function MenuDef()
        Local aRotina   := {}
-       Local _cAcsLog  := GETMV( 'ZP_PAR0035' )
-       Local _cAcsCal  := GETMV( 'ZP_PAR0036' )
+       Local _cAcsLog  := GETMV( 'ZP_PAR0035' ) //Usuario que pode visualizar os logs de liberacao
+       Local _cAcsCal  := GETMV( 'ZP_PAR0036' ) //Usuarios com acesso a memoria de calculo do pedido
        Local _cCodUsr  := Iif( Type( 'cCodUsr' ) == 'U', '', cCodUsr )
-       Local _lValUsr  := PSWADMIN( cUsername, SubStr( cUsuario, 1, 6), _cCodUsr ) == 0
+       Local _lValUsr  := .f. //PSWADMIN( cUsername, SubStr( cUsuario, 1, 6), _cCodUsr ) == 0
 
-       ADD OPTION aRotina TITLE "Visualizar"                   ACTION "U_ZFAT01Vi( )"            OPERATION 2 ACCESS 0
-       ADD OPTION aRotina TITLE "Liberação"                      ACTION "U_ZFAT01Li( )"          OPERATION 9 ACCESS 0
-       If __CUSERID $ '000000.000071' .or. _lValUsr
-          ADD OPTION aRotina TITLE "Acessos"                     ACTION "U_SENA01(_cRotUsu)"     OPERATION 9 ACCESS 0
+       ADD OPTION aRotina TITLE "Visualizar"                      ACTION "U_ZFAT01Vi( )"        OPERATION 2 ACCESS 0
+       ADD OPTION aRotina TITLE "Liberação"                       ACTION "U_ZFAT01Li( )"        OPERATION 9 ACCESS 0
+       If __CUSERID $ '000000.000071' .or. _lValUsr .or. FWIsAdmin()
+          ADD OPTION aRotina TITLE "Acessos"                      ACTION "U_SENA01(_cRotUsu)"   OPERATION 9 ACCESS 0
        Endif
-       If _cCodUsr $_cAcsLog
-          ADD OPTION aRotina TITLE "Log de liberação Automática" ACTION "U_ZFAT01Lo( )"          OPERATION 9 ACCESS 0
+       If _lValUsr --.or. FWIsAdmin()
+          ADD OPTION aRotina TITLE "Alteração do Pedido"          ACTION "U_ZFAT01Al( )"        OPERATION 9 ACCESS 0
        Endif
-       If _cCodUsr $ _cAcsCal
-          ADD OPTION aRotina TITLE "Memória de Calculo" ACTION "U_ZFAT01Ca( )"                   OPERATION 9 ACCESS 0
+       If _cCodUsr $_cAcsLog .or. FWIsAdmin()
+          ADD OPTION aRotina TITLE "Log de liberação Automática"  ACTION "U_ZFAT01Lo( )"        OPERATION 9 ACCESS 0
+       Endif
+       If _cCodUsr $ _cAcsCal .or. FWIsAdmin()
+          ADD OPTION aRotina TITLE "Memória de Calculo"           ACTION "U_ZFAT01Ca( )"        OPERATION 9 ACCESS 0
        Endif
 
 Return aRotina
@@ -305,10 +287,10 @@ User function ZFAT01Ca()
      Local _aButtons  := {}
 
      oModal := FWDialogModal():New()
-     oModal:SetEscClose( .F. )
-     oModal:setTitle( "Log de Liberação automática do pedido de Vendas" )
-     oModal:setSize( 141, 268 )
-     oModal:createDialog()
+     oModal :SetEscClose( .F. )
+     oModal :setTitle( "Memória de cálculo do Pedido " +_cPedido)
+     oModal :setSize( 141, 268 )
+     oModal :createDialog()
 
      aAdd( _aButtons, { "", 'Cancela' , {|| _nOpcAju := 0, oModal:DeActivate() }, , , .T., .F. } )
      oModal:addButtons( _aButtons )
@@ -407,8 +389,8 @@ Static Function ViewDef()
 Return oView
 
 /*/{Protheus.doc} ZFAT01Vi
-Visualização do pedido de Vendas
-@type function
+Visualização do pedido de Vendas 
+@type function 
 @version  v2021.001
 @author Luis Gustavo de Souza
 @since 27/09/2021
@@ -421,10 +403,27 @@ User Function ZFAT01Vi()
      Private cCadastro := "Pedido de Vendas"        //obrigatoriamente preciso definir com private a variável cCadastro
      Private aRotina   := {}                        //obrigatoriamente preciso definir a variavel aRotina como private
 
-     MatA410( Nil, Nil, Nil, Nil, "A410Visual" ) //executo a função padrão MatA410
+     MatA410( Nil, Nil, Nil, Nil, "A410Visual" )   //executo a função padrão MatA410
 
      RestArea( aArea )                               //restauro a area anterior.
 Return
+
+
+/**/
+User Function ZFAT01Al()
+     Local aArea       := GetArea()                 //Será gravada a area atual
+     Private Inclui    := .F.                       //defino que a inclusão é falsa
+     Private Altera    := .T.                       //defino que a alteração é verdadeira
+     Private nOpca     := 1                         //obrigatoriamente passo a variavel nOpca com o conteudo 1
+     Private cCadastro := "Pedido de Vendas"        //obrigatoriamente preciso definir com private a variável cCadastro
+     Private aRotina   := {}                        //obrigatoriamente preciso definir a variavel aRotina como private
+
+     MatA410( Nil, Nil, Nil, Nil, "A410ALTERA" )   //executo a função padrão MatA410
+
+     RestArea( aArea )                               //restauro a area anterior.
+Return
+/**/
+
 
 /*/{Protheus.doc} ZFAT01Li
 Liberação do pedido de Vendas
@@ -450,10 +449,10 @@ Local oDSEncerr		:= Nil // Pedidos Encerrados
 Local oDSLibera		:= Nil // Pedidos Liberados
 Local oDSBqRegr		:= Nil // Pedidos Bloqueados por Regra
 Local oDSBqVerb		:= Nil // Pedidos Bloqueados por Verba
-Local oDSTotVend	:= Nil // Colunas: Total do Pedido Por Vendedor
-Local oDSTotProd	:= Nil // Colunas: Valor Total Por Produto 
-Local oDSVendReg	:= Nil // Colunas: Vendas Por Região
-Local aUserPaper	:= {}
+Local oDSTotVend	   := Nil // Colunas: Total do Pedido Por Vendedor
+Local oDSTotProd	   := Nil // Colunas: Valor Total Por Produto 
+Local oDSVendReg	   := Nil // Colunas: Vendas Por Região
+Local aUserPaper	   := {}
 Local cCodUser 		:= If(SuperGetMv("MV_CRMUAZS",, .F.), CRMXCodUser(), RetCodUsr())  
 Local cSeqPaper		:= " "		
 

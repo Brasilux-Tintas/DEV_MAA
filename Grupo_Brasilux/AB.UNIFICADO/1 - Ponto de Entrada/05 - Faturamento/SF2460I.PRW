@@ -39,12 +39,33 @@ If FWCodEmp() <> '11'
          ZZB->ZZB_HORLOG := Time()
          MsUnLock()
 
+
          DbSelectArea("SF2")
          lBloqueado = U_EstaBloqueado("SF2", RecNo())
          If !lBloqueado
             RecLock("SF2", .F.)
-         Endif 
+         Endif
+         if cModulo != ('ATF')
          SF2->F2_PEDIDO := SC5->C5_NUM
+         Endif
+
+         /* parametro que habita uso via PE */
+         If GETMV("ZP_PAR0061")
+
+            /* Incluido por Nelieder Corneta em 02/08/2022 */
+            /* retirada da trigger SF2010 */
+            /* Corrige problema com volumes */
+            If !EMPTY(SF2->F2_ESPECI2) .AND. (SF2->F2_VOLUME2 <= 0)
+               SF2->F2_ESPECI2 := ''
+            EndIf
+
+            If !EMPTY(SF2->F2_ESPECI1) .AND. (SF2->F2_VOLUME1 <= 0)
+               SF2->F2_ESPECI1 := ''
+            EndIf
+
+         EndIf
+
+
          If SC5->C5_TIPO $ "D_B"
 		      If !(ALLTRIM(SA2->A2_COD) == ALLTRIM(SF2->F2_CLIENTE))
               dbselectarea("SA2")
@@ -112,10 +133,14 @@ If FWCodEmp() <> '11'
          MsUnLock()
 
         //Solic. Michelly em 07/10/2015 -> Enviar email pro Ramon quando o pedido tiver marcado para acompanhar laudo
-        IF (cNumEmp = "01010101") .and. (SC5->C5_LAUDO = "S")
+        IF ((cNumEmp = "01010101") .or. (cNumEmp = "01060101")) .and. (SC5->C5_LAUDO = "S")
            cAuxMens := "Nota Fiscal nro "+SF2->F2_DOC+", pedido nro "+SC5->C5_NUM+", CLIENTE : "+SC5->C5_CLIENTE+"-"+ ALLTRIM(IIF(SC5->C5_TIPO $ "D_B",SA2->A2_NOME,SA1->A1_NOME))+;
            " acompanha LAUDO!"
-           U_EnvMail("Nota Fiscal "+SF2->F2_DOC+" possui laudo" ,cAuxMens,"laudo@brasilux.com.br","faturamento@brasilux.com.br","") 
+           If Substr(xFilial("SF2"),1,2)== "06"
+		       U_EnvMail("Nota Fiscal "+SF2->F2_DOC+" possui laudo" ,cAuxMens,"laudo@dissoltex.com.br","") 
+		   Else
+		       U_EnvMail("Nota Fiscal "+SF2->F2_DOC+" possui laudo" ,cAuxMens,"laudo@brasilux.com.br","faturamento@brasilux.com.br","") 
+		   Endif
         ENDIF 
 Else
         /*Dyego Figueiredo / Chaus

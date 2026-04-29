@@ -11,7 +11,10 @@ User Function MATA420()
 Local cAuxUser,lAutoriz
 u_zcfga01( 'MATA420' ) //LGS#2021118 - Gravação de log de utilização da rotina
 lAutoriz := .t.
-If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+
+//LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+//If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+If PSWADMIN( , , RetCodUsr() ) != 0
 	cAuxUser := UPPER(alltrim(cUserName))
 	If cAuxUser $ UPPER(GETMV("MV_ALTTABP"))
 		MATA420()

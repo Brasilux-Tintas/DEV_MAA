@@ -1,0 +1,187 @@
+//impextr.prw
+//Snippet de código
+#Include "protheus.ch"
+#Include "fileio.ch"
+
+/*------------------------------------------------------------------
+    ENGINE DE PROCESSAMENTO CNAB (TAMANHO FIXO)
+    Arquivo: impextr.prw
+------------------------------------------------------------------*/
+
+CLASS TTxtFastEngine
+    DATA cFileIn, cFileTemp, cFileLog
+    DATA nHdlOut, nHdlLog
+    DATA aRules
+    DATA nFileSize, nLines, nChanges
+    DATA lOk, lFullLog
+
+    METHOD New(cIn, lFullLog)
+    METHOD AddRule(nPosB, nTamB, cValB, nPosT, nTamT, cValT)
+    METHOD Process()
+    METHOD Execute(oProcess)
+    METHOD ApplyRules(cLine)
+    METHOD WriteLog(cMsg)
+    METHOD CloseAndReplace()
+ENDCLASS
+
+/*--- Inicialização e Abertura de Arquivos ---*/
+METHOD New(cIn, lFullLog) CLASS TTxtFastEngine
+    Default lFullLog := .F.
+
+    ::cFileIn   := cIn
+    ::cFileTemp := StrTran(Lower(cIn), ".txt", "_tmp.txt")
+    ::cFileLog  := StrTran(Lower(cIn), ".txt", ".log")
+    
+    ::aRules    := {}
+    ::nLines    := 0
+    ::nChanges  := 0
+    ::lOk       := .T.
+    ::lFullLog  := lFullLog
+
+    // Abre arquivo CNAB para leitura
+    FT_FUse(::cFileIn)
+    If FT_FError() != 0
+        MsgStop("Erro ao abrir arquivo CNAB: " + cValToChar(FT_FError()), "Erro FT_FUse")
+        ::lOk := .F.
+        Return Self
+    EndIf
+
+    // Cria temporário e Log
+    ::nHdlOut := FCreate(::cFileTemp)
+    ::nHdlLog := FCreate(::cFileLog)
+
+    If ::nHdlOut == -1 .Or. ::nHdlLog == -1
+        FT_FUse()
+        MsgStop("Erro ao criar arquivos de saída/log no diretório.", "Erro FCreate")
+        ::lOk := .F.
+        Return Self
+    EndIf
+
+    ::nFileSize := FT_FSize()
+    ::WriteLog("--- INICIO PROCESSAMENTO CNAB: " + DtoC(Date()) + " " + Time() + " ---")
+Return Self
+
+/*--- Adiciona Regra de Troca (Posição Inicial, Tamanho, Valor) ---*/
+METHOD AddRule(nPosB, nTamB, cValB, nPosT, nTamT, cValT) CLASS TTxtFastEngine
+    AAdd(::aRules, {nPosB, nTamB, cValB, nPosT, nTamT, cValT})
+Return
+
+/*--- Gerenciador da Barra de Progresso ---*/
+METHOD Process() CLASS TTxtFastEngine
+    Local oProcess
+    oProcess := MsNewProcess():New({|_lEnd| ::Execute(oProcess) }, "Processando CNAB", "Lendo registros...", .T.)
+    oProcess:Activate()
+Return
+
+/*--- Loop de Execução ---*/
+METHOD Execute(oProcess) CLASS TTxtFastEngine
+    Local cLine    := ""
+    Local cOldLine := ""
+
+    FT_FGotop()
+    oProcess:SetRegua1(::nFileSize)
+
+    While !FT_FEOF()
+        cLine := FT_FReadLn()
+        ::nLines++
+        
+        If ::lFullLog
+            cOldLine := cLine
+        EndIf
+
+        // Processa as regras de tamanho fixo
+        cLine := ::ApplyRules(cLine)
+
+        If ::lFullLog .And. !(cLine == cOldLine)
+            ::WriteLog("[LINHA " + AllTrim(Str(::nLines)) + "] Registro alterado.")
+        EndIf
+
+        // Grava mantendo a integridade do layout
+        FWrite(::nHdlOut, cLine + CRLF)
+
+        oProcess:SetRegua1(FT_FRecno())
+        oProcess:IncRegua2("Processando registro: " + cValToChar(::nLines))
+
+        If oProcess:CheckCancel()
+            ::lOk := .F.
+            ::WriteLog("!!! OPERACAO CANCELADA PELO USUARIO !!!")
+            Exit
+        EndIf
+
+        FT_FSkip()
+    EndDo
+
+    ::CloseAndReplace()
+Return
+
+/*--- Lógica de Substituição Stuff/PadR ---*/
+METHOD ApplyRules(cLine) CLASS TTxtFastEngine
+    Local n := 0
+    
+    For n := 1 To Len(::aRules)
+        // Se o valor na posição de busca conferir (ex: Tipo de Registro '1')
+        If SubStr(cLine, ::aRules[n][1], ::aRules[n][2]) == ::aRules[n][3]
+            // Substitui mantendo exatamente o mesmo tamanho da coluna (essencial no CNAB)
+            cLine := Stuff(cLine, ::aRules[n][4], ::aRules[n][5], PadR(::aRules[n][6], ::aRules[n][5]))
+            ::nChanges++
+        EndIf
+    Next
+Return cLine
+
+/*--- Escrita no Log ---*/
+METHOD WriteLog(cMsg) CLASS TTxtFastEngine
+    If ::nHdlLog != -1
+        FWrite(::nHdlLog, "[" + Time() + "] " + cMsg + CRLF)
+    EndIf
+Return
+
+/*--- Fechamento e Substituição ---*/
+METHOD CloseAndReplace() CLASS TTxtFastEngine
+    ::WriteLog("--- ESTATISTICAS ---")
+    ::WriteLog("Total Registros: " + cValToChar(::nLines))
+    ::WriteLog("Total Alteracoes: " + cValToChar(::nChanges))
+    
+    FT_FUse()
+    FClose(::nHdlOut)
+    FClose(::nHdlLog)
+
+    If ::lOk
+        If FErase(::cFileIn) == 0
+            FRename(::cFileTemp, ::cFileIn)
+            MsgInfo("Arquivo CNAB atualizado com sucesso!", "Finalizado")
+        EndIf
+    Else
+        FErase(::cFileTemp)
+        MsgAlert("Arquivo original preservado.", "Cancelado")
+    EndIf
+Return
+
+/*------------------------------------------------------------------
+    CHAMADA PRINCIPAL
+------------------------------------------------------------------*/
+User Function BRIMPEXTR()
+    Local cFile    := ""
+    Local lFullLog := .F.
+    Local oEngine
+
+    cFile := cGetFile("Arquivos CNAB|*.rem;*.ret;*.txt|Todos|*.*", ;
+                      "Selecione o arquivo CNAB", 1, "C:\", .F., ;
+                      GETF_LOCALHARD + GETF_NETWORKDRIVE, .T.)
+
+    If !Empty(cFile)
+        lFullLog := MsgYesNo("Deseja gerar Log Detalhado?", "Log de Auditoria")
+        
+        oEngine := TTxtFastEngine():New(cFile, lFullLog)
+        
+        If oEngine:lOk
+            /* EXEMPLO PARA CNAB 400:
+               Se na Pos 1 for '1' (Registro Detalhe), 
+               muda a Pos 22 (Tam 10) para o novo Código de Agência
+            */
+            oEngine:AddRule(1, 1, "1", 22, 10, "0012345678")
+            
+            oEngine:Process()
+        EndIf
+    EndIf
+
+Return Nil

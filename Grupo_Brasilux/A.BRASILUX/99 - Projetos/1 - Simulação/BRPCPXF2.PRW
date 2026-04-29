@@ -895,7 +895,7 @@ User Function fGrvFor( aMarcacao, nPos, aEmail, nPosPro, aProNew)
                         ElseIf Len(Alltrim(SZN->ZN_COMP)) == 12 .and. SubStr(SZN->ZN_COMP, 11, 2) $ '99'
 	                        nPesLiq += SZN->ZN_QUANT
                         Else
-                           If Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_TIPO") $ 'MP'
+                           If Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_TIPO") $ 'MP-PA' /* Alterar por Nelieder 31/10/2022 */
                               If !Empty(Alltrim(Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_RELCAT1")))
                                  //nPesBru += SZN->ZN_QUANT * Posicione("SZ5", 1, xFilial("SZ5")+Alltrim(Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_RELCAT1")), "Z5_PESO")
                                  nPesBru += Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_PESO")
@@ -1035,7 +1035,7 @@ User Function fGrvFor( aMarcacao, nPos, aEmail, nPosPro, aProNew)
                             ElseIf Len(Alltrim(SZN->ZN_COMP)) == 12 .and. SubStr(SZN->ZN_COMP, 11, 2) $ '99' 
 	                           nPesLiq += SZN->ZN_QUANT 
                             Else
-                               If Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_TIPO") $ 'MP'
+                               If Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_TIPO") $ 'MP-PA' /* Alterar por Nelieder 31/10/2022 */
                                   If !Empty(Alltrim(Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_RELCAT1")))
                                      nPesBru += SZN->ZN_QUANT * Posicione("SZ5", 1, xFilial("SZ5")+Alltrim(Posicione("SB1", 1, xFilial("SB1")+SZN->ZN_COMP, "B1_RELCAT1")), "Z5_PESO")
                                      lTemEmb := .t.

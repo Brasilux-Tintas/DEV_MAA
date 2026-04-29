@@ -23,7 +23,7 @@
 25/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 */
 User Function MT105QRY()
-     Local cQuery
+     Local cQuery:=""
      Local nArea := Alias()                
      Local xLoc                                                                                      
 
@@ -34,7 +34,9 @@ User Function MT105QRY()
         dbseek(xFilial("ZZN")+RetCodUsr()+"R")
         xLoc := ZZN->ZZN_LOCAL  
 
-        cQuery = " CP_LOCAL = '"+xLoc+"' "   
+        If xLoc <> "*"
+         // cQuery := " CP_LOCAL = '"+xLoc+"' "   
+        End
 
         dbselectarea(nArea)
      Endif	

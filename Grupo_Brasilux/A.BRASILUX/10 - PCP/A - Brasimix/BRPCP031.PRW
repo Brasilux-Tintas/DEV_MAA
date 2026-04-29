@@ -574,11 +574,11 @@ Inseri dados nas tabelas Especificos e Espedidos
 /*/
 Static Function PCP031_05(aColsAux)
 	Local nLinha
-	Local GeraRec  := "0"
+	//Local GeraRec  := "0"
 	Local PriID  := 0
-	Local pProduto := '0'
-	Local vProduto := '0'
-	Local aProduto := '0'
+	Local pProduto := '0' // proximo
+	Local vProduto := '0' // atual
+	Local aProduto := '0' // anterior
 
 	PriID = last_rec('ESPEPEDIDOS')
 	For nLinha := 1 To Len(aColsAux)
@@ -603,8 +603,27 @@ Static Function PCP031_05(aColsAux)
 		vRedeSP  := AllTrim(aColsAux[nLinha]    [6])
 		vRG      := AllTrim(aColsAux[nLinha]    [7])
 
-		if (SUBSTRING(vProduto,1,10) == SUBSTRING(pProduto,1,10)) .OR. (SUBSTRING(vProduto,1,10) == SUBSTRING(aProduto,1,10))
-                  /* inputa dados itens*/
+		if SUBSTRING(vProduto,1,10) != SUBSTRING(aProduto,1,10)
+			//GeraRec := '0'
+			MaxReg   := last_rec('ESPEPEDIDOS')
+		endif	
+
+		cQuery := ""
+		cQuery := " INSERT INTO ESPEPEDIDOS (EMPRESA,CLIENTE,VOLUME,REDESP,PEDIDO,EMBAL,QUANT,ID) VALUES "
+		cQuery += " ('"+ALLTRIM(cNumEmp)+"','"+vcliente+"','"+cValToChar(vVolume)+"','"+vRedeSP+"','"+vPedido+"','"+vProduto+"','"+cValToChar(vQTDE)+"','"+cValToChar(MaxReg)+"') "
+
+		cQuery += " INSERT INTO "+RETSQLNAME("ZA6")+" (ZA6_FILIAL,ZA6_EMPRES,ZA6_CLIENT,ZA6_VOLUME,ZA6_REDESP,ZA6_PEDIDO,ZA6_EMBAL,ZA6_QUANT,ZA6_ID,R_E_C_N_O_) VALUES
+		cQuery += " ('"+xFilial("ZA6")+"','"+ALLTRIM(cNumEmp)+"','"+vcliente+"','"+cValToChar(vVolume)+"','"+vRedeSP+"','"+vPedido+"','"+vProduto+"','"+cValToChar(vQTDE)+"','"+cValToChar(MaxReg)+"',(SELECT CASE WHEN MAX(R_E_C_N_O_)+1  IS NULL THEN 0 ELSE MAX(R_E_C_N_O_)+1 end FROM "+RETSQLNAME("ZA6")+")) "
+
+		nStatus := TCSqlExec(cQuery)
+
+		if (nStatus < 0)
+			MsgAlert("TCSQLError() " + TCSQLError())
+			return()
+		endif
+
+	/*	if (SUBSTRING(vProduto,1,10) == SUBSTRING(pProduto,1,10)) .OR. (SUBSTRING(vProduto,1,10) == SUBSTRING(aProduto,1,10))
+    
 			if GeraRec == '0'
 				MaxReg   := last_rec('ESPEPEDIDOS')
 			EndIf
@@ -644,10 +663,9 @@ Static Function PCP031_05(aColsAux)
 				return()
 			endif
 
+		EndIf*/
 
 
-
-		EndIf
 		PCP031_06(vRG)
 	Next
     
@@ -706,7 +724,8 @@ Static Function PCP031_07(ID)
 
 	EndDo
 
-	Processa({|| U_BRPCP035()}, "Gerando OPs Especificos, esse processo pode demorar... !")
+	/* alterado em 17/03/2022
+	//Processa({|| U_BRPCP035()}, "Gerando OPs Especificos, esse processo pode demorar... !")
 
     /* refresch no grid */
 	PCP031_02(1)

@@ -1,0 +1,27 @@
+{
+	"configurations": [
+		{
+			"type": "totvs_language_debug",
+			"request": "launch",
+			"name": "TOTVS Language Debug",
+			"program": "${command:AskForProgramName}",
+			"cwb": "${workspaceFolder}",
+			"smartclientBin": "C:\\TCLOUD_TST\\smartclient.exe",
+			"isMultiSession": true,
+			"enableTableSync": true
+		}
+	],
+	"lastPrograms": [
+		{
+			"label": "SIGAADV",
+			"description": "<nil>"
+		},
+		{
+			"label": "u_zpcpa01"
+		},
+		{
+			"label": "SIGAMDI"
+		}
+	],
+	"lastProgramExecuted": "SIGAMDI"
+}

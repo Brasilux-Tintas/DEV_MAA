@@ -12,7 +12,7 @@
 #define WS_VISIBLE         268435456  // 0x10000000L
 #xtranslate bSETGET(<uVar>) => { | u | If( PCount() == 0, <uVar>, <uVar> := u ) }
 #IFNDEF WINDOWS
-        #DEFINE PSAY SAY
+#DEFINE PSAY SAY
 #ENDIF
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -40,22 +40,25 @@
 ±±³          ³ Luís Gustavo  ³ FATX01_B - Legenda.                        ³±±
 ±±³          ³ Luís Gustavo  ³ FATX01_C - Mostra pedidos a Liberar.       ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±± 
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function BRFATX01()
      Local aCores := { {"(C5_APROVA == '0' .and. C5_LIBCAD == 'F' .and. C5_LIBPED == 'F' .and. C5_LIBCRE == 'F' .and. C5_LIBDIR == 'F')", 'DISABLE'   },; // Analise de Cadastro
                        {"(C5_APROVA == '0' .and. C5_LIBCAD == 'T' .and. C5_LIBPED == 'F' .and. C5_LIBCRE == 'F' .and. C5_LIBDIR == 'F')", 'BR_CINZA'  },; // Analise de Vendas
                        {"(C5_APROVA == '0' .and. C5_LIBCAD == 'T' .and. C5_LIBPED == 'T' .and. C5_LIBCRE == 'F' .and. C5_LIBDIR == 'F')", 'BR_PINK'   },; // Analise de Crédito
                        {"(C5_APROVA == '0' .and. C5_LIBCAD == 'T' .and. C5_LIBPED == 'T' .and. C5_LIBCRE == 'T' .and. C5_LIBDIR == 'F')", 'BR_AZUL'   },; // Analise da Diretoria
-                       {"(C5_APROVA == '1' .and.  EMPTY(C5_NOTA))"                                              , 'BR_MARROM' },; // Aprovado e não faturado
-                       {"(C5_APROVA == '1' .and. !EMPTY(C5_NOTA))"                                              , 'ENABLE'    },; // Aprovado e faturado
-                       {"(C5_APROVA == '2')"                                                                    , 'BR_PRETO'  } } // Recusado
+                       {"(C5_APROVA == '1' .and.  EMPTY(C5_NOTA))"                                                                     , 'BR_AMARELO' },; // Aprovado e não faturado
+                       {"(C5_APROVA == '1' .and. !EMPTY(C5_NOTA))"                                                                     , 'ENABLE'     },; // Aprovado e faturado
+                       {"(C5_APROVA == '2')"                                                                                           , 'BR_PRETO'   } } // Recusado
+     //If !((SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2)) $ GETMV("MV_LIBPEDE"))
      If !((SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2)) $ GETMV("MV_LIBPEDE"))
-        MsgBox("Empresa/Filial não autorizada a utilizar essa rotina !", "Atenção...", "ALERT")
-        Return
+     //cNumEmp possui 8 digitos : 2 + 6
+        MsgBox("Empresa "+SUBSTR(cNumEmp,1,2)+" / Unidade "+SUBSTR(cNumEmp,3,2)+" / Filial "+SUBSTR(cNumEmp,FWSizeFilial()+1,2)+" não autorizada a utilizar essa rotina !", "Atenção...", "ALERT")
+        //MsgBox("Empresa "+ SUBSTR(cNumEmp,1,4) + " / Filial "+SUBSTR(cNumEmp,FWSizeFilial()+1,2)+" não autorizada a utilizar essa rotina !("+cNumEmp+"), "Atenção...", "ALERT")
+        Return   
      Endif
 
-     Private cCadastro := "Análise de pedidos"
+     Private cCadastro := "Análise de Pedidos"
      Private cCodUsr   := RetCodUsr()
      Private lAdmin    := .f.
      Private cAcesso   := ""
@@ -104,26 +107,26 @@ User Function BRFATX01()
                           { OemToAnsi("Liberação")        , 'U_FATX01_1(1)'          , 0, 2   } } //Liberação nOpc = 1
      
    If lAcsDir
-      aadd(aRotina, { OemToAnsi("Diretoria")     , 'U_FATX01_1(3)'      , 0, 3, 0} ) //Diretoria nOpc = 3
+   aadd(aRotina, { OemToAnsi("Aprov. Final")  , 'U_FATX01_1(3)'      , 0, 3, 0} ) //Diretoria nOpc = 3
    Endif
    If lAcsPed
-      aadd(aRotina, { OemToAnsi("Vendas")        , 'U_FATX01_1(5)'      , 0, 3, 0} ) //Vendas nOpc = 5
+   aadd(aRotina, { OemToAnsi("Vendas")        , 'U_FATX01_1(5)'      , 0, 3, 0} ) //Vendas nOpc = 5
    Endif
    aadd(aRotina, { OemToAnsi("Estorno")       , 'U_FATX01_1(2)'      , 0, 2   } ) //Estorno nOpc = 2 
-   aadd(aRotina, { OemToAnsi("Ped. à Liberar"), 'U_FATX01_C()'       , 0, 2   } ) //Consulta
+//   aadd(aRotina, { OemToAnsi("Ped. à Liberar"), 'U_FATX01_C()'       , 0, 2   } ) //Consulta
    aadd(aRotina, { OemToAnsi("Ped. Pendentes"), 'U_FATX01_1(4)'      , 0, 2   } ) //Pendentes nOpc = 4
    aadd(aRotina, { OemToAnsi("Legenda")       , 'U_FATX01_B()'       , 0, 3, 0} ) //Legenda
  
    //aadd(aRotina, {"POSCLI",{||a450F4Con()},"Posição do Cliente","Cliente"})
 
    If lAdmin
-      //aadd(aRotina, { OemToAnsi("Acessos")       , 'U_BRSEN001(cRotina)', 0, 3   } ) //Acessos
+      aadd(aRotina, { OemToAnsi("Acessos")       , 'U_BRSEN001(cRotina)', 0, 3   } ) //Acessos
    Endif
    Private cString   := "SC5"
      
-   If lAcsCre .and. !lAcsDir
+   /*If lAcsCre .and. !lAcsDir
       // - DESABILITADO POIS NÃO ESTA EM USO 13/02/2020 - LUIS GUSTAVO
-      /*If GETMV("MV_UFILCRE")
+      If GETMV("MV_UFILCRE")
            Pergunte("FATX01", .F.)
            mvpar01 := mv_par01
            cOpcUsr := Iif(mvpar01 == 1, 'TODOSP', Iif(mvpar01 == 2, 'CATRAS', 'SATRAS'))
@@ -217,11 +220,11 @@ User Function BRFATX01()
                      Endif
               Endif
            Endif
-      Endif*/
+      Endif
       //LGS#20200210 - Adequação de release 12.1.25 e posteriores
       //Set Key VK_F12 To FATX01_G()
       //SetKey( VK_F12, { || FATX01_G() } ) - DESABILITADO POIS NÃO ESTA EM USO 13/02/2020
-   Endif
+   Endif*/
 
    DbSelectArea(cString)
    DbSetOrder(1)
@@ -242,10 +245,11 @@ User Function BRFATX01()
             MsUnLock()
          Endif*/
       Endif
-   Endif    
+   Endif 
 
 	if Select("TMP")<>0
 		dbselectarea("TMP")
+      //DbSetOrder(1) //verificar
 		dbclosearea()
 		If Type("oTempTbl01") == "O"
 		   oTempTbl01:Delete()
@@ -254,6 +258,7 @@ User Function BRFATX01()
 
 	if Select("LPD")<>0
 		dbselectarea("LPD")
+      //DbSetOrder(1) //verificar
 		dbclosearea()
 		If Type("oTempTable") == 'O'
 		   oTempTable:Delete()
@@ -324,13 +329,13 @@ User Function FATX01_1(nOpc)
      Private lAtual     := .f.
      Private aCamBrw    := {}
      
-     If nOpc == 3
+     If nOpc == 3 //Diretoria
         If !lAcsDir
            MsgBox("Acesso negado para essa rotina !", "Atenção...", "STOP")
            Return
         Endif
      Endif
-     If nOpc == 5
+     If nOpc == 5 //Vendas
         If !lAcsPed
            MsgBox("Acesso negado para essa rotina !", "Atenção...", "STOP")
            Return
@@ -347,7 +352,8 @@ User Function FATX01_1(nOpc)
      MsgRun("Montando arquivo de trabalho.", "Aguarde...", {||U_fMonArq(nOpc)} )
      DbSelectArea("LPD")
      DbGoTop()
-     aadd(aCamBrw, {"PEDIDO"  , "", OemToAnsi("Pedido")      , "999999"} )
+     //aadd(aCampos, {"PEDIDO"   , "C",  6, 0 }) //Flag(01)      ; Pedido(02)
+     aadd(aCamBrw, {"PEDIDO"  , "", OemToAnsi("Pedido")      , "NNNNNN"} )
      aadd(aCamBrw, {"EMISSAO" , "", OemToAnsi("Emissão")     , ""      } )
      aadd(aCamBrw, {"DATAALT" , "", OemToAnsi("Dt. Alter.")  , ""      } )
      aadd(aCamBrw, {"CLIENTE" , "", OemToAnsi("Cliente/Loja"), "@!"    } )
@@ -355,10 +361,10 @@ User Function FATX01_1(nOpc)
      aadd(aCamBrw, {"BOLETO"  , "", OemToAnsi("Boleto")      , "@!"    } )
      aadd(aCamBrw, {"VENDEDOR", "", OemToAnsi("Vendedor")    , "@!"    } )
      aadd(aCamBrw, {"TRANSPORT","", OemToAnsi("Transp")      , "@!"    } )
-     aadd(aCamBrw, {"ULTCOM",   "", OemToAnsi("Ult Compra")  , ""    } )
+     aadd(aCamBrw, {"ULTCOM",   "", OemToAnsi("Ult Compra")  , ""      } )
      
      DEFINE MSDIALOG oDlg FROM 000,000 TO 032,100 TITLE OemToAnsi("Aprovação de Pedidos" ) OF oMainWnd
-            DEFINE FONT oFont  SIZE 8,0 BOLD
+            DEFINE FONT oFont  SIZE 7,0 BOLD
             DEFINE FONT oFont2 SIZE 5,0 BOLD
             DEFINE FONT oFont3 NAME 'COURIER NEW' SIZE 6,0
             DEFINE FONT oFont4 SIZE 4,0 BOLD
@@ -366,57 +372,59 @@ User Function FATX01_1(nOpc)
             oLPD := MSSelect():New("LPD", "FLAG", Nil, aCamBrw, .f., Nil, {017,003,080,393}, , , oDlg)
             /***************************************************************************/
             @ 085,355 GROUP oGrp2 TO 121,395 LABEL  OemToAnsi('Tipo Venda')           PIXEL OF oDlg
-            @ 095,360 RADIO oTipVen VAR nTpVen ITEMS "Interna","Externa" SIZE 030,010 PIXEL OF oDlg 
+            @ 091,360 RADIO oTipVen VAR nTpVen ITEMS "Interna","Externa"                       SIZE 030,010   PIXEL OF oDlg 
+            @ 112,362 SAY OemToAnsi('Risco:')                                                  SIZE 015,09    PIXEL OF oDlg
+            @ 112,380 SAY oRisco  VAR cRisco       PICTURE '@!' COLOR CLR_BLUE                 SIZE 050,09    PIXEL OF oDlg  FONT oFont4
             /***************************************************************************/
             @ 085,001 GROUP oGrp3 TO 102,352 LABEL  OemToAnsi('Valores')                                      PIXEL OF oDlg
-            @ 090,005 SAY OemToAnsi("Mercadoria")                                              SIZE 030,09    PIXEL OF oDlg
-            @ 089,040 MSGET oVlrMer VAR nVlrMer    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 050,09    PIXEL OF oDlg
-            @ 090,100 SAY OemToAnsi("I.P.I")                                                   SIZE 015,09    PIXEL OF oDlg
-            @ 089,120 MSGET oVlrIPI VAR nVlrIPI    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 040,09    PIXEL OF oDlg
-            @ 090,170 SAY OemToAnsi("Subs. Trib.")                                             SIZE 030,09    PIXEL OF oDlg
-            @ 089,205 MSGET oVlrSTb VAR nVlrSTb    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 050,09    PIXEL OF oDlg
-            @ 090,265 SAY OemToAnsi("TOTAL")       COLOR CLR_HRED                              SIZE 025,09    PIXEL OF oDlg FONT oFont2
-            @ 089,296 MSGET oVlrTot VAR nVlrTot    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 050,09    PIXEL OF oDlg
+            @ 092,005 SAY OemToAnsi("Mercadoria")                                              SIZE 030,09    PIXEL OF oDlg
+            @ 090,037 MSGET oVlrMer VAR nVlrMer    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 050,09    PIXEL OF oDlg
+            @ 092,105 SAY OemToAnsi("I.P.I")                                                   SIZE 015,09    PIXEL OF oDlg
+            @ 090,120 MSGET oVlrIPI VAR nVlrIPI    PICTURE '@E 9,999,999.99'          WHEN .f. SIZE 050,09    PIXEL OF oDlg
+            @ 092,170 SAY OemToAnsi("Subs. Trib.")                                             SIZE 030,09    PIXEL OF oDlg
+            @ 090,205 MSGET oVlrSTb VAR nVlrSTb    PICTURE '@E 9,999,999.99'          WHEN .f. SIZE 050,09    PIXEL OF oDlg
+            @ 092,265 SAY OemToAnsi("TOTAL")       COLOR CLR_HRED                              SIZE 030,09    PIXEL OF oDlg FONT oFont2
+            @ 090,296 MSGET oVlrTot VAR nVlrTot    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 050,09    PIXEL OF oDlg
             /***************************************************************************/
             @ 103,001 GROUP oGrp4 TO 121,081 LABEL  OemToAnsi('Lucro')                                        PIXEL OF oDlg
-            @ 108,005 MSGET oVlrLcr VAR nVlrLcr    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 040,09    PIXEL OF oDlg
-            @ 108,045 MSGET oPerLcr VAR nPerLcr    PICTURE '@E 999.99%'               WHEN .f. SIZE 030,09    PIXEL OF oDlg
+            @ 109,005 MSGET oVlrLcr VAR nVlrLcr    PICTURE '@E 9,999,999.99'          WHEN .f. SIZE 050,09    PIXEL OF oDlg
+            @ 109,045 MSGET oPerLcr VAR nPerLcr    PICTURE '@E 999.99%'               WHEN .f. SIZE 030,09    PIXEL OF oDlg
             /***************************************************************************/
             @ 103,083 GROUP oGrp5 TO 121,163 LABEL  OemToAnsi('Comissão')                                     PIXEL OF oDlg
-            @ 108,087 MSGET oVlrCom VAR nVlrCom    PICTURE '@E 999,999,999.99'        WHEN .f. SIZE 040,09    PIXEL OF oDlg
-            @ 108,127 MSGET oPerCom VAR nPerCom    PICTURE '@E 999.99%'                        SIZE 030,09    PIXEL OF oDlg
+            @ 109,087 MSGET oVlrCom VAR nVlrCom    PICTURE '@E 9,999,999.99'          WHEN .f. SIZE 050,09    PIXEL OF oDlg
+            @ 109,127 MSGET oPerCom VAR nPerCom    PICTURE '@E 999.99%'                        SIZE 030,09    PIXEL OF oDlg
             /***************************************************************************/
             @ 103,165 GROUP oGrp6 TO 121,300 LABEL  OemToAnsi('Informações')                                  PIXEL OF oDlg
-            @ 109,169 SAY OemToAnsi('1º Compra:')                                              SIZE 030,09    PIXEL OF oDlg
-            @ 108,199 SAY oPriCom VAR cPriCom      PICTURE '@!' COLOR CLR_BLUE                 SIZE 040,09    PIXEL OF oDlg  FONT oFont4
-            @ 109,220 SAY OemToAnsi('Ult. Compra:')                                            SIZE 030,09    PIXEL OF oDlg
-            @ 108,250 SAY oUltCom VAR cUltCom      PICTURE '@!' COLOR CLR_BLUE                 SIZE 040,09    PIXEL OF oDlg  FONT oFont4
-            @ 109,271 SAY OemToAnsi('Risco:')                                                  SIZE 015,09    PIXEL OF oDlg
-            @ 108,289 SAY oRisco  VAR cRisco       PICTURE '@!' COLOR CLR_BLUE                 SIZE 050,09    PIXEL OF oDlg  FONT oFont4
+            @ 111,169 SAY OemToAnsi('1º Compra:')                                              SIZE 030,09    PIXEL OF oDlg
+            @ 111,199 SAY oPriCom VAR cPriCom      PICTURE '@!' COLOR CLR_BLUE                 SIZE 040,09    PIXEL OF oDlg  FONT oFont4
+            @ 111,240 SAY OemToAnsi('Ult.Compra:')                                             SIZE 030,09    PIXEL OF oDlg
+            @ 111,270 SAY oUltCom VAR cUltCom      PICTURE '@!' COLOR CLR_BLUE                 SIZE 040,09    PIXEL OF oDlg  FONT oFont4
+//            @ 109,271 SAY OemToAnsi('Risco:')                                                  SIZE 015,09    PIXEL OF oDlg
+//            @ 108,289 SAY oRisco  VAR cRisco       PICTURE '@!' COLOR CLR_BLUE                 SIZE 050,09    PIXEL OF oDlg  FONT oFont4
             /***************************************************************************/
             @ 121,001 GROUP oGrp7 TO 139,395 LABEL  OemToAnsi('Aprovado por:')                                PIXEL OF oDlg
-            @ 126,005 CHECKBOX oLibCad VAR lLibCad PROMPT OemToAnsi("Sintegra:")               SIZE 030,10    PIXEL OF oDlg
-            @ 126,037 SAY oUsrCad VAR cUsrCad PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
-            @ 126,083 CHECKBOX oLibPed VAR lLibPed PROMPT OemToAnsi("Vendas:")                 SIZE 030,10    PIXEL OF oDlg
-            @ 126,113 SAY oUsrPed VAR cUsrPed PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
-            @ 126,161 CHECKBOX oLibCre VAR lLibCre PROMPT OemToAnsi("Crédito:")                SIZE 030,10    PIXEL OF oDlg
-            @ 126,191 SAY oUsrCre VAR cUsrCre PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
-            @ 126,239 CHECKBOX oLibDir VAR lLibDir PROMPT OemToAnsi("Diretoria:")              SIZE 030,10    PIXEL OF oDlg
-            @ 126,270 SAY oUsrDir VAR cUsrDir PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
-            @ 126,317 CHECKBOX oLibRec VAR lLibRec PROMPT OemToAnsi("Recusar:")                SIZE 030,10    PIXEL OF oDlg
-            @ 126,349 SAY oUsrRec VAR cUsrRec PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
+            @ 128,005 CHECKBOX oLibCad VAR lLibCad PROMPT OemToAnsi("Sintegra:")               SIZE 030,10    PIXEL OF oDlg
+            @ 128,037 SAY oUsrCad VAR cUsrCad PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
+            @ 128,083 CHECKBOX oLibPed VAR lLibPed PROMPT OemToAnsi("Vendas:")                 SIZE 030,10    PIXEL OF oDlg
+            @ 128,113 SAY oUsrPed VAR cUsrPed PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
+            @ 128,161 CHECKBOX oLibCre VAR lLibCre PROMPT OemToAnsi("Crédito:")                SIZE 030,10    PIXEL OF oDlg
+            @ 128,191 SAY oUsrCre VAR cUsrCre PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
+            @ 128,239 CHECKBOX oLibDir VAR lLibDir PROMPT OemToAnsi("Apr.Final:")              SIZE 040,10    PIXEL OF oDlg
+            @ 128,273 SAY oUsrDir VAR cUsrDir PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
+            @ 128,317 CHECKBOX oLibRec VAR lLibRec PROMPT OemToAnsi("Recusar:")                SIZE 030,10    PIXEL OF oDlg
+            @ 128,349 SAY oUsrRec VAR cUsrRec PICTURE '@!' COLOR CLR_BLUE                      SIZE 070,09    PIXEL OF oDlg  FONT oFont4
 
             /***************************************************************************/
             @ 103,302 GROUP oGrp9 TO 121,352 LABEL  OemToAnsi('Ultima Alteração:')                            PIXEL OF oDlg
-            @ 108,307 SAY oAltPed VAR cAltPed PICTURE '@!' COLOR CLR_BLUE                      SIZE 050,09    PIXEL OF oDlg  FONT oFont4
+            @ 110,307 SAY oAltPed VAR cAltPed PICTURE '@!' COLOR CLR_BLUE                      SIZE 050,09    PIXEL OF oDlg  FONT oFont4
             /***************************************************************************/            
             @ 141,001 GROUP oGrp8 TO 241,197 LABEL  OemToAnsi('Restrição:')                                   PIXEL OF oDlg
-            @ 146,003 GET oRestri VAR cRestri MEMO READONLY SIZE 192,090 PIXEL OF oDlg FONT oFont3
+            @ 147,003 GET oRestri VAR cRestri MEMO READONLY SIZE 192,090 PIXEL OF oDlg FONT oFont3
             /***************************************************************************/            
-            @ 141,199 GROUP oGrp9 TO 241,395 LABEL  OemToAnsi('Observações:')                                 PIXEL OF oDlg
-            @ 146,201 GET oObsMsg VAR cObsMsg MEMO READONLY SIZE 192,045 PIXEL OF oDlg
+            @ 141,199 GROUP oGrp9 TO 241,395 LABEL  OemToAnsi('Observações de Liberação:')                                 PIXEL OF oDlg
+            @ 147,201 GET oObsMsg VAR cObsMsg MEMO READONLY SIZE 192,045 PIXEL OF oDlg
             //@ 191,201 GET oObsSC5 VAR cObsSC5 MEMO READONLY SIZE 192,045 PIXEL OF oDlg
-            @ 191,201 GET oObsSC5 VAR cObserv MEMO READONLY SIZE 192,045 PIXEL OF oDlg
+            @ 192,201 GET oObsSC5 VAR cObserv MEMO READONLY SIZE 192,045 PIXEL OF oDlg
             oDlg:nStyle    := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
             oTipVen:bWhen  := {||.f.}
             oPerCom:bWhen  := Iif( nOpc == 1 .or. nOpc == 3, Iif( lAcsDir, {||.t.}, {||.f.} ), {||.f.} )
@@ -906,28 +914,23 @@ Return(nAcumul)
 /*************************************************************************************/
 Static Function fBusObs(oObsMsg, cObsMsg, oObsSC5, cObsSC5)
        cObsMsg := ""
-       //cObsSC5 := ""
        cObserv := ""
-       //oObsSc5:SetText(cObsSC5)
-       //oObsSC5:Refresh()
        DbSelectArea("SC5")
        DbSetOrder(1)
        DbSeek(xFilial("SC5")+LPD->PEDIDO,.t.)
        If Found()
           cObsMsg := MSMM(SC5->C5_OBSPED, , , , 3)
-          cObserv := Alltrim(U_TiraAcento(MSMM(SC5->C5_OBSSC5)))
-          //cObsSC5 := Alltrim(U_TiraAcento(MSMM(SC5->C5_OBSSC5)))
+          cObserv := (Alltrim(U_TiraAcento(SC5->C5_X_OBSFA)))+ " "+(alltrim(U_TiraAcento(MSMM(SC5->C5_OBSSC5, , , , 3))))
        Else
           cObsMsg := ""
           cObsSC5 := ""
        Endif
        oObsSc5:SetText(cObserv)
-       //oObsSc5:SetText(cObsSC5)
-       oObsSC5:Refresh()       
+       oObsSC5:Refresh()
 Return
 
 /*************************************************************************************/
-/*** FVALCOM - Atualiza variáveis de comissão e lucro, caso a comis. seja alterada.***/
+/*** FVALCOM - Atualiza variáveis de comissão e lucro, caso a comis. seja alterada.***/ 
 /*************************************************************************************/
 Static Function fValCom(oVlrLcr, nVlrLcr, oPerLcr, nPerLcr, oVlrCom, nVlrCom, oPerCom, nPerCom)
        DbSelectArea("LPD")
@@ -1090,14 +1093,14 @@ Static Function fAprPed(nOpc, oDlg, bOk, bCancel)
        //LGS#20190923 - ATUALIZADO FUNÇÕES PARA ATENDIMENTO DE ATUALIZAÇÃO DE RELEASE 12.1.25 
        
        oBar := FwButtonBar():New()
-       oBar:Init( oDlg, 025, 025, CONTROL_ALIGN_TOP, .T., .f. )
+       oBar:Init( oDlg, 025, 025, CONTROL_ALIGN_TOP, .T., .f. ) 
        If nOpc == 1
-          oBar:addBtnImage( "SIMULACAO.PNG" , "Titulos abertos..."      , { | | FATX01_3( aCliente ) }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "SIMULACAO.PNG" , "Titulos Abertos..."      , { | | FATX01_3( aCliente ) }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "BUDGET.PNG"    , "Titulos Recebidos..."    , { | | FATX01_4( aCliente ) }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "CONTAINR.PNG"  , "Itens..."                , { | | FATX01_5( aItmPed  ) }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "BMPGROUP.PNG"  , "Cliente..."              , { | | FATX01_6( aCliente ) }, , .T., CONTROL_ALIGN_LEFT )
-          oBar:addBtnImage( "OBJETIVO.PNG"  , "Histórico do pedido..."  , { | | U_fHisPed(2)         }, , .T., CONTROL_ALIGN_LEFT )
-          oBar:addBtnImage( "EDITWEB.PNG"   , "Inclui observações..."   , { | | FATX01_7()           }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "OBJETIVO.PNG"  , "Histórico do Pedido..."  , { | | U_fHisPed(2)         }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "EDITWEB.PNG"   , "Incluir Obs. Liberações" , { | | FATX01_7()           }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "PRECO.PNG"     , "Condição de Pagamento...", { | | FATX01_A()           }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "ORDEM.PNG"     , "Visualiza Pedido..."     , { | | FATX01_E()           }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "NOVACELULA.PNG", "Pesquisa..."             , { | | FATX01_F(1, "LPD")   }, , .T., CONTROL_ALIGN_LEFT )
@@ -1105,30 +1108,11 @@ Static Function fAprPed(nOpc, oDlg, bOk, bCancel)
           oBar:addBtnImage( "OK.PNG"        , "Confirma..."             , { | | FATX01_2(nOpc)       }, , .T., CONTROL_ALIGN_LEFT )
           oBar:addBtnImage( "CANCEL.PNG"    , "Sair..."                 , { | | oDlg:End()           }, , .T., CONTROL_ALIGN_LEFT )
        Else
-          oBar:addBtnImage( "S4WB010N.PNG"     , "Impressão..."            , { | | u_FATX01_h()         }, , .T., CONTROL_ALIGN_LEFT )
-          oBar:addBtnImage( "NOVACELULA.PNG"   , "Pesquisa..."             , { | | FATX01_F(2, "TMP")   }, , .T., CONTROL_ALIGN_LEFT )
-          oBar:addBtnImage( "CANCEL.PNG"       , "Sair..."                 , { | | DbSelectArea("TMP"), DbCloseArea(), oTempTbl01:Delete(), oDlg:End() }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "S4WB010N.PNG"  , "Impressão..."            , { | | u_FATX01_h()         }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "NOVACELULA.PNG", "Pesquisa..."             , { | | FATX01_F(2, "TMP")   }, , .T., CONTROL_ALIGN_LEFT )
+          oBar:addBtnImage( "CANCEL.PNG"    , "Sair..."                 , { | | DbSelectArea("TMP"), DbCloseArea(), oTempTbl01:Delete(), oDlg:End() }, , .T., CONTROL_ALIGN_LEFT )
        Endif
-       //DEFINE BUTTONBAR oBar SIZE 25,25 3D TOP OF oDlg
-       //If nOpc == 1
-       //   DEFINE BUTTON oBtAb  RESOURCE "SIMULACA"   OF oBar GROUP ACTION  FATX01_3(aCliente)                            TOOLTIP OemToAnsi("Titulos abertos...")
-       //   DEFINE BUTTON oBtRe  RESOURCE "BUDGETY"    OF oBar GROUP ACTION  FATX01_4(aCliente)                            TOOLTIP OemToAnsi("Titulos Recebidos...")
-       //   DEFINE BUTTON oBtIt  RESOURCE "CONTAINR"   OF oBar GROUP ACTION  FATX01_5(aItmPed)                             TOOLTIP OemToAnsi("Itens...")
-       //   DEFINE BUTTON oBtCl  RESOURCE "BMPGROUP"   OF oBar GROUP ACTION  FATX01_6(aCliente)                            TOOLTIP OemToAnsi("Cliente...")
-       //   DEFINE BUTTON oBrSi  RESOURCE "OBJETIVO"   OF oBar GROUP ACTION  U_fHisPed(2)                                  TOLLTIP OemToAnsi("Histórico do pedido...")
-       //   DEFINE BUTTON oBtIt  RESOURCE "EDIT"       OF oBar GROUP ACTION  FATX01_7()                                    TOOLTIP OemToAnsi("Inclui observações...")
-       //   DEFINE BUTTON oBtIt  RESOURCE "PRECO"      OF oBar GROUP ACTION  FATX01_A()                                    TOOLTIP OemToAnsi("Condição de Pagamento...")
-       //   DEFINE BUTTON oBtIt  RESOURCE "ORDEM"      OF oBar GROUP ACTION  FATX01_E()                                    TOOLTIP OemToAnsi("Visualiza Pedido...")
-       //   DEFINE BUTTON oBtPs  RESOURCE "NOVACELULA" OF oBar GROUP ACTION  FATX01_F(1, "LPD")                            TOOLTIP OemToAnsi("Pesquisa...")
-       //   DEFINE BUTTON oBtPl  RESOURCE "RELATORIO"  OF oBar GROUP ACTION  U_FATX01_P()                                  TOOLTIP OemToAnsi("Planilha Financeira..")
-       //   DEFINE BUTTON oBtOk  RESOURCE "OK"         OF oBar GROUP ACTION  FATX01_2(nOpc)                                TOOLTIP OemToAnsi("Confirma...")
-       //   DEFINE BUTTON oBtCa  RESOURCE "CANCEL"     OF oBar GROUP ACTION  oDlg:End()                                    TOOLTIP OemToAnsi("Sair...")
-       //Else
-       //   DEFINE BUTTON        RESOURCE "S4WB010N"   OF oBar       ACTION u_FATX01_h()                                     TOOLTIP OemToAnsi("Impressão...")
-       //   DEFINE BUTTON oBtPs  RESOURCE "NOVACELULA" OF oBar GROUP ACTION FATX01_F(2, "TMP")                             TOOLTIP OemToAnsi("Pesquisa...")
-       //   DEFINE BUTTON oBtCa  RESOURCE "CANCEL"     OF oBar GROUP ACTION DbSelectArea("TMP"), DbCloseArea(), oDlg:End() TOOLTIP OemToAnsi("Sair...")
-       //Endif
-       //oBar:bRClicked := {|| AllwaysTrue()}
+       
 Return Nil
 
 /*************************************************************************************/
@@ -1147,7 +1131,7 @@ User Function fMonArq(nOpc)
      aadd(aCampos, {"CONDICAO", "C", 40, 0 }) ; aadd(aCampos, {"VENDEDOR" , "C", 50, 0 }) //Condição(05)  ; Vendedor(06)
      aadd(aCampos, {"TIPOVEN" , "C",  1, 0 }) ; aadd(aCampos, {"TIPOPED"  , "C",  1, 0 }) //Tipo Vend.(07); Tipo Ped.(08)
      aadd(aCampos, {"TIPOCLI" , "C",  1, 0 }) ; aadd(aCampos, {"LUCRO"    , "N", 15, 4 }) //Tipo Cli.(09) ; Lucro(10)
-     aadd(aCampos, {"COMISSAO", "N",  15, 4 }) ; aadd(aCampos, {"VLRCOMIS" , "N",  15, 4 }) //Comissão(11)  ; Vlr. Com.(12)
+     aadd(aCampos, {"COMISSAO", "N", 15, 4 }) ; aadd(aCampos, {"VLRCOMIS" , "N",  15, 4 }) //Comissão(11)  ; Vlr. Com.(12)
      aadd(aCampos, {"PRICOM"  , "D",  8, 0 }) ; aadd(aCampos, {"ULTCOM"   , "D",  8, 0 }) //1º Compra(13) ; Ult. Com.(14)
      aadd(aCampos, {"RISCOCLI", "C",  1, 0 }) ; aadd(aCampos, {"INCLUSAO" , "C", 15, 0 }) //Risco Cli.(15); Inclusao(16)
      aadd(aCampos, {"DATAINC" , "D",  8, 0 }) ; aadd(aCampos, {"ALTERACAO", "C", 15, 0 }) //Dt. Incl.(17) ; Alteracao(18)
@@ -1165,26 +1149,6 @@ User Function fMonArq(nOpc)
      aadd(aCampos, {"VALATR"  , "N", 20, 2 }) ; aadd(aCampos, {"TOTTIT"   , "N", 20, 2 })
      aadd(aCampos, {"TOTPAB"  , "N", 20, 2 })
 
-/*//14/06/21
-     cBaseQry := "SELECT  SC5.C5_NUM AS PEDIDO, SUBSTRING(SC5.C5_EMISSAO, 7, 2) + '/' + SUBSTRING(SC5.C5_EMISSAO, 5, 2) "+;
-                         "+ '/' + SUBSTRING(SC5.C5_EMISSAO, 1, 4) AS EMISSAO, SC5.C5_CLIENTE + '/' + SC5.C5_LOJACLI + ' - ' + SA1.A1_NOME AS CLIENTE, "+;
-                         "SC5.C5_CONDPAG + ' - ' + SE4.E4_DESCRI AS CONDICAO, SC5.C5_VEND1 + ' - ' + SA3.A3_NOME AS VENDEDOR, SC5.C5_TIPOVEN AS TIPOVEN, "+;
-                         "SC5.C5_TIPO AS TIPOPED, SC5.C5_TIPOCLI AS TIPOCLI, SC5.C5_LUCRO AS LUCRO, SC5.C5_PORCOM AS COMISSAO, SC5.C5_VLRCOM AS VLRCOMIS, "+;
-                         "SUBSTRING(SA1.A1_PRICOM, 7, 2) + '/' + SUBSTRING(SA1.A1_PRICOM, 5, 2) + '/' + SUBSTRING(SA1.A1_PRICOM, 1, 4) AS PRICOM, SUBSTRING(SA1.A1_ULTCOM, 7, "+;
-                         "2) + '/' + SUBSTRING(SA1.A1_ULTCOM, 5, 2) + '/' + SUBSTRING(SA1.A1_ULTCOM, 1, 4) AS ULTCOM, SA1.A1_RISCO AS RISCOCLI, SC5.C5_CAD AS INCLUSAO, "+;
-                         "SUBSTRING(SC5.C5_DTCAD, 7, 2) + '/' + SUBSTRING(SC5.C5_DTCAD, 5, 2) + '/' + SUBSTRING(SC5.C5_DTCAD, 1, 4) AS DATAINC, SC5.C5_ALT AS ALTERACAO, "+;
-                         "SUBSTRING(SC5.C5_DTALT, 7, 2) + '/' + SUBSTRING(SC5.C5_DTALT, 5, 2) + '/' + SUBSTRING(SC5.C5_DTALT, 1, 4) AS DATAALT, 'P' AS STATUS, "+;
-                         "SC5.C5_LIBPED AS LIBPED, SC5.C5_USRPED AS USRPED, SC5.C5_LIBCRE AS LIBCRE, SC5.C5_USRCRE AS USRCRE, SC5.C5_LIBDIR AS LIBDIR, "+;
-                         "SC5.C5_USRDIR AS USRDIR, '  ' AS FLAG, 0 AS VALTOT, SC5.C5_APROVA AS APROVA, SC5.C5_USRAPR AS USRAPR, SC5.C5_LIBCAD AS LIBCAD, "+;
-                         "SC5.C5_USRCAD AS USRCAD, SC5.C5_BOLETO AS BOLETO, SC5.C5_TRANSP AS TRANSPORT, "+;
-                         "SC5.C5_CLIENTE AS CODCLI, SA1.A1_NOME AS NOMCLI, 0 AS VALATR, 0 AS TOTTIT, 0 AS TOTPAB "+;
-                 "FROM "+RetSqlName("SC5")+" AS SC5 WITH (NOLOCK) "+;
-                 "LEFT OUTER JOIN "+RetSqlName("SA1")+" AS SA1 WITH (NOLOCK) ON (A1_FILIAL = '"+xFilial("SA1")+"') AND (SC5.C5_CLIENTE = SA1.A1_COD) AND (SC5.C5_LOJACLI = SA1.A1_LOJA) AND (SA1.D_E_L_E_T_ = '') "+; 
-                 "LEFT OUTER JOIN "+RetSqlName("SE4")+" AS SE4 WITH (NOLOCK) ON (E4_FILIAL = '"+xFilial("SE4")+"') AND (C5_CONDPAG = E4_CODIGO) AND SE4.D_E_L_E_T_ = '' "+;
-                 "LEFT OUTER JOIN "+RetSqlName("SA3")+" AS SA3 WITH (NOLOCK) ON (A3_FILIAL = '"+xFilial("SA3")+"') AND (C5_VEND1 = SA3.A3_COD) AND (SA3.D_E_L_E_T_ = '') "+;
-                 "WHERE (SC5.D_E_L_E_T_ = '') AND (C5_FILIAL = '"+xFilial("SC5")+"') AND (SC5.C5_EMISSAO >= '20040906') " +;
-                 iif(nOpc != 2 .and. nOpc != 4, " AND (SC5.C5_APROVA = '0')","")
-*/                 
 
      cBaseQry := "SELECT  SC5.C5_NUM AS PEDIDO, SUBSTRING(SC5.C5_EMISSAO, 7, 2) + '/' + SUBSTRING(SC5.C5_EMISSAO, 5, 2) "+;
                          "+ '/' + SUBSTRING(SC5.C5_EMISSAO, 1, 4) AS EMISSAO, SC5.C5_CLIENTE + '/' + SC5.C5_LOJACLI + ' - ' + SA1.A1_NOME AS CLIENTE, "+;
@@ -1209,7 +1173,7 @@ User Function fMonArq(nOpc)
      //LGS#20190923 - CRIADO OS CAMPOS CODCLI E NOMCLI NA QUERY PARA ATENDIMENTO DE ATUALIZAÇÃO DE RELEASE 12.1.25
      cQry2 := cBaseQry
      cCond := ""
-     If nOpc == 1
+     If nOpc == 1 //Cadastro (Sintegra)
         If lAcsCad
            /*
            If !Empty(GETMV("MV_LSINFER"))
@@ -1300,7 +1264,8 @@ User Function fMonArq(nOpc)
     	       		cCond += " OR "
         	   	endif 
            		cCond += "((SC5.C5_LIBPED = 'T')"
-           		if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)
+           		//if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0) --LGS#20221107 - Substituição por função mais atual
+               If FWIsAdmin()
            			cCond += " AND (SC5.C5_USRPED = '"+cUsername+"')"
            		endif 
            		cCond += ")"
@@ -1318,8 +1283,9 @@ User Function fMonArq(nOpc)
     	       		cCond += " OR "
         	   	endif 
            		cCond += "((SC5.C5_LIBCRE = 'T')"
-           		if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)
-           			cCond += " AND (SC5.C5_USRCRE = '"+cUsername+"')"
+           		//if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)--LGS#20221107 - Substituição por função mais atual
+           		If FWIsAdmin()
+               	cCond += " AND (SC5.C5_USRCRE = '"+cUsername+"')"
            		endif 
            		cCond += ")"
            		/*
@@ -1337,7 +1303,8 @@ User Function fMonArq(nOpc)
     	       		cCond += " OR "
         	   	endif 
            		cCond += "((SC5.C5_LIBDIR = 'T')"
-           		if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)
+           		//if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)--LGS#20221107 - Substituição por função mais atual
+               If FWIsAdmin()
            			cCond += " AND (SC5.C5_USRDIR = '"+cUsername+"')"
            		endif 
            		cCond += ")"                     
@@ -1355,7 +1322,8 @@ User Function fMonArq(nOpc)
    	      	cCond += " OR "
        	   endif 
 			   cCond += "((SC5.C5_APROVA = '2')"
-   			if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)
+   			//if (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0)--LGS#20221107 - Substituição por função mais atual
+            If FWIsAdmin()
            		cCond += " AND (SC5.C5_USRAPR = '"+cUsername+"')"
       		endif 
            	cCond += ")"  
@@ -1582,8 +1550,8 @@ Static Function FATX01_8()
        Local nDesc1,nDesc2,nDesc3,nDesc4             
        Local _cRegra := ""
        Local _cIncon := ""
-       Local _ZPPAR0018 := GetMV( "ZP_PAR0018" )
-       Local _ZPPAR0019 := GetMV( "ZP_PAR0019" )
+       Local _ZPPAR0018 := GetMV( "ZP_PAR0018" ) //Habilita regra de Aprovação automatica de credito
+       Local _ZPPAR0019 := GetMV( "ZP_PAR0019" ) //Valor limite de liberação automatica de credito
 
        DbSelectArea("LPD")
        DbGoTop()
@@ -1670,7 +1638,8 @@ Static Function FATX01_8()
                                         _cRegra += "Limite de Crédito: R$ " + Alltrim( Transform( ( SA1->A1_LC ), "@E 999,999,999.99" ) ) + CHR(13) + CHR(10)
                                         If LPD->VALTOT <= _ZPPAR0019
                                            _cRegra += "Valor do Pedido: R$ " + Alltrim( Transform( ( LPD->VALTOT ), "@E 999,999,999.99" ) ) + " OK" + CHR(13) + CHR(10)
-                                           _cRegra += "LIBERADO AUTOMATICO CREDITO E DIRETORIA"
+                                           //_cRegra += "LIBERADO AUTOMATICO CREDITO E DIRETORIA"
+                                           _cRegra += "LIBERADO AUTOMATICO CREDITO E APR.FINAL"
                                            _lAutCre := .t. //Liberação do crédito
                                            lLibAuto := .t. //Liberação da diretoria
                                            lLCre    := .t. //Parâmetro para considerar liberação de crédito na liberação do pedido
@@ -1698,22 +1667,38 @@ Static Function FATX01_8()
                                _cNomArq := xFilial("SC5") + '_' + LPD->PEDIDO + "_" + Iif( _lAutCre .and. lLibAuto, 'L', Iif( _lAutCre .and. !lLibAuto, 'C', 'B' ) ) + '_' + StrTran( Time(), ":", "" )
                                MEMOWRITE( "\dirdoc\comercial\libped\" + _cNomArq + '.log', _cRegra )
                                If !_lAutCre .or. !lLibAuto
+                                  /*DbSelectArea("SC5")
+                                  cReg := alltrim(str(RecNo()))
+                                  //DbSeek(xFilial("SC5")+LPD->PEDIDO,.t.)
+                                  _cObsAtu := AllTrim(U_TiraAcento(SC5->C5_X_OBSFA))
+                                    If !( 'AGUARDANDO LIBERAÇÃO' $ _cObsAtu )
+                                       _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
+                                       _cObsAtu += 'AGUARDANDO LIBERAÇÃO'
+                                       cQuery = "UPDATE "+RetSqlName("SC5")+" SET C5_X_OBSFA = "+_cObsAtu+" WHERE R_E_C_N_O_ = "+cReg
+                                       TCSQLExec(cQuery)                                                                      
+                                       //AllTrim(U_TiraAcento(SC5->C5_X_OBSFA)) := _cObsAtu
+                                    Endif*/
                                   DbSelectArea("SC5")
                                   DbSetOrder(1)
                                   DbSeek(xFilial("SC5")+LPD->PEDIDO,.t.)
-                                  _cObsAtu := MSMM( SC5->C5_OBSSC5 )
-                                  If !( 'AGUARDANDO LIBERAÇÃO' $ _cObsAtu )
-                                    _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
-                                    _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
-                                    _cObsAtu += 'AGUARDANDO LIBERAÇÃO'
-                                    MSMM( SC5->C5_OBSSC5,      , , _cObsAtu   , 1, , , "SC5", 'C5_OBSSC5' )
-                                  Endif
-                                  If !Empty( Alltrim( _cIncon ) )
-                                     _cObsLib := DTOC(dDataBase) + '-' + Time() + ': ' + _cIncon
-                                     _cObsLib += Iif( Empty( Alltrim( MSMM( SC5->C5_OBSPED ) ) ), '', CHR(13) + CHR(10) + Alltrim( MSMM( SC5->C5_OBSPED ) ) )
-                                     MSMM( SC5->C5_OBSPED,      , , _cObsLib   , 1, , , "SC5", 'C5_OBSPED' )
-                                  Endif
+                                  //_cObsAtu := MSMM( SC5->C5_OBSSC5 )
+                                  _cObsAtu := (SC5->C5_X_OBSFA)
+                                    If !( 'AGUARDANDO LIBERAÇÃO' $ _cObsAtu )
+                                       _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
+                                       _cObsAtu += Iif( Empty(_cObsAtu), '', CHR(13) + CHR(10) )
+                                       _cObsAtu += 'AGUARDANDO LIBERAÇÃO DE VENDA'
+                                       RecLock( 'SC5', .F. )
+                                       (SC5->C5_X_OBSFA) := _cObsAtu
+                                       SC5->( MsUnLock() )                                       
+                                    Endif
+
+                                    If !Empty( Alltrim( _cIncon ) )
+                                       _cObsLib := DTOC(dDataBase) + '-' + Time() + ': ' + _cIncon
+                                        _cObsLib += Iif( Empty( Alltrim( MSMM( SC5->C5_OBSPED ) ) ), '', CHR(13) + CHR(10) + Alltrim( MSMM( SC5->C5_OBSPED ) ) )
+                                       MSMM( SC5->C5_OBSPED,      , , _cObsLib   , 1, , , "SC5", 'C5_OBSPED' )
+                                    Endif
                                Endif
+                               
                                If _lAutCre
                                   dbselectarea("LPD")
                                   RecLock("LPD",.f.)
@@ -1728,10 +1713,14 @@ Static Function FATX01_8()
                       If (lAcsPed .or. lAcsOut) .AND. (TMPSC5->C5_USRPED <> LPD->USRPED)
                          DbSelectArea("SC5")
                          If !U_EstaBloqueado("SC5", RecNo()) //DBRLock(RecNo())
-                            If LPD->LIBPED
-                               MsgRun("Liberando pedido "+LPD->PEDIDO, "Aguarde...", {|| lPed := U_fPedLib() } ) //MsgRun("Liberando pedido "+LPD->PEDIDO, "Aguarde...", {|| lPed := .t. } )  
-                               lPed  := .t.
-                               lLPed := .t.
+                            If LPD->LIBPED 
+ 							         // desativado andre em 21-12-24			
+                              //IF SC5->C5_LIBCRE ='T'
+                                // lPed  := .t.
+                                 MsgRun("Liberando pedido "+LPD->PEDIDO, "Aguarde...", {|| lPed := U_fPedLib() } ) //MsgRun("Liberando pedido "+LPD->PEDIDO, "Aguarde...", {|| lPed := .t. } )  
+                              //Endif
+                              lPed  := .t.
+                              lLPed := .t.
                             Endif
                             If lPed
                                DbSelectArea("SC5")
@@ -1833,15 +1822,21 @@ Static Function FATX01_8()
                                   lLDir := LPD->LIBDIR
                                   SC5->C5_LIBDIR := Iif(LPD->LIBDIR,'T', 'F')
                                   SC5->C5_USRDIR := Iif(LPD->LIBDIR, cUsername, " ")
+								          //SC5->C5_TIPLIB := '1'
                                Endif
-//                               If QtdComp(Round(SC5->C5_PORCOM, 3)) <> QtdComp(Round(LPD->COMISSAO, 3)) //14/06/21
-                               If QtdComp(Round(SC5->C5_COMIS1, 3)) <> QtdComp(Round(LPD->COMISSAO, 3))
+//                              If QtdComp(Round(SC5->C5_PORCOM, 3)) <> QtdComp(Round(LPD->COMISSAO, 3)) //14/06/21
+								       If QtdComp(Round(SC5->C5_COMIS1, 3)) <> QtdComp(Round(LPD->COMISSAO, 3))
                                   SC5->C5_COMIS1:= LPD->COMISSAO
                                   SC5->C5_VLRCOM := LPD->VLRCOMIS
                                   SC5->C5_LUCRO  := LPD->LUCRO
                                Endif
                                dbselectarea("SC5")
                             MsUnLock()
+							       // troca do momento de liberação do pedido (passar para diretoria ao invés da venda) andre em 21-12-24
+                            lPed := .t.
+                            //IF SC5->C5_NUM == "060101"   
+                              //MsgRun("Liberando pedido "+LPD->PEDIDO, "Aguarde...", {|| lPed := U_fPedLib() } ) //MsgRun("Liberando pedido "+LPD->PEDIDO, "Aguarde...", {|| lPed := .t. } )  																									  
+                            //Endif
                             If !lAcsOut
                                U_EnviaRec("SC5", SC5->C5_NUM, .f.,SC5->C5_VEND1)
                             Endif
@@ -1890,6 +1885,7 @@ Static Function FATX01_8()
                                      SC5->C5_DTAPR := dDataBase //(Cleber, 27/04/16) -> Data de Aprovação do Pedido
                                      SC5->C5_SUGENT := dAux
                                      SC5->C5_X_EXPO := " "
+									          //SC5->C5_TIPLIB := '1'
                                      if lCif // Se for CIF, zerar descontos antes de alterar valores dos itens para evitar problemas de se colocar valor de tabela descontado
                                         nDesc1 := SC5->C5_DESCON1
                                         nDesc2 := SC5->C5_DESCON2
@@ -2169,8 +2165,8 @@ Static Function FATX01_5(aItmPed)
           aadd(aHeaderIPD,"Produto") ; aadd(aHeaderIPD,"Descrição")   ; aadd(aHeaderIPD,"UM")
           aadd(aHeaderIPD,"Qtde.")   ; aadd(aHeaderIPD,"Preço Unit.") ; aadd(aHeaderIPD,"Total Produto")
           aadd(aHeaderIPD,"IPI")     ; aadd(aHeaderIPD,"Subst. Trib."); aadd(aHeaderIPD,"TOTAL DO ITEM")
-          DEFINE MSDIALOG oDlg2 FROM 000,000 TO 011,089 TITLE OemToAnsi("Itens do Pedido") OF oMainWnd
-                 @ 013,003 LISTBOX oIPD FIELDS TITLE "Itens do Pedido"  SIZE 346,065 PIXEL OF oDlg2 
+          DEFINE MSDIALOG oDlg2 FROM 000,000 TO 016,095 TITLE OemToAnsi("Itens do Pedido") OF oMainWnd
+                 @ 032,003 LISTBOX oIPD FIELDS TITLE "Itens no Pedido"  SIZE 346,093 PIXEL OF oDlg2 
                  oIPD:aHeaders := aHeaderIPD
                  oIPD:SetArray(aItmPed)
                  oIPD:bLine    := {|| oIPD:aArray[oIPD:nAt] }
@@ -2186,10 +2182,10 @@ Return
 /*************************************************************************************/
 Static Function FATX01_6(aCliente)
        Local nOpcE          := 4 //2
-       Local cArea    		:= alias()
-       Local aAreaAnt 		:= U_PegaArea({"SA1","SC5","SYP"})
+       Local cArea    		 := alias()
+       Local aAreaAnt 		 := U_PegaArea({"SA1","SC5","SYP"})
        Local _ni
-       Local _nModAtu      := nModulo
+       Local _nModAtu       := nModulo
        Private lVirtual     := .F.
        Private aAltEnChoice := {}
        Private aCpoEnChoice := {}
@@ -2199,8 +2195,7 @@ Static Function FATX01_6(aCliente)
        nModulo := _nModAtu
        DbSelectArea("LPD")
        If RecCount() > 0
-          RegToMemory(aCliente[1],.F.)
-         
+          RegToMemory(aCliente[1],.F.)         
           DbSelectArea(aCliente[1])
           DbSetOrder(1)
           DbSeek(xFilial(aCliente[1])+aCliente[2],.t.)
@@ -2240,12 +2235,12 @@ Static Function FATX01_7()
        Local cObsPed := CRIAVAR("ZT_LOG")
        DbSelectArea("LPD")
        If RecCount() > 0
-          DEFINE MSDIALOG oDlg1 TITLE OemToAnsi("Observação no Pedido") FROM 000,000 TO 010,049 OF oMainWnd
-                 @ 015,002 GROUP oGrp1 TO 074,191 LABEL  OemToAnsi('Observação')           PIXEL OF oDlg1
-                 @ 020,005 GET cObsPed  MEMO             SIZE 183,047 OBJECT oObsPed
+          DEFINE MSDIALOG oDlg1 TITLE OemToAnsi("Observações de Liberação ao Pedido") FROM 000,000 TO 014,054 OF oMainWnd
+                 @ 031,002 GROUP oGrp1 TO 100,214 LABEL  OemToAnsi('Observação')           PIXEL OF oDlg1
+                 @ 038,004 GET cObsPed  MEMO             SIZE 208,060 OBJECT oObsPed
                  oDlg1:nStyle       := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
           ACTIVATE MSDIALOG oDlg1 ON INIT EnchoiceBar(oDlg1, {|| oDlg1:End(), nOpcB := 1 }, {|| oDlg1:End(), nOpcB := 0 } ) CENTERED
-          If nOpcB == 1
+          If nOpcB == 1 
              cAuxObs := cObsMsg
              cObsMsg := Alltrim(cUsername)+" ("+dToc(dDataBase)+" "+Time()+"):"+Chr(13)+chr(10)
              cObsMsg += Upper(cObsPed)+Chr(13)+chr(10)+Chr(13)+chr(10)
@@ -2294,13 +2289,13 @@ Return(.t.)
 /*** FATX01_B - Legenda.                                                           ***/
 /*************************************************************************************/
 User Function FATX01_B(nPos, aPedi)
-       BrwLegenda(OemToAnsi("Legenda"), "Status", { { "DISABLE"  , "Analise de Cadastro"     } ,;
-                                                    { "BR_CINZA" , "Analise de Vendas"       } ,;
-                                                    { "BR_PINK"  , "Analise de Crédito"      } ,;
-                                                    { "BR_AZUL"  , "Analise da Diretoria"    } ,;
-                                                    { "BR_MARROM", "Aprovado e não faturado" } ,;
-                                                    { "ENABLE"   , "Aprovado e faturado"     } ,;
-                                                    { "BR_PRETO" , "Recusado"                } })
+       BrwLegenda(OemToAnsi("Legenda"), "Status", { { "DISABLE"   , "Analise de Cadastro"     } ,;
+                                                    { "BR_CINZA"  , "Analise de Vendas"       } ,;
+                                                    { "BR_PINK"   , "Analise de Crédito"      } ,;
+                                                    { "BR_AZUL"   , "Analise da Apr.Final"    } ,;
+                                                    { "BR_AMARELO", "Aprovado e não faturado" } ,;
+                                                    { "ENABLE"    , "Aprovado e faturado"     } ,;
+                                                    { "BR_PRETO"  , "Recusado"                } })
 Return
 
 /*****************************************************************************/
@@ -2309,14 +2304,14 @@ Return
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³   DATA   ³ Programador   ³Manutencao efetuada                           ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³          ³ Luís Gustavo  ³ FATX01_D - Impressão de pedidos a aprovar.   ³±±
+±±³          ³ Luís Gustavo  ³ FATX01_C - Impressão de pedidos a aprovar.   ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function FATX01_C()
      Local aCamBrw := {}
      Local aCampos := {}
-     Local cQry2   := ""   
+     Local cQry2   := ""
      Local cUf,nAliqSol, nY
      
      aadd(aCampos, {"TEMP"   , "C",  2, 0 }) ; aadd(aCampos, {"FILIAL"  , "C",  2, 0 }) //Temp(01)      ; FILIAL(02)
@@ -2341,7 +2336,7 @@ User Function FATX01_C()
      //DbUseArea(.t., , cNomArq, "TMP", .t., .f.)
      if Select("TMP")<>0
         dbselectarea("TMP")
-        dbclosearea()
+        //dbclosearea()
         If Type("oTempTbl01") == "O"
            oTempTbl01:Delete()
         Endif
@@ -2371,8 +2366,9 @@ User Function FATX01_C()
         cQry2 += "FROM MAT_"+cEmpAnt+"010SINTEGRA "
         cQry2 += "WHERE FILIAL = '"+xFilial("SC5")+"' "
         cQry2 += "  AND (INCLUSAO = '"+cUsername+"' "
+        //cQry2 += "  OR (INCLUSAO = '"+cCodUsr+"' " //verificar
         If Alltrim(UPPER(cUsername)) $ Alltrim(UPPER(GETMV("MV_LIBSINT")))
-           cQry2 += "  OR LEN(RTRIM(INCLUSAO)) = 6 )"
+           cQry2 += "  OR LEN(RTRIM(INCLUSAO)) = 6 ) OR (INCLUSAO like '%[0-9]%') "
         Else
            cQry2 += ")"
         Endif
@@ -2500,7 +2496,7 @@ User Function FATX01_C()
      DbSelectArea("TMP")
      DbGoTop()
      aadd(aCamBrw, {"CLIENTE" , "", OemToAnsi("Cliente")    , "@!"            } )
-     aadd(aCamBrw, {"PEDIDO"  , "", OemToAnsi("Pedido")     , "999999"        } )
+     aadd(aCamBrw, {"PEDIDO"  , "", OemToAnsi("Pedido")     , "XXXXXX"        } )
      aadd(aCamBrw, {"EMISSAO" , "", OemToAnsi("Emissão")    , ""              } )
      aadd(aCamBrw, {"VLRMERC" , "", OemToAnsi("Valor Merc."), "@E 999,999.99" } )
      aadd(aCamBrw, {"VLRTOT"  , "", OemToAnsi("Valor Total"), "@E 999,999.99" } )
@@ -2532,14 +2528,14 @@ User Function FATX01_D()
        //                      0         1         2         3         4         5         6         7         8         9         10        11        12        13
        //                      0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
        //                      999999/99 - XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  999999  99/99/99  999,999.99  999,999.99  999999 - XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-       //Local Cabec1       := "CLIENTE                                        PEDIDO  EMISSAO   VLR. MERC.  VLR.TOTAL   REPRESENTANTE"
-       //Local Cabec2       := ""   
-       //Local imprime       := .T.
+       //Local Cabec1      := "CLIENTE"                                        PEDIDO  EMISSAO   VLR. MERC.  VLR.TOTAL   REPRESENTANTE"
+       //Local Cabec2      := ""   
+       //Local imprime     := .T.
        Local aOrd          := {}
 
        Private lEnd        := .F.
        Private lAbortPrint := .F.
-       //Private CbTxt       := ""
+       //Private CbTxt     := ""
        Private limite      := 132
        Private tamanho     := "M"
        Private nomeprog    := "FATX01_D"
@@ -2552,7 +2548,7 @@ User Function FATX01_D()
        Private CONTFL      := 01
        Private m_pag       := 01
        Private wnrel       := "FATX01_D"
-       Private cString       := "SC9"
+       Private cString     := "SC9"
 
        //Pergunte(cPerg, .f.)
        wnrel := SetPrint(cString, NomeProg,      , @titulo, cDesc1, cDesc2, cDesc3, .T., aOrd, .T., Tamanho,,.F.)
@@ -2598,7 +2594,7 @@ Static Function fImpReg(Cabec1, Cabec2, Titulo, nLin)
              Endif
              
              @ nLin, 000 PSAY TMP->CLIENTE  Picture "@!"
-             @ nLin, 047 PSAY TMP->PEDIDO   Picture "999999"
+             @ nLin, 047 PSAY TMP->PEDIDO   Picture "@!"
              @ nLin, 055 PSAY TMP->EMISSAO
              @ nLin, 065 PSAY TMP->VLRMERC  Picture "@E 999,999.99"
              @ nLin, 077 PSAY TMP->VLRTOT   Picture "@E 999,999.99"
@@ -3415,9 +3411,9 @@ oDlg1      := MSDialog():New( 171,642,319,1202,"ATUALIZA CADASTRO DE E-MAIL",,,.
 oSay1      := TSay():New( 004,028,{||"Atualização de E-mail (Clientes)"},oDlg1,,,.F.,.F.,.F.,.T.,CLR_BLACK,CLR_WHITE,120,008)
 oSay2      := TSay():New( 013,014,{||"Código"},oDlg1,,,.F.,.F.,.F.,.T.,CLR_BLACK,CLR_WHITE,032,008)
 oSay3      := TSay():New( 032,012,{||"e-mail"},oDlg1,,,.F.,.F.,.F.,.T.,CLR_BLACK,CLR_WHITE,032,008)
-oGetCod      := TGet():New( 020,013,,oDlg1,038,008,'',,CLR_BLACK,CLR_WHITE,,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","",,)
-oGetRaz      := TGet():New( 020,054,,oDlg1,188,008,'',,CLR_BLACK,CLR_WHITE,,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","",,)
-oGetEmail      := TGet():New( 039,012,,oDlg1,232,008,'',,CLR_BLACK,CLR_WHITE,,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","",,)
+oGetCod    := TGet():New( 020,013,,oDlg1,038,008,'',,CLR_BLACK,CLR_WHITE,,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","",,)
+oGetRaz    := TGet():New( 020,054,,oDlg1,188,008,'',,CLR_BLACK,CLR_WHITE,,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","",,)
+oGetEmail  := TGet():New( 039,012,,oDlg1,232,008,'',,CLR_BLACK,CLR_WHITE,,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","",,)
 oSBtOK     := SButton():New( 052,241,1,,oDlg1,,"", )
 
 oDlg1:Activate(,,,.T.)

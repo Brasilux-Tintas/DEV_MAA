@@ -14,36 +14,33 @@
 	+-----------+----------+-------+-----------------------+------+-------------+
 	|                                                                           |
     | Descricao:	Função de WorkFlow para envio de mensagem por email	 	  	|
-    |               dos pedidos que estão endereçados e deletados ou ainda dos  |
-    |               pedidos que foram faturados e ainda não despachados a 4 dias| 
+    |               dos pedidos que não sairam na impressao					  	|
 	+-----------+------------------------------------------+------+-------------+ 
 	| USO  AP        				    									   	|                                      						    
 	+---------------------------------------------------------------------------+  
 
 */
 User Function WFIMPPED()
-
-    Local cPara    	:= "vendas@brasilux.com.br"
-    Local cAssunto  := "PEDIDOS QUE NÃO SAIRAM NA IMPRESSÃO	 "
+ 
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0076")) //"vendas@brasilux.com.br"
+    Local cAssunto  := "PEDIDOS QUE NÃO SAIRAM NA IMPRESSÃO"
     Local cMsg		:= ""
-    PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-     
+    
+	PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
+    cPara    		:= TRIM(GETMV("ZP_PAR0076")) 
 
-     /**	Monta a query para buscar os dados	**/   
-	
-cQuery := "SELECT C5_NUM, C5_CLIENTE, A1_NOME, C5_TRANSP, SUBSTRING(ZZB_DATLOG,7,2)+'/'+SUBSTRING(ZZB_DATLOG,5,2)+'/'+SUBSTRING(ZZB_DATLOG,1,4) AS 'APROVACAO', DATEDIFF(DAY,ZZB_DATLOG,GETDATE()) AS 'ATRASO'
-cQuery += "FROM  "+RetSqlName("SC5")+" SC5 WITH (NOLOCK)
-cQuery += "LEFT OUTER JOIN  "+RetSqlName("SA1")+"  SA1 WITH (NOLOCK) ON A1_FILIAL = '' AND A1_COD = C5_CLIENTE AND SA1.D_E_L_E_T_ =''
-cQuery += "LEFT OUTER JOIN  "+RetSqlName("ZZB")+"  ZZB WITH (NOLOCK) ON ZZB_FILIAL = C5_FILIAL AND ZZB_PEDIDO = C5_NUM AND ZZB.D_E_L_E_T_ =''
-cQuery += "WHERE C5_FLAG ='N' AND C5_NOTA ='' AND C5_APROVA<>'1' AND SC5.D_E_L_E_T_ ='' AND C5_LIBDIR ='T' AND C5_FILIAL ='010101' AND ZZB_IDLOG ='LDI' AND DATEDIFF(DAY,ZZB_DATLOG,GETDATE())>0
-cQuery += "ORDER BY DATEDIFF(DAY,ZZB_DATLOG,GETDATE()) DESC, C5_TRANSP, C5_NUM"                                                                        	
+    /**	Monta a query para buscar os dados	**/
+	cQuery := "SELECT C5_NUM, C5_CLIENTE, A1_NOME, C5_TRANSP, SUBSTRING(ZZB_DATLOG,7,2)+'/'+SUBSTRING(ZZB_DATLOG,5,2)+'/'+SUBSTRING(ZZB_DATLOG,1,4) AS 'APROVACAO', DATEDIFF(DAY,ZZB_DATLOG,GETDATE()) AS 'ATRASO'
+	cQuery += "FROM  "+RetSqlName("SC5")+" SC5 WITH (NOLOCK)
+	cQuery += "LEFT OUTER JOIN  "+RetSqlName("SA1")+"  SA1 WITH (NOLOCK) ON A1_FILIAL = '' AND A1_COD = C5_CLIENTE AND SA1.D_E_L_E_T_ =''
+	cQuery += "LEFT OUTER JOIN  "+RetSqlName("ZZB")+"  ZZB WITH (NOLOCK) ON ZZB_FILIAL = C5_FILIAL AND ZZB_PEDIDO = C5_NUM AND ZZB.D_E_L_E_T_ =''
+	cQuery += "WHERE C5_FLAG ='N' AND C5_NOTA ='' AND C5_APROVA<>'1' AND SC5.D_E_L_E_T_ ='' AND C5_LIBDIR ='T' AND C5_FILIAL ='010101' AND ZZB_IDLOG ='LDI' AND DATEDIFF(DAY,ZZB_DATLOG,GETDATE())>0
+	cQuery += "ORDER BY DATEDIFF(DAY,ZZB_DATLOG,GETDATE()) DESC, C5_TRANSP, C5_NUM"                                                                        	
     
 	TcQuery cQuery ALIAS "TCQ" NEW   
 	DbSelectArea("TCQ")        
    
-	/**		Monta o script HTML para ser enviado por email 	**/        
-	
-    
+	/**  Monta o script HTML para ser enviado por email 	**/        
     cMsg:="<html>"
 	cMsg+="<body>"
 	cMsg+="<table width='1400' height='92' border='0' font size='1'>"

@@ -83,7 +83,6 @@ User Function BRFT101(nOrigem)
 			RESET ENVIRONMENT
 			RpcSetType(3) //seta tipo de consumo de licença
 
-			//RpcSetEnv( "01",_cFilial,'Administrador' ,'851296' , "FAT" , , aTables, , , ,  )
 			PREPARE ENVIRONMENT EMPRESA "01" FILIAL _cFilial MODULO "FAT" TABLES "SC5","SC6","SB1","SA2","SA1","SD1","SF1","SF2","SD2","SC9","SB2","SF4"
 			
 			bErro := {|e| SCHERRO_1(e)}    

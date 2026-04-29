@@ -41,7 +41,7 @@ User Function BRPCP053()
      DbSelectArea("SX3")
      DbSetOrder(1)
      cPerg := "ES"+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2)
-     ValidPerg()
+     //ValidPerg()
      Pergunte(cPerg)   
 
      cPlanilha := Alltrim(mv_par01)+".pdv"
@@ -87,7 +87,7 @@ User Function PCP0532()
      Private cEst := Iif(SB1->B1_ESTOQUE=="S","Sim","Não")
      Private oDlg
      
-     If !rtrim(cUserName) $ GETMV("MV_ALTTABP")
+     If !Upper( AllTrim( cUserName ) ) $ Upper( GETMV( "MV_ALTTABP" ) )
         MsgBox("Acesso negado. Entre em contato com o Administrador do Sistema!!!","Atenção...","ALERT")
         Return
      Endif
@@ -159,7 +159,7 @@ User Function PCP0532()
             Endif
       Endif
 Return
-     
+/*
 Static Function ValidPerg()
        Local _sAlias := Alias()
        Local i, j
@@ -184,4 +184,4 @@ Static Function ValidPerg()
            Endif
        Next
        DbSelectArea(_sAlias)
-Return
+Return*/

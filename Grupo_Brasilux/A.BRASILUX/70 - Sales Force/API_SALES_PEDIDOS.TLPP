@@ -1,0 +1,572 @@
+#include 'totvs.ch'
+#include 'tlpp-core.th'
+#include 'tlpp-rest.th'
+#include 'tlpp-object.th'
+
+/*±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Função    ³ API_SALES_PEDIDOS³ Autor ³ Nelieder M Corneta   ³ Data ³ 01/10/24    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄ´±±
+±±³Descrição ³ API de integração de Pedidos com Sales Force                         ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄßßßßßßßßßßßß*/
+
+
+class salesforce_pedido from fwAdapterBaseV2
+
+	public method new() constructor
+
+	@post('/salesforce/pedido')
+	public method pedido() as logical
+
+    @post('/salesforce/tes')
+	public method retornates() as logical
+
+ 
+end class
+
+method new() class salesforce_pedido; return self
+
+method pedido() class salesforce_pedido
+    Local oError         as object
+    
+    Private jBodyReq  as json
+    Private jPedido   as json
+    Private jTmp      as json 
+    Private jEtemp    as json   
+    Private jTemp     as json
+    Private JCab      as json
+    Private JPed      as json
+    Private cCampo    as character
+    Private cEmpresa  as character
+    Private cCliente  as character
+    Private nProdutos as numeric
+    Private aProdutos as array
+    Private cMsgLog   as character
+    Private cLoja     as character
+
+    Private lMsErroAuto as logical
+    Private err as object
+ 
+
+
+    cLoja := "01"
+
+    jBodyReq := jsonObject():new()
+    jBodyReq:fromJson(oRest:getBodyRequest())
+
+    Try
+        If ValType(jBodyReq[1]['Cabecalho']) == "U"
+            
+            jResp               := jsonObject():new()
+            jResp['Requerido']  := 'Necessário informar Cabecalho !'
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+
+        EndIf
+        // verifica se campos do cabeçalho foram preenchidos
+        do case
+
+            case Empty(jBodyReq[1]['Cabecalho']['Empresa']) .OR. ValType(jBodyReq[1]['Cabecalho']['Empresa']) == "U"
+                cCampo := "Empresa"
+
+            case Empty(jBodyReq[1]['Cabecalho']['Deposito']) .OR. ValType(jBodyReq[1]['Cabecalho']['Deposito']) == "U"
+                cCampo := "Deposito"
+
+            case Empty(jBodyReq[1]['Cabecalho']['Cliente']) .OR. ValType(jBodyReq[1]['Cabecalho']['Cliente']) == "U"
+                cCampo := "Cliente"
+            
+            case Empty(jBodyReq[1]['Cabecalho']['CondicaoPagamento']) .OR. ValType(jBodyReq[1]['Cabecalho']['CondicaoPagamento']) == "U"
+                cCampo := "CondicaoPagamento" 
+
+            case Empty(jBodyReq[1]['Cabecalho']['Transportadora']) .OR. ValType(jBodyReq[1]['Cabecalho']['Transportadora']) == "U"
+                cCampo := "Transportadora"  
+
+            case Empty(jBodyReq[1]['Cabecalho']['TabelaPreco']) .OR. ValType(jBodyReq[1]['Cabecalho']['TabelaPreco']) == "U"
+                cCampo := "TabelaPreco"       
+                
+            case Empty(jBodyReq[1]['Cabecalho']['IdPedido']) .OR. ValType(jBodyReq[1]['Cabecalho']['IdPedido']) == "U"
+            cCampo := "IdPedido"
+                
+            case Empty(jBodyReq[1]['Cabecalho']['IdReserva']) .OR. ValType(jBodyReq[1]['Cabecalho']['IdReserva']) == "U"
+            cCampo := "IdReserva"
+                    
+
+            case Empty(jBodyReq[1]['Cabecalho']['Vendedor']) .OR. ValType(jBodyReq[1]['Cabecalho']['Vendedor']) == "U"
+                cCampo := "Vendedor"        
+
+        endcase
+
+        // retorna informando obrigatoriedade dos campos
+        If !Empty(cCampo)
+            jResp               := jsonObject():new()
+            jResp['Requerido']  := 'Necessário informar a variavel '+cCampo+' !'
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+        EndIF
+
+        If UPPER(jBodyReq[1]['Cabecalho']['Deposito']) == "ARARAQUARA"
+            jBodyReq[1]['Cabecalho']['Estoque'] := "A3"
+        elseif UPPER(jBodyReq[1]['Cabecalho']['Deposito']) == "GUARULHOS"
+            jBodyReq[1]['Cabecalho']['Estoque'] := "G3"
+        else
+            jResp           := jsonObject():new()
+            jResp['Requerido']  := 'Necessário informar a Deposito (Araraquara ou Guarulhos) !'
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+        EndIF
+
+        If ( UPPER(jBodyReq[1]['Cabecalho']['Empresa']) == "DISSOLTEX")
+            cEmp := "01"
+            cFil := "060101"
+        Elseif ( UPPER(jBodyReq[1]['Cabecalho']['Empresa']) == "BRASILUX") 
+            cEmp := "01"
+            cFil := "010101"
+        else
+            
+            jResp           := jsonObject():new()
+            jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+
+        EndIF
+    
+
+
+
+        // Seta Empresa 
+        RpcSetEnv(cEmp,cFil,"","","","MATA410",{"SC5","SC6","SA1","SB1","SB2","SF4"})
+
+        // verifica se possui itens
+        // Cod Ped Sales
+        // Vendedor
+        // desconto por produto
+        // Comissão
+        // Tipo de Frete
+        // Desconto Total
+        lOk := .T.
+      
+
+        If !Valida()
+            return .T.
+        EndIf
+
+        // Verifica reservas e faz amarrações
+        LocalizaReserva()
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']       := 'Erro na execução, '+oError:description
+
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_PEDIDOS", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro API_SALES_PEDIDOS",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:setStatusCode(501)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY 
+
+        Try 
+
+            If U_SALES_PEDIDO_EXE(jBodyReq)
+
+                    cLog := PrintJson(AllTrim(SC5->C5_NUM))
+                    U_API_LOGS("0"    , "API_SALES_PEDIDOS", ProcName(),AllTrim(SC5->C5_NUM), cLog)
+                    U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Pedido Incluido "+AllTrim(SC5->C5_NUM),cLog,"neliedercorneta@brasilux.com.br","","")
+            
+                    jResp                       := jsonObject():new()
+                    jResp['Status']             := .T.
+                    jResp['NumeroDoPedido']     := SC5->C5_NUM
+                    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                    oRest:setResponse(jResp:toJson())
+        
+            EndIF
+        
+        CATCH oError
+
+            jResp               := jsonObject():new()
+            jResp['Erro']       := 'Erro na execução, '+oError:description
+
+            //         cStatus, cRotina          , Funcao    , cPedido, cLog
+            U_API_LOGS("B"    , "API_SALES_PEDIDOS", ProcName(), ''     , oError:description)
+            U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro API_SALES_PEDIDOS Linha 204",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+            oRest:setStatusCode(501)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+
+	ENDTRY          
+
+    RpcClearEnv()
+
+return .T.
+
+// Gerar Pedido em TXT para Log
+Static function PrintJson(cPedido)
+  local nX       as numeric
+  local cLog    as character
+    cLog := ""
+    cLog := "Nº Pedido..........: "+cPedido                                         + CRLF
+    cLog += "Empresa............: "+jBodyReq[1]['Cabecalho']['Empresa']             + CRLF
+    cLog += "Deposito...........: "+jBodyReq[1]['Cabecalho']['Deposito']            + CRLF
+    cLog += "Cliente............: "+jBodyReq[1]['Cabecalho']['Cliente']             + CRLF
+    cLog += "Cond de Pagamento..: "+jBodyReq[1]['Cabecalho']['CondicaoPagamento']   + CRLF
+    cLog += "Transportadora.....: "+jBodyReq[1]['Cabecalho']['Transportadora']      + CRLF
+    cLog += "Tabela de Preço....: "+jBodyReq[1]['Cabecalho']['TabelaPreco']         + CRLF
+    cLog += "Vendedor...........: "+jBodyReq[1]['Cabecalho']['Vendedor']            + CRLF
+    cLog += "IdPedido...........: "+jBodyReq[1]['Cabecalho']['IdPedido']            + CRLF
+    cLog += "IdReserva..........: "+jBodyReq[1]['Cabecalho']['IdReserva']           + CRLF
+    
+    cLog += "============================================================================"+ CRLF + CRLF
+
+    For nX := 1 To len(jBodyReq[1]['Itens'])  
+        cLog += "Sku...: " + jBodyReq[1]['Itens'][nX]['Sku'] + " Qtd :" + AllTrim(Str(jBodyReq[1]['Itens'][nX]['Quantidade'])) + CRLF
+    Next nX
+    
+
+return (cLog)
+
+
+
+Static Function Valida()
+Local i         as numeric
+Local cFilAGG   as character
+Local cFilSA1   as character
+Local cFilSB1   as character
+Local cFilSE4   as character
+Local cFilSF4   as character
+Local cFilSA4   as character
+Local cFilDA0   as character
+Local cFilSA3   as character
+
+Local cProduto  as character
+Local cCondPag  as character
+Local cCliente  as character
+Local cVendedo  as character
+Local cTransp   as character
+Local cTabprc   as character
+Local cDeposito as character
+Local oError         as object
+Local cError        as character
+
+
+Try
+
+    cFilAGG := xFilial("AGG")
+    cFilSA1 := xFilial("SA1") // cliente
+    cFilSB1 := xFilial("SB1") // produto
+    cFilSE4 := xFilial("SE4") // condicao de pagamento
+    cFilSF4 := xFilial("SF4") // tes
+    cFilSA4 := xFilial("SA4") // transportadora
+    cFilDA0 := xFilial("DA0") // Tabela de preço
+    cFilSA3 := xFilial("SA3") // Vendedor
+
+    //****************************************************************
+    //* Valida itens cabeçalho do pedido
+    //****************************************************************
+
+
+    jErro                   := jsonObject():new()
+    jErro['Status']         := .F.
+    jErro['NumeroDoPedido'] := ""    
+    jErro['Erros']          := array(0)
+   
+
+    cCondPag := jBodyReq[1]['Cabecalho']['CondicaoPagamento']
+    cCondPag := padr(cCondPag,TamSx3("E4_CODIGO")[1]," ")
+    If SE4->(! MsSeek(cFilSE4 + cCondPag))
+        lOk     := .F.
+        jTmp                      := jsonObject():new()
+        jTmp["CondicaoPagamento"] := "Condição de Pagamento não Cadastrada !"
+        aadd(jErro['Erros'] ,jTmp)
+    EndIf
+
+
+    cCliente := jBodyReq[1]['Cabecalho']['Cliente']
+    cCliente := padr(cCliente,TamSx3("A1_COD")[1]," ")
+    If SA1->(! MsSeek(cFilSA1 + cCliente + cLoja))
+        lOk     := .F.
+        jTmp            := jsonObject():new()
+        jTmp["Cliente"] := "Cliente não Cadastrado !"
+        aadd(jErro['Erros'] ,jTmp)
+    Else
+        If SA1->A1_MSBLQL == "1"
+            lOk     := .F.
+            jTmp            := jsonObject():new()
+            jTmp["Cliente"] := "Cliente Bloqueado !"
+            aadd(jErro['Erros'] ,jTmp)
+        EndIF
+    EndIf
+
+
+    cTransp := jBodyReq[1]['Cabecalho']['Transportadora']
+    cTransp := padr(cTransp,TamSx3("A4_COD")[1]," ")
+    If SA4->(! MsSeek(cFilSA4 + cTransp))
+        lOk     := .F.
+        jTmp                   := jsonObject():new()
+        jTmp["Transportadora"] := " Transportadora não Cadastrada ! "
+        aadd(jErro['Erros'] ,jTmp)
+    Else
+        If SA4->A4_OCORREN == "B"
+            lOk     := .F.
+            jTmp                   := jsonObject():new()
+            jTmp["Transportadora"] := "Transportadora Bloqueada ! "
+            aadd(jErro['Erros'] ,jTmp)
+        EndIF
+    EndIf
+
+
+    cTabprc := jBodyReq[1]['Cabecalho']['TabelaPreco']
+    cTabprc := padr(cTabprc,TamSx3("DA0_CODTAB")[1]," ")
+    If DA0->(! MsSeek(cFilDA0 + cTabprc))
+        lOk     := .F.
+        jTmp                := jsonObject():new()
+        jTmp["TabelaPreco"] := "Tabela de Preço não Cadastrada !"
+        aadd(jErro['Erros'] ,jTmp)
+    Else
+        If DA0->DA0_ATIVO <> "1"
+            lOk     := .F.
+            jTmp                := jsonObject():new()
+            jTmp["TabelaPreco"] := "Tabela de Preço Bloqueada !"
+            aadd(jErro['Erros'] ,jTmp)
+        elseif dDataBase > DA0->DA0_DATATE
+            lOk     := .F.
+            jTmp        := jsonObject():new()
+            jTmp["TabelaPreco"] := "Tabela de Preço fora de vigência !"
+            aadd(jErro['Erros'] ,jTmp)
+        EndIF
+    EndIf
+
+
+    cVendedo := jBodyReq[1]['Cabecalho']['Vendedor']
+    cVendedo := padr(cVendedo,TamSx3("A3_COD")[1]," ")
+    If SA3->(! MsSeek(cFilSA3 + cVendedo + cLoja))
+        lOk     := .F.
+        jTmp                      := jsonObject():new()
+        jTmp["Vendedor"] := "Vendedor não Cadastrado"
+        aadd(jErro['Erros'] ,jTmp)
+    Else
+        If SA3->A3_MSBLQL == "1"
+            lOk     := .F.
+            jTmp             := jsonObject():new()
+            jTmp["Vendedor"] := " Vendedor Bloqueado"
+            aadd(jErro['Erros'] ,jTmp)
+        EndIf
+    EndIf
+
+    // valida itens produto
+    For i := 1 to len(jBodyReq[1]['Itens'])
+       
+      
+        
+        cProduto := padr(jBodyReq[1]['Itens'][i]['Sku'],TamSx3("B1_COD")[1]," ")
+        If SB1->(! MsSeek(cFilSB1 + cProduto))
+            lOk     := .F.  
+            jTmp         := jsonObject():new()
+            jTmp['sku']  := "Produto " + cProduto + " não Cadastrado" 
+            aadd(jErro['Erros'] ,jTmp)
+        elseif SB1->B1_MSBLQL == "1"
+            lOk     := .F.  
+            jTmp         := jsonObject():new()
+            jTmp['sku']  := "Produto " + cProduto + " Bloqueado" 
+            aadd(jErro['Erros'] ,jTmp)
+        EndIf
+
+        Iif(cDeposito == "ARARAQUARA","A3","G3") 
+        cDeposito := padr(cDeposito,TamSx3("B2_LOCAL")[1]," ")
+        
+        SB2->(DbSetOrder(1))
+        IF  !SB2->(DbSeek(xFilial("SC0")+cProduto+cDeposito))
+            //Aciona a checagem / criação do saldo no armazém para o produto
+            //A120ChkAlmox(cProduto, cDeposito)      
+        EndIf
+
+
+        
+       
+    Next
+
+CATCH oError
+
+    jResp           := jsonObject():new()
+    cError          := "Erro no fonte API_SALES_PEDIDOS.TLPP " + CRLF
+    cError          += 'Erro na execução da Função '+ProcName() + " - Linha " + AllTrim(Str(ProcLine())) + " " + oError:description 
+
+    jResp['Erro']   := 'Erro na execução da Função '+ProcName() + " - Linha " + AllTrim(Str(ProcLine())) + " " + oError:description 
+    U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro API_SALES_PEDIDOS",cError,"neliedercorneta@brasilux.com.br","","")
+    oRest:appendKeyHeaderResponse("Content-Type","application/json")
+    oRest:setResponse(jResp:toJson())
+    return .T.
+
+ENDTRY  
+
+
+    If !lOk
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setStatusCode(402)
+        oRest:setResponse(jErro:toJson())
+        return .F.
+    EndIf
+
+return(lOk)
+
+
+Static Function LocalizaReserva()
+Local i         as numeric
+Local cReserva  as character
+
+    cReserva := jBodyReq[1]['Cabecalho']['IdReserva']
+    
+    For i := 1 to len(jBodyReq[1]['Itens'])
+              
+        cProduto := padr(jBodyReq[1]['Itens'][i]['Sku'],TamSx3("B1_COD")[1]," ")
+        DbSelectArea("SC0")
+        SC0->(DbSetOrder(4))
+        IF  SC0->(DbSeek(xFilial("SC0")+cReserva))
+              While .not. SC0->(eof()) .AND. cReserva == SC0->C0_XIDSF
+                jBodyReq[1]['Itens'][i]['reserva'] := SC0->C0_NUM
+                SC0->(dbSkip())
+              End
+        EndIf
+       
+    Next
+
+
+return()
+
+
+
+method retornates() class salesforce_pedido
+Local oError         as object
+Local i              as numeric
+Local cCliente       as character
+Local cProduto       as character
+Local cTes           as character
+
+Private jBodyReq  as json
+
+jBodyReq := jsonObject():new()
+jBodyReq:fromJson(oRest:getBodyRequest())
+
+    Try
+
+         If Empty(jBodyReq["empresa"])
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+        else
+
+            If ( UPPER(jBodyReq["empresa"]) == "DISSOLTEX")
+                cFil := "060101"
+            Elseif ( UPPER(jBodyReq["empresa"]) == "BRASILUX") 
+                cFil := "010101"
+            else
+                
+                jResp           := jsonObject():new()
+                jResp['Requerido']  := 'Necessário informar a variavel empresa (Dissoltex ou Brasilux) !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+
+            EndIF
+
+        EndIf 
+        
+        RpcSetEnv("01",cFil,"","","","",{"SA1"})
+        
+        
+        If Empty(jBodyReq['cliente'])
+            jResp               := jsonObject():new()
+            jResp['Requerido']  := 'Necessário informar a Cliente  !'
+            oRest:setStatusCode(402)
+            oRest:appendKeyHeaderResponse("Content-Type","application/json")
+            oRest:setResponse(jResp:toJson())
+            return .T.
+        Else
+            cCliente := padr(jBodyReq['cliente'],TamSx3("A1_COD")[1]," ")
+            If SA1->(! MsSeek(xFilial("SA1") + cCliente))
+                jResp               := jsonObject():new()
+                jResp['Requerido']  := 'Cliente não cadastrado  !'
+                oRest:setStatusCode(402)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .T.
+            EndIf
+        
+        EndIF
+        jResp               := jsonObject():new()
+        jResp['itens']      := array(0) // informo que é um json com array
+        If .not. Empty(jBodyReq["produto"])
+
+            For i := 1 to len(jBodyReq["produto"]) 
+                
+                cProduto := jBodyReq["produto"][i]  
+                cProduto := padr(cProduto,TamSx3("B1_COD")[1]," ")
+                jTemp           := jsonObject():new() // zero e inicio json
+
+                If SB1->(! MsSeek(xFilial("SB1") + cProduto))
+                    jTemp['CodigoProduto']  := AllTrim(cProduto)
+                    jTemp['Tes']            := ""
+                    jTemp['Status']         := .F.
+                Else
+                    If SB1->B1_MSBLQL == '1'
+                        jTemp['CodigoProduto']  := AllTrim(cProduto)
+                        jTemp['Tes']            := ""
+                        jTemp['Status']         := .F.
+                    else
+                        cTes := U_BRFAT053('N',cCliente,cProduto)
+                        jTemp['CodigoProduto']  := AllTrim(cProduto)
+                        jTemp['Tes']            := cTes
+                        jTemp['Status']         := .T.
+                    EndIF
+                        
+                EndIf  
+                aadd(jResp['itens'] ,jTemp)
+
+            Next
+
+        EndIf  
+
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+    CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']       := 'Erro na execução, '+oError:description
+
+        //         cStatus, cRotina          , Funcao    , cPedido, cLog
+        U_API_LOGS("B"    , "API_SALES_PEDIDOS", ProcName(), ''     , oError:description)
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro API_SALES_PEDIDOS",oError:description,"neliedercorneta@brasilux.com.br","","")
+
+        oRest:setStatusCode(501)
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+	ENDTRY  
+
+
+
+    RpcClearEnv()
+
+
+return(.T.)

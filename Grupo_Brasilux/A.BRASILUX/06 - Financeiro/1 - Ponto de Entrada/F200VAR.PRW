@@ -13,21 +13,23 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 //30/09/2019 - Luís Gustavo - Adequação para release 12.1.25
 User Function F200VAR()
+Local oCorren := "66"  // Jose 26/06/2023
+Local _ZPPAR0119 := GetMV( "ZP_PAR0119" )  // Jose 26/06/2023
 Local cArea := Alias()
-Local aArea, lBaixa, lLiqui, lBloqueado, lAchou,_cTitulo
+Local aArea, lBaixa, lLiqui, lBloqueado, lAchou, _cTitulo
 Local  _cGrpEmp := ALLTRIM(FWGrpCompany())
-     u_zcfga01( 'F200VAR' ) //LGS#2021202 - Gravação de log de utilização da rotina
-If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
+       u_zcfga01( 'F200VAR' ) //LGS#2021202 - Gravação de log de utilização da rotina
+// If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).   //   FOI INIBIDO AQUI PARA ACEITAR TODAS AS EMPRESAS   jose 26/06/2023
    aArea := U_PegaArea({"SE1","SEA"})
    DbSelectArea("SE1")
    DbSetOrder(1)
-        /*_cAux := alltrim(substr(cNumTit,10,3))
+      /*_cAux := alltrim(substr(cNumTit,10,3))
         if empty(_cAux) .and. !empty(substr(cNumTit,1,10))
            _cTitulo = substr(paramixb[1][1],1,13)
            cNumTit := substr(cNumTit,1,9)+substr(cNumTit,13,3)
         else
-           //_cTitulo := substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,1)
-           //cNumTit  := substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,3)
+         //_cTitulo := substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,1)
+         //cNumTit  := substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,3)
            _cTitulo := substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,1)+" "
            cNumTit  := _cTitulo
            if empty(alltrim(substr(paramixb[1][1],11,1)))
@@ -36,8 +38,15 @@ If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
               cNumTit += substr(paramixb[1][1],11,2)
            endif
         endif */
-
-   _cTitulo := PADR(substr(paramixb[1][1],1,9),9)+space(3)+PADR(substr(paramixb[1][1],10,1),2)+"NF "
+   If _cGrpEmp <> '11'    // Jose 20/10/2023 
+      _cTitulo := PADR(substr(paramixb[1][1],1,9),9)+space(3)+PADR(substr(paramixb[1][1],10,1),2)+"NF " 
+   Else     // Jose 20/10/2023
+      If(Alltrim(cBanco) == "237")  //  Jose 20/10/2023
+         _cTitulo := PADR(substr(paramixb[1][1],1,10),10)+space(3)+PADR(substr(paramixb[1][1],10,1),2)+"NF "      // Jose 20/10/2023
+      Else   //  Jose 20
+         _cTitulo := PADR(substr(paramixb[1][1],1,9),9)+space(3)+PADR(substr(paramixb[1][1],10,1),2)+"NF "   //  Jose 20/10/2023
+      EndIf //  Jose 20/10/2023
+   Endif    // Jose 20/10/2023
 
    DbSelectArea("SE1")
    DbSeek(xFilial("SE1")+_cTitulo) // paramixb[1][3])
@@ -46,8 +55,8 @@ If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
    cNumTit := IIF(lAchou .and. !empty(alltrim(SE1->E1_IDCNAB)),SE1->E1_IDCNAB,substr(_cTitulo,1,len(_cTitulo)-3))
    paramixb[1][1] := cNumTit
 
-        //Cleber (15/01/09) => Mudou tam. campo num tít. em SE1, de 6 p/ 9 díg., acerto de probl. em retornos de tít. remetidos anteriormente
-        /*_cTitulo = rtrim(paramixb[1][1])
+      //Cleber (15/01/09) => Mudou tam. campo num tít. em SE1, de 6 p/ 9 díg., acerto de probl. em retornos de tít. remetidos anteriormente
+      /*_cTitulo = rtrim(paramixb[1][1])
         if len(_cTitulo) == 12
            _cTitulo = substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,1)
            cNumTit = substr(paramixb[1][1],1,9)+space(3)+substr(paramixb[1][1],10,3)
@@ -57,8 +66,9 @@ If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         endif */
 
    if lAchou	
-           //cLEBER (05/12/12) -> Excluido tratamento para E1_SITUACA = 2
-           /*If (Alltrim(Paramixb[1][14]) $ "06*08*09*48") .AND. Alltrim(SE1->E1_SITUACA) == "2"
+
+         //cLEBER (05/12/12) -> Excluido tratamento para E1_SITUACA = 2
+         /*If (Alltrim(Paramixb[1][14]) $ "06*08*09*48") .AND. Alltrim(SE1->E1_SITUACA) == "2"
                 nValrec   := SE1->E1_SALDO
                 dDatacred := dbaixa
                 nJuros    := 0
@@ -66,8 +76,21 @@ If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
            //
            // Marcar como em cartorio e voltar p/carteira
            //
+
+//---------   Jose 26/06/2023 Acrescentado --------------------------------------------------------
+        If _ZPPAR0119
+           If(Alltrim(cBanco) == "237") .And. (Alltrim(cOcorr) == oCorren) //66     
+              If nJuros = 0
+                 //Ajusta o valor de juros quando o pagamento é feito por PIX QRCODE
+                 nJuros := nValRec - SE1->E1_VALOR
+              EndIf
+           EndIF
+        EndIf 
+If _cGrpEmp <> '11' //  Empresas que não são do grupo 11(Tecpolpa).  Jose 26/06/2023 
+//------------------------   ATÉ AQUI   ------------------------------------------------------------
            lBaixa := .F.
            lLiqui := .F.
+ 
            If Alltrim(cBanco) == "237"
               If Alltrim(Paramixb[1][14]) == "10" .and. SubStr(Paramixb[1][15], 1, 2) == "14"        //Baixa por ter sido
                  lBaixa := .T.                                                                       //enviado ao Cartório
@@ -115,6 +138,7 @@ If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
               SE1->E1_HIST    := "*BXP*"+ALLTRIM(SE1->E1_HIST)
               SE1->E1_OCORREN := cOcorr
               SE1->E1_NATUREZ := "802016"
+              SE1->E1_VALJUR  := nJuros  //   jose 26/06/2023 ACRESCENTADO 
               If !lBloqueado
                  MsUnLock()
               Endif
@@ -133,9 +157,50 @@ If _cGrpEmp <> '11' //Empresas que não são do grupo 11(Tecpolpa).
            Endif
    Endif 
    U_VoltaArea(aArea)
+//EndIf   //  jose 26/06/2023   TIRAR ANTES DE PRO EM PRODUÇÃO SE FOR APROVADO PELO USUÁRIO
 Endif // Fim If _cGrpEmp <> '11'
+
 if !empty(cArea)
 	dbselectarea(cArea)
 endif 
 
 Return(.t.)
+
+
+/*-----------    jose 26/06/2023   TIRAR ANTES DE PRO EM PRODUÇÃO SE FOR APROVADO PELO USUÁRIO --------
+#INCLUDE "PROTHEUS.CH"
+{Protheus.doc} F200VAR
+Manipular as informações (variáveis) no retorno do Cnab a Receber (FINA200). 
+@PARAMIXB aDados[1] = Número do Título    | Variavel de origem: cNumTit
+          aDados[2] = Data da Baixa       | Variavel de origem: dBaixa
+          aDados[3] = Tipo do Título      | Variavel de origem: cTipo
+          aDados[4] = Nosso Número        | Variavel de origem: cNsNum
+          aDados[5] = Valor da Despesa    | Variavel de origem: nDespes
+          aDados[6] = Valor do Desconto   | Variavel de origem: nDescont
+          aDados[7] = Valor do Abatimento | Variavel de origem: nAbatim
+          aDados[8] = Valor Recebido      | Variavel de origem: nValRec /////////
+          aDados[9] = Juros               | Variavel de origem: nJuros  /////////
+          aDados[10] = Multa              | Variavel de origem: nMulta
+          aDados[11] = Outras Despesas    | Variavel de origem: nOutrDesp
+          aDados[12] = Valor do Credito   | Variavel de origem: nValCc
+          aDados[13] = Data do Credito    | Variavel de origem: dDataCred
+          aDados[14] = Ocorrência         | Variavel de origem: cOcorr
+          aDados[15] = Motivo do banco    | Variavel de origem: cMotBan
+          aDados[16] = Linha Inteira      | Variavel de origem: xBuffer
+          aDados[17] = Data de Vencimento | Variavel de origem: dDtVc
+User Function F200VAR()
+    Local aDados     := PARAMIXB
+    Local aAreaSE1   := SE1->(GetArea())
+    Local cNumTitulo := Alltrim(Paramixb[1][1])
+    dbSelectArea("SE1")               
+    SE1->( dbSetOrder(16) )        
+    cChave := SE1->(dbSeek(xFilial("SE1")+cNumTitulo))
+    If Alltrim(cBanco) == "237"        
+       If nJuros = 0
+          //Ajusta o valor de juros quando o pagamento é feito por PIX
+          nJuros := nValRec - SE1->E1_VALOR
+       EndIf
+    EndIF
+    RestArea(aAreaSE1)
+Return(aDados)
+-------------------------------------------------------------------------------------------------*/

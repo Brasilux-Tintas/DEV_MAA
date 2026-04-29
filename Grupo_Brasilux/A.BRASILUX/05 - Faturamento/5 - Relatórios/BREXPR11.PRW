@@ -5,7 +5,7 @@
 //Constantes
 #Define STR_PULA    Chr(13)+Chr(10)
  
-/*-------------------------------------------------------------------/
+/*---------------------------------------------------------------------/
 {Protheus.doc} BREXPR11
 Função que cria um exemplo de FWMsExcel
 @author Jose Uliana
@@ -26,13 +26,22 @@ User Function BREXPR11()
      Local oFWMsExcel
      Local oExcel
      Local _cPerg :="BREXPR11"
-     Local cArquivo:= GetTempPath()+'BREXPR11.xml'
+//   Local cArquivo:= GetTempPath()+'BREXPR11.xml' //  ver aqui para colocar no c:\Temp da maquina 15/09/2023
+     Local cArquivo:="C:\Temp\"+"BREXPR11.xml"
 
-     //  jose ---------------------
+//--------------  Jose 10/10/2023 -----------------------------
+  //Verifica se o Excel está instalado
+    If ApOleClient("MSEXCEL") == .F.
+       MessageBox("Excel Não Instalado...,   Favor Executar em Outra Maquina que tenha Excel", "  Atenção  ",0)
+	    return
+    EndIf
+//-------------------------------------------------------------
+
+     //-----  jose ---------------------------
      Emissoo:=DATE()
      Horass:=TIME()
      Hifemm:=" -"
-     //----------------------------
+     //---------------------------------------
 
      //( _cPerg ) Chamada da Criação das perguntas  //LGS#20200204 - Adequação de release 12.1.25 e posteriores
      If !Pergunte( _cPerg ) 
@@ -49,40 +58,42 @@ User Function BREXPR11()
         cQuery +=" AND SB1.B1_COD = ZZL.ZZL_PRODUT AND SB1.D_E_L_E_T_ = '' " + CHR(13) + CHR(10)
         //  jose 03/12/2021 --------------------------------------------------------------------------------------------------
         cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB2.B2_FILIAL = ZZL.ZZL_FILIAL " + CHR(13) + CHR(10)
-        cQuery +=" AND SB2.B2_COD = ZZL.ZZL_PRODUT AND SB2.D_E_L_E_T_ = '' AND SB2.B2_LOCALIZ <> '' " + CHR(13) + CHR(10)
+        cQuery +=" AND SB2.B2_COD = ZZL.ZZL_PRODUT AND SB2.D_E_L_E_T_ = '' AND SB2.B2_LOCAL = SB1.B1_LOCPAD AND SB2.B2_LOCALIZ <> '' " + CHR(13) + CHR(10) // Jose 09/10/2023
         //--------------------------------------------------------------------------------------------------------------------
         cQuery +="WHERE (ZZL_FILIAL='"+xFilial("ZZL")+"') AND (ZZL.D_E_L_E_T_='') AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
         cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10) 
         If !Empty(MV_PAR02) 
            cQuery +="AND UPPER(SUBSTRING(ZZL_LOCALI,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
         EndIf  
-        If MV_PAR05 == 1 
+        If MV_PAR05 == 1 // ver com ele se é para imprimir só os que tem provisorio os que não tem provisório ou não imprimi ?o provisório Jose 15/09/2023
            cQuery +="AND ZZL_LOCALI <> '' " + CHR(13) + CHR(10)
         EndIf
+        cQuery +="GROUP BY ZZL_PRODUT, B1_DESC, B2_LOCALIZ, ZZL_LOCALI "  // Jose 09/10/2023   
         cQuery +="ORDER BY ZZL_LOCALI" + CHR(13) + CHR(10)
      Else
-        //  Jose 14/12/2021 ------------
-        If MV_PAR05 == 2 .OR. MV_PAR02 = 'X'
+        //  Jose 14/12/2021 ----------------
+        If MV_PAR05 == 1 .OR. MV_PAR02 = 'X'
            //-------------------------------
            cQuery :="SELECT B1_COD AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', ZZL_LOCALI AS 'PROVISORIO', " + CHR(13) + CHR(10)
            cQuery +=" '' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
            cQuery +="FROM "+RetSqlName("SB1")+" SB1 "
            cQuery +="LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON B2_FILIAL = '"+xFilial("SB2")+"' " + CHR(13) + CHR(10)
-           cQuery +=" AND B1_COD = B2_COD AND SB2.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
+           cQuery +=" AND B1_COD = B2_COD AND SB2.D_E_L_E_T_ =''  " + CHR(13) + CHR(10)
            cQuery +="LEFT OUTER JOIN "+RetSqlName("ZZL")+" ZZL WITH (NOLOCK) ON ZZL_FILIAL = '"+xFilial("ZZL")+"' " + CHR(13) + CHR(10)
            cQuery +=" AND B1_COD = ZZL_PRODUT AND ZZL.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
            cQuery +="WHERE SB1.D_E_L_E_T_ ='' AND B1_FILIAL ='"+xFilial("SB1")+"' " + CHR(13) + CHR(10)
            cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10)
-           cQuery +=" AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
+           cQuery +=" AND SB2.B2_LOCAL = SB1.B1_LOCPAD AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)  // Jose 09/10/2023
            If !Empty(MV_PAR02) 
               cQuery +="AND UPPER(SUBSTRING(B2_LOCALIZ,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
            EndIf                               
            If MV_PAR05 == 1 
               cQuery +="AND ZZL_LOCALI <> '' " + CHR(13) + CHR(10)
           EndIf
+          cQuery +="GROUP BY B1_COD, B1_DESC, B2_LOCALIZ, ZZL_LOCALI "  //  Jose 09/10/2023
           cQuery +="ORDER BY B2_LOCALIZ" + CHR(13) + CHR(10)    
           // Jose  14/12/2021 -----------------------
-       Else
+        Else
           cQuery :="SELECT B1_COD AS 'PRODUTO', B1_DESC AS 'DESCRICAO', B2_LOCALIZ AS 'ESTOQUE', '' AS 'PROVISORIO', " + CHR(13) + CHR(10)
           cQuery +=" '' AS 'OBSERVACAO', '' AS 'EMISSAO', '' AS 'HIFEM', '' AS 'HORAS' " + CHR(13) + CHR(10)
           cQuery +="FROM "+RetSqlName("SB1")+" SB1 "
@@ -90,13 +101,14 @@ User Function BREXPR11()
           cQuery +=" AND B1_COD = B2_COD AND SB2.D_E_L_E_T_ ='' " + CHR(13) + CHR(10)
           cQuery +="WHERE SB1.D_E_L_E_T_ ='' AND B1_FILIAL ='"+xFilial("SB1")+"' " + CHR(13) + CHR(10)
           cQuery +=" AND (SUBSTRING(B1_COD,4,2) BETWEEN ('"+MV_PAR03+"') AND ('"+MV_PAR04+"')) " + CHR(13) + CHR(10)
-          cQuery +=" AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10)
+          cQuery +=" AND SB2.B2_LOCAL = SB1.B1_LOCPAD AND B2_LOCALIZ <>'' AND B1_TIPO = 'PA' AND LEN(B1_COD) = '12' " + CHR(13) + CHR(10) // Jose 09/10/2023
           If !Empty(MV_PAR02) 
              cQuery +="AND UPPER(SUBSTRING(B2_LOCALIZ,1,2)) = '"+MV_PAR02+"' " + CHR(13) + CHR(10)
-          EndIf                               
+          EndIf    
+          cQuery +="GROUP BY B1_COD, B1_DESC, B2_LOCALIZ "    // Jose 09/10/2023                       
           cQuery +="ORDER BY B2_LOCALIZ" + CHR(13) + CHR(10)        
           //----------------------------------------
-       EndIf                                       
+       EndIf                                 
     Endif
     TCQuery cQuery New Alias "QRYPRO"
      
@@ -129,7 +141,7 @@ User Function BREXPR11()
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização","Estoque",1)
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização","Provisorio",1)
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização","Observacao",1)
-	oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização",dToC(Emissoo),1,4)
+	 oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização",dToC(Emissoo),1,4)
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização",Hifemm,1)
     oFWMsExcel:AddColumn("Relatório de Estoque por Localização","Relatório de Estoque por Localização",Horass,1,4)
 

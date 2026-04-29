@@ -53,7 +53,12 @@ if Select("KITS")<>0
 	dbselectarea("KITS")
 	dbclosearea()
 endif 
-cQuery = "SELECT CODIGO,SEQ,COMPON,QTDE,PAI,QTDEFILHO FROM KITSCOCA ORDER BY COMPON,CODIGO,PAI "
+
+	if (GETMV("ZP_PAR0052") == .F.)
+		cQuery = "SELECT CODIGO,SEQ,COMPON,QTDE,PAI,QTDEFILHO FROM KITSCOCA ORDER BY COMPON,CODIGO,PAI "
+	else
+		cQuery = "SELECT ZA7_CODIGO AS CODIGO,ZA7_SEQ AS SEQ,ZA7_COMPON AS COMPON,ZA7_QTD AS QTDE,ZA7_PAI AS PAI,ZA7_QTDFIL AS QTDEFILHO FROM ZA7110 ORDER BY COMPON,CODIGO,PAI "
+	endif	
 TCQuery cQuery ALIAS "KITS" NEW
 
 
@@ -330,8 +335,8 @@ if !lJaExiste
 					{'C2_DATPRI'   ,dDataBase                   ,NIL},;            
 					{'C2_DATPRF'   ,dDataBase                   ,NIL},;            
 					{'C2_XLOTE'   ,""                  ,NIL},;
-					{'C2_OBS'   ,_cObs                  ,NIL},;
-					{'AUTEXPLODE' ,"S" ,NIL}}		
+					{ 'C2_OBS' ,_cObs ,NIL},;
+						{'AUTEXPLODE' ,"S" ,NIL}}		
 					
 
 	lMsErroAuto := .f.  
@@ -677,11 +682,22 @@ if Select("TMP")<>0
 	dbselectarea("TMP")
 	dbclosearea()
 endif 
-cQuery = "SELECT ZZD.R_E_C_N_O_ AS REG,ZZD_CODBAR AS CODBAR,KITS.QTDEFILHO "+;
-"FROM "+RetSqlName("ZZD")+" ZZD "+;
-"LEFT OUTER JOIN KITSCOCA KITS ON KITS.COMPON = SUBSTRING(ZZD_CODBAR,4,7) "+;
-"WHERE (ZZD.D_E_L_E_T_ <> '*') AND (ZZD_FILIAL = '"+xFilial("ZZD")+"') AND "+;
-"(ZZD_CHVNFE = '"+cChvnfe+"') ORDER BY REG "
+
+	/* alterado por nelieder 18/08/2022 */
+	if (GETMV("ZP_PAR0052") == .F.)
+		cQuery = "SELECT ZZD.R_E_C_N_O_ AS REG,ZZD_CODBAR AS CODBAR,KITS.QTDEFILHO "+;
+		"FROM "+RetSqlName("ZZD")+" ZZD "+;
+		"LEFT OUTER JOIN KITSCOCA KITS ON KITS.COMPON = SUBSTRING(ZZD_CODBAR,4,7) "+;
+		"WHERE (ZZD.D_E_L_E_T_ <> '*') AND (ZZD_FILIAL = '"+xFilial("ZZD")+"') AND "+;
+		"(ZZD_CHVNFE = '"+cChvnfe+"') ORDER BY REG "
+	else
+		cQuery = "SELECT ZZD.R_E_C_N_O_ AS REG,ZZD_CODBAR AS CODBAR,KITS.ZA7_QTDFIL AS QTDEFILHO  "+;
+		"FROM "+RetSqlName("ZZD")+" ZZD "+;
+		"LEFT OUTER JOIN ZA7110 KITS ON ZA7_COMPON = SUBSTRING(ZZD_CODBAR,4,7) "+;
+		"WHERE (ZZD.D_E_L_E_T_ <> '*') AND (ZZD_FILIAL = '"+xFilial("ZZD")+"') AND "+;
+		"(ZZD_CHVNFE = '"+cChvnfe+"') ORDER BY REG "
+
+	endif	
 TCQuery cQuery ALIAS "TMP" NEW
 dbselectarea("KITS")
 dbgotop()  // COMPON+CODIGO+PAI 

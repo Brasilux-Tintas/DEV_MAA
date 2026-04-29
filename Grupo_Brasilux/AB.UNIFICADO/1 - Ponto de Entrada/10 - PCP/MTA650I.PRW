@@ -54,7 +54,7 @@ If _cGrpEmp <> '11' //Empresas do Grupo BRASILUX
         Endif
         If (cNumEmp == "01010104") //Para Filial Resina
            If Empty(SC2->C2_LOTE)
-              If Len(Alltrim(SC2->C2_PRODUTO)) == 5 //Resina Principal
+              If Len(Alltrim(SC2->C2_PRODUTO)) == 4 .or. Len(Alltrim(SC2->C2_PRODUTO)) == 5 //Resina Principal
                  xNumLote := U_NumSeqLot("SZZ")
               ElseIf Len(Alltrim(SC2->C2_PRODUTO)) == 7
                      cQry1 := ""
@@ -80,7 +80,16 @@ If _cGrpEmp <> '11' //Empresas do Grupo BRASILUX
 	     Else
            //Buscar e inserir numero de lote
 	       If Empty(SC2->C2_LOTE)
-              xNumLote := U_NumSeqLot("SZZ")
+              //xNumLote := U_NumSeqLot("SZZ")
+              If (cNumEmp == "01010101") 
+                  //If SC2->C2_PRODUTO $ 'MANUTENCAO'
+                     //xNumLote := ""
+                  //Else
+                     xNumLote := U_NroSqLote("SZZ")
+                  //Endif
+              Else
+                  xNumLote := U_NumSeqLot("SZZ")
+              Endif
               SC2->C2_LOTE := xNumLote
            Endif
         Endif
@@ -168,7 +177,7 @@ If _cGrpEmp <> '11' //Empresas do Grupo BRASILUX
            If Len(Alltrim(cTexto)) >0
               cTexto += CHR(13)+CHR(10)+"Prog. Origem : MTA650I"
               If Substr((SC2->C2_FILIAL),1,2)== "06"
-                 U_EnvMail("DISSOLTEX - O.P Lote "+SC2->C2_LOTE+" emitido, porém, existe falta de Saldo !" ,cTexto,"silene@dissoltex.com.br,ricardo@dissoltex.com.br","") 
+                 U_EnvMail("DISSOLTEX - O.P Lote "+SC2->C2_LOTE+" emitido, porém, existe falta de Saldo !" ,cTexto,"silene@dissoltex.com.br","") 
               Else
                  U_EnvMail("BRASILUX - O.P Lote "+SC2->C2_LOTE+" emitido, porém, existe falta de Saldo !" ,cTexto,"compras@brasilux.com.br, pcp@brasilux.com.br, paulo@brasilux.com.br","")                       	  
               Endif
@@ -211,6 +220,8 @@ Else // If _cGrpEmp <> '11'
           Função: 1) Copiar o lote do PA para os PIs que utilizam controle de lote;
                   2) Copiar a quantidade de volume por tanque para as OPs intermediárias;
         */
+        _lPAR0056 := GETMV('ZP_PAR0056')
+
         DbSelectArea("SC2")
         nRegi := recno()
         
@@ -244,6 +255,10 @@ Else // If _cGrpEmp <> '11'
               SC2->C2_XVOLTNQ := nVolume
               SC2->C2_XCONV   := nFator
            MSUNLOCK()
+        Else //LGS#20220722 - Integração Protheus x ProdWin - Envia somente a sequencia 001 para o ProdWin
+           If _lPAR0056
+              u_ZWSDLI01()
+           Endif           
         Endif
 Endif //If _cGrpEmp <> '11'
 U_VoltaArea(aAreaAnt)

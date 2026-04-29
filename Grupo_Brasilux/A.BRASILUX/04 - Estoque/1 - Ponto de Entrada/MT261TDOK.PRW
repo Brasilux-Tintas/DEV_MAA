@@ -16,7 +16,8 @@ User Function  MT261TDOK()
      Local _cAlias := Alias()
      Local aArea   := U_PegaArea({"SB2","SZH"})
      Local cAuxDoc,cFlag,cTexto,i,cAssunto,saldoAtual,saldoEmpenhado,saldoDisponivel,cProdDif,_cNumSeri
-     u_zcfga01( 'MT261TDOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
+     //---------------- LGS#20231023 ----- RETIRADA DA GRAVAÇÃO DO LOG DE ROTINA PARA MELHORA DE PERFORMANCE.
+     //u_zcfga01( 'MT261TDOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         cAuxDoc := M->CDOCUMENTO    
         cProdDif := ""   

@@ -24,17 +24,20 @@ User Function M410ALOK()
      Local cMsgUse   := ""  
      Local cTmp, cMsgPed, nConPed, cAuxMen   
      Local _cCodUser := RetCodUsr()
-     u_zcfga01( 'M410ALOK' ) //LGS#2021201 - Gravação de log de utilização da rotina
+	
      If alltrim(FWGrpCompany()) <> '11' //Empresas que não são do grupo 11(Tecpolpa).
-        lAdmin := (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUser) = 0)
+        //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+        //lAdmin := (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUser) = 0)
+        lAdmin := .f. //( PSWADMIN( , , _cCodUser ) == 0 )
 
         If ALTERA .AND. !( Type("l410Auto") <> "U" .And. l410Auto )
            DO CASE 
               CASE (SC5->C5_TPFRETE = "C") .AND. (SC5->C5_XVLRFRE > 0.0) .AND. (SC5->C5_TIPO = "N") .AND. (SC5->C5_APROVA = '1')					
-                   lRet := .f.
-                   cMsgUse := "Atenção! Pedido com FRETE CIF! Execute antes a rotina "+chr(13)+chr(10)
-                   cMsgUse += "Atualizacoes->Especificos Brasilux->Pedidos->Zerar FRETE CIF!"
-                   MsgBox(cMsgUse, "Atenção...", "ALERT")     	
+                   
+                   //lRet := .f. Comentado por Nelieder em 05/05/2023
+                   //cMsgUse := "Atenção! Pedido com FRETE CIF! Execute antes a rotina "+chr(13)+chr(10)
+                   //cMsgUse += "Atualizacoes->Especificos Brasilux->Pedidos->Zerar FRETE CIF!"
+                   //MsgBox(cMsgUse, "Atenção...", "ALERT")     	
               CASE !lAdmin .and. (SC5->C5_APROVA = '1') .AND. !(ALLTRIM(UPPER(SC5->C5_USRCAD)) == UPPER(ALLTRIM(cUsername)))
                    cTmp := U_NovoCursor()
                    cMsgUse += "Atenção, pedido já está totalmente liberado."+chr(13)+chr(10)

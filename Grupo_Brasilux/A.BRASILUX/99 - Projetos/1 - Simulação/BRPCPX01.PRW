@@ -45,7 +45,7 @@
 /***          # PCPX01_A  # Visualiza / exclui fórmulas                                                         ***/
 
 User Function BRPCPX01()
-     //Local   nPos,cLinhas,cAux,cQuery
+   //Local   nPos,cLinhas,cAux,cQuery
      Private cCadastro := "Manutenção da Estrutura do Produto"
      Private cCodUsr   := RetCodUsr()
      Private cAcessos  := ""
@@ -53,7 +53,7 @@ User Function BRPCPX01()
      Private lFiltro   := .f.                                                                   // Filtro para produtos da linha Brasimix
      Private lFiltBM   := .f.
      Private _cFiltro   := "" //'(ZM_FILIAL == "'+xFilial("SZM")+'")'                                           // Filtro para itens pendentes
-     //Private cFiltBM   := '(LEN(ALLTRIM(ZM_CODIGO)) # 6) .AND. (Substr(ZM_CODIGO,1,2) # "BM")' // Filtro para itens do tipo BM
+   //Private cFiltBM   := '(LEN(ALLTRIM(ZM_CODIGO)) # 6) .AND. (Substr(ZM_CODIGO,1,2) # "BM")' // Filtro para itens do tipo BM
      Private cFiltBM   := "" // Filtro para itens do tipo BM
      Private lAcs1     := .f.
      Private lAcs2     := .f.
@@ -66,11 +66,11 @@ User Function BRPCPX01()
      Private lAcs9     := .f.
      Private lAcsA     := .f.
      Private cQueryZM  := ""
-	 Private aIndexSZM := {}
-	 Private oObjBrow  := Nil
+	  Private aIndexSZM := {}
+	  Private oObjBrow  := Nil
      Private nIniFil   := 1
-	 Private nOpcFil   := 3
-	 Private oTemptable:= ""
+	  Private nOpcFil   := 3
+	  Private oTemptable:= ""
 //   Private aRotina   := { { OemToAnsi("&Pesquisar")        , 'AxPesqui'            , 0, 1} ,;
      Private aRotina   := { { OemToAnsi("&Pesquisar")        , 'PesqBrw'            , 0, 1} ,;
                             { OemToAnsi("&Visualiza")        , 'U_PCPX01_A(1)'       , 0, 2} ,;
@@ -79,8 +79,9 @@ User Function BRPCPX01()
                             { OemToAnsi("&Manutenção")       , 'U_PCPX01_1(2)'       , 0, 4} ,;
                             { OemToAnsi("&Exclusão")         , 'U_PCPX01_1(1, , , , .t.)', 0, 5} ,;
                             { OemToAnsi("&Liberação")        , 'U_PCPX01_3()'        , 0, 6},;
-                            { OemToAnsi("&Impressão")        , 'U_PCPX01_9()'        , 0, 6}   }
-
+                            { OemToAnsi("&Impressão")        , 'U_PCPX01_9()'        , 0, 6},;   // }   jose 07/03/2024
+                            { OemToAnsi("&Amostra")          , 'U_AMOSTRA()'         , 0, 7}   } //   jose 07/03/2024
+  
 
      Private aCores    := { { 'SZM->ZM_STATUS == "EE"', 'DISABLE'    },;
                             { 'SZM->ZM_STATUS == "PP"', 'BR_AMARELO' },;
@@ -96,14 +97,14 @@ User Function BRPCPX01()
    	DbSeek(__CUSERID + funname())
    	if !found() .or. (found() .and. (substr(ZW_ACESSOS,1,1) != "*"))
          MsgBox("Acesso não autorizado!---->"+funname(),"Atenção","Alert")
-   		return(.f.)
+   	//	return(.f.)
    	endif
      u_zcfga01( 'BRPCPX01' ) //LGS#2021203 - Gravação de log de utilização da rotina
 
      cRotina  := Stuff(cRotina, Len(cRotina)+1, 10 - Len(cRotina), space(10 - Len(cRotina)))
      cAcessos := Posicione("SZW", 4, xFilial("SZW")+cRotina+cCodUsr+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")    
-     
-     lAcs1    := Iif((SubStr(cAcessos, 01, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Gera revisão PI
+     //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+     /*lAcs1    := Iif((SubStr(cAcessos, 01, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Gera revisão PI
      lAcs2    := Iif((SubStr(cAcessos, 02, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Libera revisão PI
      lAcs3    := Iif((SubStr(cAcessos, 03, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Gera revisão PA
      lAcs4    := Iif((SubStr(cAcessos, 04, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Libera revisão PA
@@ -112,7 +113,18 @@ User Function BRPCPX01()
      lAcs7    := Iif((SubStr(cAcessos, 07, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Filtra BM
      lAcs8    := Iif((SubStr(cAcessos, 08, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Visualiza Estrutura
      lAcs9    := Iif((SubStr(cAcessos, 09, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Usuário Ativo
-     lAcsA    := Iif((SubStr(cAcessos, 10, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Recebe e-mail
+     lAcsA    := Iif((SubStr(cAcessos, 10, 1) == '*') .or. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0), .t., .f.) //Recebe e-mail*/
+     //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+     lAcs1    := Iif( ( SubStr( cAcessos, 01, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Gera revisão PI  
+     lAcs2    := Iif( ( SubStr( cAcessos, 02, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Libera revisão PI
+     lAcs3    := Iif( ( SubStr( cAcessos, 03, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Gera revisão PA
+     lAcs4    := Iif( ( SubStr( cAcessos, 04, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Libera revisão PA
+     lAcs5    := Iif( ( SubStr( cAcessos, 05, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Liberação Diretoria
+     lAcs6    := Iif( ( SubStr( cAcessos, 06, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Produtos BRASIMIX
+     lAcs7    := Iif( ( SubStr( cAcessos, 07, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Filtra BM
+     lAcs8    := Iif( ( SubStr( cAcessos, 08, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Visualiza Estrutura
+     lAcs9    := Iif( ( SubStr( cAcessos, 09, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Usuário Ativo
+     lAcsA    := Iif( ( SubStr( cAcessos, 10, 1 ) == '*' ) .or. ( PSWADMIN( , , cCodUsr ) == 0 ), .t., .f. ) //Recebe e-mail
      If !lAcs9
         MsgBox("Usuário não possui acesso a essa opção", "Atenção", "STOP")
         Return
@@ -123,10 +135,11 @@ User Function BRPCPX01()
  	If !lAcs6
   		lFiltBM := .t.         
     	cFiltBM := '(Substr(ZM_CODIGO,1,2) != "BM")'
-//    	cFiltBM := "(SUBSTRING(ZM_CODIGO,1,2) = 'BM')"
+//  	cFiltBM := "(SUBSTRING(ZM_CODIGO,1,2) = 'BM')"
   	Endif
 
 /*	if lFiltBM			
+
         dbselectarea("SZM")
         Set Filter To &(cFiltBM)
  	endif */
@@ -139,8 +152,9 @@ User Function BRPCPX01()
      aadd(aRotina, { OemToAnsi("Desligar Filtro Ativo")        , 'U_PCPX01_6(2,3)'   , 0, 0} )
      aadd(aRotina, { OemToAnsi("Ficha Pro&cesso")              , 'U_fFichaOp(SZM->ZM_CODIGO, SZM->ZM_REVISAO, SZM->ZM_DESCRIC)', 0, 6} )
      aadd(aRotina, { OemToAnsi("&Histórico")                   , 'U_PCPA04_7()'      , 0, 6} )
-     //aadd(aRotina, { OemToAnsi("&Histórico")                   , 'U_PCPX01_5("SI")'        , 0, 6} )
-     aadd(aRotina, { OemToAnsi("Le&genda")                     , 'U_PCPX01_7()'            , 0, 6} )
+   //aadd(aRotina, { OemToAnsi("&Histórico")                   , 'U_PCPX01_5("SI")'  , 0, 6} )
+     aadd(aRotina, { OemToAnsi("Le&genda")                     , 'U_PCPX01_7()'      , 0, 6} )
+     aadd(aRotina, { OemToAnsi("&Amostra")                     , 'U_AMOSTRA()' , 0, 7} ) // Jose  07/03/2024
 
 	DbSelectArea("SZM")
  	DbSetOrder(1)
@@ -166,7 +180,7 @@ User Function BRPCPX01()
 	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "EE"' , 'DISABLE'    , "Analise Química" )
 	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "PP"' , 'BR_AMARELO' , "Analise PCP" )
 	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "EA"' , 'BR_AZUL'    , "Analise Diretoria" )
-	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "AC"' , 'ENABLE'     , "Aprovado" )
+	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "AC"' , 'ENABLE'     , "do" )
 	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "RE"' , 'BR_PRETO'   , "Rejeitado" )
 	oObjBrow:AddLegend( 'SZM->ZM_STATUS == "RT"' , 'BR_CINZA'   , "Retorno Status" )
 	oObjBrow:Activate()	
@@ -178,12 +192,12 @@ Return
 /********************************************************************************************/
 User Function PCPX01_8(nOpc)
     Local cDesEmb := ""
-	Local lTemPaKg:= .f.
+	 Local lTemPaKg:= .f.
 
-	If !EstaAutori(SZM->ZM_CODIGO)
-		Alert("Acesso Não Autorizado!")
-		return(.f.)
-	Endif 
+    If !EstaAutori(SZM->ZM_CODIGO)
+	    Alert("Acesso Não Autorizado! PCPX01 ")
+	    return(.f.)
+    Endif 
     If Posicione("SZM", 3, xFilial("SZM")+SZM->ZM_CODIGO, "ZM_STATUS") $ 'EE.PP'
     	Alert("Existe produto em Análise Química / ou Análise do PCP. Dê manutenção ou exclua-o antes de prosseguir !")	
 		return(.f.)    
@@ -257,8 +271,9 @@ Return(lTemPaKg)
   ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
   ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 //User Function PCPX01_1(nOpc, cCodigo, cDescri, cProExi, lExcl, cDesEmb, cLocal, cPosIpi, cGrupo2)
-User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLocal)
-     Local aCpoEnChoice := { "ZM_CODIGO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_REVISAO", "ZM_PESESP", "ZM_CATALIS", "ZM_RELCAT", "ZM_ROTEIRO","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT"  }
+User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLocal) // JOSE 07/03/2024 , _cDesamos
+//  JOSE 07/03/2024      Local aCpoEnChoice := { "ZM_CODIGO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_REVISAO", "ZM_PESESP", "ZM_CATALIS", "ZM_RELCAT", "ZM_ROTEIRO","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_AMOSTRA","ZM_DESAMOS"  }
+     Local aCpoEnChoice := { "ZM_CODIGO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_REVISAO", "ZM_PESESP", "ZM_CATALIS", "ZM_RELCAT", "ZM_ROTEIRO","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_AMOSTRA" } 
      Local aAltEnChoice := {}
      Local aAltGetDados := {}
      Local nReg         := SZM->(Recno())
@@ -280,9 +295,10 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
      Local nLinhas      := 50
      Local cBitmap      := ''
      Local nOpcA        := 0
-     //Local lFil         := .f.
+   //Local lFil         := .f.
      Local lCont        := .f.
      Local nCnt
+
      lExcl        := Iif(lExcl == Nil, .f., lExcl)
      Private lSaida     := .f.
      Private nCusRea    := 0 ; Private nVarPrc := 0
@@ -306,22 +322,25 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
      Private aHeader    := {}
      Private aTELA      := Array(0,0)
      Private aGets      := Array(0)
-     Private cCodigo    := Iif(_cCodigo == Nil, SZM->ZM_CODIGO , _cCodigo)
-     Private cDescri    := Iif(_cDescri == Nil, SZM->ZM_DESCRIC, _cDescri)
-     Private cProExi    := Iif(_cProExi == Nil, SZM->ZM_TIPOPRO, _cProExi)
-     Private cLocal     := Iif(_cPLocal == Nil, SZM->ZM_LOCAL,   _cPLocal)
-     Private cRespon    := Iif(nOpc    == 3  , cUsername, SZM->ZM_RESPONS)
-     Private cStatus    := Iif(nOpc    == 3  , "EE", SZM->ZM_STATUS)
-     //Private cTipoPro   := Iif(nOpc    == 3  , If(!(cNumEmp == "01010104"),  If(Len(Alltrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) $ '00.99', 'PI', 'PA'), 'PI'), Iif(cNumEmp = '01010104', If(Len(Alltrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) $ '00.99', 'PI', 'PA'), 'PA'), 'PA') ), SZM->ZM_TIPO )
-     Private cTipoPro   := Iif(nOpc    == 3  ,   If(Len(Alltrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) $ '00.99', 'PI', 'PA'), 'PI') , SZM->ZM_TIPO )
-     Private cRevisao   := Iif(nOpc    == 3  , "001", SZM->ZM_REVISAO)
+     Private cCodigo    := Iif(_cCodigo  == Nil, SZM->ZM_CODIGO , _cCodigo)
+     Private cDescri    := Iif(_cDescri  == Nil, SZM->ZM_DESCRIC, _cDescri)
+// jOSE 07/03/2024     Private cDesamos   := Iif(_cDesamos == Nil, SZM->ZM_DESAMOS, _cDesAmos)
+     Private cProExi    := Iif(_cProExi  == Nil, SZM->ZM_TIPOPRO, _cProExi)
+     Private cLocal     := Iif(_cPLocal  == Nil, SZM->ZM_LOCAL,   _cPLocal)
+     Private cRespon    := Iif(nOpc      == 3  , cUsername, SZM->ZM_RESPONS)
+     Private cStatus    := Iif(nOpc      == 3  , "EE", SZM->ZM_STATUS)
+   //Private cTipoPro   := Iif(nOpc      == 3  , If(!(cNumEmp == "01010104"),  If(Len(Alltrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) $ '00.99', 'PI', 'PA'), 'PI'), Iif(cNumEmp = '01010104', If(Len(Alltrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) $ '00.99', 'PI', 'PA'), 'PA'), 'PA') ), SZM->ZM_TIPO )
+     Private cTipoPro   := Iif(nOpc      == 3  , If(Len(Alltrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) $ '00.99', 'PI', 'PA'), 'PI') , SZM->ZM_TIPO )
+     Private cRevisao   := Iif(nOpc      == 3  , "001", SZM->ZM_REVISAO)
      Private cPosIpi    := SZM->ZM_POSIPI //Iif(cPosIpi == Nil, SZM->ZM_POSIPI , cPosIpi)
      Private cGrupo2    := SZM->ZM_GRUPO2 //Iif(cGrupo2 == Nil, SZM->ZM_GRUPO2,  cGrupo2)
      Private cExNcm     := SZM->ZM_EX_NCM
+     Private cAmostra   := SZM->ZM_AMOSTRA
+
      If !EstaAutori(SZM->ZM_CODIGO)
-		Alert("Acesso Não Autorizado!")
+		Alert("Acesso Não Autorizado! PCPX01   ")
 		return(.f.)
-	 Endif 
+	  Endif 
 
      If !U_fVerPerm(cRespon, cStatus, cAcessos, nOpc, cCodigo, cTipoPro)
         If lFiltro
@@ -338,7 +357,7 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
               Return
            Else
               If (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) != 0) .and. !Alltrim(Upper(cUsername)) $ Alltrim(Upper(SZM->ZM_RESPONS))
-                 MsgBox("Usuário não autorizado a efetuar exclusão dessa estrutura !!!","Atenção","STOP")
+                 MsgBox("Usuário não autorizado a efetuar exclusão dessa estrutura PCPX01_1() !!!"+cUsername+"  "+SubStr(cUsuario, 1, 6)+"   "+cCodUsr+"  "+Alltrim(Upper(SZM->ZM_RESPONS)),"Atenção","STOP")
                  If lFiltro
                     U_PCPX01_6(1)
                  Endif
@@ -374,9 +393,11 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
      Endif
      If nOpc <> 1
         If cTipoPro == 'PA'
-           aAltEnchoice := Iif(nOpc <> 2, { "ZM_SOLICIT", "ZM_MOTIVO", "ZM_DESCRIC", "ZM_CATALIS", "ZM_RELCAT", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2" }, { "ZM_DESCRIC", "ZM_ROTEIRO", "ZM_CATALIS", "ZM_RELCAT","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2" } )
+//  JOSE 07/03/2024  aAltEnchoice := Iif(nOpc <> 2, { "ZM_SOLICIT", "ZM_MOTIVO", "ZM_DESCRIC", "ZM_CATALIS", "ZM_RELCAT", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA","ZM_DESAMOS" }, { "ZM_DESCRIC", "ZM_ROTEIRO", "ZM_CATALIS", "ZM_RELCAT","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA","ZM_DESAMOS" } )
+           aAltEnchoice := Iif(nOpc <> 2, { "ZM_SOLICIT", "ZM_MOTIVO", "ZM_DESCRIC", "ZM_CATALIS", "ZM_RELCAT", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA" }, { "ZM_DESCRIC", "ZM_ROTEIRO", "ZM_CATALIS", "ZM_RELCAT","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA" } ) 
         Else
-           aAltEnchoice := Iif(nOpc <> 2, { "ZM_SOLICIT", "ZM_MOTIVO", "ZM_DESCRIC", "ZM_CATALIS", "ZM_RELCAT", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2" }, { "ZM_DESCRIC", "ZM_ROTEIRO", "ZM_CATALIS", "ZM_RELCAT","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2"  } )
+//  JOSE 07/03/2024  aAltEnchoice := Iif(nOpc <> 2, { "ZM_SOLICIT", "ZM_MOTIVO", "ZM_DESCRIC", "ZM_CATALIS", "ZM_RELCAT", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA","ZM_DESAMOS" }, { "ZM_DESCRIC", "ZM_ROTEIRO", "ZM_CATALIS", "ZM_RELCAT","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA","ZM_DESAMOS"  } )
+           aAltEnchoice := Iif(nOpc <> 2, { "ZM_SOLICIT", "ZM_MOTIVO", "ZM_DESCRIC", "ZM_CATALIS", "ZM_RELCAT", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA" }, { "ZM_DESCRIC", "ZM_ROTEIRO", "ZM_CATALIS", "ZM_RELCAT","ZM_POSIPI","ZM_EX_NCM","ZM_XCODANT","ZM_GRUPO2","ZM_AMOSTRA"  } ) 
         Endif
         aAltGetDados := { "ZN_COMP", "ZN_TRT", "ZN_PERC", "ZN_PERDA", "ZN_OPERACA" }
      Endif
@@ -395,11 +416,13 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
         M->ZM_CODIGO  := cCodigo
         M->ZM_REVISAO := cRevisao
         M->ZM_DESCRIC := cDescri
+        M->ZM_DESAMOS := "" // JOSE 07/03/2024   cDesamos
         M->ZM_POSIPI  := cPosIpi
         M->ZM_EX_NCM  := cExNcm
         M->ZM_RESPONS := cRespon
         M->ZM_TIPO    := cTipoPro
-        //M->ZM_TIPO    := Iif(cNumEmp = "01010104", Iif( Len(AllTrim(cCodigo)) == 12 .and. SubStr(cCodigo, 11, 2) == '00', 'PI', 'PA'), Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'PI', Iif( SubStr(cCodigo,11,02) $ "00", "PI", "PA" ) ) )
+        M->ZM_AMOSTRA := cAmostra
+      //M->ZM_TIPO    := Iif(cNumEmp = "01010104", Iif( Len(AllTrim(cCodigo)) == 12 .and. SubStr(cCodigo, 11, 2) == '00', 'PI', 'PA'), Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'PI', Iif( SubStr(cCodigo,11,02) $ "00", "PI", "PA" ) ) )
         M->ZM_GRUPO2  := cGrupo2
         M->ZM_SOLICIT := Iif(nOpc == 3, "", SZM->ZM_SOLICIT)
 		  If Len(Alltrim(cCodigo)) == 12 
@@ -419,8 +442,8 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
 		  Endif
         M->ZM_LOCAL   := Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, cLocal , _cLocal ) //Iif(cNumEmp = "01010104", '03', Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, cLocal , Iif( SubStr(cCodigo,11,02) $ "00", _cLocal, "02" ) ) ) //Iif(cNumEmp $ "0104", '03', Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, '02', Iif( SubStr(cCodigo,11,02) $ "00", "02", "03" ) ) )
         M->ZM_TIPOPRO := cProExi
-       // M->ZM_UM      := Iif(cNumEmp = "01010104", Iif( Len(AllTrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) == '00', 'L ', 'UN'), 'K  '), Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'K ', Iif( SubStr(cCodigo,11,02) $ "00", "L ", "UN" ) ) )
-        //M->ZM_UM      := Iif(cNumEmp = "01010104", Iif( Len(AllTrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) == '00', 'L ', 'UN'), 'K  '), Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'K ', Iif( SubStr(cCodigo,11,02) $ "00", "L ", Iif(SubStr(cCodigo, 11, 2) == '99', 'K ', 'UN') ) ) )
+     // M->ZM_UM      := Iif(cNumEmp = "01010104", Iif( Len(AllTrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) == '00', 'L ', 'UN'), 'K  '), Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'K ', Iif( SubStr(cCodigo,11,02) $ "00", "L ", "UN" ) ) )
+     // M->ZM_UM      := Iif(cNumEmp = "01010104", Iif( Len(AllTrim(cCodigo)) == 12, Iif(SubStr(cCodigo, 11, 2) == '00', 'L ', 'UN'), 'K  '), Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'K ', Iif( SubStr(cCodigo,11,02) $ "00", "L ", Iif(SubStr(cCodigo, 11, 2) == '99', 'K ', 'UN') ) ) )
         M->ZM_UM      := Iif( Len(AllTrim(cCodigo)) == 4 .or. Len(AllTrim(cCodigo)) == 5 .or. Len(AllTrim(cCodigo)) == 6, 'K ', Iif( SubStr(cCodigo,11,02) $ "00", "L ", Iif(SubStr(cCodigo, 11, 2) == '99', 'K ', 'UN') ) ) 
         cDesEmb       := Iif(Empty(cDesEmb), Posicione("SZ5", 1, xFilial("SZ5")+SubStr(M->ZM_CODIGO, 11, 2), "Z5_DESCR"), cDesEmb)
         If M->ZM_TIPO $ 'PA'
@@ -441,6 +464,8 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
         M->ZM_POSIPI  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_POSIPI")
         M->ZM_EX_NCM  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_EX_NCM")
         M->ZM_GRUPO2  := Posicione("SB1", 1, xFilial("SB1")+M->ZM_CODIGO, "B1_GRUPO2")
+        M->ZM_AMOSTRA := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_AMOSTRA") // JOSE 06/03/2024  "Z04_CODIGO")
+// JOSE 07/03/2024    M->ZM_DESAMOS := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_DESAMOS") // jOSE 06/03/2024  "Z04_DESCRI")
      ElseIf nOpc == 2
         M->ZM_CATALIS := M->ZM_CATALIS
         M->ZM_RELCAT  := M->ZM_RELCAT
@@ -448,8 +473,10 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
         M->ZM_XCODANT := M->ZM_XCODANT
         M->ZM_POSIPI  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_POSIPI")
         M->ZM_EX_NCM  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_EX_NCM")
-        //M->ZM_GRUPO2  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_GRUPO2")
+      //M->ZM_GRUPO2  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_GRUPO2")
         M->ZM_GRUPO2  := Posicione("SB1", 1, xFilial("SB1")+M->ZM_CODIGO, "B1_GRUPO2")
+        M->ZM_AMOSTRA := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_AMOSTRA") // JOSE 06/03/2024  "Z04_CODIGO")
+// JOSE 07/03/2024  M->ZM_DESAMOS := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_DESAMOS") // jOSE 06/03/2024  "Z04_DESCRI")
      Else
         M->ZM_CATALIS := Posicione("SB1", 1, xFilial("SB1")+M->ZM_CODIGO, "B1_CATALIS")
         M->ZM_RELCAT  := Posicione("SB1", 1, xFilial("SB1")+M->ZM_CODIGO, "B1_RELCAT1")
@@ -458,6 +485,9 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
         M->ZM_EX_NCM  := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_EX_NCM")
         M->ZM_XCODANT := Posicione("SZM", 1, xFilial("SZM")+M->ZM_CODIGO, "ZM_XCODANT")
         M->ZM_GRUPO2  := Posicione("SB1", 1, xFilial("SB1")+M->ZM_CODIGO, "B1_GRUPO2")
+        M->ZM_AMOSTRA := Posicione("Z04", 1, xFilial("Z04")+M->ZM_CODIGO, "Z04_CODIGO")
+// JOSE 07/03/2024  M->ZM_DESAMOS := Posicione("Z04", 1, xFilial("Z04")+M->ZM_CODIGO, "Z04_DESCRI") // jOSE 06/03/2024  "Z04_DESCRI")
+
      Endif
      If lCont
         Return
@@ -490,14 +520,15 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
         Endif
      Endif
 
-     DEFINE MSDIALOG oDlg FROM 000,000 TO 033,100 TITLE OemToAnsi("Formulação") OF oMainWnd
+  //   DEFINE MSDIALOG oDlg FROM 000,000 TO 033,100 TITLE OemToAnsi("Formulação") OF oMainWnd
+     DEFINE MSDIALOG oDlg FROM 000,000 TO 400,400 TITLE OemToAnsi("Formulação") OF oMainWnd
      DEFINE FONT oFont SIZE 8,0 BOLD
 	        EnChoice("SZM",nReg,nOpcE,,,,aCpoEnchoice,{020,001,100,395},aAltEnchoice,3,,,,,,lVirtual)
 
-            /**************************************************************************/
+            /*****************************************************************************************************/
             @ 090,050 SAY OemToAnsi("FORMULA VIGENTE")      SIZE 100,009 COLOR CLR_BLUE PIXEL OF oDlg  FONT oFont
             @ 100,001 LISTBOX oForVig FIELDS TITLE ""       SIZE 193,080 	            PIXEL OF oDlg
-            /**************************************************************************/
+            /*****************************************************************************************************/
    
             @ 182,001 GROUP oGrp1 TO 211,195 LABEL  OemToAnsi('Especificações...')    COLOR CLR_HRED  PIXEL OF oDlg
             @ 187,025 SAY OemToAnsi("% Fórmula: ")                        SIZE 030,09                 PIXEL OF oDlg
@@ -523,10 +554,9 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
 
             U_fBusVig(M->ZM_CODIGO, M->ZM_REVISAO, M->ZM_TIPO, @aHeaderVig, @aDadVig, @oPerFor, @nPerFor, @oPesEsp, @nPesEsp, @oCusRea, @nCusRea, @oCusDol, @nCusDol, @oPrcVig, @nPrcVig, @nOldPVC, @nOldBri, , 1, , oSayVig, @nCusOuO, @oCusOuO, @oCusVig )
 
-            /**************************************************************************/
+            /*****************************************************************************************************************/
             @ 090,260 SAY OemToAnsi("REVISÃO: "+M->ZM_REVISAO)           SIZE 100,09 COLOR CLR_BLUE  PIXEL OF oDlg  FONT oFont
-
-            /**************************************************************************/
+            /*****************************************************************************************************************/
             @ 182,197 GROUP oGrp2 TO 211,394 LABEL  OemToAnsi('Especificações...')    COLOR CLR_HRED  PIXEL OF oDlg
             @ 187,222 SAY OemToAnsi("% Fórmula: ")                        SIZE 030,09                 PIXEL OF oDlg
             @ 186,252 MSGET oPerNew VAR nPerNew PICTURE '@E 999.99%'      SIZE 030,09 COLOR CLR_HBLUE PIXEL OF oDlg
@@ -551,7 +581,7 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
             @ 229,300 SAY oSayVar   VAR OemToAnsi("Variação:")            SIZE 035,09                 PIXEL OF oDlg
             @ 228,332 MSGET oVarPrc VAR nVarPrc PICTURE '@E 9,999.99%'    SIZE 040,09 COLOR CLR_HBLUE PIXEL OF oDlg
             @ 225,378 BITMAP oBitmap RESOURCE cBitmap                     SIZE 015,15 ADJUST          PIXEL OF oDlg NO BORDER
-            /**************************************************************************/
+            /******************************************************************************************************************/
             DbSelectArea("SZM")
             oGetD := MsGetDados():New( 100, 197, 180, 393, nOpcE, cLinOk, cTudoOk, "", .T., aAltGetDados, 2, , nLinhas, cFieldOk )
 
@@ -584,7 +614,8 @@ User Function PCPX01_1(nOpc, _cCodigo, _cDescri, _cProExi, lExcl, cDesEmb, _cPLo
            Endif
         Endif
      Else
-        ACTIVATE MSDIALOG oDlg VALID lSaida ON INIT SIButton( {|| lSaida := .t., nOpca := 1, Iif(oGetD:TudoOk(), Iif(obrigatorio(aGets,aTela), oDlg:Destroy(), nOpca := 0), nOpca := 0), iif(nOpcA==1, oDlg:End(), nOpcA == 0) }, {|| lSaida := .t., nOpca := 0, oDlg:End() }, oDlg, M->ZM_CODIGO, M->ZM_DESCRIC, M->ZM_REVISAO, M->ZM_TIPO, M->ZM_TIPOPRO, M->ZM_POSIPI,nOpc) CENTERED
+//  JOSE 07/03/2024 ACTIVATE MSDIALOG oDlg VALID lSaida ON INIT SIButton( {|| lSaida := .t., nOpca := 1, Iif(oGetD:TudoOk(), Iif(obrigatorio(aGets,aTela), oDlg:Destroy(), nOpca := 0), nOpca := 0), iif(nOpcA==1, oDlg:End(), nOpcA == 0) }, {|| lSaida := .t., nOpca := 0, oDlg:End() }, oDlg, M->ZM_CODIGO, M->ZM_DESCRIC, M->ZM_REVISAO, M->ZM_TIPO, M->ZM_TIPOPRO, M->ZM_POSIPI, M->ZM_AMOSTRA, M->ZM_DESAMOS, nOpc) CENTERED
+        ACTIVATE MSDIALOG oDlg VALID lSaida ON INIT SIButton( {|| lSaida := .t., nOpca := 1, Iif(oGetD:TudoOk(), Iif(obrigatorio(aGets,aTela), oDlg:Destroy(), nOpca := 0), nOpca := 0), iif(nOpcA==1, oDlg:End(), nOpcA == 0) }, {|| lSaida := .t., nOpca := 0, oDlg:End() }, oDlg, M->ZM_CODIGO, M->ZM_DESCRIC, M->ZM_REVISAO, M->ZM_TIPO, M->ZM_TIPOPRO, M->ZM_POSIPI, M->ZM_AMOSTRA, nOpc) CENTERED
 
         If nOpcA == 1           
            Begin Transaction
@@ -606,20 +637,21 @@ Return Nil
 /********************************************************************************************/
 /*** SIButton - Monta a enchoice bar da Rotina PCPX01_1.                                  ***/
 /********************************************************************************************/
-Static Function SIButton(bOk, bCancel, oDlgPad, cCodigo, cDescri, cRevisao, cTipo, cTipoPro,cPosIpi, nOpc)
+Static Function SIButton(bOk, bCancel, oDlgPad, cCodigo, cDescri, cRevisao, cTipo, cTipoPro,cPosIpi, cAmostra, nOpc)  // JOSE 07/03/2024  ,cDesamos
        Local oBar
        DEFINE BUTTONBAR oBar SIZE 25, 25 3D TOP OF oDlgPad
        DEFINE BUTTON RESOURCE "S4WB005N" OF oBar       ACTION NaoDisp()           //TOOLTIP OemToAnsi("Recortar")
        DEFINE BUTTON RESOURCE "S4WB006N" OF oBar       ACTION NaoDisp()           //TOOLTIP OemToAnsi("Copiar")
        DEFINE BUTTON RESOURCE "S4WB007N" OF oBar       ACTION NaoDisp()           //TOOLTIP OemToAnsi("Colar")
        DEFINE BUTTON RESOURCE "S4WB008N" OF oBar GROUP ACTION Calculadora()       //TOOLTIP OemToAnsi("Calculadora...")
-       DEFINE BUTTON RESOURCE "S4WB009N" OF oBar       ACTION Agenda()           // TOOLTIP OemToAnsi("Agenda...")
+       DEFINE BUTTON RESOURCE "S4WB009N" OF oBar       ACTION Agenda()            // TOOLTIP OemToAnsi("Agenda...")
        DEFINE BUTTON RESOURCE "S4WB010N" OF oBar       ACTION OurSpool()          //TOOLTIP OemToAnsi("Gerenciador de Impressão...")
        DEFINE BUTTON RESOURCE "S4WB016N" OF oBar GROUP ACTION HelProg()           //TOOLTIP OemToAnsi("Help de Programa...")
 
        //If !(cNumEmp == "01010104")
-          DEFINE BUTTON RESOURCE "S4WB007N" OF oBar    ACTION U_fMonOpe(nOpc, cCodigo, cRevisao, cDescri, @aHeader, @aCols)  TOOLTIP OemToAnsi("Operações...")
+          DEFINE BUTTON RESOURCE "S4WB007N" OF oBar    ACTION U_fMonOper(nOpc, cCodigo, cRevisao, cDescri, @aHeader, @aCols)  TOOLTIP OemToAnsi("Operações...")
           DEFINE BUTTON RESOURCE "S4WB009N" OF oBar    ACTION U_fFichaOP(cCodigo, cRevisao, cDescri)                         TOOLTIP OemToAnsi("Ficha de Processo...")
+//        DEFINE BUTTON RESOURCE "S4WB020N" OF oBar    ACTION U_AMOSTRA()                                                    TOOLTIP OemToAnsi("Tabela de Amostras...")  // jOSE 07/03/2024
           If cTipo $ "PI" .and. SubStr(Alltrim(cCodigo),11,2) $ "00.99"
              DEFINE BUTTON RESOURCE "CONTAINR" OF oBar ACTION fIncrPA(nOpc, @aHeader, @aCols, cCodigo, cRevisao, cTipoPro)   TOOLTIP OemToAnsi("Embalagens")
           Endif
@@ -633,8 +665,6 @@ Static Function SIButton(bOk, bCancel, oDlgPad, cCodigo, cDescri, cRevisao, cTip
        oBar:bRClicked := { || AllwaysTrue() }
 
 Return NIL
- 
-
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
   ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -754,9 +784,9 @@ User Function PCPX01_7()
      BrwLegenda(OemToAnsi("Legenda"), "Status", { {"DISABLE"    ,"Analise Química"   } ,;
                                                   {"BR_AMARELO" ,"Analise PCP"       } ,;
                                                   {"BR_AZUL"    ,"Analise Diretoria" } ,;
-                                                  {"ENABLE"     ,"Aprovado"          } ,;
+                                                  {"ENABLE"     ,"do"          } ,;
                                                   {"BR_PRETO"   ,"Rejeitado"         } ,;
-                                                  {"BR_CINZA"  ,"Retorno Status"    } })
+                                                  {"BR_CINZA"   ,"Retorno Status"    } })
      If lFiltro
         U_PCPX01_6(1)
      Endif
@@ -1046,7 +1076,9 @@ User Function PCPX01_3()
      Local bPage     := {|n| Eval(oFolder:bSetOption, 1), oFolder:nOption := 1, fLibPag(n, @aGeral, @aMarcacao, @aTitVig, @aDadVig, @oForVig) }
      Private cCodigo := ""
      Private cDescri := "" 
+     Private cDesamos := ""
      Private cPosIpi := ""
+     Private cAmostra := ""
      Private cExNcm  := ""
      Private cTipo   := ""
      Private cRevisao:= SZM->ZM_REVISAO
@@ -1080,10 +1112,10 @@ User Function PCPX01_3()
         lFiltro := .t. //Como o filtro é desligado dentro da rotina de liberação, então deve-se colocar verdadeiro 
                        //na variável para que na saida da rotina seja feito o filtro novamente.
      Endif
-	if !EstaAutori(SZM->ZM_CODIGO)
-		Alert("Acesso Não Autorizado!")
-		return(.f.)
-	endif 
+     If !EstaAutori(SZM->ZM_CODIGO)
+	  	  Alert("Acesso Não Autorizado! PCPX01   ")
+	 	  return(.f.)
+	  Endif 
 
      If SZM->ZM_STATUS $ 'AC.RE'
         MsgBox('Esse status não permite liberação !!!', 'Atenção', 'INFO')
@@ -1129,10 +1161,10 @@ User Function PCPX01_3()
         DEFINE MSDIALOG oDlg TITLE OemToAnsi("Análise de Formulas") FROM 000,000 TO 032,100 OF oMainWnd
         DEFINE FONT oFont SIZE 8,0 BOLD
                /**********************************************************************/
-               /***                     CABEÇALHO DA APROVAÇÃO                     ***/
+               /***                     CABEÇALHO DA ÇÃO                     ***/
                /**********************************************************************/
                @ 013,001 GROUP oGrp1 TO 032,235 LABEL OemToAnsi('Dados do Produto')                                                                                      PIXEL OF oDlg
-	           @ 018,005 MSGET oCodigo                VAR    cCodigo                PICTURE PesqPict("SZM","ZM_CODIGO" , 15) SIZE 050,09 WHEN .F.                        PIXEL OF oDlg
+	            @ 018,005 MSGET oCodigo                VAR    cCodigo                PICTURE PesqPict("SZM","ZM_CODIGO" , 15) SIZE 050,09 WHEN .F.                        PIXEL OF oDlg
                @ 018,060 MSGET oDescri                VAR    cDescri                PICTURE PesqPict("SZM","ZM_DESCRIC", 30) SIZE 130,09 WHEN .F.                        PIXEL OF oDlg
                @ 018,195 MSGET oTipo                  VAR    cTipo                  PICTURE PesqPict("SZM","ZM_TIPO")        SIZE 012,09 WHEN .F. CENTER                 PIXEL OF oDlg
                @ 018,215 MSGET oLocal                 VAR    cLocal                 PICTURE PesqPict("SZM","ZM_LOCAL")       SIZE 012,09 WHEN .F. CENTER                 PIXEL OF oDlg
@@ -1291,7 +1323,7 @@ User Function fGrvLDir(cID)
        //If Empty(aMarcacao[1][1][1])
        oDlg1Mot   := MSDialog():New( 091, 232, 260, 560, "Observações para a Fórmula", , , .F., , , , , , .T., , , .T. )
        oMGet1Mo   := TMultiGet():New( 004, 004, {|u| If(PCount() > 0, cMGet1Mo := u, cMGet1Mo)}, oDlg1Mot, 156, 060, , , CLR_BLACK, CLR_WHITE, , .T., "", , , .F., .F., .F., , , .F., ,  )
-       oBtn1Mot   := TButton():New( 068, 122, "Confirma", oDlg1Mot, {|| nOpcA := 1, oDlg1Mot:End() }, 037, 012, , , , .T., , "", , , , .F. )
+       oBtn1Mot   := TButton():New( 068, 122, "Confirma", oDlg1Mot, {|| nOpcA := 1, oDlg1Mot:End() }, 037, 012, , , , .T., , "", , , , .F. ) 
 
        oDlg1Mot:Activate(, , , .T.)
        If nOpcA == 0
@@ -1645,11 +1677,13 @@ Static Function fLibEnB(oDlg, bOk, bCancel, bPage, aGeral, cCodigo, cRevisao, aM
        Private oBar
        Eval(bPage,1)
 
-       DEFINE BUTTONBAR oBar SIZE 25,25 3D TOP OF oDlg
-       DEFINE BUTTON        RESOURCE "S4WB010N" OF oBar       ACTION OurSpool()                                                                                      //TOOLTIP OemToAnsi("Gerenciador de Impressão...")
+       DEFINE BUTTONBAR oBar SIZE 60,40  TOP OF oDlg // jose 05/12/2024  DEFINE BUTTONBAR oBar SIZE 25,25  3D TOP OF oDlg 
+       DEFINE BUTTON        RESOURCE "S4WB010N" OF oBar      ACTION OurSpool()                                                                                      //TOOLTIP OemToAnsi("Gerenciador de Impressão...")
        DEFINE BUTTON        RESOURCE "S4WB016N" OF oBar GROUP ACTION HelProg()                                                                                       //TOOLTIP OemToAnsi("Help de Programa...")
-       DEFINE BUTTON        RESOURCE "S4WB007N" OF oBar GROUP ACTION DbSelectArea(aGeral[GEL_ARQ]), U_fMonOpe(1, TMP_CODIGO, TMP_REVISA, TMP_DESCRI, aHeader, aCols) TOOLTIP OemToAnsi("Operações...")
+       DEFINE BUTTON        RESOURCE "S4WB007N" OF oBar GROUP ACTION DbSelectArea(aGeral[GEL_ARQ]), U_fMonOper(1, TMP_CODIGO, TMP_REVISA, TMP_DESCRI, aHeader, aCols) TOOLTIP OemToAnsi("Operações...")
        DEFINE BUTTON        RESOURCE "S4WB009N" OF oBar GROUP ACTION DbSelectArea(aGeral[GEL_ARQ]), U_fFichaOp(TMP_CODIGO, TMP_REVISA, TMP_DESCRI)                   TOOLTIP OemToAnsi("Ficha de Processo...")
+//     DEFINE BUTTON        RESOURCE "S4WB020N" OF oBar       ACTION DbSelectArea(aGeral[GEL_ARQ]), U_Alter(2)                      TOOLTIP OemToAnsi("Tabela de Amostras...")  // jOSE 07/03/2024
+
        If !Posicione("SZM", 1, xFilial("SZM")+&(aGeral[GEL_ARQ]+"->TMP_CODIGO")+&(aGeral[GEL_ARQ]+"->TMP_REVISA"), "ZM_STATUS") $ 'EE'
           DEFINE BUTTON        RESOURCE "S4WB014B" OF oBar GROUP ACTION U_fRetSta(oDlg, @aGeral, @aMarcacao, @lSaida), Iif(lSaida, oDlg:End(), )                     TOOLTIP OemToAnsi("Retorna status anterior...")
           If !Posicione("SZM", 1, xFilial("SZM")+&(aGeral[GEL_ARQ]+"->TMP_CODIGO")+&(aGeral[GEL_ARQ]+"->TMP_REVISA"), "ZM_STATUS") $ 'PP'
@@ -1657,9 +1691,8 @@ Static Function fLibEnB(oDlg, bOk, bCancel, bPage, aGeral, cCodigo, cRevisao, aM
           Endif
        Endif
        oBar:nGroups += 2
-       DEFINE BUTTON oBtOk  RESOURCE "S4WB018N" OF oBar GROUP ACTION lSaida := .t., U_fAprFor(oDlg, @aGeral, @aMarcacao)                                             TOOLTIP OemToAnsi("Aprova...")
-       DEFINE BUTTON oBtCan RESOURCE "S4WB019N" OF oBar       ACTION lSaida := .t., oDlg:End()                                                                       TOOLTIP OemToAnsi("Sair...")
-
+       DEFINE BUTTON oBtOk  RESOURCE "S4WB018N" OF oBar GROUP ACTION lSaida := .t., U_fAprFor(oDlg, @aGeral, @aMarcacao)                                             TOOLTIP OemToAnsi("...") 
+       DEFINE BUTTON oBtCan RESOURCE "S4WB019N" OF oBar       ACTION lSaida := .t., oDlg:End()                                                                       TOOLTIP OemToAnsi("Sair...")  
        oBar:bRClicked := {|| AllwaysTrue()}
 
 Return Nil
@@ -1722,11 +1755,10 @@ User Function PCPX01_9()
      Private nColMax := 2350
      Private nColBox := 2200
 
-	if !EstaAutori(SZM->ZM_CODIGO)
-		Alert("Acesso Não Autorizado!")
-		return(.f.)
-	endif 
-
+	  If !EstaAutori(SZM->ZM_CODIGO)
+		  Alert("Acesso Não Autorizado!  PCPX01 ")
+	     return(.f.)
+	  Endif 
 
      If !lAcs8
      	MsgBox("Usuário sem acesso a impressão de fórmulas.!!","Atenção","STOP")
@@ -1782,7 +1814,7 @@ User Function PCPX01_9()
                oPrn:Say(nLinha    , nColuna + 1850, SZM->ZM_RESPONS                     , oFont3,,,,)
                nLinha += 60
                If SZM->ZM_STATUS $ "AC"
-                  cStatus := 'APROVADO - FÓRMULA VIGENTE'
+                  cStatus := 'DO - FÓRMULA VIGENTE'
                ElseIf SZM->ZM_STATUS $ "EE"
                       cStatus := 'EM ELABORAÇÃO - FÓRMULA BLOQUEADA'
                ElseIf SZM->ZM_STATUS $ "PP"
@@ -1925,7 +1957,7 @@ User Function PCPX01_A(nOpc)
      Private lSaida     := .f.            //Validação para saída do sistema
 
 	 If !EstaAutori(SZM->ZM_CODIGO)
-		Alert("Acesso Não Autorizado!")
+		Alert("Acesso Não Autorizado!  PCPX01  ")
 		return(.f.)
 	 Endif 
 
@@ -1937,19 +1969,22 @@ User Function PCPX01_A(nOpc)
            Return
         Else
            If !Alltrim(Upper(cUsername)) $ Alltrim(Upper(SZM->ZM_RESPONS))
-              MsgBox("Usuário não autorizado a efetuar exclusão dessa estrutura !!!","Atenção","STOP")
+              MsgBox("Usuário não autorizado a efetuar exclusão dessa estrutura PCPX01_A() !!!"+Alltrim(Upper(cUsername))+" "+Alltrim(Upper(SZM->ZM_RESPONS)),"Atenção","STOP")
               Return
            Endif
         Endif
      Endif
      //Montagem dos Campos da Enchoice de acordo com o item referido.
      If Len(Alltrim(SZM->ZM_CODIGO)) == 12
-        aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO", "ZM_CATALIS", "ZM_RELCAT", "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO", "ZM_DESEMB", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT","ZM_VERIFCO", "ZM_GRUPO2"}
+// jOSE 07/03/2024     aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO", "ZM_CATALIS", "ZM_RELCAT", "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO", "ZM_DESEMB", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT","ZM_VERIFCO", "ZM_GRUPO2", "ZM_AMOSTRA", "ZM_DESAMOS" }
+        aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO", "ZM_CATALIS", "ZM_RELCAT", "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO", "ZM_DESEMB", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT","ZM_VERIFCO", "ZM_GRUPO2", "ZM_AMOSTRA" }
      Else
         If Len(Alltrim(SZM->ZM_CODIGO)) == 4 //.or. cNumEmp = '01010104'
-           aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO",                          "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT","ZM_VERIFCO"}
+// JOSE 07/03/2024     aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO",                          "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT","ZM_VERIFCO","ZM_AMOSTRA", "ZM_DESAMOS"}
+           aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO",                          "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT","ZM_VERIFCO","ZM_AMOSTRA"}
         Else
-           aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO",                          "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT" }
+//  JOSE  07/038/2024  aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO",                          "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT", "ZM_AMOSTRA", "ZM_DESAMOS" }
+           aAcho := { "ZM_CODIGO", "ZM_REVISAO", "ZM_DESCRIC", "ZM_RESPONS", "ZM_DTINCLU", "ZM_TIPO",                          "ZM_TIPOPRO", "ZM_SOLICIT", "ZM_LOCAL", "ZM_UM", "ZM_ROTEIRO", "ZM_PADCOR","ZM_POSIPI","ZM_EX_NCM", "ZM_XCODANT", "ZM_AMOSTRA" }
         Endif
      Endif
      RegToMemory("SZM", .F.)
@@ -1977,7 +2012,8 @@ User Function PCPX01_A(nOpc)
      /************************************/
      fCarrRev(@aHeader, @aCols, @nPerRev, @nPesRev, @nPVCRev, @nBriRev, @nCusRRv, @nCusDRv, @nCusORv, @nPrcRev)
      
-     DEFINE MSDIALOG oDlg FROM 000,000 TO 033,100 TITLE OemToAnsi("Formulação") OF oMainWnd
+  //   DEFINE MSDIALOG oDlg FROM 000,000 TO 033,100 TITLE OemToAnsi("Formulação") OF oMainWnd
+     DEFINE MSDIALOG oDlg FROM 100,100 TO 300,300 TITLE OemToAnsi("Formulação") OF oMainWnd
 
      DEFINE FONT oFont SIZE 8,0 BOLD
             EnChoice("SZM", nReg, nOpcE, , , , aAcho, {015, 001, 090, 395}, aAcho, 3, , , , , , lVirtual)
@@ -2102,6 +2138,9 @@ Static Function fEncBarG(bOk, bCancel, oDlgPad, nOpc)
        /***********************************************************************************************************/
        DEFINE BUTTON        RESOURCE "S4WB007N" OF oBar       ACTION U_fMonOper(nOpc, M->ZM_CODIGO, M->ZM_REVISAO, M->ZM_DESCRIC) TOOLTIP OemToAnsi("Operações...")
        DEFINE BUTTON        RESOURCE "S4WB009N" OF oBar       ACTION U_fFichaOP(      M->ZM_CODIGO, M->ZM_REVISAO, M->ZM_DESCRIC) TOOLTIP OemToAnsi("Ficha de Processo...")
+      //--------------------   Jose 07/03/2024 -----------------------------------------------  
+//     DEFINE BUTTON        RESOURCE "S4WB020N" OF oBar       ACTION U_AMOSTRA() TOOLTIP OemToAnsi("Tabela de Amostras...") // jOSE 07/03/2024 
+      //--------------------------------------------------------------------------------------
        If M->ZM_TIPO $ 'PI' .AND. Len(Alltrim(M->ZM_CODIGO)) == 12
           DEFINE BUTTON        RESOURCE "CONTAINR" OF oBar       ACTION U_fIncEmba(nOpc, M->ZM_CODIGO, M->ZM_REVISAO, M->ZM_TIPOPRO) TOOLTIP OemToAnsi("Embalagens")
        Endif
@@ -2566,14 +2605,72 @@ Static Function fCarrRev(aHeader, aCols, nPerRev, nPesRev, nPVCRev, nBriRev, nCu
 Return
 
 Static Function EstaAutori(_cCodigo)
-       Local _aRetInf, _nX
-       Local lRet,cLinha,nArea,_cCodUsr
-       //Local lAux
+       Local _nX
+       Local lRet,cLinha,nArea
+       Private _cCodUsr
+       Private _nX1      := 0
+       Private _cTipoPro 
+       Private _aRetInf := {} //:=0  jose 09/07/205
+
        nArea    := Alias()
        _cCodUsr := RetCodUsr()
-       _aRetInf := FWGetSX5( "W0", _cCodUsr )
-       lRet     := .t.
-      If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUsr) != 0
+
+//If _nX1 = 0 jose 21/07/2025
+  // Messagebox("Produto "+_cCodigo+" nX1 !","Atenção...",48) 
+//EndIf
+
+//IF _nX1 = 0 jose 21/07/2025
+  // Messagebox("Produto "+_cCodUsr+" nX1 !","Atenção...",48) 
+//EndIf
+
+//     _aRetInf := FWGetSX5( "W0", _cCodUsr ) tirado por  jOSE 30/06/2025
+//     u_FWGetZAC(_cCodUsr) // jose 10/07/2025
+/*// Acrescentado por Jose 30/06/2025 ----------------------------------------------------------------*/
+    cQuery := ""     
+    cQuery += "SELECT ZM_TIPO "   
+    cQuery += "FROM "+RetSqlName("SZM")+" SZM WITH (NOLOCK) "     
+    cQuery += "WHERE ZM_FILIAL = '"+xFilial("SZM")+"' "    
+    cQuery += "  AND ZM_CODIGO  = '"+_cCodigo+"' "   
+    cQuery += "  AND D_E_L_E_T_ = '' "   
+
+    If Select( "TCQSZM" ) > 0    
+       DbSelectArea( "TCQSZM" )   
+       DbCloseArea()  
+    Endif  
+    TCQUERY cQuery ALIAS "TCQSZM" NEW   
+    DbSelectArea("TCQSZM")   
+    DbGoTop()   
+    _cTipoPro := TCQSZM->ZM_TIPO   
+
+
+//IF _nX1 = 0   jose 21/07/2025
+ //  Messagebox("Produto "+_cTipoPro+" nX1 !","Atenção...",48) 
+//EndIf
+
+    cQuery := "" 
+    cQuery += "SELECT ZAC_FILIAL, ZAC_CODIGO,  ZAC_TIPO, ZAC_LINHA "
+    cQuery += "  FROM "+RetSqlName("ZAC")+" ZAC  "
+    cQuery += " WHERE  D_E_L_E_T_ = '' "
+    cQuery += "   AND ZAC_FILIAL = '"+xFilial("ZAC")+"' " 
+    cQuery += "   AND ZAC_CODIGO = '"+_cCodUsr+"'  "  
+    cQuery += "ORDER BY ZAC_FILIAL, ZAC_CODIGO,  ZAC_TIPO, ZAC_LINHA "
+
+    If Select( "TCQZAC" ) > 0    
+       DbSelectArea( "TCQZAC" )  
+       DbCloseArea()   
+    Endif  
+    TCQUERY cQuery ALIAS "TCQZAC" NEW
+    DbSelectArea("TCQZAC")   
+    DbGoTop()   
+    While !EOF()
+        AAdd( _aRetInf, { TCQZAC->ZAC_FILIAL, TCQZAC->ZAC_CODIGO, TCQZAC->ZAC_TIPO, TCQZAC->ZAC_LINHA })
+        DbSkip()
+    EndDo
+    DbCloseArea()
+
+/*   ate aqui  Jose 30/06/2025 -----------------------------------------------------------------------*/
+      lRet     := .t.
+//      If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUsr) != 0  // Jose 30/07/2025
           If Len(Trim(_cCodigo)) == 12
              lRet   := .f.
              cLinha := Substr(_cCodigo,4,2)
@@ -2591,18 +2688,134 @@ Static Function EstaAutori(_cCodigo)
                 dbselectarea("SX5")
                 dbskip()
              enddo*/
+             _nx1 := 0
              For _nX := 1 To Len( _aRetInf )
-                 If _aRetInf[_nX][3] == _cCodUsr
-                    If Alltrim( _aRetInf[_nX][4] ) == Alltrim( xFilial("SG1") ) + cLinha
+                 If _aRetInf[_nX][2] == _cCodUsr
+   //                If Alltrim( _aRetInf[_nX][1] ) == Alltrim( xFilial("SG1") ) + cLinha .AND. Alltrim( _aRetInf[_nX][3] ) == Alltrim( xFilial("SG1") ) + _cTipoPro   Jose 11/07/2025
+                     If Alltrim( _aRetInf[_nX][1] ) == Alltrim( xFilial("SG1") ) .AND. Alltrim( _aRetInf[_nX][4] ) == cLinha .AND. Alltrim( _aRetInf[_nX][3] ) ==  _cTipoPro 
                        lRet = .t.
+                       _nX1 = _nX1 + 1
                        exit
-                    Endif
+                     Endif
                  Endif
              Next
-             If lRet .and. lFiltBM
-                lRet := &cFiltBM
-             Endif 
+             IF _nX1 = 0
+                Messagebox("Produto "+AllTrim(_cCodigo)+ "   Usuário não autorizado a Manipular esta Linha "+AllTrim(cLinha)+" e ou Tipo de Produto "+AllTrim(_cTipoPro)+" "+AllTrim(_nX1)+ " nX1 !","Atenção...",48) 
+                lRet = .f.
+                return(lRet) 
+             Else
+               If lRet .and. lFiltBM
+                  lRet := &cFiltBM
+               Endif 
+             Endif
           Endif 
-      Endif 
+//      Endif   // Jose 30/07/2025
        DbSelectArea(nArea)
 return(lRet)
+
+// Função para buscar valores da tabela ZAC  Jose  10/07/2025
+/*
+User Function FWGetZAC(_cCodigo)
+//    Private _cTipoPro 
+    Private _aRetInf := {}
+    Private _nx1 := 0
+/*
+    cQuery := ""     
+    cQuery += "SELECT B1_TIPO "   
+    cQuery += "FROM "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) "     
+    cQuery += "WHERE B1_FILIAL = '"+xFilial("SB1")+"' "    
+    cQuery += "  AND B1_COD  = '"+_cCodigo+"' "   
+    cQuery += "  AND D_E_L_E_T_ = '' "   
+
+    If Select( "TCQSB1" ) > 0    
+       DbSelectArea( "TCQSB1" )   
+       DbCloseArea()  
+    Endif  
+    TCQUERY cQuery ALIAS "TCQSB1" NEW   
+    DbSelectArea("TCQSB1")   
+    DbGoTop()   
+    _cTipoPro := TCQSB1->B1_TIPO   
+*/
+/*
+    // Monta a query para buscar os dados da tabela ZAC
+    cQuery := "" 
+    cQuery += "SELECT ZAC_FILIAL, ZAC_CODIGO,  ZAC_TIPO, ZAC_LINHA "
+    cQuery += "  FROM "+RetSqlName("ZAC")+" ZAC  "
+    cQuery += " WHERE  D_E_L_E_T_ = '' "
+    cQuery += "   AND ZAC_FILIAL = '"+xFilial("ZAC")+"' " 
+    cQuery += "   AND ZAC_CODIGO = '"+_cCodUsr+"'  "  
+    cQuery += "ORDER BY ZAC_FILIAL, ZAC_CODIGO,  ZAC_TIPO, ZAC_LINHA "
+
+    If Select( "TCQZAC" ) > 0    
+       DbSelectArea( "TCQZAC" )  
+       DbCloseArea()   
+    Endif  
+    TCQUERY cQuery ALIAS "TCQZAC" NEW
+    DbSelectArea("TCQZAC")   
+    DbGoTop()   
+    While !EOF()
+        AAdd( _aRetInf, { TCQZAC->ZAC_FILIAL, TCQZAC->ZAC_CODIGO, TCQZAC->ZAC_TIPO, TCQZAC->ZAC_LINHA })
+        DbSkip()
+    EndDo
+    DbCloseArea()
+Return 
+
+*/
+
+
+
+/*// Acrescentado por Jose 30/06/2025 ----------------------------------------------------------------
+
+       
+//       Local ZACLinha   //  jose 30/06/2025
+//       Local _cTipoPro //  jose 30/06/2025
+       //Local lAux
+       cQry := ""     
+       cQry += "SELECT B1_TIPO "   
+       cQry += "FROM "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) "     
+       cQry += "WHERE B1_FILIAL = '"+xFilial("SB1")+"' "    
+       cQry += "  AND B1_COD  = '"+_cCodigo+"' "   
+       cQry += "  AND D_E_L_E_T_ = '' "   
+
+       If Select( "TCQSB1" ) > 0    
+          DbSelectArea( "TCQSB1" )   
+          DbCloseArea()  
+       Endif  
+       TCQUERY cQry ALIAS "TCQSB1" NEW   
+       DbSelectArea("TCQSB1")   
+       DbGoTop()   
+       _cTipoPro := TCQSB1->B1_TIPO   
+
+       ZACLinha := SubStr(_cCodigo,4,2) 
+   
+        cQry := ""
+       cQry += "SELECT ZAC_FILIAL, ZAC_CODIGO, ZAC_TIPO, ZAC_LINHA "
+       cQry += "  FROM "+RetSqlName("ZAC")+" ZAC "
+       cQry += " WHERE D_E_L_E_T_ = '' "
+       cQry += "   AND ZAC_FILIAL = '"+xFilial("ZAC")+"' " 
+       cQry += "   AND ZAC_CODIGO = '"+_cCodUsr+"'  "  
+       cQry += "   AND ZAC_TIPO   = '"+_cTipoPro+"' "  
+       cQry += "   AND ZAC_LINHA  = '"+ZACLinha+"'  "  
+       If Select( "TCQZAC" ) > 0    
+          DbSelectArea( "TCQZAC" )  
+          DbCloseArea()   
+       Endif  
+       TCQUERY cQry ALIAS "TCQZAC" NEW  
+
+//     _aRetInf :=0  jose 09/07/2025
+       _nX1 := 0  // Jose 09/07/2025
+       do while !eof() .AND. TCQZAC->ZAC_CODIGO = _cCodUsr .AND. TCQZAC->ZAC_TIPO = _cTipoPro .AND. TCQZAC->ZAC_LINHA = ZACLinha     
+//        _aRetInf := _aRetInf + 1   Jose 09/07/205
+          _nX1 = _nX1 + 1 // Jose 09/07/2025
+          AADD(_aRetInf, ZACLinha) // jose 09/07/2025
+          dbselectarea("ZAC") 
+          dbskip() 
+       enddo
+       If _nX1 = 0 
+          Messagebox("Produto "+AllTrim(_cCodigo)+ "   Usuário não autorizado a Manipular esta Linha "+AllTrim(ZACLinha)+" e ou Tipo de Produto "+AllTrim(_cTipoPro)+" !","Atenção...",48) 
+          lRet := .f. 
+          return 
+       EndIf 
+//   até aqui   jose 30/06/2025 -----------------------------------------------------------------------------------------*/
+
+

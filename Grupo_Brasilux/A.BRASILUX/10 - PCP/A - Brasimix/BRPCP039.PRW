@@ -6,7 +6,7 @@
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
 ฑฑบPrograma  ณ BRPCP039  บAutor  ณ Nelieder Corneta  บ Data ณ  17/01/2022 บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDescri็ใo ณ Etiquetas de Volumes (BrasTintas)                           ฑฑ
+ฑฑบDescri็ใo ณ Etiquetas p/ Volumes (BrasTintas)                           ฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ BRASILUX TINTAS TษCNICAS LTDA.                             บฑฑ
@@ -158,7 +158,8 @@ cQry += " ISNULL(A2_NOME,'') AS A2_NOME,ISNULL(A2_MUN,'') AS A2_MUN,ISNULL(A2_ES
 
 cQry += " FROM "+RetSqlName("SC9")+" SC9 WITH (NOLOCK) "
 
-if !empty(cBordero1) .OR. !empty(dDtBord2)
+/* alterado em 15/07/2022 */
+/*if !empty(cBordero1) .OR. !empty(dDtBord2)
 	cQry += "RIGHT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH (NOLOCK) ON (SZG.D_E_L_E_T_ <> '*') AND (ZG_FILIAL = '"+xFilial("SZG")+"') AND (C9_PEDIDO = RIGHT(ZG_PEDIDO,6)) "
 	IF !empty(cBordero1)
 		cQry += "AND (ZG_CODIGO = '"+cBordero1+"') "
@@ -166,7 +167,7 @@ if !empty(cBordero1) .OR. !empty(dDtBord2)
 	IF !empty(dDtBord2) 
 		cQry += "LEFT OUTER JOIN "+RetSqlName("SZF")+" SZF WITH (NOLOCK) ON (SZF.D_E_L_E_T_ <> '*') AND (ZF_FILIAL = '"+xFilial("SZF")+"') AND (ZG_CODIGO = ZF_CODIGO) "
 	ENDIF 
-ENDIF 
+ENDIF */
 
 IF !EMPTY(cBordesp)
 	cQry += "RIGHT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON (SZB.D_E_L_E_T_ <> '*') AND (ZB_FILIAL = '"+xFilial("SZB")+"') AND (ZB_CODIGO = '"+cBordesp+"') AND (C9_PEDIDO = RIGHT(ZB_PEDIDO,6)) "
@@ -183,11 +184,27 @@ cQry += " LEFT OUTER JOIN "+RETSQLNAME("SZG")+" SZG WITH (NOLOCK) ON (SZG.D_E_L_
 cQry += "LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (C9_FILIAL = C5_FILIAL) AND (C9_PEDIDO = C5_NUM) AND (SC5.D_E_L_E_T_ <> '*') "
 cQry += "LEFT OUTER JOIN "+RetSqlName("SA4")+" SA4 WITH (NOLOCK) ON (SC5.C5_REDESP = A4_COD) AND (SA4.D_E_L_E_T_ <> '*') "
 cQry += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON (SB2.D_E_L_E_T_ <> '*') AND (B2_FILIAL = '"+xFilial("SB2")+"') AND (B1PED.B1_COD = B2_COD) AND (B1PED.B1_LOCPAD = B2_LOCAL) "
+
+/* incluido em 15/07/2022 */
+if !empty(cBordero1) .OR. !empty(dDtBord2)
+	IF !empty(dDtBord2) 
+		cQry += "LEFT OUTER JOIN "+RetSqlName("SZF")+" SZF WITH (NOLOCK) ON (SZF.D_E_L_E_T_ <> '*') AND (ZF_FILIAL = '"+xFilial("SZF")+"') AND (ZG_CODIGO = ZF_CODIGO) "
+	ENDIF 
+ENDIF 
+
 cQry += "WHERE "
 cQry +=  "(SC9.D_E_L_E_T_ <>  '*') AND (SC9.C9_FILIAL = '"+xFilial('SC9')+"') AND (SC5.C5_APROVA = '1') AND (LEN(B2_LOCALIZ) > 0) "
 if !empty(cPedido2) .and. (cPedido2 >= cPedido1)
 	cQry +=  "AND (SC9.C9_PEDIDO BETWEEN '"+cPedido1+"' AND '"+cPedido2+"') "
 ENDIF
+
+/* incluido em 15/07/2022 */
+if !empty(cBordero1) .OR. !empty(dDtBord2)
+	IF !empty(cBordero1)
+		cQry += "AND (ZG_CODIGO = '"+cBordero1+"') "
+	ENDIF 
+ENDIF 
+
 
 IF !EMPTY(cLocaliz2)
 	cQry +=  "AND (SB2.B2_LOCALIZ BETWEEN '"+ALLTRIM(cLocaliz1)+"' AND '"+cLocaliz2+"') "
@@ -199,7 +216,7 @@ if !empty(cProd2) .and. (cProd2 >= cProd1)
 endif
 
 if !empty(dDtBord2)
-	cQry += "AND SZF.ZF_EMISSAO BETWEEN '"+dtos(dDtBord1)+"' AND '"+dtos(dDtBord2)+"')"
+	cQry += "AND SZF.ZF_EMISSAO BETWEEN '"+dtos(dDtBord1)+"' AND '"+dtos(dDtBord2)+"'"
 endif
 
 cQry += " GROUP BY C9_PEDIDO,C9_CLIENTE,SC5.C5_VOLUME1,A1_NOME,A1_MUN,A1_EST,  A2_NOME,A2_MUN,A2_EST,A4_NOME,A4_REGIAO,ZG_LOCALIZ "

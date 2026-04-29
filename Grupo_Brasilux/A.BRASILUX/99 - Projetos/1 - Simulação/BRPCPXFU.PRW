@@ -1,7 +1,8 @@
 //#include 'brasilux.ch'
 #include "protheus.ch"
 #include 'topconn.ch'                                                                                   	
-#include "rwmake.ch"                                                                                      
+#include "rwmake.ch" 
+
 #define DS_MODALFRAME            128  // 0x80
 #define WS_POPUP          2147483648  // 0x80000000L
 #define WS_CAPTION          12582912  // 0x00C00000L
@@ -30,7 +31,9 @@
 User Function fVerPerm(cUser, cStatus, cAcess, nOpc, cCodigo, cTipo)
      If cStatus $ "EE"
         If nOpc == 4
-			if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+           //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+			  //if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+           //if PSWADMIN( , , RetCodUsr() ) != 0
            		If cTipo $ 'PI'
               		If !SubStr(cAcess, 2, 1) == '*'
                  		MsgBox("Usuário não autorizado a liberar as alterações dessa estrutura !!!","Atenção...","STOP")
@@ -46,50 +49,56 @@ User Function fVerPerm(cUser, cStatus, cAcess, nOpc, cCodigo, cTipo)
                  		Return(.f.)
               		Endif
            		Endif
-   			endif 
+   			//endif 
         ElseIf nOpc == 3
-			if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
-               If cTipo $ 'PI'
+         //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+			//if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+         //if PSWADMIN( , , RetCodUsr() ) != 0
+               If cTipo $ 'PI' .AND. cTipo $ 'PA'
                   If !SubStr(cAcess, 1, 1) == '*'
-                     MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                     MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura 1  !!!","Atenção...","STOP")
                      Return(.f.)
                   Endif
-               ElseIf cTipo == 'PA'
+               ElseIf cTipo == 'PA' .AND. cTipo == 'PI'
                       If !SubStr(cAcess, 3, 1) == '*'
-                         MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                         MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura 2  !!!","Atenção...","STOP")
                          Return(.f.)
                       Endif
                Endif
-   			endif 
+   			//endif 
         ElseIf nOpc == 2
-			if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
-               If cTipo == 'PI'
+          //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+			 //if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+          //if PSWADMIN( , , RetCodUsr() ) != 0
+               If cTipo == 'PI' .AND. cTipo == 'PA'
                   If !Upper(Alltrim(cUser)) == Upper(Alltrim(cUsername))
-                     MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                     MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura 3 !!!"+cTipo+"  "+Upper(Alltrim(cUser))+"   "+Upper(Alltrim(cUsername)),"Atenção...","STOP")
                      Return(.f.)
                   Else
                      If !SubStr(cAcessos, 1, 1) == '*'
-                        MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                        MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura  4  !!!","Atenção...","STOP")
                         Return(.f.)
                      Endif
                   Endif
-               ElseIf cTipo == 'PA'
+               ElseIf cTipo == 'PA' .AND. cTipo == 'PI'
                       If !Empty(cUser)
                          If !Upper(Alltrim(cUser)) == Upper(Alltrim(cUsername))
-                            MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                            MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura  5  !!!","Atenção...","STOP")
                             Return(.f.)
                          Endif
                       Else
                          If SubStr(cAcessos, 3, 1) == '*'
-                            MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                            MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura  6 !!!","Atenção...","STOP")
                             Return(.f.)
                          Endif
                       Endif
                Endif
    			endif 
-        Endif
+        //Endif
      ElseIf cStatus $ "PP"
-			if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+         //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+			//if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+         //if PSWADMIN( , , RetCodUsr() ) != 0
             	If nOpc == 4
                		If !SubStr(cAcess, 4 , 1) == '*'
                   		MsgBox("Usuário não autorizado a liberar as alterações dessa estrutura !!!","Atenção...","STOP")
@@ -97,7 +106,7 @@ User Function fVerPerm(cUser, cStatus, cAcess, nOpc, cCodigo, cTipo)
                		Endif
             	ElseIf nOpc == 2
                    If !SubStr(cAcess, 3 , 1) == '*'
-                      MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                      MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura  7 !!!","Atenção...","STOP")
                       Return(.f.)
                    Endif
                    If !cTipo $ 'PA'
@@ -105,19 +114,21 @@ User Function fVerPerm(cUser, cStatus, cAcess, nOpc, cCodigo, cTipo)
                       Return(.f.)
                    Endif
             	Endif
-   			endif 
+   			//endif 
      ElseIf cStatus $ "EA"
-			if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+         //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+			//if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+         //if PSWADMIN( , , RetCodUsr() ) != 0
             	If nOpc == 4
                		If !SubStr(cAcess, 5, 1) == '*'
                   		MsgBox("Usuário não autorizado a liberar as alterações dessa estrutura !!!","Atenção...","STOP")
                   		Return(.f.)
                		Endif
             	ElseIf nOpc == 2
-                 MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura !!!","Atenção...","STOP")
+                 MsgBox("Usuário não autorizado a efetuar alterações dessa estrutura  8 !!!","Atenção...","STOP")
                  Return(.f.)
             	Endif
-   			endif 
+   			//endif 
      ElseIf cStatus $ "AC.RE.RT"
             If !nOpc == 1
                MsgBox("Atenção esse status não permite manutenção dessa estrutura !!!","Informação...","INFO")
@@ -1022,9 +1033,9 @@ User Function fMonCol(aCols, aHeader, cTipOpe, cCodigo, cRevisao, cId, cTipo, cU
               For nX := 1 to Len(aCols)
                   // produto de custeio
                   If U_IsProdCusto(aCols[nX][nPosCom])
-                     //aCols[nX][nPosQtd] := ( aCols[nX][nPosPer] / 100 ) 
-                     //aCols[nX][nPosCRe] := 0
-                     //aCols[nX][nPosCDo] := 0
+                   //aCols[nX][nPosQtd] := ( aCols[nX][nPosPer] / 100 ) 
+                   //aCols[nX][nPosCRe] := 0
+                   //aCols[nX][nPosCDo] := 0
                      Loop
                   Endif   
                   If Posicione("SB1", 1, xFilial("SB1")+aCols[nX][1], "B1_UM") $ cUM 
@@ -1034,8 +1045,8 @@ User Function fMonCol(aCols, aHeader, cTipOpe, cCodigo, cRevisao, cId, cTipo, cU
                   Endif
                   aCols[nX][nPosCRe] := (aCols[nX][nPosQtd] / (1- ( aCols[nX][nPosPda] / 100 ) ) ) * aCols[nX][nPosCUn]
                   aCols[nX][nPosCDo] := (aCols[nX][nPosQtd] / (1- ( aCols[nX][nPosPda] / 100 ) ) ) / Posicione("SM2", 1, dDataBase, "M2_MOEDA2")
-                  //aCols[nX][nPosCRe] := ( aCols[nX][nPosQtd] + ( aCols[nX][nPosQtd] * ( aCols[nX][nPosPda] / 100 ) ) ) * aCols[nX][nPosCUn]
-                  //aCols[nX][nPosCDo] := ( aCols[nX][nPosQtd] + ( aCols[nX][nPosQtd] * ( aCols[nX][nPosPda] / 100 ) ) ) / Posicione("SM2", 1, dDataBase, "M2_MOEDA2")
+                //aCols[nX][nPosCRe] := ( aCols[nX][nPosQtd] + ( aCols[nX][nPosQtd] * ( aCols[nX][nPosPda] / 100 ) ) ) * aCols[nX][nPosCUn]
+                //aCols[nX][nPosCDo] := ( aCols[nX][nPosQtd] + ( aCols[nX][nPosQtd] * ( aCols[nX][nPosPda] / 100 ) ) ) / Posicione("SM2", 1, dDataBase, "M2_MOEDA2")
               Next
            Endif
            DbSelectArea(cTcq)
@@ -1139,10 +1150,10 @@ User Function fMonCol(aCols, aHeader, cTipOpe, cCodigo, cRevisao, cId, cTipo, cU
                   ElseIf Alltrim(aHeader[nX][2]) $ "ZN_CUSTOUN"
                          aCols[Len(aCols)][nX] :=  U_fCCusPro(aCols[Len(aCols)][1])//fCusPro(aCols[Len(aCols)][1])
                   ElseIf Alltrim(aHeader[nX][2]) $ "ZN_CUSTORE"
-                         //aCols[Len(aCols)][nX] := ( aCols[Len(aCols)][nPosQtd] + ( aCols[Len(aCols)][nPosQtd] * ( aCols[Len(aCols)][nPosPda] / 100 ) ) ) * aCols[Len(aCols)][nPosCUn]
+                       //aCols[Len(aCols)][nX] := ( aCols[Len(aCols)][nPosQtd] + ( aCols[Len(aCols)][nPosQtd] * ( aCols[Len(aCols)][nPosPda] / 100 ) ) ) * aCols[Len(aCols)][nPosCUn]
                          aCols[Len(aCols)][nX] := (aCols[Len(aCols)][nPosQtd] / (1- ( aCols[Len(aCols)][nPosPda] / 100 ) ) ) * aCols[Len(aCols)][nPosCUn]
                   ElseIf Alltrim(aHeader[nX][2]) $ "ZN_CUSTODO"
-                         //aCols[Len(aCols)][nX] := ( aCols[Len(aCols)][nPosQtd] + ( aCols[Len(aCols)][nPosQtd] * ( aCols[Len(aCols)][nPosPda] / 100 ) ) ) / Posicione("SM2", 1, dDataBase, "M2_MOEDA2")
+                       //aCols[Len(aCols)][nX] := ( aCols[Len(aCols)][nPosQtd] + ( aCols[Len(aCols)][nPosQtd] * ( aCols[Len(aCols)][nPosPda] / 100 ) ) ) / Posicione("SM2", 1, dDataBase, "M2_MOEDA2")
                          aCols[Len(aCols)][nX] := (aCols[Len(aCols)][nPosQtd] / (1- ( aCols[Len(aCols)][nPosPda] / 100 ) ) ) / Posicione("SM2", 1, dDataBase, "M2_MOEDA2")
                   ElseIf Alltrim(aHeader[nX][2]) $ "ZN_INI"
                          aCols[Len(aCols)][nX] := dDataBase
@@ -1183,7 +1194,7 @@ User Function fMonRod(cCodigo, cRevisao, cTipo, cUM, cTipoPro, aCols, aHeader, o
      Local nY, nX
      Local _lOpen        := .F. //LGS#20200210 - Adequação para release 12.1.25
      Local _cAliasSX3 := GetNextAlias() //LGS#20200210 - Adequação para release 12.1.25
-     
+  
      // ABERTURA DO DICIONÁRIO SX3 - LGS#20200210 - Adequação para release 12.1.25
      OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
      _lOpen := Select( _cAliasSX3 ) > 0
@@ -1799,8 +1810,9 @@ Return(lRet)
   /****************************************************************************/
 User Function PCPX01_2()
      Local nRadio := 1
-
-     If (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0) .and. !lAcs1 .and. !lAcs3
+     //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+     //If (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0) .and. !lAcs1 .and. !lAcs3
+     If /*( PSWADMIN( , , RetCodUsr() ) != 0 ) .and.*/ !lAcs1 .and. !lAcs3
         MsgBox("Usuário não autorizado a incluir simulação","Atenção","STOP")
         Return
      Endif
@@ -1888,7 +1900,9 @@ User Function fProTin()
             oVariac:bValid := {|| U_fValPNT(4, @oCaract, @cCaract, @oLinha, @cLinha, @oCor, @cCor, @oVariac, @cVariac, @oEmbal, @cEmbal, @oSeq, @cSeq, @oCodigo, @cCodigo, @oDescri, @cDescri, @oTipo, @cTipo, @oLocal, @cLocal, @oUm, @cUm, @cBase, @cDesEmb )}
             oEmbal:bValid  := {|| U_fValPNT(5, @oCaract, @cCaract, @oLinha, @cLinha, @oCor, @cCor, @oVariac, @cVariac, @oEmbal, @cEmbal, @oSeq, @cSeq, @oCodigo, @cCodigo, @oDescri, @cDescri, @oTipo, @cTipo, @oLocal, @cLocal, @oUm, @cUm, @cBase, @cDesEmb )}
  			oLocal:bValid  := {|| U_fValPNT(10, @oCaract, @cCaract, @oLinha, @cLinha, @oCor, @cCor, @oVariac, @cVariac, @oEmbal, @cEmbal, @oSeq, @cSeq, @oCodigo, @cCodigo, @oDescri, @cDescri, @oTipo, @cTipo, @oLocal, @cLocal, @oUm, @cUm, @cBase, @cDesEmb )}    
-     ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar(oDlg, {|| oDlg:End(), U_fSimPro(cCodigo, cDescri, cDesEmb, cLocal ) }, {|| oDlg:End() } ) CENTERED
+ //      ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar(oDlg, {|| oDlg:End(), U_fSimPro(cCodigo, cDescri, cDesEmb, cLocal ) }, {|| oDlg:End() } ) CENTERED
+         ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar(oDlg, {|| oDlg:End(), U_fSimPro(cCodigo, cDescri, cDesEmb, cLocal, cLinha, cTipo ) }, {|| oDlg:End() } ) CENTERED
+
 Return
 
   /****************************************************************************/
@@ -2162,7 +2176,7 @@ User Function fProPas( _nOpc )
             oDescri:bValid := {|| U_fValPNP(2, @oCodigo, @cCodigo, @oDescri, @cDescri, @oLocal, @cLocal, nOpc)}
             oLocal:bValid  := {|| U_fValPNP(3, @oCodigo, @cCodigo, @oDescri, @cDescri, @oLocal, @cLocal, nOpc)}
             oDlg:nStyle       := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
-     ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar(oDlg, {|| oDlg:End(), U_fSimPro(Alltrim(cCodigo)+SubStr(cLatex, 1, 1)+space(14), cDescri, cDesEmb, cLocal, nOpc) }, {|| oDlg:End() } ) CENTERED
+     ACTIVATE MSDIALOG oDlg ON INIT EnchoiceBar(oDlg, {|| oDlg:End(), U_fSimPro(Alltrim(cCodigo)+SubStr(cLatex, 1, 1)+space(14), cDescri, cDesEmb, cLocal, cLinha, cTipo, nOpc) }, {|| oDlg:End() } ) CENTERED
 Return
 
   /****************************************************************************/
@@ -2244,12 +2258,13 @@ Return
   /*** TELA PARA VALIDAÇÃO DO NOVO PRODUTO                                  ***/
   /*** Parâmetros:                                                          ***/
   /****************************************************************************/
-User Function fSimPro(cCodigo, cDescri, cDesEmb, cLocal, nTpO)
+User Function fSimPro(cCodigo, cDescri, cDesEmb, cLocal, cLinha, cTipo, nTpO)
      Local nOpc    := 3
      Local cProExi
      Local cVarAux := ""
      Local lRet    := .t.
 
+//   jose   18/07/2025   verificar aqui o porque do erro //////////////
 	 If !EstaAutori(cCodigo)
 		Alert("Acesso Não Autorizado!")
 		Return(.f.)
@@ -2309,16 +2324,114 @@ User Function fSimPro(cCodigo, cDescri, cDesEmb, cLocal, nTpO)
      Endif
 Return
 
+
+//  jose 19/07/2025 acescentou  
+
+
 Static Function EstaAutori(_cCodigo)
+       Local _nX
+       Local lRet,cLinha,nArea
+       Private _cCodUsr
+       Private _nX1      := 0
+       Private _cTipoPro 
+       Private _aRetInf := {} //:=0  jose 09/07/205
+
+       nArea    := Alias()
+       _cCodUsr := RetCodUsr()
+/*
+    cQuery := ""     
+    cQuery += "SELECT ZM_TIPO "   
+    cQuery += "FROM "+RetSqlName("SZM")+" SZM WITH (NOLOCK) "     
+    cQuery += "WHERE ZM_FILIAL = '"+xFilial("SZM")+"' "    
+    cQuery += "  AND ZM_CODIGO  = '"+_cCodigo+"' "   
+    cQuery += "  AND D_E_L_E_T_ = '' "   
+
+    If Select( "TCQSZM" ) > 0    
+       DbSelectArea( "TCQSZM" )   
+       DbCloseArea()  
+    Endif  
+    TCQUERY cQuery ALIAS "TCQSZM" NEW   
+    DbSelectArea("TCQSZM")   
+    DbGoTop()
+     
+    _cTipoPro := TCQSZM->ZM_TIPO   
+*/
+    
+    If (Substr(_cCodigo,11,2) = '00') .OR. (Substr(_cCodigo,11,2) = '99')
+       _cTipoPro := "PI"
+    Else
+       _cTipoPro := "PA"
+    EndIf
+
+    cQuery := "" 
+    cQuery += "SELECT ZAC_FILIAL, ZAC_CODIGO,  ZAC_TIPO, ZAC_LINHA "
+    cQuery += "  FROM "+RetSqlName("ZAC")+" ZAC  "
+    cQuery += " WHERE  D_E_L_E_T_ = '' "
+    cQuery += "   AND ZAC_FILIAL = '"+xFilial("ZAC")+"' " 
+    cQuery += "   AND ZAC_CODIGO = '"+_cCodUsr+"'  "  
+    cQuery += "ORDER BY ZAC_FILIAL, ZAC_CODIGO,  ZAC_TIPO, ZAC_LINHA "
+
+    If Select( "TCQZAC" ) > 0    
+       DbSelectArea( "TCQZAC" )  
+       DbCloseArea()   
+    Endif  
+    TCQUERY cQuery ALIAS "TCQZAC" NEW
+    DbSelectArea("TCQZAC")   
+    DbGoTop()   
+    While !EOF()
+        AAdd( _aRetInf, { TCQZAC->ZAC_FILIAL, TCQZAC->ZAC_CODIGO, TCQZAC->ZAC_TIPO, TCQZAC->ZAC_LINHA })
+        DbSkip()
+    EndDo
+    DbCloseArea()
+
+      lRet     := .t.
+//      If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUsr) != 0   // Jose 30/07/2025
+          If Len(Trim(_cCodigo)) == 12
+             lRet   := .f.
+             cLinha := Substr(_cCodigo,4,2)
+             _nx1 := 0
+             For _nX := 1 To Len( _aRetInf )
+                 If _aRetInf[_nX][2] == _cCodUsr
+                     If Alltrim( _aRetInf[_nX][1] ) == Alltrim( xFilial("SG1") ) .AND. Alltrim( _aRetInf[_nX][4] ) == cLinha .AND. Alltrim( _aRetInf[_nX][3] ) ==  _cTipoPro 
+                       lRet = .t.
+                       _nX1 = _nX1 + 1
+                       exit
+                     Endif
+                 Endif
+             Next
+             IF _nX1 = 0
+                Messagebox("Produto "+AllTrim(_cCodigo)+ "   Usuário não autorizado a Manipular esta Linha "+AllTrim(cLinha)+" e ou Tipo de Produto "+AllTrim(_cTipoPro)+" "+AllTrim(_nX1)+ " nX1 !","Atenção...",48) 
+                lRet = .f.
+                return(lRet) 
+             Else
+               If lRet .and. lFiltBM
+                  lRet := &cFiltBM
+               Endif 
+             Endif
+          Endif 
+//      Endif   // Jose 30/07/2025
+       DbSelectArea(nArea)
+return(lRet)
+
+
+
+//   Jose 19/07/2025 até aqui
+
+
+
+// jose mudou para EstAutori   19/07/2025
+Static Function EstAutori(_cCodigo)
        Local lRet,cLinha,nArea,_cCodUsr
-       //Local lAux
+     //Local lAux
        Local _aRetInf := FWGetSX5( "W0", _cCodUsr )
        Local _nX
 
        nArea   := Alias()
        _cCodUsr := RetCodUsr()
        lRet := .t.
-       If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUsr) != 0
+       //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+       //If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),_cCodUsr) != 0
+       //If PSWADMIN( , , _cCodUsr ) != 0
           If Len(Trim(_cCodigo)) == 12
              lRet := .f.
              cLinha := Substr(_cCodigo,4,2)
@@ -2347,7 +2460,7 @@ Static Function EstaAutori(_cCodigo)
                   lRet := &cFiltBM
              Endif */
           Endif
-       Endif
+       //Endif
        DbSelectArea(nArea)
 Return(lRet)
 
@@ -2398,8 +2511,10 @@ User Function fGrvSim(nOpc, nPesNew, nCalPVC, nCalBri)
            SZM->ZM_PCREVIS := M->ZM_PCREVIS
            SZM->ZM_POSIPI  := M->ZM_POSIPI
            SZM->ZM_EX_NCM  := M->ZM_EX_NCM
-   	       SZM->ZM_XCODANT := M->ZM_XCODANT
-   	       SZM->ZM_GRUPO2  := M->ZM_GRUPO2
+   	     SZM->ZM_XCODANT := M->ZM_XCODANT
+   	     SZM->ZM_GRUPO2  := M->ZM_GRUPO2
+           SZM->ZM_AMOSTRA := M->ZM_AMOSTRA  //  jOSE 06/03/2024
+           SZM->ZM_DESAMOS := M->ZM_DESAMOS  //  jOSE 06/03/2024
 /*           If Len(Alltrim(M->ZM_CODIGO)) == 12
                 DbSelectArea("SZ6")
                 DbSetOrder(1)
@@ -2460,7 +2575,9 @@ User Function fGrvSim(nOpc, nPesNew, nCalPVC, nCalBri)
                   SZM->ZM_POSIPI  := M->ZM_POSIPI
                   SZM->ZM_EX_NCM  := M->ZM_EX_NCM
                   SZM->ZM_XCODANT := M->ZM_XCODANT
-  				  SZM->ZM_GRUPO2  := M->ZM_GRUPO2
+  				      SZM->ZM_GRUPO2  := M->ZM_GRUPO2
+                  SZM->ZM_AMOSTRA := M->ZM_AMOSTRA  //  jOSE 06/03/2024
+                  SZM->ZM_DESAMOS := M->ZM_DESAMOS  //  jOSE 06/03/2024
                MsUnLock()
             Endif
             DbSelectArea("SZT")
@@ -2504,8 +2621,8 @@ User Function fGrvSim(nOpc, nPesNew, nCalPVC, nCalBri)
                             SZN->ZN_PERC    := aCols[nX][nPosPer]
                             SZN->ZN_QUANT   := aCols[nX][nPosQtd]
                             SZN->ZN_PERDA   := aCols[nX][nPosPda]
-			                SZN->ZN_INI     := aCols[nX][nPosIni]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),ddatabase) //aCols[nX][nPosIni]
-			                SZN->ZN_FIM     := aCols[nX][nPosFim]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),CTOD("31/12/2049")) //aCols[nX][nPosFim]
+			                   SZN->ZN_INI     := aCols[nX][nPosIni]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),ddatabase) //aCols[nX][nPosIni]
+			                   SZN->ZN_FIM     := aCols[nX][nPosFim]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),CTOD("31/12/2049")) //aCols[nX][nPosFim]
                             SZN->ZN_FIXVAR  := aCols[nX][nPosFVa]
                             SZN->ZN_REVINI  := aCols[nX][nPosRIn]
                             SZN->ZN_REVFIM  := aCols[nX][nPosRFi]
@@ -2521,8 +2638,8 @@ User Function fGrvSim(nOpc, nPesNew, nCalPVC, nCalBri)
                             SZN->ZN_PERC    := aCols[nX][nPosPer]
                             SZN->ZN_QUANT   := aCols[nX][nPosQtd]
                             SZN->ZN_PERDA   := aCols[nX][nPosPda]
-			                SZN->ZN_INI     := aCols[nX][nPosIni]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),ddatabase) //aCols[nX][nPosIni]
-			                SZN->ZN_FIM     := aCols[nX][nPosFim]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),CTOD("31/12/2049")) //aCols[nX][nPosFim]
+			                   SZN->ZN_INI     := aCols[nX][nPosIni]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),ddatabase) //aCols[nX][nPosIni]
+			                   SZN->ZN_FIM     := aCols[nX][nPosFim]//IiF(POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_TIPO")="MC" .AND. POSICIONE("SB1",1,xFilial("SB1")+Alltrim(aCols[nX][nPosCom]),"B1_GRUPO2")= GETMV("MV_XGRPMC"),CTOD("31/12/2012"),CTOD("31/12/2049")) //aCols[nX][nPosFim]
                             SZN->ZN_FIXVAR  := aCols[nX][nPosFVa]
                             SZN->ZN_REVINI  := aCols[nX][nPosRIn]
                             SZN->ZN_REVFIM  := aCols[nX][nPosRFi]
@@ -2761,6 +2878,13 @@ User Function fUlRvFrm(cCodigo)
      cQry1 += "  AND SZM.ZM_CODIGO  = '"+cCodigo+"' "
      cQry1 += "  AND SZM.ZM_STATUS  = 'AC' "
      cQry1 += "ORDER BY SZM.ZM_REVISAO DESC "
+
+     /* verifica se arquivo está aberto e finaliza */
+     IF Select("TMP") <> 0
+        DbSelectArea("TMP")
+        DbCloseArea()
+     ENDIF
+     
      TCQuery cQry1 ALIAS "TMP" NEW
      DbSelectArea("TMP")
      cCodRev := TMP->ZM_REVISAO

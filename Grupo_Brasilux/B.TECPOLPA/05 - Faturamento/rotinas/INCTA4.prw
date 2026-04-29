@@ -218,12 +218,25 @@ User Function INCTA4()
 		aAux[posC6DESCRI] 	:= aItensSD3[i][4] 			//Descrição
 		aAux[posC6RECWT] 	:= 0						//Recno do acols
 
-		If nTotal > 0.0
-			aAux[len(aHeader)+1] 	:= .F.
+		If nTotal > 0.0 
+			aAux[len(aHeader)+1] 	:= .F. /* NÃO APAGA LINHA */
 		Else
-			aAux[len(aHeader)+1] 	:= .T.
+			aAux[len(aHeader)+1] 	:= .T. /* APAGA LINHA */
 		Endif
 
+		/* produtos da estrutura deleta nelieder 16/08/2022 */
+		if aItensSD3[i][16] == "RE1"
+			aAux[len(aHeader)+1] 	:= .T. /* apaga linha de produtos da estrutura do produto */	
+		EndIf
+
+		/* nelieder 16/08/2022 */
+		If (SUBSTR(aItensSD3[i][3], 2,3) $ "AAA")
+			If !Empty( GETMV("ZP_PAR0062")) .AND. (aItensSD3[i][16] <> "RE1")
+				aAux[len(aHeader)+1] 	:= .F.
+			EndIf
+		EndIf
+
+		
 		If ( cCliente	+ cLoja ) == "00002802"
 			aAux[posC6NUMPCOM] 	:= Posicione('SB1',1,xFilial('SB1')+aAux[posC6PRODUTO] , 'B1_XPRGREM')
 		Endif
@@ -326,7 +339,7 @@ Else
 Endif
 
 cQuery += "FROM (																	"+cQLinha
-cQuery += "SELECT  SUBSTRING(SD3.D3_OP, 1,6) + '01001' D3_OP,						"+cQLinha
+cQuery += "SELECT  SUBSTRING(SD3.D3_OP, 1,6) + '01001' D3_OP,D3_CF, 				"+cQLinha
 cQuery += "		SB1.B1_COD ,														"+cQLinha
 cQuery += "		SB1.B1_DESC, 														"+cQLinha
 cQuery += "		SB1.B1_TIPO ,														"+cQLinha
@@ -356,7 +369,11 @@ cQuery += "	AND SD3.D3_ESTORNO		<> 'S'											"+cQLinha
 cQuery += " AND ( SD3.D3_TIPO       NOT IN ('PI', 'TI', 'MO') OR ( SD3.D3_TIPO = 'PI' AND SD3.D3_GRUPO = 'MSUG' ) ) "+cQLinha
 //Linha abaixo substituida pela linha de cima, por Jose Ulina entrou Açucar Liquido prodyzido pela TecPolpa
 //cQuery += "	AND SD3.D3_TIPO			NOT IN ('PI', 'TI', 'MO')						"+cQLinha   ///// JOSE VER COM O GUSTAVO
-cQuery += "	AND SD3.D3_CF			!= 'PR0'										"+cQLinha
+
+cQuery += "	AND SD3.D3_CF			!= 'PR0'										"+cQLinha //Nelieder 16/08/2022
+
+//cQuery += "	AND SD3.D3_CF			NOT IN ('PR0','RE1')							"+cQLinha  Nelieder 16/08/2022
+
 cQuery += " AND  SUBSTRING(SD3.D3_OP,7,2) <> 'OS' 									"+cQLinha
 cQuery += "	AND ISNULL((SELECT DISTINCT CASE WHEN C2_DATRF = ' ' THEN 'ABERTA'	ELSE 'ENCERRADA' END  FROM	"+RetSqlName("SC2")+" SC2 WHERE	SC2.D_E_L_E_T_ = '' AND C2_FILIAL = '"+xFilial("SC2")+"' AND  C2_NUM + C2_ITEM + C2_SEQUEN = RTRIM(SUBSTRING(SD3.D3_OP, 1,6) + '01001' )), 'XYZ') = 'ENCERRADA'  "+cQLinha  // busca apenas ops encerradas
 cQuery += " AND  SUBSTRING(SD3.D3_OP, 1,6) IN 										"+cQLinha
@@ -370,6 +387,7 @@ cQuery += "			AND SD3_.D3_LOTECTL 	= '"+cLote+"'							"+cQLinha
 cQuery += "			AND SD3_.D3_OP			<> ''									"+cQLinha
 cQuery += "		)																	"+cQLinha
 cQuery += "GROUP BY SUBSTRING(SD3.D3_OP, 1,6),										"+cQLinha
+cQuery += "		SD3.D3_CF,															"+cQLinha
 cQuery += "		SB1.B1_COD ,														"+cQLinha
 cQuery += "		SB1.B1_DESC, 														"+cQLinha
 cQuery += "		SB1.B1_TIPO ,														"+cQLinha
@@ -418,13 +436,29 @@ cQuery += "ORDER BY 1,2																"+cQLinha
 		        FwLogMSG( "INFO", , 'SIGAFAT', funname(), '', '01', 'x3 -> ' + str(nQtdCalc), 0 )
 			Endif
 
-
+		/* produtos tecpolpa */
+		
 		If (SUBSTR(TMSD3->B1_COD, 2,3) $ "AAA")
 
-			_nPreco		:=  u_RMarkup(0, cCliente, cLoja, TMSD3->B1_COD)
+			/* tem tabela de preço cadastrada e não faz parte de estrutura */
+			If !Empty( GETMV("ZP_PAR0062")) .AND. (TMSD3->D3_CF <> "RE1")
+				
+				_nPreco := 0
+				dbselectarea("DA1")
+        		dbsetorder(1) //Cod. Tabela + Cod.Produto
+        		if dbseek(xFilial("DA1")+PADR(GETMV("ZP_PAR0062"),TamSX3("DA1_CODTAB")[1])+PADR(TMSD3->B1_COD,TamSX3("DA1_CODPRO")[1])) 
+					_nPreco := DA1->DA1_PRCVEN
+				else
+					MessageBox( 'O Produto '+TMSD3->B1_COD+' não está cadastrado na Tabela de Preço '+GETMV("ZP_PAR0062")+', favor verificar !', "Atenção!", 16 )
+				EndIf
+
+			Else
+				_nPreco		:=  u_RMarkup(0, cCliente, cLoja, TMSD3->B1_COD)	
+			EndIf	
+			
 
 
-			aadd(_aItAcols,{substr(TMSD3->D3_OP,1,6) , substr(TMSD3->D3_OP,7,2)  ,  TMSD3->B1_COD, TMSD3->B1_DESC, TMSD3->B1_UM, nQtdCalc 		, _nPreco,  			SPACE(TamSX3("D1_DOC")[1]), 			SPACE(TamSX3("D1_SERIE")[1]),	SPACE(TamSX3("D1_ITEM")[1] ), 				"SM", 			TMSD3->B1_LOCPAD,  SPACE(TamSX3("D1_NUMSEQ")[1]), TMSD3->B1_TIPO, 0 })
+			aadd(_aItAcols,{substr(TMSD3->D3_OP,1,6) , substr(TMSD3->D3_OP,7,2)  ,  TMSD3->B1_COD, TMSD3->B1_DESC, TMSD3->B1_UM, nQtdCalc 		, _nPreco,  			SPACE(TamSX3("D1_DOC")[1]), 			SPACE(TamSX3("D1_SERIE")[1]),	SPACE(TamSX3("D1_ITEM")[1] ), 				"SM", 			TMSD3->B1_LOCPAD,  SPACE(TamSX3("D1_NUMSEQ")[1]), TMSD3->B1_TIPO, 0 , TMSD3->D3_CF})
 			//						1= op						2=item				3=cod pro		4= desc			 5=UM			6= Qtd		 		7=preco   		  8= doc orig 							9= serie orig 				  10 = item orig						11= operacao	12= loc pad			13 = IDENT SB6							14 TIPO
 
 		Else
@@ -440,8 +474,8 @@ cQuery += "ORDER BY 1,2																"+cQLinha
 				for j := 1  to len(aItensSB6)
 
 
-					aadd(_aItAcols,{substr(TMSD3->D3_OP,1,6) ,  substr(TMSD3->D3_OP,7,2),  	TMSD3->B1_COD, TMSD3->B1_DESC, TMSD3->B1_UM, aItensSB6[j][5], 	aItensSB6[j][3],  aItensSB6[j][1],  aItensSB6[j][2],  aItensSB6[j][4], 		aItensSB6[j][9], 		TMSD3->B1_LOCPAD,  aItensSB6[j][8], TMSD3->B1_TIPO, aItensSB6[j][10]})
-					//							1= op				2=item					3=cod pro		4= desc			 5=UM			6= Qtd		 		7=preco   		  8= doc orig 		9= serie orig 	  10 = item orig	11= operac			12= loc pad    			13 IDENT		14 TIPO			15 D1_VALOR
+					aadd(_aItAcols,{substr(TMSD3->D3_OP,1,6) ,  substr(TMSD3->D3_OP,7,2),  	TMSD3->B1_COD, TMSD3->B1_DESC, TMSD3->B1_UM, aItensSB6[j][5], 	aItensSB6[j][3],  aItensSB6[j][1],  aItensSB6[j][2],  aItensSB6[j][4], 		aItensSB6[j][9], 		TMSD3->B1_LOCPAD,  aItensSB6[j][8], TMSD3->B1_TIPO, aItensSB6[j][10], TMSD3->D3_CF})
+					//							1= op				2=item					3=cod pro		4= desc			 5=UM			6= Qtd		 		7=preco   		  8= doc orig 		9= serie orig 	  10 = item orig	11= operac			12= loc pad    			13 IDENT		14 TIPO			15 D1_VALOR,      16 D3_CF
 
 				Next j
 

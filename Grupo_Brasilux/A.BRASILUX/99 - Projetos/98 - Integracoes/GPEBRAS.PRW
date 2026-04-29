@@ -59,9 +59,9 @@ User Function GpeBras()
      //³         Grupo  Ordem Pergunta Portugues     Pergunta Espanhol  Pergunta Ingles Variavel Tipo Tamanho Decimal Presel  GSC Valid                              Var01      Def01         DefSPA1   DefEng1 Cnt01             Var02  Def02    		 DefSpa2  DefEng2	Cnt02  Var03 Def03      DefSpa3    DefEng3  Cnt03  Var04  Def04     DefSpa4    DefEng4  Cnt04  Var05  Def05       DefSpa5	 DefEng5   Cnt05  XF3   GrgSxg ³
      //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-     @ 096,042 TO 323,505 DIALOG oDlg TITLE OemToAnsi("INTEGRAÇÃO COM MS-WORD")
+     @ 096,042 TO 323,505 DIALOG oDlg TITLE OemToAnsi("INTEGRAÇÃO BRASILUX C/ MS-WORD")
      @ 008,010 TO 084,222
-     @ 018,020 SAY OemToAnsi("Impressão de Documentos Word. Serão impressos de acordo com a")
+     @ 018,020 SAY OemToAnsi("Impressão Brasilux de Documentos Word. Serão impressos de acordo com a")
      @ 030,020 SAY OemToAnsi("Seleção dos Parâmetros.")
      @ 095,042 BMPBUTTON TYPE 5 ACTION Eval( { || fPerg_Word() , Pergunte(cPerg,.T.) } )	
      @ 095,072 BUTTON OemToAnsi("Impr. Variáveis") SIZE 55,13 ACTION Eval( { || fPerg_Word() , (ndepen:= 0,fVarW_Imp() ) }  )      
@@ -264,7 +264,7 @@ Static Function fWord_Imp()
                    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
                    //³Consiste os dependentes  de Salario Familia                            ³
                    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-                   If SRB->(dbSeek(SRA->RA_Filial+SRA->RA_Mat,.F.))        
+                   If SRB->(dbSeek(SRA->RA_FILIAL+SRA->RA_MAT,.F.))        
                       fDepSF( )
                    Else
                       SRA->(dbSkip())
@@ -274,7 +274,7 @@ Static Function fWord_Imp()
                        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
                        //³Consiste os dependentes  de Imposto de Renda                           ³
                        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
-                       If SRB->(dbSeek(SRA->RA_Filial+SRA->RA_Mat,.F.))  
+                       If SRB->(dbSeek(SRA->RA_FILIAL+SRA->RA_MAT,.F.))
                           fDepIR( )
                        Else
                           SRA->(dbSkip())
@@ -284,13 +284,13 @@ Static Function fWord_Imp()
                        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
                        //³Consiste todos os tipos de Dependentes                            ³
                        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-                       If SRB->(dbSeek(SRA->RA_Filial+SRA->RA_Mat,.F.))  
+                       If SRB->(dbSeek(SRA->RA_FILIAL+SRA->RA_MAT,.F.))
                           fDepIR( )
                       //  Else                    -----  Inibido por Jose Uliana 04/12/2020
                       //    SRA->(dbSkip())       -----  Inibido por Jose Uliana 04/12/2020
                       //    Loop                  -----  Inibido por Jose Uliana 04/12/2020
                        Endif
-                       If SRB->(dbSeek(SRA->RA_Filial+SRA->RA_Mat,.F.))        
+                       If SRB->(dbSeek(SRA->RA_FILIAL+SRA->RA_MAT,.F.))
                           fDepSF( )
                       // Else                     -----  Inibido por Jose Uliana 04/12/2020
                       //    SRA->(dbSkip())       -----  Inibido por Jose Uliana 04/12/2020
@@ -731,12 +731,13 @@ STATIC Function fCpos_Word()
        aAdd( aExp, {'GPE_TIT_ELEITOR'       , SRA->RA_TITULOE                                                                     , "SRA->RA_TITULOE"      , 'STR0026'} ) 
        aAdd( aExp, {'GPE_ZONA_SECAO'        , SRA->RA_ZONASEC                                                                     , "SRA->RA_ZONASEC"      , 'STR0027'} ) 
        aAdd( aExp, {'GPE_ENDERECO'          , SRA->RA_ENDEREC                                                                     , "SRA->RA_ENDEREC"      , 'STR0028'} ) 
-       aAdd( aExp, {'GPE_COMP_ENDER'        , SRA->RA_COMPLEM                                                                     , "SRA->RA_COMPLEM"      , 'STR0029'} )	
-       aAdd( aExp, {'GPE_BAIRRO'            , SRA->RA_BAIRRO                                                                      , "SRA->RA_BAIRRO"       , 'STR0030'} ) 
-       aAdd( aExp, {'GPE_MUNICIPIO'         , SRA->RA_MUNICIP                                                                     , "SRA->RA_MUNICIP"      , 'STR0031'} )	
-       aAdd( aExp, {'GPE_ESTADO'            , SRA->RA_ESTADO                                                                      , "SRA->RA_ESTADO"       , 'STR0032'} )	
-       aAdd( aExp, {'GPE_DESC_ESTADO'       , fDesc("SX5","12"+SRA->RA_ESTADO,"X5_DESCRI")                                        , "@!"                   , 'STR0033'} ) 
-       aAdd( aExp, {'GPE_CEP'               , SRA->RA_CEP                                                                         , "SRA->RA_CEP"          , 'STR0034'} ) 
+       aAdd( aExp, {'GPE_NUM_ENDERECO'      , (Alltrim( SRA->RA_NUMENDE )+" "+Alltrim( SRA->RA_COMPLEM ) )                        , "@!"                   , 'STR0029'} ) 
+       aAdd( aExp, {'GPE_COMP_ENDER'        , SRA->RA_COMPLEM                                                                     , "SRA->RA_COMPLEM"      , 'STR0030'} )	
+       aAdd( aExp, {'GPE_BAIRRO'            , SRA->RA_BAIRRO                                                                      , "SRA->RA_BAIRRO"       , 'STR0031'} ) 
+       aAdd( aExp, {'GPE_MUNICIPIO'         , SRA->RA_MUNICIP                                                                     , "SRA->RA_MUNICIP"      , 'STR0032'} )	
+       aAdd( aExp, {'GPE_ESTADO'            , SRA->RA_ESTADO                                                                      , "SRA->RA_ESTADO"       , 'STR0033'} )	
+       aAdd( aExp, {'GPE_DESC_ESTADO'       , fDesc("SX5","12"+SRA->RA_ESTADO,"X5_DESCRI")                                        , "@!"                   , 'STR0034'} ) 
+       aAdd( aExp, {'GPE_CEP'               , SRA->RA_CEP                                                                         , "SRA->RA_CEP"          , 'STR0035'} ) 
        aAdd( aExp, {'GPE_TELEFONE'          , SRA->RA_TELEFON                                                                     , "SRA->RA_TELEFON"      , 'Numero do Telefone'                   } ) 
        aAdd( aExp, {'GPE_NOME_PAI'          , SRA->RA_PAI                                                                         , "SRA->RA_PAI"          , 'Nome do Pai'                          } )
        aAdd( aExp, {'GPE_NOME_MAE'          , SRA->RA_MAE                                                                         , "SRA->RA_MAE"          , 'Nome da Mãe'                          } )

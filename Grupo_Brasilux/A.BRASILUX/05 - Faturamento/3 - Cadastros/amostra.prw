@@ -523,7 +523,8 @@ dbSeek(xFilial("Z04")+Z04->Z04_CODIGO)
 etapa := Z04->Z04_ETAPA
 
 RecLock("Z04", .F.)
-
+//LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+/*
 if (((PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0) .OR. RetCodUsr() == '000005' .OR. RetCodUsr() == '000264') .AND. etapa =="2")
 	Z04->Z04_ETAPA := "1"
 elseif(((PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0) .OR. RetCodUsr() == '000005' .OR. RetCodUsr() == '000264') .AND.  etapa =="3")
@@ -531,7 +532,15 @@ elseif(((PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0) .OR. Ret
 elseif (((PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0) .OR. RetCodUsr() == '000005' .OR. RetCodUsr() == '000264') .AND.  etapa =="4")
    Z04->Z04_ETAPA := "3"
 elseif (((PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0) .OR. RetCodUsr() == '000005' .OR. RetCodUsr() == '000264') .AND.  etapa =="5")
-   Z04->Z04_ETAPA := "4"
+   Z04->Z04_ETAPA := "4"*/
+if ( ( /*(PSWADMIN( , , RetCodUsr() ) == 0 ) .OR.*/ RetCodUsr() == '000005' .OR. RetCodUsr() == '000264' ) .AND. etapa =="2" )
+   Z04->Z04_ETAPA := "1"
+elseif ( ( /*(PSWADMIN( , , RetCodUsr() ) == 0 ) .OR.*/ RetCodUsr() == '000005' .OR. RetCodUsr() == '000264' ) .AND.  etapa =="3" )
+       Z04->Z04_ETAPA := "2"
+elseif ( ( /*(PSWADMIN( , , RetCodUsr() ) == 0 ) .OR.*/ RetCodUsr() == '000005' .OR. RetCodUsr() == '000264' ) .AND.  etapa =="4" )
+       Z04->Z04_ETAPA := "3"
+elseif ( ( /*(PSWADMIN( , , RetCodUsr() ) == 0 ) .OR.*/ RetCodUsr() == '000005' .OR. RetCodUsr() == '000264' ) .AND.  etapa =="5" )
+       Z04->Z04_ETAPA := "4"
 else
    Alert("Não pode voltar etapa de um pedido de amostra Cancelado ou Finalizado!!!")
 endif
@@ -605,7 +614,7 @@ dbSelectArea("Z04")
 dbSetOrder(2)
 dbSeek(xFilial("Z04")+Z04->Z04_CODIGO)
   
-if ((Z04->Z04_RESP01== RetCodUsr()).OR. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0))
+if ((Z04->Z04_RESP01== RetCodUsr()) /*.OR. (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) == 0)*/)
 	if  Z04_ETAPA < '6' 
 		RecLock("Z04", .F.)
 		dbDelete()

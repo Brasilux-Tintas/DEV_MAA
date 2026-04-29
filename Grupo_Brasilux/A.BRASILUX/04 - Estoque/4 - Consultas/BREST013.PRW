@@ -42,7 +42,7 @@ User Function BREST013()
      
      dbSelectArea("SB1")
      dbSetOrder(1)
-          u_zcfga01( 'BREST013' ) //LGS#2021119 - Gravação de log de utilização da rotina
+     
      ValPerg5()
      lPerg := pergunte(cPerg5,.T.)   // Escolher 1 - Consumo ou 2 - Classificação
      If lPerg
@@ -251,11 +251,13 @@ Static Function EST0138(nPar)
                  Enddo
               Else 
                  cQry1 := ""
-                 cQry1 := cQry1 + "SELECT ZZ3.ZZ3_COD AS CODIGO "
+                 cQry1 := cQry1 + "SELECT ZZ3.ZZ3_COD AS CODIGO, B1_TIPO AS 'TIPO', B1_ESTOQUE "
                  cQry1 := cQry1 + "FROM "+RetSqlName("ZZ3")+" ZZ3 WITH (NOLOCK) "
-                 cQry1 := cQry1 + "WHERE ZZ3.D_E_L_E_T_ = '' "
+                 cQry1 := cQry1 + "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON B1_FILIAL = ZZ3_FILIAL AND B1_COD = ZZ3_COD AND SB1.D_E_L_E_T_ ='' "
+                 cQry1 := cQry1 + "WHERE ZZ3.D_E_L_E_T_ = '' AND B1_TIPO IS NOT NULL "
                  cQry1 := cQry1 + "AND ZZ3.ZZ3_FILIAL = '"+xFilial("ZZ3")+"' "
-                 cQry1 := cQry1 + "GROUP BY ZZ3.ZZ3_COD "
+                 //cQry1 := cQry1 + "AND SB1.B1_COD ='BT 010500702' "
+                 cQry1 := cQry1 + "GROUP BY ZZ3.ZZ3_COD, SB1.B1_TIPO, B1_ESTOQUE  "
                  cQry1 := cQry1 + "ORDER BY ZZ3.ZZ3_COD "
                  TCQUERY cQry1 NEW ALIAS "TMPSB1"
 
@@ -263,7 +265,8 @@ Static Function EST0138(nPar)
                  DbGoTop()
                  While !Eof()
                        IncProc("Aguarde a montagem do arquivo de trabalho...")
-                       aadd(aProd, TMPSB1->CODIGO)
+                       //aadd(aProd, TMPSB1->CODIGO, TMPSB1->TIPO, TMPSB1->B1_ESTOQUE )
+                       aAdd(aProd,{TMPSB1->CODIGO, TMPSB1->TIPO, TMPSB1->B1_ESTOQUE})
                        DbSelectArea("TMPSB1")
                        dbSkip()
                  Enddo
@@ -296,10 +299,10 @@ Static Function EST0138(nPar)
                      cQry2  := cQry2 + "AND SD3.D3_ESTORNO          <> 'S' "
                      cQry2  := cQry2 + "AND SUBSTRING(SD3.D3_CF,1,2) = 'RE' "
                      cQry2  := cQry2 + "AND SUBSTRING(SD3.D3_CF,3,1) IN('0', '1', '2', '3') "
-                     cQry2  := cQry2 + "AND SD3.D3_TM NOT IN('600', '200', '110') "
-                     If !Posicione("SB1",1,xFilial("SB1")+aProd[i],"B1_TIPO") $ 'PA.MC'
-                        cQry2  := cQry2 + "AND SD3.D3_OP               <> '' "
-                     Endif
+                     cQry2  := cQry2 + "AND SD3.D3_TM NOT IN('120','520') "
+                     //If !Posicione("SB1",1,xFilial("SB1")+aProd[i],"B1_TIPO") $ 'PA.MC'
+                     //   cQry2  := cQry2 + "AND SD3.D3_OP               <> '' "
+                     //Endif
                      TCQUERY cQry2 NEW ALIAS "TMPSD3"
                   
                      DbSelectArea("ZZ3")
@@ -340,13 +343,13 @@ Static Function EST0138(nPar)
                                     DbSelectArea("ZZ3")
                                     DbSeek(xFilial("ZZ3")+mv_par10+aProd[i],.t.)
                                     RecLock("ZZ3",.f.)
-                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) - TMPSD2->MES
+                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := (ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) - TMPSD2->MES)
                                     MsUnLock()
                                  Else
                                     DbSelectArea("ZZ3")
                                     DbSeek(xFilial("ZZ3")+mv_par10+aProd[i],.t.)
                                     RecLock("ZZ3",.f.)
-                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) + TMPSD2->MES
+                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := (ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) + TMPSD2->MES)
                                     MsUnLock()
                                  Endif
                               Endif
@@ -387,13 +390,13 @@ Static Function EST0138(nPar)
                                     DbSelectArea("ZZ3")
                                     DbSeek(xFilial("ZZ3")+mv_par10+aProd[i],.t.)
                                     RecLock("ZZ3",.f.)
-                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) - TMPSD1->MES
+                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := (ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) - TMPSD1->MES)
                                     MsUnLock()
                                  Else
                                     DbSelectArea("ZZ3")
                                     DbSeek(xFilial("ZZ3")+mv_par10+aProd[i],.t.)
                                     RecLock("ZZ3",.f.)
-                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) + TMPSD1->MES
+                                       ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) := (ZZ3->&("ZZ3_Q"+StrZero(mv_par09,2)) + TMPSD1->MES)
                                     MsUnLock()
                                  Endif
                               Endif
@@ -478,7 +481,7 @@ Static Function EST0138(nPar)
                               If mv_par04 == 1
                                  DbSelectArea("SB1")
                                  DbSetOrder(1)
-                                 DbSeek(xFilial("SB1")+aProd[i],.t.)
+                                 DbSeek(xFilial("SB1")+aProd[i,1],.t.)
                                  If Found()
                                     nValor := SB1->B1_UPRC
                                  Else
@@ -487,9 +490,18 @@ Static Function EST0138(nPar)
                              ElseIf mv_par04 == 2
                                     DbSelectArea("SB2")
                                     DbSetOrder(1)
-                                    DbSeek(xFilial("SB2")+aProd[i],.t.)
+                                    DbSeek(xFilial("SB2")+aProd[i,1],.t.)
                                     If Found()
                                        nValor := SB2->B2_CM1
+                                    Else
+                                       nValor := 0
+                                    Endif
+                             ElseIf mv_par04 == 3 .and. aProd[i,2] =="PA" //.and. aProd[i,3] =="S"
+                                    DbSelectarea("DA1")
+                                    DA1->( Dbsetorder(2) ) //Cod.Produto + Cod. Tabela + Item
+                                    DA1->( DbSeek( xFilial("DA1") + aProd[i,1] +"2  " ) )                                     
+                                    If Found()
+                                       nValor := ROUND(DA1->DA1_PRCVEN,2)
                                     Else
                                        nValor := 0
                                     Endif
@@ -498,7 +510,7 @@ Static Function EST0138(nPar)
                              For x := 1 to Len(aMesM)
                                  DbSelectArea("ZZ3")
                                  DbSetOrder(1)
-                                 DbSeek(xFilial("ZZ3")+SubStr(aMesM[x],3,4)+aProd[i],.t.)
+                                 DbSeek(xFilial("ZZ3")+SubStr(aMesM[x],3,4)+aProd[i,1],.t.)
                                  If Found()
                                     nSoma := nSoma + ( ZZ3->&('ZZ3_Q'+SubStr(aMesM[x],1,2))  * aPesos[Val(SubStr(aMesM[x],1,2))] )
                                  Endif
@@ -506,24 +518,24 @@ Static Function EST0138(nPar)
                           
                              DbSelectArea("ZZ2")
                              DbSetOrder(1)
-                             DbSeek(xFilial("ZZ2")+aProd[i],.t.)
+                             DbSeek(xFilial("ZZ2")+aProd[i,1],.t.)
                              If Found()
                                 RecLock("ZZ2",.f.)
                                    ZZ2->ZZ2_MEDIA  := (nSoma / Len(aMesM)) * (1 + (mv_par03/100))
-                                   ZZ2->ZZ2_TOTAL  := ZZ2->ZZ2_MEDIA * nValor
+                                   ZZ2->ZZ2_TOTAL  := ROUND((ZZ2->ZZ2_MEDIA * nValor),2)
                                    ZZ2->ZZ2_MES    := cUltDia
                                 MsUnLock()
                              Else
                                 RecLock("ZZ2",.T.)
                                    ZZ2->ZZ2_FILIAL := xFilial("ZZ2")
-                                   ZZ2->ZZ2_COD    := aProd[i]
+                                   ZZ2->ZZ2_COD    := aProd[i,1]
                                    ZZ2->ZZ2_MEDIA  := (nSoma / Len(aMesM)) * (1 + (mv_par03/100))
                                    ZZ2->ZZ2_CLASSE := ""
-                                   ZZ2->ZZ2_TOTAL  := ZZ2->ZZ2_MEDIA * nValor
+                                   ZZ2->ZZ2_TOTAL  := ROUND((ZZ2->ZZ2_MEDIA * nValor),2)
                                    ZZ2->ZZ2_MES    := cUltDia
                                 MsUnLock()
                              Endif
-                             IncProc("Calculando as Médias. Produto: "+aProd[i])
+                             IncProc("Calculando as Médias. Produto: "+aProd[i,1])
                           Next
                        Endif
                        lCont := .f.
@@ -867,7 +879,7 @@ Static Function EST0131()
                 Next
                 CCONS->MEDIA     := TMPSB1->MEDIA
                 CCONS->UNITARIO  := IIF(TMPSB1->CTOTAL > 0, (TMPSB1->CTOTAL / TMPSB1->MEDIA),0)
-                CCONS->TOTAL     := TMPSB1->CTOTAL
+                CCONS->TOTAL     := ROUND(TMPSB1->CTOTAL,2)
                 CCONS->ATUAL     := nQAtu
                 CCONS->DISPON    := (nQAtu - nQEmp)
                 CCONS->PEDIDO    := TMPSB1->PEDIDO
@@ -1249,7 +1261,7 @@ Static Function EST013AA()
        aadd(aCamCla,{"PEDIDO"     ,"N",14,2 } )
        aadd(aCamCla,{"MEDIA"      ,"N",14,2 } )
        aadd(aCamCla,{"CLASSE"     ,"C",01,0 } )
-       aadd(aCamCla,{"PRECO"      ,"N",09,4 } )
+       aadd(aCamCla,{"PRECO"      ,"N",14,2 } )
        aadd(aCamCla,{"ENTREGA"    ,"C",17,0 } )      //'99 + 99 = 99 DIAS'
        aadd(aCamCla,{"NUMPED"     ,"C",27,0 } )
        aadd(aCamCla,{"VALTOT"     ,"N",14,4 } )
@@ -1271,7 +1283,7 @@ Static Function EST013AA()
        aadd(aCpoCon,{"PEDIDO"     ,OemToAnsi("Ponto Pedido") ,"@E 999,999,999.99" } ) 
        aadd(aCpoCon,{"MEDIA"      ,OemToAnsi("Media Consumo"),"@E 999,999,999.99" } ) 
        aadd(aCpoCon,{"CLASSE"     ,OemToAnsi("Classe ABC")   ,"@!"                } )        
-       aadd(aCpoCon,{"PRECO"      ,OemToAnsi("Ult. Preco")   ,"@E 9999.9999"         } )        
+       aadd(aCpoCon,{"PRECO"      ,OemToAnsi("Ult. Preco")   ,"@E 999,999,999.99" } )        
 
        //lRet := ChkFile("CCONS2")
        If SELECT("CCONS2") > 0
@@ -1399,7 +1411,7 @@ Static Function EST013AA()
                          CCONS2->DESCRICAO  := SB1->B1_DESC
                          CCONS2->LOTE       := SB1->B1_LE
                          CCONS2->PEDIDO     := SB1->B1_EMIN
-                         CCONS2->PRECO      := SB1->B1_UPRC
+                         CCONS2->PRECO      := ROUND(SB1->B1_UPRC,2)
                          CCONS2->ATUAL      := TMPCON->ATUAL
                          CCONS2->EMPENHO    := TMPCON->EMPENHO
                          CCONS2->DISPONIVEL := TMPCON->DISPONIVEL
@@ -1511,6 +1523,8 @@ Static Function EST0139()
        LOCAL nMes:=22
        LOCAL nEnt:=0
        LOCAL nOpca:=2
+       LOCAL qtdmarca := 0
+       LOCAL j:= 0
        LOCAL oChkQual,oChk5
        LOCAL oOk := LoadBitmap( GetResources(), "LBOK")
        LOCAL oNo := LoadBitmap( GetResources(), "LBNO")
@@ -1540,7 +1554,7 @@ Static Function EST0139()
        EndDo
        */
        For _nX := 1 To Len( _aRetInf )
-           If Alltrim( _aRetInf[ _nX][ 3] ) $ "MP"
+           If Alltrim( _aRetInf[ _nX][ 3] ) $ "MP.PA.MC.EP"
               AADD(aTipo, { .T., SubStr( _aRetInf[ _nX][ 3], 1, 3) + _aRetInf[ _nX][ 4] } )
            Endif
        Next
@@ -1582,17 +1596,31 @@ Static Function EST0139()
        DEFINE SBUTTON FROM 140,270 TYPE 2 ACTION oDlg:End() ENABLE OF oDlg
        oChk2:BlClicked :=	{|| oChk2:Refresh()}
        ACTIVATE MSDIALOG oDlg CENTERED
+       For i := 1 to Len(aTipo)
+         If aTipo[i,1] 
+            qtdmarca := (qtdmarca +1)
+         Endif
+       Next
        If nOpca == 1
-          If Len(aTipo) > 0
+          If (qtdmarca) > 0
              cConTP := ""
              For i := 1 to Len(aTipo)
-                 If aTipo[i,1]
-                    If i == 1
-                       cConTP := cConTP + "'"+SubStr(aTipo[i,2],1,2)+"'"
+                 //If aTipo[i,1]
+                    If (qtdmarca) == 1
+                       If aTipo[i,1]
+                           cConTP := cConTP + "'"+SubStr(aTipo[i,2],1,2)+"'"
+                       Endif 
                     Else
-                       cConTP := cConTP + ",'"+SubStr(aTipo[i,2],1,2)+"'"
+                        If aTipo[i,1]   
+                           j:= (j+1)
+                           If j == qtdmarca
+                              cConTP := cConTP + "'"+SubStr(aTipo[i,2],1,2)+"'"
+                           Else
+                              cConTP := cConTP + "'"+SubStr(aTipo[i,2],1,2)+"',"
+                           Endif
+                        Endif
                     Endif
-                 Endif
+                 //Endif
              Next
              Processa({|| EST0137(nA1,nB1,nC1,nA2,nB2,nC2,lGrvABC,cConTP,nMes,nEnt,lLote,lPedido) },"Classificação")
           Else
@@ -1670,6 +1698,7 @@ Static Function EST0137(nMesA,nMesB,nMesC,nPerA,nPerB,nPerC,lGrvABC,cTipo,nMes,n
        cQry6 := cQry6 + "  AND ZZ2.D_E_L_E_T_ = '' "
        cQry6 := cQry6 + "  AND  B1.D_E_L_E_T_ = '' "
        cQry6 := cQry6 + "  AND B1.B1_TIPO IN("+cTipo+") "
+       cQry6 := cQry6 + "  AND ((B1.B1_TIPO ='PA' AND B1_ESTOQUE ='S') OR (B1.B1_TIPO <>'PA' AND B1_ESTOQUE IN('','S','N'))) "
        cQry6 := cQry6 + "GROUP BY B1.B1_TIPO "
        
        TCQUERY cQry6 NEW ALIAS "TMPSB3"
@@ -1695,6 +1724,7 @@ Static Function EST0137(nMesA,nMesB,nMesC,nPerA,nPerB,nPerC,lGrvABC,cTipo,nMes,n
            cQry6 := cQry6 + "WHERE ZZ2.ZZ2_FILIAL = '"+xFilial("ZZ2")+"' "
            cQry6 := cQry6 + "  AND ZZ2.D_E_L_E_T_ = '' "
            cQry6 := cQry6 + "  AND B1.B1_TIPO IN('"+aTotTp[i,1]+"') "
+           cQry6 := cQry6 + "  AND ((B1.B1_TIPO ='PA' AND B1_ESTOQUE ='S') OR (B1.B1_TIPO <>'PA' AND B1_ESTOQUE IN('','S','N'))) "
            cQry6 := cQry6 + "ORDER BY ZZ2.ZZ2_TOTAL DESC"
            
            TCQUERY cQry6 NEW ALIAS "TMPSB3"
@@ -1738,6 +1768,7 @@ Static Function EST0137(nMesA,nMesB,nMesC,nPerA,nPerB,nPerC,lGrvABC,cTipo,nMes,n
                     RecLock("ZZ2",.f.)
                        IF lGrvABC
                           ZZ2->ZZ2_CLASSE := cClasse
+                          ZZ2->ZZ2_DT_ABC := DATE()
                        Endif
                     MsUnLock()
                  Endif
@@ -2020,7 +2051,7 @@ Static Function EST013C1( Cabec12, Cabec22, Titulo2, nLin2, tamanho, nTipo, wnre
                 @ nLin2, 101 PSAY CCONS2->MEDIA                  Picture "@E 99,999,999.9999"
                 @ nLin2, 117 PSAY CCONS2->PEDIDO                 Picture "@E 99,999,999.9999"
                 @ nLin2, 133 PSAY (CCONS2->MEDIA - CCONS2->DISPONIVEL)              Picture "@E 99,999,999.9999"
-                @ nLin2, 149 PSAY CCONS2->PRECO                  Picture "@E 9,999.99"
+                @ nLin2, 149 PSAY CCONS2->PRECO                  Picture "@E 999,999,999.99"
                 @ nLin2, 159 PSAY CCONS2->VALTOT   Picture "@E 9,999,999.99"
                 @ nLin2, 172 PSAY CCONS2->CLASSE   Picture "@!"
                 @ nLin2, 174 PSAY "|"
@@ -2038,8 +2069,8 @@ Static Function EST013C1( Cabec12, Cabec22, Titulo2, nLin2, tamanho, nTipo, wnre
                 @ nLin2, 133 PSAY CCONS2->LOTE                   Picture "@E 99,999,999.9999"
                 @ nLin2, 149 PSAY CCONS2->CLASSE                 Picture "@!"
                 @ nLin2, 151 PSAY CCONS2->ENTREGA                Picture "@!"
-                @ nLin2, 169 PSAY CCONS2->PRECO                  Picture "@E 9,999.99"
-                @ nLin2, 178 PSAY CCONS2->LOTE * CCONS2->PRECO   Picture "@E 9,999,999.99"
+                @ nLin2, 169 PSAY CCONS2->PRECO                  Picture "@E 999,999,999.99"
+                @ nLin2, 178 PSAY CCONS2->LOTE * CCONS2->PRECO   Picture "@E 999,999,999.99"
                 @ nLin2, 192 PSAY "|"
                 @ nLin2, 195 PSAY CCONS2->PREVISTO               Picture "@E 99,999,999.99"
              Else

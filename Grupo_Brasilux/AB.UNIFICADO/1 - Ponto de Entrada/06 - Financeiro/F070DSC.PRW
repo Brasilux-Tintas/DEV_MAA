@@ -23,7 +23,9 @@ User Function F070DSC()
         If Empty(RetSqlName("SZW"))
            Return(.t.)
         Endif
-        If (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0)
+        //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+        //If (PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),cCodUsr) == 0)
+        If ( PSWADMIN( , , cCodUsr ) == 0 )
            lAcsDsc := .t.
         Else
            cQry := "SELECT ZW_ACESSOS "

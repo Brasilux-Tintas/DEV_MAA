@@ -1,5 +1,6 @@
 #include "rwmake.ch"
 #include "totvs.ch"
+#Include "Protheus.ch"
   /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
   ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
   ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
@@ -34,6 +35,7 @@ User Function MT100TOK()
      Local nPosVunit   := aScan(aHeader, { |x| Trim( x[2] ) == "D1_VUNIT"    } ) //Posicionamento do campo D1_VUNIT no aHeader
      Local lPis, lCof, cMens,_cGrpEmp,lAchou,_nTam,_nVlrUnit //, cTes
      Local _lVVarNull  := Type("l103Auto") <> "U"
+     Local lToler:=.F.
      u_zcfga01( 'MT100TOK' ) //LGS#2021118 - Grava็ใo de log de utiliza็ใo da rotina
 _cGrpEmp := alltrim(FWGrpCompany())
 
@@ -188,7 +190,11 @@ For _x := 1 to Len(aCols)
                                        _nVlrUnit := SC7->C7_PRECO*iif((SC7->C7_MOEDA != 1) .AND. (SC7->C7_TXMOEDA > 0),SC7->C7_TXMOEDA,1)
                                        if (abs(aCols[_x][nPosVunit] - _nVlrUnit)*100/_nVlrUnit) > AIC->AIC_PPRECO
                                           lRet := .f.
-                                          cAuxMens := "Produto "+alltrim(aCols[_x][nPosCod])+" estแ fora da tolerโncia de pre็o permitida!"
+                                          //cAuxMens := "Produto "+alltrim(aCols[_x][nPosCod])+" estแ fora da tolerโncia de pre็o permitida!"
+                                          lToler:=.T.
+                                          cAuxMens:="Por ter ultrapassado a tolerancia permitida no pre็o "+chr(13)+chr(10)
+                                          cAuxMens+="a Nota Fiscal irแ passar pelo processo de Libera็ใo de Documentos"+chr(13)+chr(10)
+                                          cAuxMens+="antes de ser efetivada no sistema"+chr(13)+chr(10)
                                        endif 
                                     endif
                                  ENDIF
@@ -201,10 +207,15 @@ For _x := 1 to Len(aCols)
                            If ( _lVVarNull .And. l103Auto )
                               FwLogMSG( "ERROR", , 'SIGACOM', funname(), '', '01', cAuxMens, 0 )
                            Else 
-                                 MsgBox(cAuxMens, "Aten็ใo", "STOP")
+                               If lToler
+                                 lRet:=.T.
+                               End  
+                                FWAlertWarning(cAuxMens,"A T E N C A O")
+                               //  MsgBox(cAuxMens, "Aten็ใo", "STOP")
                            Endif  
                            exit 
-                        endif                       
+                        endif   
+                                            
                   endif
                Endif 
             Endif //Fim if nPosTES > 0
@@ -223,7 +234,7 @@ If lPis .OR. lCof
       cMens += "COFINS" 
    Endif
    cMens += " estแ(ใo) destacado(s) INDEVIDAMENTE pois no TES diz pra nใo GERAR! Corrija o problema!"
-   MsgBox(cMens,"Aten็ใo","STOP")
+   FWAlertWarniBox(cMens,"Aten็ใo")
 Endif
         /*	
         if !(ALLTRIM(cFormul) == "S") .AND. (alltrim(cEspecie) == "SPED") .and. (LEN(ALLTRIM(M->F1_CHVNFE)) <> 44)

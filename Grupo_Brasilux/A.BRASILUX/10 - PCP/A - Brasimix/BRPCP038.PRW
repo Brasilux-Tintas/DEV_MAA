@@ -6,7 +6,7 @@
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
 ±±ºPrograma  ³ BRPCP038  ºAutor  ³ Nelieder Corneta  º Data ³  17/12/2021 º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDescrição ³ Estiquetas de volume Diferenciadas (Etiqueta de Produtos)   ±±
+±±ºDescrição ³ Etiquetas Identif. Volumes Diferenciados				       ±±
 ±±º          ³                                                            º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ BRASILUX TINTAS TÉCNICAS LTDA.                             º±±
@@ -52,7 +52,7 @@ Estrtura do Array aBrowse
 20 - C2_SEQUEN
 */
  
-User Function  BRPCP038()
+User Function BRPCP038  ()
 
 Local nTipo       := 1
 
@@ -103,7 +103,7 @@ Private oCodPro,cCodPro
 Private cDescPro,oDescPro
 
 Private oQtVol,cQtVol
-Private aQtVol :={}
+//Private aQtVol :={}
 
 Private aLPT      :={}
 
@@ -121,7 +121,7 @@ DEFINE MSDIALOG oDlg TITLE "Estiquetas Identif. Volumes Diferenciados" FROM 000,
 @ 008, 200 MSGET oLote VAR cLote PICTURE "@!" SIZE 040,010 COLOR  CLR_BLUE F3 "ZC2" ON CHANGE PCP038_01() PIXEL OF  oDlg FONT oFontBtn
 
 @ 030, 010 SAY OemToAnsi("Codigo EAN ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
-@ 028, 070 MSGET oEan VAR cEan PICTURE "9999999999999" SIZE 060,010 COLOR CLR_BLUE  ON CHANGE PCP038_04() PIXEL OF oDlg FONT oFontBtn
+@ 028, 070 MSGET oEan VAR cEan PICTURE "@!" SIZE 060,010 COLOR CLR_BLUE  ON CHANGE PCP038_04() PIXEL OF oDlg FONT oFontBtn
 
 @ 050, 010 SAY OemToAnsi("Codigo Prod..: ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
 @ 048, 070 MSGET oCodPro VAR cCodPro  SIZE 060,010 COLOR CLR_BLUE PIXEL OF oDlg FONT oFontBtn When .F.
@@ -131,7 +131,13 @@ DEFINE MSDIALOG oDlg TITLE "Estiquetas Identif. Volumes Diferenciados" FROM 000,
 @ 068, 068 MSCOMBOBOX oProduto VAR cProduto ITEMS aProduto SIZE 180, 007 OF oPanel COLORS 0, 16777215 PIXEL ON CHANGE PCP038_02(cProduto) FONT oFontBtn
 
 @ 090, 010 SAY OemToAnsi("Qtde Itens no Vol") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
-@ 088, 068 MSCOMBOBOX oQtVol VAR cQtVol ITEMS aQtVol SIZE 070, 007 OF oPanel COLORS 0, 16777215 PIXEL FONT oFontBtn
+//@ 088, 068 MSCOMBOBOX oQtVol VAR cQtVol ITEMS aQtVol SIZE 070, 007 OF oPanel COLORS 0, 16777215 PIXEL FONT oFontBtn
+@ 088, 068 MSGET oQtVol VAR cQtVol SIZE 070, 007 OF oPanel COLORS 0, 16777215 PIXEL FONT oFontBtn
+
+
+/*oQtVol:lEditable := .T.
+oQtVol:lListOnly := .F.*/
+
 
 @ 110, 010 SAY OemToAnsi("Qtde Etiq ") SIZE 100,009 PIXEL OF oDlg FONT oFontBtn
 @ 108, 070 MSGET oQtde1 VAR cQtde1 PICTURE "999" SIZE 060,010 COLOR CLR_BLUE PIXEL OF oDlg FONT oFontBtn
@@ -142,7 +148,7 @@ DEFINE MSDIALOG oDlg TITLE "Estiquetas Identif. Volumes Diferenciados" FROM 000,
 
 @ 060, 004 MSCOMBOBOX oLPT VAR cLPT ITEMS aLPT SIZE 050, 007 OF oPanel COLORS 0, 16777215 PIXEL FONT oFontBtn
 ListPort()
-cLPT := GETMV('MV_PCP038') 
+//cLPT := GETMV('MV_PCP038') 
 
 @ 140,004 BUTTON oBtnFech PROMPT "Imprimir" SIZE 060, 018 OF oDlg ACTION PCP038_05(nTipo,cQtde1) FONT oFontBtn PIXEL
 @ 140,070 BUTTON oBtnFech PROMPT "Visualizar" SIZE 060, 018 OF oDlg ACTION ReportPrint(nTipo) FONT oFontBtn PIXEL
@@ -195,13 +201,14 @@ Endif
 
 TMP->(dbGoTop())
 aProduto := {}
-aQtVol := {}
+//aQtVol := {}
+cQtVol := ''
 
 Index := 1
-cCod := Alltrim(TMP->CODIGO)+'-'+Alltrim(TMP->NOMEPROD)+'-'+CValToChar(Index)
+cCod := CValToChar(Index)+'-'+Alltrim(TMP->CODIGO)+'-'+Alltrim(TMP->NOMEPROD)
 
 While !TMP->(EoF())
-	cValor := Alltrim(TMP->CODIGO)+'-'+Alltrim(TMP->NOMEPROD)+'-'+CValToChar(Index)
+	cValor := CValToChar(Index)+'-'+Alltrim(TMP->CODIGO)+'-'+Alltrim(TMP->NOMEPROD)
 	aAdd(aProduto,cValor)
 	
 	aAdd(aBrowse, { ;
@@ -215,7 +222,7 @@ While !TMP->(EoF())
 	Lote,;
 	CODBARRA,;
 	B1_PRVALID,;
-	TMP->NOMEPROD,;
+	REPLACE(TMP->NOMEPROD, "º", "§"),;
 	TMP->c2_xidvol,;
 	TMP->VOLUME,;
 	TMP->UMEMB,;
@@ -224,7 +231,8 @@ While !TMP->(EoF())
 	TMP->REG,;
 	TMP->C2_NUM,;
 	TMP->C2_ITEM,;
-	TMP->C2_SEQUEN;
+	TMP->C2_SEQUEN,;
+	TMP->TEXTO2;
 	})
 	
 	Index += 1
@@ -244,11 +252,17 @@ identificar volume do produto
 @param cProd, character, codigo do produto
 /*/
 Static Function PCP038_02(cProd)
+Local xPro
 
 aString := strtokarr (cProd, "-")
-cProd := aString[1]
 
-cQuery := "SELECT dbo.DetVol('"+xFilial("SC2")+"','"+cProd+"') RELVOL "
+if !Empty(cEan)
+	xPro := aString[1]
+else
+	xPro := aString[2]
+endif
+
+cQuery := "SELECT dbo.DetVol('"+xFilial("SC2")+"','"+xPro+"') RELVOL "
 
 IF Select("TEMP") <> 0
 	DbSelectArea("TEMP")
@@ -256,9 +270,13 @@ IF Select("TEMP") <> 0
 ENDIF
 
 TCQuery cQuery New Alias "TEMP"
-aQtVol := {}
+
+cQtVol := ''
+cQtVol := Padr(Alltrim(TEMP->RELVOL),5)
+
+/*aQtVol := {}
 aAdd(aQtVol,Alltrim(TEMP->RELVOL))
-oQtVol:SetItems(aQtVol)
+oQtVol:SetItems(aQtVol)*/
 
 return
 
@@ -284,6 +302,15 @@ ENDIF
 
 TCQuery cQuery New Alias "TEMP"
 
+Count To nTotal 
+
+If nTotal == 0
+    MsgAlert('Nenhum Registro localizado!', 'Atenção')
+    return()
+endif
+
+TEMP->(dbGoTop())
+
 cLote := TEMP->C2_LOTE
 oLote:Refresh()
 
@@ -306,7 +333,7 @@ cEan := Alltrim(cEan)
   return()
 endif*/
 
-if len(cEan) == 12
+if len(cEan) == 12 .AND. isdigit(cEan)
 	cQry := " SELECT dbo.DigVer('"+cEan+"') DIGITO "
 
 	IF Select("TPI") <> 0
@@ -319,17 +346,19 @@ if len(cEan) == 12
 	cEan := cEan+TPI->DIGITO
 endif
 
-cQuery := " SELECT B1_CODBAR,B1_COD,B1_RESUMO,dbo.DetVol(B1_FILIAL,B1_COD) RELVOL "
+cQuery := " SELECT B1_CODBAR,B1_COD,B1_DESC,B1_RESUMO,dbo.DetVol(B1_FILIAL,B1_COD) RELVOL "
 cQuery += " FROM "+RetSqlName("SB1")+" WHERE D_E_L_E_T_ = ''  "
 cQuery += " AND B1_FILIAL = '"+xFilial("SB1")+"'   " 
 
 if len(cEan) == 13
 	cQuery += " AND B1_CODBAR = '"+SUBSTR(cEan,1,12)+"'"
-endif
-
-if len(cEan) == 4
+else
 	cQuery += " AND B1_COD = '"+cEan+"'"
 endif
+
+/*if len(cEan) == 4
+	cQuery += " AND B1_COD = '"+cEan+"'"
+endif*/
 
 IF Select("TEMP") <> 0
         DbSelectArea("TEMP")
@@ -339,19 +368,24 @@ ENDIF
 TCQuery cQuery New Alias "TEMP"
 
 aProduto := {}
-aQtVol := {}
+
+//aQtVol := {}
+cQtVol := ''
+
 Count To nTotal 
 TEMP->(dbGoTop())
 
 While !TEMP->(EoF())
     cCodPro := TEMP->B1_COD
-    cDescPro := TEMP->B1_RESUMO
+    cDescPro := AllTrim(TEMP->B1_DESC)
 
     aAdd(aProduto,TEMP->B1_COD)
     oProduto:SetItems(aProduto)
 
-    aAdd(aQtVol,Alltrim(TEMP->RELVOL))
-    oQtVol:SetItems(aQtVol)
+    /*aAdd(aQtVol,Alltrim(TEMP->RELVOL))
+    oQtVol:SetItems(aQtVol)*/
+	cQtVol := Alltrim(TEMP->RELVOL)
+
     
     TEMP->(DbSkip())
 EndDo
@@ -374,14 +408,43 @@ Local i
 Local aString
 Local linha
 
+if Empty(cQtVol) .OR. Empty(cQtde1)
+
+	MsgInfo( 'Necessário informar Volume e Qtd de Etiquetas' , 'Etiquetas Produtos' )
+	Return()
+
+endif	
+//BN 880673900 822171
 /* valida se array pois dados */
 	if len(aBrowse) < 1
-		MsgInfo( 'Necessário Consultar uma OP ou Lote' , 'Etiquetas Produtos' )
-		Return()
+
+			/* impressão por codigo EAN  */
+			if !Empty(cCodPro) 
+				Do Case
+					Case nTipo == 1
+						For i := 1 to val(qtd)
+							PCP037_E05()
+						Next	
+
+						/* limpa memoria objeo */
+						PUTMV('MV_PCP038', cLPT)
+						FreeObj(oDlg)
+
+						/* carrega tela novamente */
+						U_BRPCP038()
+
+
+					Return()
+				EndCase	
+
+			else
+				MsgInfo( 'Necessário Consultar uma OP ou Lote' , 'Etiquetas Produtos' )
+				Return()
+			endif	
 	Endif
 
 aString := strtokarr (cProduto, "-")
-linha := val(aString[3])
+linha := val(aString[1])
     
 /* loop na qtd de etiquetas a ser impressa */
 For i := 1 to val(qtd)
@@ -448,15 +511,29 @@ Static Function PCP037_05(linha,qtd)
 Local cModelo := "ZEBRA"
 Local Prod,ProdTxt,Cod,Unid,CodBar
 Local Validade,Prevf,PrazoVali,Dias,cLote
-Local DtVenc,cEmb,UMEMB
+Local DtVenc,cEmb,UMEMB,cEmb_Bar
 Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 
-
 Cod           := AllTrim(aBrowse[linha][2])
-ProdTxt       := AllTrim(aBrowse[linha][4])
-Unid          := SUBSTR(aBrowse[linha][5],1,2)
+
+/* 
+	Quando B1_DESCLIN for diferente de branco pegar B1_DESCLIN
+	*/
+
+if !empty(AllTrim(aBrowse[linha][21]))
+	ProdTxt    := AllTrim(aBrowse[linha][21])
+else
+	ProdTxt    := AllTrim(aBrowse[linha][4])
+endif
+
+
+/* Especifico para o BRPCP038 */
+/*	Unid          := SUBSTR(aBrowse[linha][5],1,2) */
+Unid          := SUBSTR(Alltrim(cQtVol),1,2)
+
 Unid          := AllTrim(Unid)
 Unid          := StrZero(val(Unid),2)
+
 Validade      := aBrowse[linha][6]
 Prevf         := AllTrim(aBrowse[linha][7])
 cLote         := AllTrim(aBrowse[linha][8])
@@ -494,17 +571,34 @@ C2_SEQUEN	  := aBrowse[linha][20]
 
 	/* identifica embalagem */
 	If len(Alltrim(Cod)) == 12
-		cEmb          := substr(Cod,11,2)
+		
+
+		/* 
+		   Tratativa para produtos com inicio BM
+		   Exemplo BM 00.23.157-01   	
+		   Neste caso, não utilizar o codigo da embalagem e sim 157
+
+		 */
+
+		if substr(Cod,1,2) == "BM"
+			cEmb          := substr(Cod,8,3)
+			cEmb_Bar	  := substr(Cod,11,2)
+		else
+			cEmb          := substr(Cod,11,2)
+			cEmb_Bar	  := substr(Cod,11,2)
+		endif	
+
 	Endif
 
 
-	CodBar        := cLote+cEmb+Unid+NcXidvol
+
+	CodBar        := cLote+cEmb_Bar+Unid+NcXidvol
 	UMEMB         := UniMed(CodBar,Cod)
 	
 	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
 	MSCBCHKSTATUS(.F.)
 	MSCBLOADGRF("SIGA.GRF")
-	MSCBBEGIN(1,6)
+	MSCBBEGIN(1,4)
 
 	MSCBSAY(03,02 ,Prod, "N", "0", "025,025") // negrito
 	MSCBSAY(70,02 ,cEmb, "N", "0", "025,025") // negrito
@@ -517,14 +611,16 @@ C2_SEQUEN	  := aBrowse[linha][20]
 	MSCBSAY(09,11,Cod, "N", "0", "025,022") // negrito
 	MSCBSAY(57,11, AllTrim(UMEMB), "N", "0", "026,026") // negrito
 	
-	MSCBSAYBAR(18, 15,CodBar,"N","MB01",6, .F., .T., .F., ,3,02, .F., .F., "1", .T.)
+//	MSCBWRITE("^FT470,145^BQN,4,4")         // Jose 14/03/2025
+//	MSCBWRITE("^FH\^FDLA,"+cConteudo+"^FS")  //Jose 14/03/2025
+	MSCBSAYBAR(14, 15,CodBar,"N","MB07",6, .F., .T., .F., ,2,03, .F., .F., "1", .T.) // Jose 06/03/2025
+//	MSCBSAYBAR(18, 15,CodBar,"N","MB01",6, .F., .T., .F., ,3,02, .F., .F., "1", .T.) // Jose 14/03/2025
 
 	MSCBEND()
 	MSCBCLOSEPRINTER()
 
 	UPD_XVOL(NcXidvol,REG,C2_NUM,C2_ITEM,C2_SEQUEN,cLote)
 	
-
 
 Return()
 
@@ -547,8 +643,21 @@ Static Function PCP037_06(linha,qtd)
 
 	
 	Cod           := AllTrim(aBrowse[linha][2])
-	ProdTxt       := AllTrim(aBrowse[linha][4])
-	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	
+	/* 
+	Quando B1_DESCLIN for diferente de branco pegar B1_DESCLIN
+	*/
+
+	if !empty(AllTrim(aBrowse[linha][21]))
+		ProdTxt    := AllTrim(aBrowse[linha][21])
+	else
+		ProdTxt    := AllTrim(aBrowse[linha][4])
+	endif
+	
+	/* Especifico para o BRPCP038 */
+	/*	Unid          := SUBSTR(aBrowse[linha][5],1,2) */
+	Unid          := SUBSTR(Alltrim(cQtVol),1,2)
+	
 	Unid          := AllTrim(Unid)
 	Unid          := StrZero(val(Unid),2)
 	Validade      := aBrowse[linha][6]
@@ -598,14 +707,14 @@ Static Function PCP037_06(linha,qtd)
 	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
 	MSCBCHKSTATUS(.F.)
 	MSCBLOADGRF("SIGA.GRF")
-	MSCBBEGIN(1,6)
+	MSCBBEGIN(1,4)
 
 	MSCBSAY(02+cColuna,02,Prod,"N","0","020,020")
 	
 	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
 	MSCBSAY(02+cColuna,06,Cod, "N", "0", "018,018")
 	
-	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lot: "+cLote, "N", "0","018,018") // negrito
+	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lote: "+cLote, "N", "0","018,018") // negrito
 	
 	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "018,018") // negrito
 	
@@ -622,7 +731,7 @@ Static Function PCP037_06(linha,qtd)
 	
 	MSCBSAY(02+cColuna,06,Cod, "N", "0", "018,018")
 	
-	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lot: "+cLote, "N", "0","018,018") // negrito
+	MSCBSAY(02+cColuna,08.5,Volume+UMEMB+" Lote: "+cLote, "N", "0","018,018") // negrito
 	
 	MSCBSAY(02+cColuna,11,"Val.: "+CValToChar(DtVenc), "N", "0", "018,018") // negrito
 	
@@ -660,10 +769,24 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 
 
 	Cod           := AllTrim(aBrowse[linha][2])
-	ProdTxt       := AllTrim(aBrowse[linha][4])
-	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+
+	/* 
+	Quando B1_DESCLIN for diferente de branco pegar B1_DESCLIN
+	*/
+
+	if !empty(AllTrim(aBrowse[linha][21]))
+		ProdTxt    := AllTrim(aBrowse[linha][21])
+	else
+		ProdTxt    := AllTrim(aBrowse[linha][4])
+	endif
+	
+	/* Especifico para o BRPCP038 */
+	/*	Unid          := SUBSTR(aBrowse[linha][5],1,2) */
+	Unid          := SUBSTR(Alltrim(cQtVol),1,2)
+
 	Unid          := AllTrim(Unid)
 	Unid          := StrZero(val(Unid),2)
+	
 	Validade      := aBrowse[linha][6]
 	Prevf         := AllTrim(aBrowse[linha][7])
 	cLote         := AllTrim(aBrowse[linha][8])
@@ -708,7 +831,7 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
 	MSCBCHKSTATUS(.F.)
 	MSCBLOADGRF("SIGA.GRF")
-	MSCBBEGIN(1,6)
+	MSCBBEGIN(1,4)
 
 	MSCBSAY(03,02 ,Prod, "N", "0", "025,025") // negrito
 	MSCBSAY(65,02 ,cEmb, "N", "0", "025,025") // negrito
@@ -723,9 +846,11 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 	MSCBSAY(10,11,Cod, "N", "0", "025,025") // negrito
 	MSCBSAY(57,11, AllTrim(UMEMB), "N", "0", "026,026") // negrito
 
-	
-	MSCBSAYBAR(10,18,CodBar,"N","MB01",8, .F., .T., .F., ,3,3, .F., .F., "1", .T.)
-
+//	MSCBWRITE("^FT470,145^BQN,4,4")         // Jose 14/03/2025
+//	MSCBWRITE("^FH\^FDLA,"+cConteudo+"^FS")  //Jose 14/03/2025
+//	MSCBSAYBAR(14, 15,CodBar,"N","MB07",6, .F., .T., .F., ,2,03, .F., .F., "1", .T.) // Jose 06/03/2025
+// 	MSCBSAYBAR(10,18,CodBar,"N","MB01",8, .F., .T., .F., ,3,3, .F., .F., "1", .T.) // Jose 14/03/2025   24/04/2025
+ 	MSCBSAYBAR(10,18,CodBar,"N","MB07",6, .F., .T., .F., ,2,01, .F., .F., "1", .T.) // Jose 24/04/2025
 	MSCBEND()
 	MSCBCLOSEPRINTER()
 
@@ -759,10 +884,24 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 
 
 	Cod           := AllTrim(aBrowse[linha][2])
-	ProdTxt       := AllTrim(aBrowse[linha][4])
-	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	
+	/* 
+	Quando B1_DESCLIN for diferente de branco pegar B1_DESCLIN
+	*/
+
+	if !empty(AllTrim(aBrowse[linha][21]))
+		ProdTxt    := AllTrim(aBrowse[linha][21])
+	else
+		ProdTxt    := AllTrim(aBrowse[linha][4])
+	endif
+	
+	/* Especifico para o BRPCP038 */
+	/*	Unid          := SUBSTR(aBrowse[linha][5],1,2) */
+	Unid          := SUBSTR(Alltrim(cQtVol),1,2)
+
 	Unid          := AllTrim(Unid)
 	Unid          := StrZero(val(Unid),2)
+	
 	Validade      := aBrowse[linha][6]
 	Prevf         := AllTrim(aBrowse[linha][7])
 	cLote         := AllTrim(aBrowse[linha][8])
@@ -816,7 +955,7 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
 	MSCBCHKSTATUS(.F.)
 	MSCBLOADGRF("SIGA.GRF")
-	MSCBBEGIN(1,6)
+	MSCBBEGIN(1,4)
 
 	MSCBSAY(04,06 ,substr(Prod,1,24),"N", "0", "045,055") // negrito
 	MSCBSAY(90,06 ,cEmb, "N", "0", "045,055") // negrito
@@ -827,8 +966,12 @@ Local REG,C2_NUM,C2_ITEM,C2_SEQUEN
 	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
 	MSCBSAY(15,26,Cod, "N", "0", "050,060") // negrito
 	MSCBSAY(80,26,UMEMB, "N", "0", "040,040") // negrito
-	
-	MSCBSAYBAR(9,35,CodBar,"N","MB01",12, .F., .T., .F., ,5,5, .F., .F., "1", .T.)
+
+//	MSCBWRITE("^FT470,145^BQN,4,4")         // Jose 14/03/2025
+//	MSCBWRITE("^FH\^FDLA,"+cConteudo+"^FS")  //Jose 14/03/2025
+//	MSCBSAYBAR(14, 15,CodBar,"N","MB07",6, .F., .T., .F., ,2,03, .F., .F., "1", .T.) // Jose 06/03/2025
+//	MSCBSAYBAR(9,35,CodBar,"N","MB01",12, .F., .T., .F., ,5,5, .F., .F., "1", .T.) // jose 14/03/2025   24/04/2025
+	MSCBSAYBAR(9,35,CodBar,"N","MB07",06, .F., .T., .F., ,2,01, .F., .F., "1", .T.) // jose 24/04/2025
 
 
 	MSCBEND()
@@ -862,10 +1005,24 @@ Static Function PCP037_11(linha,qtd)
 	
 
 	Cod           := AllTrim(aBrowse[linha][2])
-	ProdTxt       := AllTrim(aBrowse[linha][4])
-	Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	
+	/* 
+	Quando B1_DESCLIN for diferente de branco pegar B1_DESCLIN
+	*/
+
+	if !empty(AllTrim(aBrowse[linha][21]))
+		ProdTxt    := AllTrim(aBrowse[linha][21])
+	else
+		ProdTxt    := AllTrim(aBrowse[linha][4])
+	endif
+	
+	/* Especifico para o BRPCP038 */
+	/*	Unid          := SUBSTR(aBrowse[linha][5],1,2) */
+	Unid          := SUBSTR(Alltrim(cQtVol),1,2)
+
 	Unid          := AllTrim(Unid)
 	Unid          := StrZero(val(Unid),2)
+	
 	Validade      := aBrowse[linha][6]
 	Prevf         := AllTrim(aBrowse[linha][7])
 	cLote         := AllTrim(aBrowse[linha][8])
@@ -906,7 +1063,7 @@ Static Function PCP037_11(linha,qtd)
 
 	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
 	MSCBCHKSTATUS(.F.)
-	MSCBBEGIN(1,6)
+	MSCBBEGIN(1,4)
 	
 	MSCBSAY(05.5,03,"Lt "+cLote , "N", "0", "024,027") // negrito
 	MSCBSAY(05.5,07,"Fab "+CValToChar(STOD(Prevf)), "N", "0", "024,027") // negrito
@@ -932,8 +1089,8 @@ Static function UniMed(codbarra,codigo)
 local retorno
 
 if  (len( AllTrim(codbarra)) == 14)
-		retorno :=	substr(codbarra,9,2)
 
+		retorno :=	substr(codbarra,9,2)
 		if (SUBSTR(codigo,11,2) == "99")
 			retorno :=	retorno + " Kg"
 		endif	
@@ -945,6 +1102,25 @@ if  (len( AllTrim(codbarra)) == 14)
 		endif	
 
 endif
+
+/* quando é produto BM */
+if  (len( AllTrim(codbarra)) == 15)
+
+		retorno :=	substr(codbarra,10,2)
+		if (SUBSTR(codigo,11,2) == "99")
+			retorno :=	retorno + " Kg"
+		endif	
+			
+		if (SUBSTR(codigo,11,2) == "00")
+			retorno := retorno + " L"
+			else
+			retorno := retorno +  " Unid"
+		endif	
+
+endif
+
+
+
 /* função no fox pro */
 //iif(len(allt(codbarra)) = 14,substr(codbarra,9,2)+IIF(SUBSTR(codigo,11,2) == "99"," Kg",IIF(SUBSTR(codigo,11,2) == "00"," L"," Unid")),"")
 
@@ -972,6 +1148,11 @@ Private oFont15n    := TFont():New('Arial',,15,,.T.,,,,.F.,.F.)
 Private oFont30     := TFont():New('Arial',,30,,.F.,,,,.F.,.F.)
 Private oFont30n    := TFont():New('Arial',,30,,.T.,,,,.F.,.F.)
 
+If len(aBrowse) == 0
+	MsgAlert('Impressão disponivel apenas para etiquetas com o Lote !')
+	return()
+EndIf
+
 
 oPrint := TMSPrinter():New(OemToAnsi('Etiqueta de produto'))
 oPrint:SetPortrait()
@@ -983,15 +1164,28 @@ cPage := 0
 cont := 0
 
 aString := strtokarr (cProduto, "-")
-linha := val(aString[3])
+linha := val(aString[1])
 
 Cod           := AllTrim(aBrowse[linha][2])
 Cod 		  := TRANSFORM(Cod, "@R XX 99.99.999-99")
 
-ProdTxt       := AllTrim(aBrowse[linha][4])
-Unid          := SUBSTR(aBrowse[linha][5],1,2)
+	/* 
+	Quando B1_DESCLIN for diferente de branco pegar B1_DESCLIN
+	*/
+
+if !empty(AllTrim(aBrowse[linha][21]))
+	ProdTxt    := AllTrim(aBrowse[linha][21])
+else
+	ProdTxt    := AllTrim(aBrowse[linha][4])
+endif
+
+/* Especifico para o BRPCP038 */
+/*	Unid          := SUBSTR(aBrowse[linha][5],1,2) */
+Unid          := SUBSTR(Alltrim(cQtVol),1,2)
+
 Unid          := AllTrim(Unid)
 Unid          := StrZero(val(Unid),2)
+
 Validade      := aBrowse[linha][6]
 Prevf         := AllTrim(aBrowse[linha][7])
 cLote         := AllTrim(aBrowse[linha][8])
@@ -1085,7 +1279,7 @@ Case nTipo == 3
 	nLin += 050
 	oPrint:Say(nLin,0050,OemToAnsi(Cod),oFont12n,,,,0)
 	nLin += 050
-	oPrint:Say(nLin,0050,OemToAnsi(Volume+UMEMB+" Lot: "+cLote),oFont12n,,,,0)
+	oPrint:Say(nLin,0050,OemToAnsi(Volume+UMEMB+" Lote: "+cLote),oFont12n,,,,0)
 	nLin += 050
 	oPrint:Say(nLin,0050,OemToAnsi("Val "+CValToChar(DtVenc)),oFont12n,,,,0)
 	CodBar        := cLote+cEmb+Unid+StrZero( (val(cXidvol))+i , 4)
@@ -1214,3 +1408,124 @@ Static Function UPD_XVOL(XIDVOL,REG,C2_NUM,C2_ITEM,C2_SEQUEN,C2_LOTE)
 	Endif
 
 return
+
+
+/*/{Protheus.doc} PCP037_05
+Etiqueta Zebra de Volume
+@type function
+@author neliedercorneta
+@since 23/12/2021
+@param linha, logical, linha
+@param qtd, variant, qtd produtos
+/*/
+Static Function PCP037_E05()
+
+Local cModelo := "ZEBRA"
+Local Empresa := '01'
+Local Cod,xCod,cEmb
+Local cIDVOL
+
+	
+	/* identifica qual empresa é, nos padroes da Tabela CODBAR */
+	if SUBSTR(xFilial("SB1"),1,2) = '01'
+		Empresa := '01'
+	endif
+
+	if SUBSTR(xFilial("SB1"),1,2) = '06'		
+		Empresa := '06'
+	endif	
+/*----  jOSE 17/10/2023------------------------------------------------------
+	cQuery := " SELECT B1_CODBAR,B1_COD,B1_DESC,IDVOL "
+	cQuery += " FROM "+RetSqlName("SB1")+"   "
+	cQuery += " INNER JOIN CODBAR ON PRODUTO = B1_COD AND EMPRESA = "+Empresa+" "
+	cQuery += " WHERE D_E_L_E_T_ = ''  "
+	cQuery += " AND B1_FILIAL = '"+xFilial("SB1")+"'   " 
+	cQuery += " AND B1_COD = '"+cProduto+"'"
+------------------------------------------------------------------------------*/
+
+//---  jOSE 17/10/2023------------------------------------------------------
+	cQuery := " SELECT B1_CODBAR, B1_COD, B1_DESC, ZA1.ZA1_SEQCOD,IsNull(IDVOL,0)IDVOL "
+	cQuery += " FROM "+RetSqlName("SB1")+" SB1  "
+	cQuery += " INNER JOIN  "+RetSqlName("ZA1")+" ZA1 ON ZA1.ZA1_PRODUT = B1_COD AND ZA1.ZA1_FILIAL = '"+Empresa+"' "
+	cQuery += " LEFT JOIN CODBAR ON PRODUTO = B1_COD AND EMPRESA = "+Empresa+" "
+	cQuery += " WHERE SB1.D_E_L_E_T_ = ''  "
+	cQuery += " AND B1_FILIAL = '"+xFilial("SB1")+"'   " 
+	cQuery += " AND B1_COD = '"+cProduto+"'"
+//------------------------------------------------------------------------------ 
+
+	IF Select("TEMP") <> 0
+			DbSelectArea("TEMP")
+			DbCloseArea()
+	ENDIF
+
+	TCQuery cQuery New Alias "TEMP"
+
+	Cod  := TEMP->B1_COD
+	xCod := Cod
+	Prod := TEMP->B1_DESC
+
+	/* identifica embalagem */
+	If len(Alltrim(Cod)) == 12
+		/* 
+		   Tratativa para produtos com inicio BM
+		   Exemplo BM 00.23.157-01   	
+		   Neste caso, não utilizar o codigo da embalagem e sim 157
+
+		*/
+
+		if substr(Cod,1,2) == "BM"
+			cEmb          := substr(Cod,8,3)
+			cEmb_Bar	  := substr(Cod,11,2)
+		endif
+
+			cEmb          := substr(Cod,11,2)
+			cEmb_Bar	  := substr(Cod,11,2)
+			
+	Endif
+
+	//cIDVOL := TEMP->IDVOL Ajustado Nelieder
+	
+	aIDVOL := TEMP->IDVOL
+	cIDVOL := Val(TEMP->ZA1_SEQCOD) 
+
+	If aIDVOL > cIDVOL
+		cIDVOL := aIDVOL
+	EndIf
+
+	cIDVOL++
+	CodBar	:= Alltrim(TEMP->B1_CODBAR)+AllTrim(StrZero(cIDVOL,6))
+	/*CodBar        := cLote+cEmb+Unid+NcXidvol
+	UMEMB         := UniMed(CodBar,Cod)*/
+	
+	MSCBPRINTER(cModelo, cLPT,,12,.F.,,,,,,.F.,)
+	MSCBCHKSTATUS(.F.)
+	MSCBLOADGRF("SIGA.GRF")
+	MSCBBEGIN(1,4)
+
+	MSCBSAY(03,02 ,Prod, "N", "0", "025,025") // negrito
+	MSCBSAY(70,02 ,cEmb, "N", "0", "025,025") // negrito
+	MSCBSAY(03,05 ,"** IDENTIF VOL **", "N", "0", "025,025") // negrito
+	
+	MSCBLineH(00,10,190,3, 'B' )
+	
+	MSCBSAY(03,11,"COD:", "N", "0", "025,022") // negrito
+	Cod = TRANSFORM(Cod, "@R XX 99.99.999-99")
+	MSCBSAY(09,11,Cod, "N", "0", "025,022") // negrito
+	
+//	MSCBWRITE("^FT470,145^BQN,4,4")         // Jose 14/03/2025
+//	MSCBWRITE("^FH\^FDLA,"+cConteudo+"^FS")  //Jose 14/03/2025
+//	MSCBSAYBAR(14, 15,CodBar,"N","MB07",6, .F., .T., .F., ,2,03, .F., .F., "1", .T.) // Jose 06/03/2025
+	MSCBSAYBAR(18, 15,CodBar,"N","MB01",6, .F., .T., .F., ,3,02, .F., .F., "1", .T.) // Jose 14/03/2025
+
+	MSCBEND()
+	MSCBCLOSEPRINTER()
+
+	//cQry1 := "" Ajustado por Nelieder
+	//cQry1 := "UPDATE CODBAR SET IDVOL = '"+str(cIDVOL)+"' WHERE (EMPRESA = '"+Empresa+"') AND (PRODUTO = '"+xCod+"') AND (CODBAR > '')"
+    //TcSQLExec(cQry1)
+
+	cQry1 := "" 
+	cQry1 := "UPDATE "+RetSqlName("ZA1")+" SET ZA1_SEQCOD = '"+AllTrim(StrZero(cIDVOL,5))+"' WHERE (ZA1_FILIAL = '"+xFilial("ZA1")+"') AND (ZA1_PRODUT = '"+AllTrim(xCod)+"') AND (ZA1_GTIN > '')"
+    TcSQLExec(cQry1)
+
+Return()

@@ -1,3 +1,7 @@
+//Bibliotecas
+#INCLUDE "Avprint.ch"
+#include 'totvs.ch'
+
 #INCLUDE 'PROTHEUS.CH'
 #INCLUDE 'RWMAKE.CH'
 #INCLUDE 'FONT.CH'
@@ -43,7 +47,7 @@ User Function BRFATC01()
      /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Definicao do Dialog e todos os seus componentes.                        ±±
      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     oDlg1Con   := MSDialog():New( 091, 232, 665, 927, "Consulta Pedidos Liberados", , , .F., , , , , , .T., , , .T. )
+     oDlg1Con   := MSDialog():New( 091, 232, 665, 987, "Consulta Pedidos Liberados", , , .F., , , , , , .T., , , .T. )
      oFont1Co   := TFont():New( "MS Sans Serif",0,-19,,.F.,0,,400,.F.,.F.,,,,,, )
      oSay1Con   := TSay():New( 006, 002, {|| "De:" }, oDlg1Con, , oFont1Co, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 020, 009)
      oGet1Con   := TGet():New( 004, 020, {|u| If(PCount()>0,dGet1Con:=u,dGet1Con)},oDlg1Con, 048, 014,'',,CLR_BLACK,CLR_WHITE,oFont1Co,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","dGet1Con",,)
@@ -52,16 +56,17 @@ User Function BRFATC01()
      MsAguarde( {|| oTbl1Tmp("C") }, "Aguarde", "Buscando informações...")
      DbSelectArea("TMPCON")
      DbSetOrder(1)
-//     oBrw1Con   := MsSelect():New( "TMPCON","","",{{"PEDI","","Pedido",""},{"CODC","","Cliente",""},{"NOME","","Nome do Cliente",""},{"ESTA","","UF",""},{"REPR","","Representante",""},{"FLAG","","Imp.?",""}, {"PEDP","","Ped. Progr.",""},{"EMIS","","Emissao",""},{"LIBC","","Liberacao",""},{"DIAS","","Atraso","@E 9999"},{"ESPE","","Qtde. Esp.",""},{"ESTO","","Estoque",""},{"BORP","","Bor. Pedidos",""},{"BORD","","Bor. Desp.",""}},.F.,,{024, 003, 285, 347},,, oDlg1Con ) 
-     oBrw1Con   := MsSelect():New( "TMPCON","","",{{"PEDI","","Pedido",""},{"CODC","","Cliente",""},{"NOME","","Nome do Cliente",""},{"ESTA","","UF",""},{"REPR","","Representante",""},{"FLAG","","Imp.?",""}, {"PEDP","","Ped. Progr.",""},{"EMIS","","Emissao",""},{"LIBC","","Liberacao",""},{"DIAS","","Atraso Dt Lib","@E 9999"},{"DIASP","","Atraso Dt Prog","@E 9999"},{"ESPE","","Qtde. Esp.",""},{"ESTO","","Estoque",""},{"BORP","","Bor. Pedidos",""},{"BORD","","Bor. Desp.",""},{"DTDESP","","Dt a Despachar",""}},.F.,,{024, 003, 285, 347},,, oDlg1Con ) 
+//   oBrw1Con   := MsSelect():New( "TMPCON","","",{{"PEDI","","Pedido",""},{"CODC","","Cliente",""},{"NOME","","Nome do Cliente",""},{"ESTA","","UF",""},{"REPR","","Representante",""},{"FLAG","","Imp.?",""}, {"PEDP","","Ped. Progr.",""},{"EMIS","","Emissao",""},{"LIBC","","Liberacao",""},{"DIAS","","Atraso","@E 9999"},{"ESPE","","Qtde. Esp.",""},{"ESTO","","Estoque",""},{"BORP","","Bor. Pedidos",""},{"BORD","","Bor. Desp.",""}},.F.,,{024, 003, 285, 347},,, oDlg1Con ) 
+     oBrw1Con   := MsSelect():New( "TMPCON","","",{{"PEDI","","Pedido",""},{"CODC","","Cliente",""},{"NOME","","Nome do Cliente",""},{"ESTA","","UF",""},{"REPR","","Representante",""},{"FLAG","","Imp.?",""}, {"PEDP","","Ped. Progr.",""},{"EMIS","","Emissao",""},{"LIBC","","Liberacao",""},{"DIAS","","Atraso Dt Lib","@E 9999"},{"DIASP","","Atraso Dt Prog","@E 9999"},{"ESPE","","Qtde. Esp.",""},{"ESTO","","Estoque",""},{"BORP","","Bor. Pedidos",""},{"BORD","","Bor. Desp.",""},{"DTDESP","","Dt a Despachar",""}},.F.,,{024, 003, 285, 380},,, oDlg1Con ) 
      oBrw1Con:oBrowse:nFreeze := 3
-     oCBox1Co   := TComboBox():New( 007, 150, {|u| If(PCount()>0,nCBox1Co:=u,nCBox1Co)},{"Pedido", "Atraso"}, 056, 016,oDlg1Con,,,,CLR_BLACK,CLR_WHITE,.T.,oFont1Co,"",,,,,,,nCBox1Co )
+     oCBox1Co   := TComboBox():New( 004, 150, {|u| If(PCount()>0,nCBox1Co:=u,nCBox1Co)},{"Pedido", "Atraso"}, 056, 016,oDlg1Con,,,,CLR_BLACK,CLR_WHITE,.T.,oFont1Co,"",,,,,,,nCBox1Co )
      oCBox1Co:bChange := {|| DbSelectArea("TMPCON"), DBSetOrder(oCBox1Co:nAt), oBrw1Con:oBrowse:Refresh(), DbGoTop() }
 
-     oBtn2Con   := TButton():New( 006, 209, "Filtra" , oDlg1Con, {|| MsAguarde( {|| oTbl1Tmp("F") }, "Aguarde", "Buscando informações...")  }, 032, 012, , , , .T., , "", , , , .F. )
-     oBtn3Con   := TButton():New( 006, 244, "Imprime", oDlg1Con, {|| u_BRFATR16("C") }                                                       , 032, 012, , , , .T., , "", , , , .F. )
-     oBtn4Con   := TButton():New( 006, 279, "Observ.", oDlg1Con, {|| fMonObs()       }                                                       , 032, 012, , , , .T., , "", , , , .F. )
-     oBtn1Con   := TButton():New( 006, 314, "Sair"   , oDlg1Con, {|| oDlg1Con:End() }                                                        , 032, 012, , , , .T., , "", , , , .F. )
+     oBtn2Con   := TButton():New( 006, 215, "Filtra"    ,  oDlg1Con, {|| MsAguarde( {|| oTbl1Tmp("F") }, "Aguarde", "Buscando informações...")  }, 032, 012, , , , .T., , "", , , , .F. )
+     oBtn3Con   := TButton():New( 003, 250, "Imprime"   ,  oDlg1Con, {|| u_BRFATR16("C") }                                                       , 032, 008, , , , .T., , "", , , , .F. )
+     oBtn3Con   := TButton():New( 013, 250, "Impr. Tela",  oDlg1Con, {|| fMonImp()       }                                                       , 032, 008, , , , .T., , "", , , , .F. )
+     oBtn4Con   := TButton():New( 006, 289, "Observ."   ,  oDlg1Con, {|| fMonObs()       }                                                       , 032, 012, , , , .T., , "", , , , .F. )
+     oBtn1Con   := TButton():New( 006, 324, "Sair"      ,  oDlg1Con, {|| oDlg1Con:End()  }                                                       , 032, 012, , , , .T., , "", , , , .F. )
      oDlg1Con:Activate(, , , .T.)
      DbSelectArea("TMPCON")
      DbCloseArea()
@@ -72,7 +77,8 @@ Function  ³ oTbl1Tmp() - Cria temporario para o Alias: TMPCON
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl1Tmp(cTipCha)
        Local aFds := {}
-       Local cTmp,cLibCre,dLibCre
+//     Local cTmp
+       Local cLibCre,dLibCre
        Local cQry := ""
 	   
 	   If SELECT( "TMPCON" ) <> 0
@@ -105,23 +111,23 @@ Static Function oTbl1Tmp(cTipCha)
           oTempTable:AddIndex( "cTmp_2", { "DIIN" } )
           oTempTable:Create()
 
-
-//          cTmp := CriaTrab( , .F. )
-//          dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
-//          Use (cTmp+".Dbf") Alias TMPCON VIA "DBFCDXADS" New Exclusive
-//          DbCreateIndex(cTmp+"_1.cdx", "PEDI", {||"PEDI"} )
-//          DbCreateIndex(cTmp+"_2.cdx", "DIIN", {||"DIIN"} )
-//          DbClearInd()
-//          DbSetIndex(cTmp+"_1")
-//          DbSetIndex(cTmp+"_2")
-//          DbSetOrder(1)
- 
+/*
+//        cTmp := CriaTrab( , .F. )
+//        dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
+//        Use (cTmp+".Dbf") Alias TMPCON VIA "DBFCDXADS" New Exclusive
+//        DbCreateIndex(cTmp+"_1.cdx", "PEDI", {||"PEDI"} )
+//        DbCreateIndex(cTmp+"_2.cdx", "DIIN", {||"DIIN"} )
+//        DbClearInd()
+//        DbSetIndex(cTmp+"_1")
+//        DbSetIndex(cTmp+"_2")
+//        DbSetOrder(1)
+*/
        Else
           DbSelectArea("TMPCON")
           Zap
        Endif
        
-	   cQry := ""
+  	    cQry := ""
        cQry += "SELECT SC5.C5_NUM, SC5.C5_CLIENTE, SA1.A1_NOME, SC5.C5_FLAG, SA1.A1_EST, SA1.A1_VEND, "
        cQry += "       'PED_PRO' = CASE WHEN SC5.C5_PEDPROG = '' THEN '' ELSE CONVERT(VARCHAR(10), ISNULL(CAST(ISNULL(SC5.C5_PEDPROG, '') AS DATETIME), ''), 103) END, "
        cQry += "       'EMISSAO' = CONVERT(VARCHAR(10), CAST(SC5.C5_EMISSAO AS DATETIME), 103), "
@@ -130,7 +136,7 @@ Static Function oTbl1Tmp(cTipCha)
        cQry += "                    WHERE SC9.C9_FILIAL = SC5.C5_FILIAL "
        cQry += "                       AND SC9.D_E_L_E_T_ = '' "
        cQry += "                       AND SC9.C9_PEDIDO = SC5.C5_NUM), "
-	/*
+/*
        cQry += "       'LIB_CRE' = (SELECT CONVERT(VARCHAR(10), CAST(SC9.C9_DTLCRED AS DATETIME), 103) AS QTD_ESP "
        cQry += "                    FROM "+RETSQLNAME("SC9")+" SC9 WITH (NOLOCK) "
        cQry += "                    WHERE SC9.C9_FILIAL = SC5.C5_FILIAL "
@@ -169,7 +175,7 @@ Static Function oTbl1Tmp(cTipCha)
        cQry += "LEFT OUTER JOIN "+RETSQLNAME("SA1")+" SA1 WITH (NOLOCK) ON SA1.A1_FILIAL = '"+xFilial("SA1")+"' AND SA1.A1_COD = SC5.C5_CLIENT AND SA1.D_E_L_E_T_ = '' "
        cQry += "WHERE SC5.C5_FILIAL  = '"+xFilial("SC5")+"' "
        cQry += "  AND SC5.D_E_L_E_T_ = '' "
-       //cQry += "  AND SC5.C5_APROVA  = '1' "
+     //cQry += "  AND SC5.C5_APROVA  = '1' "
        cQry += "  AND SC5.C5_LIBPED ='T' AND SC5.C5_LIBCRE ='T' AND SC5.C5_LIBDIR ='T' " // pegar os pedidos que estão aprovados e não estão atualizando o c5_aprova =1 
        cQry += "  AND SC5.C5_NOTA    = '' "
        cQry += "  AND SC5.C5_TIPO    = 'N' "
@@ -186,22 +192,22 @@ Static Function oTbl1Tmp(cTipCha)
                 Loop
              Endif
              RecLock("TMPCON", .t.)
-                TMPCON->PEDI := TCQ->C5_NUM
-                TMPCON->CODC := TCQ->C5_CLIENTE
-                TMPCON->NOME := TCQ->A1_NOME
-                TMPCON->FLAG := Iif(TCQ->C5_FLAG $ 'S', 'SIM', 'NÂO')
-                TMPCON->PEDP := CTOD(TCQ->PED_PRO)
-                TMPCON->EMIS := CTOD(TCQ->EMISSAO)
-                TMPCON->LIBC := dLibCre //CTOD(TCQ->LIB_CRE)
-                TMPCON->DIAS := Iif(Empty(TCQ->LIB_CRE), 0, dDataBase - dLibCre)
-                TMPCON->DIASP := Iif(Empty(TCQ->PED_PRO), Iif(Empty(TCQ->LIB_CRE), 0, dDataBase - dLibCre), dDataBase - CTOD(TCQ->PED_PRO))
-                TMPCON->DIIN := Inverte( StrZero( Iif(Empty(TCQ->LIB_CRE), 0, dDataBase - dLibCre), 5) )
-                TMPCON->ESPE := TCQ->QTD_ESP
-                TMPCON->ESTO := TCQ->QTD_EST
-                TMPCON->BORP := TCQ->BOR_PED
-                TMPCON->BORD := SUBSTR(TCQ->BOR_DES,1,6)
-                TMPCON->ESTA := TCQ->A1_EST
-                TMPCON->REPR := ALLTRIM(TCQ->A1_VEND)+' - '+Posicione("SA3", 1, xFilial("SA3")+TCQ->A1_VEND, "A3_NREDUZ")
+                TMPCON->PEDI   := TCQ->C5_NUM
+                TMPCON->CODC   := TCQ->C5_CLIENTE
+                TMPCON->NOME   := TCQ->A1_NOME
+                TMPCON->FLAG   := Iif(TCQ->C5_FLAG $ 'S', 'SIM', 'NÂO')
+                TMPCON->PEDP   := CTOD(TCQ->PED_PRO)
+                TMPCON->EMIS   := CTOD(TCQ->EMISSAO)
+                TMPCON->LIBC   := dLibCre //CTOD(TCQ->LIB_CRE)
+                TMPCON->DIAS   := Iif(Empty(TCQ->LIB_CRE), 0, dDataBase - dLibCre)
+                TMPCON->DIASP  := Iif(Empty(TCQ->PED_PRO), Iif(Empty(TCQ->LIB_CRE), 0, dDataBase - dLibCre), dDataBase - CTOD(TCQ->PED_PRO))
+                TMPCON->DIIN   := Inverte( StrZero( Iif(Empty(TCQ->LIB_CRE), 0, dDataBase - dLibCre), 5) )
+                TMPCON->ESPE   := TCQ->QTD_ESP
+                TMPCON->ESTO   := TCQ->QTD_EST
+                TMPCON->BORP   := TCQ->BOR_PED
+                TMPCON->BORD   := SUBSTR(TCQ->BOR_DES,1,6)
+                TMPCON->ESTA   := TCQ->A1_EST
+                TMPCON->REPR   := ALLTRIM(TCQ->A1_VEND)+' - '+Posicione("SA3", 1, xFilial("SA3")+TCQ->A1_VEND, "A3_NREDUZ")
                 TMPCON->DTDESP := CTOD(SUBSTR(TCQ->BOR_DES,13,2)+"/"+SUBSTR(TCQ->BOR_DES,11,2)+"/"+SUBSTR(TCQ->BOR_DES,7,4))
              MsUnLock()
              DbSelectArea("TCQ")
@@ -211,7 +217,7 @@ Static Function oTbl1Tmp(cTipCha)
        DbCloseArea()
        DbSelectArea("TMPCON")
        If cTipCha $ 'F'
-          DbSetOrder(oBrw1Con:oBrowse:nAt)
+         DbSetOrder(oBrw1Con:oBrowse:nAt)
        Endif
        DbGoTop()
 Return
@@ -280,3 +286,153 @@ Static Function fMonObs()
           Endif
        Endif
 Return
+
+Static Function fMonImp()
+   Local aArea       := GetArea()
+   Local oFWMsExcel
+   Local oExcel
+   Local cArquivo    := "C:\Temp\"+"BRFATC01.xml"
+
+   cQry := ""
+   cQry += "SELECT SC5.C5_NUM, SC5.C5_CLIENTE, SA1.A1_NOME, SC5.C5_FLAG, SA1.A1_EST, SA1.A1_VEND, SA1.A1_MUN, SC5.C5_TRANSP, SC5.C5_REDESP, "
+   cQry += "       'DESPACH' = CASE WHEN C5_TRANSP IN('00700','00573','099999','00800') OR C5_DEPOSI ='S' THEN 'DEPOSITO' ELSE "
+   cQry += "       CASE WHEN C5_DEPOSI ='A' THEN 'ARARAQUARA' ELSE 'RETIRA' END END, "
+   cQry += "       'PED_PRO' = CASE WHEN SC5.C5_PEDPROG = '' THEN '' ELSE CONVERT(VARCHAR(10), ISNULL(CAST(ISNULL(SC5.C5_PEDPROG, '') AS DATETIME), ''), 103) END, "
+   cQry += "       'EMISSAO' = CONVERT(VARCHAR(10), CAST(SC5.C5_EMISSAO AS DATETIME), 103), C5_PBRUTO, C5_VOLUME1, "
+   cQry += "       'LIB_CRE' = (SELECT MAX(C9_DTLCRED) "
+   cQry += "                    FROM "+RETSQLNAME("SC9")+" SC9 WITH (NOLOCK) "
+   cQry += "                    WHERE SC9.C9_FILIAL  = SC5.C5_FILIAL "
+   cQry += "                      AND SC9.D_E_L_E_T_ = '' "
+   cQry += "                      AND SC9.C9_PEDIDO  = SC5.C5_NUM), "
+   cQry += "       'QTD_ESP' = (SELECT COUNT(SB2.B2_LOCALIZ) AS QTD_ESP "
+   cQry += "                    FROM "+RETSQLNAME("SC9")+" SC9 WITH (NOLOCK) "
+   cQry += "                    LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.B1_FILIAL = SC9.C9_FILIAL) AND (SB1.B1_COD = SC9.C9_PRODUTO) AND (SB1.D_E_L_E_T_ = '') "
+   cQry += "                    LEFT OUTER JOIN SB2010 SB2 WITH (NOLOCK) ON (SB2.B2_FILIAL = SC9.C9_FILIAL) AND (SB2.B2_COD = SB1.B1_COD) AND (SB2.B2_LOCAL = SB1.B1_LOCPAD) AND (SB2.D_E_L_E_T_ = '') "
+   cQry += "                    WHERE SC9.C9_FILIAL  = SC5.C5_FILIAL "
+   cQry += "                      AND SC9.D_E_L_E_T_ = '' "
+   cQry += "                      AND SC9.C9_PEDIDO  = SC5.C5_NUM "
+   cQry += "                      AND SB2.B2_LOCALIZ = ''), "
+   cQry += "       'QTD_EST' = (SELECT COUNT(SB2.B2_LOCALIZ) AS QTD_EST "
+   cQry += "                    FROM "+RETSQLNAME("SC9")+" SC9 WITH (NOLOCK) "
+   cQry += "                    LEFT OUTER JOIN SB1010 SB1 WITH (NOLOCK) ON (SB1.B1_FILIAL = SC9.C9_FILIAL) AND (SB1.B1_COD = SC9.C9_PRODUTO) AND (SB1.D_E_L_E_T_ = '') "
+   cQry += "                    LEFT OUTER JOIN "+RETSQLNAME("SB2")+" SB2 WITH (NOLOCK) ON (SB2.B2_FILIAL = SB1.B1_FILIAL) AND (SB2.B2_COD = SB1.B1_COD) AND (SB2.B2_LOCAL = SB1.B1_LOCPAD) AND (SB2.D_E_L_E_T_ = '') "
+   cQry += "                    WHERE SC9.C9_FILIAL   = SC5.C5_FILIAL "
+   cQry += "                      AND SC9.D_E_L_E_T_  = '' "
+   cQry += "                      AND SC9.C9_PEDIDO   = SC5.C5_NUM "
+   cQry += "                      AND SB2.B2_LOCALIZ <> ''), "
+   cQry += "       'BOR_PED' = (SELECT TOP 1 SZG.ZG_CODIGO "
+   cQry += "                    FROM "+RETSQLNAME("SZG")+" SZG WITH (NOLOCK) "
+   cQry += "                    WHERE SZG.ZG_FILIAL  = SC5.C5_FILIAL "
+   cQry += "                      AND SZG.ZG_PEDIDO  = '"+substr(cNumEmp,1,2)+"'+SC5.C5_NUM "
+   cQry += "                      AND SZG.D_E_L_E_T_ = ''), "
+   cQry += "       'BOR_DES' = (SELECT TOP 1 SZB.ZB_CODIGO+'-'+ZA_DESCR AS CODDT "
+   cQry += "                    FROM "+RETSQLNAME("SZB")+" SZB WITH (NOLOCK) "+;
+         								"LEFT OUTER JOIN "+RETSQLNAME("SZA")+" SZA WITH (NOLOCK) ON (SZA.D_E_L_E_T_ <> '*') AND (ZB_FILIAL = ZA_FILIAL) AND (ZB_CODIGO = ZA_CODIGO) "
+   cQry += "                    WHERE SZB.ZB_FILIAL  = SC5.C5_FILIAL "
+   cQry += "                      AND SZB.ZB_PEDIDO  = '"+substr(cNumEmp,1,2)+"'+SC5.C5_NUM "
+   cQry += "                      AND SZB.D_E_L_E_T_ = ''), "
+   cQry += "                      C5_VLRDUP AS 'VALORDUPL', "
+   cQry += "                      '_PEDIDO'= ISNULL(ROUND((SELECT CASE WHEN SUM(ZZC_VOLRET) =0 OR SUM(ZZC_VOLUME)=0 THEN 0 ELSE (SUM(ZZC_VOLRET)/SUM(ZZC_VOLUME)) END FROM "+RETSQLNAME("ZZC")+" ZZC WHERE ZZC_FILIAL = '"+xFilial("SC5")+"' AND ZZC_PEDIDO = C5_NUM AND ZZC.D_E_L_E_T_ =''),2),0) "
+   cQry += "FROM "+RETSQLNAME("SC5")+" SC5 WITH (NOLOCK) "
+   cQry += "LEFT OUTER JOIN "+RETSQLNAME("SA1")+" SA1 WITH (NOLOCK) ON SA1.A1_FILIAL = '"+xFilial("SA1")+"' AND SA1.A1_COD = SC5.C5_CLIENT AND SA1.D_E_L_E_T_ = '' "
+   cQry += "WHERE SC5.C5_FILIAL  = '"+xFilial("SC5")+"' "
+   cQry += "  AND SC5.D_E_L_E_T_ = '' "
+   cQry += "  AND SC5.C5_LIBPED  ='T' AND SC5.C5_LIBCRE ='T' AND SC5.C5_LIBDIR ='T' " // pegar os pedidos que estão aprovados e não estão atualizando o c5_aprova = 1 
+   cQry += "  AND SC5.C5_NOTA    = '' "
+   cQry += "  AND SC5.C5_TIPO    = 'N' "
+   cQry += "ORDER BY 1 "
+   TCQuery cQry ALIAS "TCI" NEW
+
+   //Criando o objeto que irá gerar o conteúdo do Excel
+   oFWMsExcel := FWMSExcel():New()
+   //Aba 01 
+   oFWMsExcel:AddworkSheet("Pedidos") //Não utilizar número junto com sinal de menos. Ex.: 1-
+   //Criando a Tabela
+   ccabecalho :="Data.: "+DTOC(dDataBase)+"  AS  "+Time()+ "                                "+"CONSULTA PEDIDOS LIBERADOS"
+   //Criando Colunas
+   oFWMsExcel:AddTable ("Pedidos",ccabecalho) // Adiciona a tabela 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"PEDIDO"           ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"DESPACHADO"       ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"CLIENTE"          ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"NOME DO CLIENTE  ",1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"UF"               ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"MUNICIPIO"        ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"TRANSPORTADORA"   ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"REDESPACHO"       ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"REPRESENTANTE    ",1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"IMP.?"            ,1)  
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"PED. PROGR."      ,1)  
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"EMISSAO"          ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"LIBERACAO"        ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"ATRASO DT LIB"    ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"ATRASO DT PROG"   ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"QTDE ESP."        ,1) 
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"ESTOQUE"          ,1)
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"% SEPARAÇÃO"      ,1)
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"VALOR PRODUTOS"   ,1)
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"PESO BRUTO"       ,1)
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"VOLUMES"          ,1)
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"BOR. PEDIDOS"     ,1)
+   oFWMsExcel:AddColumn("Pedidos",ccabecalho,"BOR. DESP."       ,1)
+   
+   MsgRun("Montando Arquivo em Excel...... Processando")
+
+   While  !(TCI->(EoF()))            
+      cLibCre := TCI->LIB_CRE
+      dLibCre := ctod(substr(cLibCre,7,2)+'/'+substr(cLibCre,5,2)+'/'+substr(cLibCre,1,4))
+      If dLibCre >= dGet1Con .and. dLibCre <= dGet2Con
+         
+      Else
+         DbSelectArea("TCI")
+         DbSkip()
+         Loop
+      Endif
+    //Inverte( StrZero( Iif(Empty(TCI->LIB_CRE), 0, dDataBase - dLibCre), 5) ),;
+      
+      oFWMsExcel:AddRow("Pedidos",ccabecalho,{;
+      TCI->C5_NUM,; 
+      TCI->DESPACH,;
+      TCI->C5_CLIENTE,; 
+      TCI->A1_NOME,;
+      TCI->A1_EST,;
+      TCI->A1_MUN,;
+      ALLTRIM(TCI->C5_TRANSP)+' - '+Posicione("SA4", 1, xFilial("SA4")+TCI->C5_TRANSP, "A4_NOME"),;
+      ALLTRIM(TCI->C5_REDESP)+' - '+Posicione("SA4", 1, xFilial("SA4")+TCI->C5_REDESP, "A4_NOME"),;
+      ALLTRIM(TCI->A1_VEND)+' - '+Posicione("SA3", 1, xFilial("SA3")+TCI->A1_VEND, "A3_NREDUZ"),;
+      Iif(TCI->C5_FLAG $ 'S', 'SIM', 'NÂO'),; 
+      CTOD(TCI->PED_PRO),; 
+      CTOD(TCI->EMISSAO),; 
+      dLibCre,; 
+      Iif(Empty(TCI->LIB_CRE), 0, dDataBase - dLibCre),; 
+      Iif(Empty(TCI->PED_PRO), Iif(Empty(TCI->LIB_CRE), 0, dDataBase - dLibCre), dDataBase - CTOD(TCI->PED_PRO)),;
+      TCI->QTD_ESP,;
+      TCI->QTD_EST,;
+     (TCI->_PEDIDO*100),;
+      TCI->VALORDUPL,;
+      TCI->C5_PBRUTO,;
+      TCI->C5_VOLUME1,;
+      TCI->BOR_PED,;
+      TCI->BOR_DES;
+      }) 
+      //Pulando Registro
+      TCI->(DbSkip())
+
+      //Pulando Registro
+//    TCI->(DbSkip())
+   EndDo
+
+   //Ativando o arquivo e gerando o xml
+   oFWMsExcel:Activate()
+   MsgRun("Processando...","Aguarde Gerando arquivo em Excel...",{|| oFWMsExcel:GetXMLFile(cArquivo) } )
+
+   //Abrindo o excel e abrindo o arquivo xml
+   oExcel := MsExcel():New()           //Abre uma nova conexão com Excel
+   oExcel:WorkBooks:Open(cArquivo)     //Abre uma planilha
+   oExcel:SetVisible(.T.)              //Visualiza a planilha
+   oExcel:Destroy()                    //Encerra o processo do gerenciador de tarefas
+   
+   TCI->(DbCloseArea())
+   RestArea(aArea)
+
+Return
+

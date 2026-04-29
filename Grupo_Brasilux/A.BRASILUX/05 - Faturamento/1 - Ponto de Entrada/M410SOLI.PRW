@@ -226,28 +226,36 @@ User Function M410SOLI()
             do case
             case (SA1->A1_EST = "BA") .AND. !empty(cNcm) .AND. (cNcm = "32149000")
                nMargemRef := 1.45 //Renata (24/08/2021)
-            case (SA1->A1_EST = "MG") .AND. !empty(cNcm) .AND. !(cNcm = "32061119") .AND. ((substr(cNcm,1,4) $ "3208.3209.2821.3206") .OR. (cNcm = "321000") .OR. (cNcm = "32041700"))
-					nMargemRef := 1.64                	
-               //11/03/2016->Solic Fernando Mauri excluir esses mvas					          	
-               //21/11/2016->Reunião com Fernando, volta situação anterior com exceção de MG. Apresentado PDF da Sitivesp com NCMs
-            case (SA1->A1_EST = "SP") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3208.3209") .OR. (cNcm = "321000"))
-					   nMargemRef := 1.53                	
+            //(Sergio - 23/08/2023) -> Chamado R2315 (Renata) alteração do ST p/ MG - Alíquota da MVA do grupo 3204
+            case (SA1->A1_EST = "MG") .AND. !empty(cNcm) .AND. !(cNcm = "32061119") .AND. ((substr(cNcm,1,4) $ "2821.3206.3208.3209") .OR. (cNcm = "321000")) //.OR. (cNcm = "32041700"))
+					nMargemRef := 1.64
+            //11/03/2016->Solic Fernando Mauri excluir esses mvas					          	
+            //21/11/2016->Reunião com Fernando, volta situação anterior com exceção de MG. Apresentado PDF da Sitivesp com NCMs
+            case (SA1->A1_EST = "SP") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3208.3209") .OR. (cNcm = "321000")) // Jose mudar dia 29/10/2024
+					   nMargemRef := 1.52  // Jose mudar dia 29/10/2024 DE   1.53             	
             case (SA1->A1_EST = "SP") .AND. !empty(cNcm) .AND. !(cNcm = "32061119") .AND. ((substr(cNcm,1,4) $ "2821.3206") .OR. ((cNcm = "32041700") .AND. (cCest = '2400200'))) //Chamado 025536, considerar CEST
-					   nMargemRef := 2.18                	
-            case (SA1->A1_EST $ "MG-SP") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3204.3206.3212") .OR. (cNcm = "32050000"))
-               //11/04/2017 -> Chamado 006914, Fernando Mauri
+					   nMargemRef := 2.14 // Jose mudar dia 29/10/2024 DE  2.18
+            case (SA1->A1_EST $ "MG-SP") .AND. !empty(cNcm) .AND. ((substr(cNcm,1,4) $ "3204.3206.3212") .OR. (cNcm = "32050000")) // Jose mudar dia 29/10/2024
+            //11/04/2017 -> Chamado 006914, Fernando Mauri
                if SA1->A1_EST = "MG"
-					nMargemRef := 1.6468                	
+					   nMargemRef := 1.6468
                else 
-   					nMargemRef := 2.03                	
+                  if (cNcm = "32041700") // Jose mudar dia 29/10/2024
+                      nMargemRef := 2.14 // Jose mudar dia 29/10/2024 DE  2.18
+                  Else // Jose mudar dia 29/10/2024
+   					    nMargemRef := 1.93  // Jose mudar dia 29/10/2024 DE 2.03  
+                  Endif // Jose mudar dia 29/10/2024
                endif 
-            case !(SA1->A1_EST $ "MG-AC-AM-TO-PE") .AND. ((substr(cNcm,1,4) $ "3204.3206.3212.2821") .OR. (cNcm = "32050000") )
+// JOSE 02/10/2024 case !(SA1->A1_EST $ "MG-AC-AM-TO-PE") .AND. ((substr(cNcm,1,4) $ "3204.3206.3212.2821") .OR. (cNcm = "32050000") )  // AC,PE, TO
+              case !(SA1->A1_EST $ "MG-AM") .AND. ((substr(cNcm,1,4) $ "3204.3206.3212.2821") .OR. (cNcm = "32050000") )  // JOSE 02/10/2024
                //À partir de 01/05/2019, chamado 013806
                do case
                case SA1->A1_EST = "RS"
                   nMargemRef := 2.18
                case SA1->A1_EST = "PR"
                   nMargemRef := 1.53
+               case SA1->A1_EST $ "AC-AL-MS-PE-RO-TO" // JOSE 01/10/2024
+                  nMargemRef := 1.35   // JOSE 01/10/2024
                otherwise
                   nMargemRef := 1.50
                endcase 

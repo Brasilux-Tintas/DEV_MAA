@@ -789,7 +789,7 @@ Static Function fBloqOpSal()
        If Len( Alltrim( cTexto ) ) > 0
           Messagebox( cTexto, "Produto sem Saldo", 48 )
           If Substr( xFilial("ZZA"), 1, 2) == "06"
-             U_EnvMail( "DISSOLTEX - O.P " + cNumOrd + " não iniciada por falta de Saldo !", cTexto, "silene@dissoltex.com.br, ricardo@dissoltex.com.br", "" )
+             U_EnvMail( "DISSOLTEX - O.P " + cNumOrd + " não iniciada por falta de Saldo !", cTexto, "silene@dissoltex.com.br", "" )
           Else
              U_EnvMail( "BRASILUX - O.P "  + cNumOrd + " não iniciada por falta de Saldo !", cTexto, "materiais@brasilux.com.br, paulo@brasilux.com.br" , "" )
           Endif
@@ -2850,7 +2850,7 @@ Static Function fValidaPE( )
              Endif
              If Alltrim( Upper( GetEnvServer() ) )  == 'PRODUCAO' //Enviar e-mail somente para o ambiente oficial
                 If Alltrim( SM0->M0_CODFIL ) == '060101'
-                   U_EnvMail( "DISSOLTEX - O.P " + _cGet1Ord + " Peso Específico na O.P informado é " + Iif( _lTolera, 'MAIOR', 'MENOR' ) + " que o tolerável. !" , _cTxtMsg, "silene@dissoltex.com.br, ricardo@dissoltex.com.br", "" )
+                   U_EnvMail( "DISSOLTEX - O.P " + _cGet1Ord + " Peso Específico na O.P informado é " + Iif( _lTolera, 'MAIOR', 'MENOR' ) + " que o tolerável. !" , _cTxtMsg, "silene@dissoltex.com.br", "" )
                 Else
                    U_EnvMail( "BRASILUX - O.P " + _cGet1Ord + " Peso Específico na O.P informado é " + Iif( _lTolera, 'MAIOR', 'MENOR' ) + " que o tolerável. !" , _cTxtMsg, "marciononis@brasilux.com.br, pcp@brasilux.com.br ", "" )
                 Endif

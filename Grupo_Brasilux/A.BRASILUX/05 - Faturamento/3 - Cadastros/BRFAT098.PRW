@@ -65,7 +65,7 @@ else
 		RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões
 		RpcSetType(3) //seta tipo de consumo de licença
 
-		RpcSetEnv( "01",_cFilial,'Administrador' ,'851296' , "COM" , , aTables, , , ,  )
+		PREPARE ENVIRONMENT EMPRESA "01" FILIAL _cFilial MODULO "COM" TABLES "SC7","SD1","SB1","SA2","SD1","SF1","SZY","SB2","SF4"
 
 		bErro := {|e| SCHERRO_1(e)}    
 

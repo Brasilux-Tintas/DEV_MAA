@@ -1,15 +1,9 @@
-#Include 'Protheus.ch'
+#include "protheus.ch"
 
 /*/{Protheus.doc} MNTA340A
 //TODO Retorna o código do produto que deverá ser gerada a solicitação de compra e armazém.
 //30/09/2019 - Luís Gustavo - Adequação para release 12.1.25
-@author 
-@since   /  /    
-@version 1.0
-@return ${return}, ${return_description}
-
-@type function
-/*/
+*/
 User Function MNTA340A()
      Local cTerceiro := ""
      Local oDlg, oList

@@ -2,22 +2,21 @@
 #INCLUDE "TBICONN.CH"
 #include "RWMAKE.ch"
 #include "Topconn.ch"
-#INCLUDE "AP5MAIL.CH" 
+#INCLUDE "AP5MAIL.CH"
 
        
 User Function WFSEMAPR()                                                        
-   
-    Local cPara    	:= "andre@brasilux.com.br;marcelopaiva@brasilux.com.br"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0078")) //"andre@brasilux.com.br;marcelopaiva@brasilux.com.br"
     Local cAssunto  := "Produtos transferidos sem aprovação"
     Local cMsg		:= ""
 
 	 PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-     
+    cPara    		:= TRIM(GETMV("ZP_PAR0078"))
 
-     /**	Monta a query para buscar os dados	**/   
+    /**	Monta a query para buscar os dados	**/
 	cTmp := U_NovoCursor()    
     cQuery := ""
-    
     cQuery += " SELECT D3_FILIAL, D3_COD, B1_DESC, D3_LOCAL, D3_TIPO, D3_QUANT, D3_USUARIO, SUBSTRING(D3_EMISSAO,7,2)+'/'+SUBSTRING(D3_EMISSAO,5,2)+'/'+SUBSTRING(D3_EMISSAO,1,4) AS D3_EMISSAO "
     cQuery += " FROM "+RetSqlName("SD3")+" SD3  WITH(NOLOCK) "
     cQuery += " LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON B1_FILIAL = D3_FILIAL AND B1_COD = D3_COD AND SB1.D_E_L_E_T_ ='' "
@@ -29,7 +28,8 @@ User Function WFSEMAPR()
 	cQuery += " ORDER BY D3_FILIAL,D3_LOCAL, D3_COD "
 
 	TcQuery cQuery ALIAS (cTmp) NEW   
-	DbSelectArea(cTmp)        
+	DbSelectArea(cTmp)
+	
     /**		Monta o script HTML para ser enviado por email 	**/        
 	cMsg:="<html>"
 	cMsg+="<body>"

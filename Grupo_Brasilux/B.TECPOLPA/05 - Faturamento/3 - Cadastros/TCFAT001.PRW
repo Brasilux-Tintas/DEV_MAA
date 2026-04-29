@@ -50,6 +50,7 @@ cAuxPed,nCont,cCondPag,nVlrUnit,_cLocal,;
 cAuxRef,aCampos := {} ,cArqBloq,_cAreaBloq,cProd,nQtde,nRet,cTransp,dEntrega
 Private lMsErroAuto
 Private lMsHelpAuto := .f.
+
 if _nOpc == 2 //Cleber(05/08/21) ->Caso for implementar Schedule, implantar parâmetro com pasta onde serão salvas as planilhas!
 	private MV_PAR01
 	MV_PAR01 := getmv("MV_DIRBREP") //"\\10.1.1.146\brasilux\Cast\DATA\entrada\"
@@ -140,32 +141,39 @@ dbseek(xFilial("SC6"))
 				dbsetorder(11) //C6_FILIAL+C6_CLI+C6_LOJA+C6_PEDCLI                                                                                                                              
 				MsSeek(xFilial("SC6")+cCliente+cLoja+cAuxPed)
 				if !found() //Só incluir se o pedido não existir no cadastro
-					aAux := aItensPed
-					lMsErroAuto := .f.
-					lMsHelpAuto := .f.
-					dbselectarea("SC6")
-					dbsetorder(1)
-					MsSeek(xFilial("SC6"))
-					DbSelectArea("SC5")   
-					if _nOpc == 1
-						MsgRun("Incluindo pedido"+cAuxPed+"...", "Aguarde", {|| MsExecAuto( { |x, y, z| MATA410(x, y, z) }, aPed, aAux, 3 ) } )
-					else 
-						MsExecAuto( { |x, y, z| MATA410(x, y, z) }, aPed, aAux, 3 )
-					endif 
-					If lMsErroAuto
-						cAux := "Nao foi possí­vel incluir pedido "+cAuxPed+" da planilha :"+cCaminho+aArqs[i]
+					
+				    /* Nelieder 09/06/2022 Verifica se array possui produtos para gerar pedido */
+					/* Caso a planilha toda tenha redução o sistema não gera o pedido */
+					if len(aItensPed) > 0
+						aAux := aItensPed
+						lMsErroAuto := .f.
+						lMsHelpAuto := .f.
+						dbselectarea("SC6")
+						dbsetorder(1)
+						MsSeek(xFilial("SC6"))
+						DbSelectArea("SC5")   
+
 						if _nOpc == 1
-							MsgAlert(cAux)
-							MostraErro()
-						else
-							FWLogMsg("INFO", "LAST", cPerg, ,  , , cAux, 0,0)		
+							MsgRun("Incluindo pedido"+cAuxPed+"...", "Aguarde", {|| MsExecAuto( { |x, y, z| MATA410(x, y, z) }, aPed, aAux, 3 ) } )
+						else 
+							MsExecAuto( { |x, y, z| MATA410(x, y, z) }, aPed, aAux, 3 )
+						endif 
+						If lMsErroAuto
+							cAux := "Nao foi possí­vel incluir pedido "+cAuxPed+" da planilha :"+cCaminho+aArqs[i]
+							if _nOpc == 1
+								MsgAlert(cAux)
+								MostraErro()
+							else
+								FWLogMsg("INFO", "LAST", cPerg, ,  , , cAux, 0,0)		
+							endif
 						endif
-					endif
-					lSucesso := !lMsErroAuto
-					lErro    := !lSucesso
-					if !lSucesso	
-						exit 
-					endif 
+						lSucesso := !lMsErroAuto
+						lErro    := !lSucesso
+						if !lSucesso	
+							exit 
+						endif 
+				    EndIf
+					  	
 				endif 
 			endif
 
@@ -176,6 +184,7 @@ dbseek(xFilial("SC6"))
 			if nCont == 1
 				cCliente := padl(alltrim(aPlan[ni,3]),6,"0")
 				cLoja := padl(alltrim(aPlan[ni,4]),2,"0")
+
 				DbSelectArea("SA1")
 				DbSetOrder(1)
 				MsSeek(xFilial("SA1")+cCliente+cLoja,.t.)
@@ -222,7 +231,7 @@ dbseek(xFilial("SC6"))
 				do case 
 				case cUf == "SP"
 					cTab := "CC1"
-				case cUf $ "MG-RJ-SC-PR-RS"
+				case cUf == "MG"
 					cTab := "CC2"
 				case cUf $ "RN-AC-AL-BA-CE-DF-ES-GO-MA-MS"
 					cTab := "CC3"
@@ -285,7 +294,7 @@ dbseek(xFilial("SC6"))
 			MsSeek(xFilial("DA1")+DA0->DA0_CODTAB+cProd) //+DA1_INDLOT+DA1_ITEM
 			if !found()
 				lSucesso = .f.
-				cAux := "Não encontrado o produto "+cProd+" na tabela de preços "+DA0->DA0_CODTAB+", pedido "+aPlan[ni,1]
+				cAux := "Não encontrado o produto "+cProd+" na tabela de preços "+cDA0->DA0_CODTAB+", pedido "+aPlan[ni,1]
 				if _nOpc == 1
 					MsgAlert(cAux)
 				else
@@ -331,18 +340,31 @@ dbseek(xFilial("SC6"))
 					CriaSb2(cProd,_cLocal)
 				endif  
 			endif 
-			aAdd(aPedRel, {"C6_ITEM"   , _cItem     , nil})
-			aadd(aPedRel, {"C6_PRODUTO", cProd     , nil})
-			if !empty(_cLocal)
-				aadd(aPedRel, {"C6_LOCAL", _cLocal     , nil})
-			endif 
-			aadd(aPedRel, {"C6_QTDVEN" , nQtde, nil})
-			aadd(aPedRel, {"C6_PRCVEN" , nVlrUnit , nil})
-			aadd(aPedRel, {"C6_OPER" , "SV" , nil})
-			aadd(aPedRel, {"C6_PEDCLI" ,ALLTRIM(aPlan[ni,1]) , nil})
-			//aadd(aPedRel, {"C6_TES"    , "824", nil})
-			aadd(aItensPed, aPedRel)       
 
+			/* Nelieder 09/06/2022 */
+			/* GeraReg(item,produto,local,reforco,reducao,pedido,cliente,loja,transp,qtd) */
+			/* verifica se existe redução, caso tenha alimenta a tabela ZC6 e não inclui no pedido */
+			if ( val(aPlan[ni,10])  > 0 ) .or. ( val(aPlan[ni,9])  > 0 )
+			   GeraReg(_cItem,cProd,_cLocal,val(aPlan[ni,9]),val(aPlan[ni,10]),ALLTRIM(aPlan[ni,1]),cCliente,cLoja,cTransp,nQtde)
+			EndIf
+			
+			if nQtde > 0
+				aAdd(aPedRel, {"C6_ITEM"   , _cItem     , nil})
+				aadd(aPedRel, {"C6_PRODUTO", cProd     , nil})
+				if !empty(_cLocal)
+					aadd(aPedRel, {"C6_LOCAL", _cLocal     , nil})
+				endif 
+				aadd(aPedRel, {"C6_QTDVEN" , nQtde, nil})
+				aadd(aPedRel, {"C6_PRCVEN" , nVlrUnit , nil})
+				aadd(aPedRel, {"C6_OPER" , "SV" , nil})
+				aadd(aPedRel, {"C6_PEDCLI" ,ALLTRIM(aPlan[ni,1]) , nil})
+
+				
+				aadd(aPedRel, {"C6_XREFORC" ,val(aPlan[ni,9]) , nil})
+				aadd(aPedRel, {"C6_XREDUCA",val(aPlan[ni,10]) , nil})
+				//aadd(aPedRel, {"C6_TES"    , "824", nil})
+				aadd(aItensPed, aPedRel)       
+			EndIf	
 
 			cPed := alltrim(aPlan[ni,1])
 		next ni 
@@ -438,3 +460,46 @@ aCabExcel,aItensExcel}})})
 //*********** 
 
 Return
+
+/*/{Protheus.doc} GeraReg
+Alimenta tabela com ZC6 com dados de Reforço
+@type function
+@author neliedercorneta
+@since 09/06/2022
+/*/
+Static Function GeraReg(item,produto,xlocal,reforco,reducao,pedido,cliente,loja,Transp,Qtde)
+Local cDesc := ""
+
+dbselectarea("SB1")
+dbsetorder(1)
+if MsSeek(xFilial("SB1")+produto)
+    cDesc           := SB1->B1_DESC
+EndIf
+
+
+DbSelectArea("ZC6")
+DbSetOrder(2)
+If DbSeek(xFilial("ZC6")+PADR(pedido,20)+PADR(produto,15))
+   	RecLock("ZC6", .F.)
+		DbDelete()
+	MsUnlock()
+EndIf
+
+RecLock("ZC6", .t.)
+	ZC6->ZC6_FILIAL := xFilial("ZC6")
+	ZC6->ZC6_ITEM   := item
+	ZC6->ZC6_PRODUT := produto
+	ZC6->ZC6_DESCRI := cDesc
+	ZC6->ZC6_LOCAL  := xlocal
+	ZC6->ZC6_XREFOR := reforco
+	ZC6->ZC6_XREDUC := reducao
+	ZC6->ZC6_NUM    := pedido
+	ZC6->ZC6_EMISSA := dDataBase
+	ZC6->ZC6_CLIENT := cliente
+	ZC6->ZC6_LOJA   := loja
+	ZC6->ZC6_TRANSP := Transp
+	ZC6->ZC6_QTD    := Qtde
+MsUnlock()
+	
+
+return

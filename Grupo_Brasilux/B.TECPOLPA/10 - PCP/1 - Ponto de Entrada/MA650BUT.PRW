@@ -8,9 +8,10 @@ User Function MA650BUT()
      //Não declarar o array aRotina
      //Adiciona um novo item no menu principal do MATA650
      If ALLTRIM(FWGrpCompany()) == '11' //Empresas que são do grupo 11(Tecpolpa).
-        If GetMv("MV_XBIPOP")
-           aAdd(aRotina,{ 'Gera Ordem de Separação'   , 'u_TCGORDEM(1)', 0 , 6 } )
-           aAdd(aRotina,{ 'Estorna Ordem de Separação', 'u_TCGORDEM(2)', 0 , 6 } )
-        Endif
+        //If GetMv("MV_XBIPOP")
+        //  aAdd(aRotina,{ 'Gera Ordem de Separação'   , 'u_TCGORDEM(1)', 0 , 6 } )
+        //  aAdd(aRotina,{ 'Estorna Ordem de Separação', 'u_TCGORDEM(2)', 0 , 6 } )
+        //Endif
+        aAdd( aRotina, { 'Integração Protheus -->>> ProdWin', 'u_ZWSDLI01()', 0 , 6 } )
      Endif
-Return (aRotina)
+Return aRotina

@@ -2,18 +2,19 @@
 #INCLUDE 'fwmvcdef.ch'
 
 Static __lConManual := .F.
-Static __nHdlPrv	:= 0
+Static __nHdlPrv	  := 0
 Static __cArquivo
-Static __nTotal		:= 0
-Static __cLote		:= ""
-Static __aFlagCTB	:= {}
-Static __aSelFIL	:= {}
-Static __aTmpFil	:= {}
-Static __aRecCtb	:= {}
-Static __aRetE5E1	:= {}
-Static __lFK5Fil	:= .F.
+Static __nTotal	  := 0
+Static __cLote		  := ""
+Static __aFlagCTB	  := {}
+Static __aSelFIL	  := {}
+Static __aTmpFil    := {}
+Static __aRecCtb	  := {}
+Static __aRetE5E1	  := {}
+Static __lFK5Fil	  := .F.
 
-/*/{Protheus.doc} ZFINF02
+/*/
+{Protheus.doc} ZFINF02
 Conciliação Bancaria especifica para Brasilux, conforme solicitado no chamado 018457, Diretor Sérgio Duó.
 @type function
 @version 
@@ -24,7 +25,7 @@ Conciliação Bancaria especifica para Brasilux, conforme solicitado no chamado 01
 User Function ZFINF02()
      Local _aArea := GetArea()
      u_zcfga01( 'ZFINF02' ) //LGS#2021201 - Gravação de log de utilização da rotina
-     //Pergunte( "FINA473", .F. )
+   //Pergunte( "FINA473", .F. )
      Pergunte( "ZFINF01", .F. )
 
      RestArea( _aArea )
@@ -93,7 +94,8 @@ Static Function ModelDef()
        oModel:GetModel( 'GRIDMOVI' ):SetUseOldGrid( .T. )
 Return oModel
 
-/*/{Protheus.doc} FLCab
+/*/
+{Protheus.doc} FLCab
 description
 @type function
 @version 
@@ -106,7 +108,7 @@ Static Function FLCab( oModel )
        Local aRet		:= {}
        Local aAux		:= {}
 
-       //Pergunte("FINA473",.F.)
+     //Pergunte("FINA473",.F.)
        Pergunte("ZFINF01",.F.)
 
        DbSelectArea( "SE8" )
@@ -126,8 +128,8 @@ Static Function FLCab( oModel )
        aAdd( aAux, MV_PAR05 )
        aAdd( aAux, cValtoChar( MV_PAR06 ) )
        aAdd( aAux, cValtoChar( MV_PAR07 ) )
-       //aAdd( aAux, cValtoChar( MV_PAR08 ) )
-       //aAdd( aAux, cValtoChar( MV_PAR09 ) )
+     //aAdd( aAux, cValtoChar( MV_PAR08 ) )
+     //aAdd( aAux, cValtoChar( MV_PAR09 ) )
        aRet := { aAux, 0 }
 Return aRet
 
@@ -138,20 +140,20 @@ Static Function ViewDef()
        Local oStr2      as Object
        Local oStr3      as Object
 	    Local oCal1      as Object
-       //Local oCal2      as Object
+     //Local oCal2      as Object
        Local oCal3      as Object
-       //Local oCal4      as Object
+     //Local oCal4      as Object
        Local oCal5      as Object
-       //Local oCal6      as Object
+     //Local oCal6      as Object
        Private _oTable1 as Object
-       //Private _aConcNN as Array
+     //Private _aConcNN as Array
        Private bConcilia := { |oView| FWMsgRun( , { || fConAuto(oView, 1) }, "Aguarde...", "Processando conciliação Automática" ) }
        Private bReceber  := { |oView| FWMsgRun( , { || fConAuto(oView, 2) }, "Aguarde...", "Processando conciliação Automática" ) }
        Private bLancamen := { |oView| FWMsgRun( , { || fGeraLan(oView)    }, "Aguarde...", "Gerando lançamento"   ) }
        Private bTransfer := { |oView| FWMsgRun( , { || fGeraTra(oView)    }, "Aguarde...", "Gerando lançamento"   ) }
        Private bExcluiEx := { |oView| FWMsgRun( , { || fExcluiE(oView)    }, "Aguarde...", "Excluindo lançamento" ) }
 
-       //_aConcNN := {}
+     //_aConcNN := {}
        oModel := ModelDef()
 
        //Montagem e ajustes das estruturas de campos
@@ -176,8 +178,8 @@ Static Function ViewDef()
        oStr2:SetProperty( 'IG_CONEXT' , MVC_VIEW_ORDEM, '09' )
        oStr2:SetProperty( 'IG_DOCEXT' , MVC_VIEW_ORDEM, '10' )
        oStr2:RemoveField( 'IG_IDPROC' ) ; oStr2:RemoveField( 'SIG_SOMA' )
-       oStr2:SetProperty( '*'       , MVC_VIEW_CANCHANGE, .F. )
-       oStr2:SetProperty( 'EXT_MARK', MVC_VIEW_CANCHANGE, .T. )
+       oStr2:SetProperty( '*'         , MVC_VIEW_CANCHANGE, .F. )
+       oStr2:SetProperty( 'EXT_MARK'  , MVC_VIEW_CANCHANGE, .T. )
 
        oStr3  := FWFormStruct( 2, "SE5" )
        oStr3:AddField( 'MOV_MARK' , '01', ''    , ''                     , , 'L' , ''  , , '', .T., NIL, NIL, NIL                              , NIL, NIL, .F.,	NIL, NIL )
@@ -204,7 +206,7 @@ Static Function ViewDef()
        oStr3:SetProperty( 'E5_DATA'   , MVC_VIEW_ORDEM, '09' )
        oStr3:SetProperty( 'E5_AGENCIA', MVC_VIEW_ORDEM, '10' )
        oStr3:SetProperty( 'E5_CONTA'  , MVC_VIEW_ORDEM, '11' )
-       //oStr3:SetProperty( 'E5_RECPAG' , MVC_VIEW_ORDEM, '12' )
+     //oStr3:SetProperty( 'E5_RECPAG' , MVC_VIEW_ORDEM, '12' )
        oStr3:SetProperty( 'E5_MOEDA'  , MVC_VIEW_ORDEM, '13' )
        oStr3:SetProperty( 'E5_NUMCHEQ', MVC_VIEW_ORDEM, '14' )
        oStr3:RemoveField( 'SE5_SOMA' )   ; oStr3:RemoveField( 'E5_X_JAGR' ) ; oStr3:RemoveField( 'E5_BANCO'  )
@@ -299,9 +301,9 @@ Static function MontaCab( _nOpc )
           aAdd( _aCampos, { 'SALDOANT' , 'N',                      18,                       2 } )
           aAdd( _aCampos, { 'DATADE'   , 'C',                       8,                       0 } )
           aAdd( _aCampos, { 'DATAATE'  , 'C',                       8,                       0 } )
-          //aAdd( _aCampos, { 'AGLUTINA' , 'C',                       1,                       0 } )
-          //aAdd( _aCampos, { 'MOSTRACTB', 'C',                       1,                       0 } )
-          //aAdd( _aCampos, { 'CTBONLINE', 'C',                       1,                       0 } )
+        //aAdd( _aCampos, { 'AGLUTINA' , 'C',                       1,                       0 } )
+        //aAdd( _aCampos, { 'MOSTRACTB', 'C',                       1,                       0 } )
+        //aAdd( _aCampos, { 'CTBONLINE', 'C',                       1,                       0 } )
           aAdd( _aCampos, { 'SELFIL'   , 'C',                       1,                       0 } )
           aAdd( _aCampos, { 'VISIBI'   , 'C',                       1,                       0 } )
           fMontaTMP( _aCampos, 'CABCON', _oTable1 )
@@ -314,11 +316,11 @@ Static function MontaCab( _nOpc )
           oStruct:AddField( 'Saldo Bancário'  , 'Saldo bancario (anterior)', 'SALDOANT' , 'N', 18, , , ,                   , , , .T., .F. )
           oStruct:AddField( 'Data De'         , 'Data De'                  , 'DATADE'   , 'D',                      8 )
           oStruct:AddField( 'Data Até'        , 'Data Até'                 , 'DATAATE'  , 'D',                      8 )
-          //oStruct:AddField( 'Aglut Lanc'      , 'Aglut Lanc'         , 'AGLUTINA' , 'C',                      1 , , , , { '1=Sim', '2=Não' } )
-          //oStruct:AddField( 'Mostra Lanc'     , 'Mostra Lanc'        , 'MOSTRACTB', 'C',                      1 , , , , { '1=Sim', '2=Não' } )
-          //oStruct:AddField( 'Contb On Line'   , 'Contb On Line'      , 'CTBONLINE', 'C',                      1 , , , , { '1=Sim', '2=Não' } )
-          oStruct:AddField( "Seleciona Filial", "Seleciona Filial"   , 'SELFIL'   , 'C',                      1 , , , , { '1=Sim', '2=Não' } )
-          oStruct:AddField( "Visibilidade"    , "Visibilidade"       , 'VISIBI'   , 'C',                      1 , , , , { '1=Todos', '2=Não Conciliados', '3=Conciliados' } )
+        //oStruct:AddField( 'Aglut Lanc'      , 'Aglut Lanc'               , 'AGLUTINA' , 'C',                      1 , , , , { '1=Sim', '2=Não' } )
+        //oStruct:AddField( 'Mostra Lanc'     , 'Mostra Lanc'              , 'MOSTRACTB', 'C',                      1 , , , , { '1=Sim', '2=Não' } )
+        //oStruct:AddField( 'Contb On Line'   , 'Contb On Line'            , 'CTBONLINE', 'C',                      1 , , , , { '1=Sim', '2=Não' } )
+          oStruct:AddField( "Seleciona Filial", "Seleciona Filial"         , 'SELFIL'   , 'C',                      1 , , , , { '1=Sim', '2=Não' } )
+          oStruct:AddField( "Visibilidade"    , "Visibilidade"             , 'VISIBI'   , 'C',                      1 , , , , { '1=Todos', '2=Não Conciliados', '3=Conciliados' } )
        Else
           oStruct := FWFormViewStruct():New()
           oStruct:AddField( 'BANCO'    , '1', 'Banco'           , 'Banco'           , , 'Get'  ,     , , , .F. )
@@ -327,9 +329,9 @@ Static function MontaCab( _nOpc )
           oStruct:AddField( 'SALDOANT' , '5', 'Saldo'           , 'Saldo'           , , 'Get'  , '@E 999,999,999,999.99'    , , , .F. )
           oStruct:AddField( 'DATADE'   , '5', 'Data De'         , 'Data De'         , , 'Get'  ,     , , , .F. )
           oStruct:AddField( 'DATAATE'  , '6', 'Data Ate'        , 'Data Ate'        , , 'Get'  ,     , , , .F. )
-          //oStruct:AddField( 'AGLUTINA' , '6', 'Aglut Lanc'      , 'Aglut Lanc'      , , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
-          //oStruct:AddField( 'MOSTRACTB', '7', 'Mostra Lanc'     , 'Mostra Lanc'     , , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
-          //oStruct:AddField( 'CTBONLINE', '8', 'Contb On Line'   , 'Contb On Line'   , , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
+        //oStruct:AddField( 'AGLUTINA' , '6', 'Aglut Lanc'      , 'Aglut Lanc'      , , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
+        //oStruct:AddField( 'MOSTRACTB', '7', 'Mostra Lanc'     , 'Mostra Lanc'     , , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
+        //oStruct:AddField( 'CTBONLINE', '8', 'Contb On Line'   , 'Contb On Line'   , , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
           oStruct:AddField( 'SELFIL'   , '7', 'Seleciona Filial', 'Seleciona Filial', , 'Combo',     , , , .F., , , { '1-Sim', '2-Não' } )
           oStruct:AddField( 'VISIBI'   , '8', 'Vilibilidade'    , 'Visibilidade'    , , 'Combo',     , , , .F., , , { '1-Todos', '2-Não Conciliados', '3-Conciliados' } )
        Endif
@@ -337,15 +339,15 @@ Return oStruct
 
 Static Function FLItem( oModelItem )
        Local aItConc    := {}
-       //Local aAux       := {}
+     //Local aAux       := {}
        Local cBanco     := ""
        Local cAgencia   := ""
        Local cConta     := ""
        Local dDataDe    := cTod("")
        Local dDataAte   := cTod("")
-       //Local lAglutina  := .F.
-       //Local lMostra    := .F.
-       //Local lCtbOnline := .F.
+     //Local lAglutina  := .F.
+     //Local lMostra    := .F.
+     //Local lCtbOnline := .F.
        Local aCpoSIG    := {}
        Local aArea      := GetArea()
        Local nSeqDig    := 0
@@ -359,9 +361,9 @@ Static Function FLItem( oModelItem )
        Local nPosRec    := 0
        Local aAreaSE5   := SE5->(GetArea())
        Local nPosSeqCon := 0
-       //Local cFilX      := ""
+     //Local cFilX      := ""
 
-       //Pergunte( "FINA473", .F. )
+     //Pergunte( "FINA473", .F. )
        Pergunte( "ZFINF01", .F. )
 
        cBanco     := MV_PAR01
@@ -369,9 +371,9 @@ Static Function FLItem( oModelItem )
        cConta     := MV_PAR03
        dDataDe    := MV_PAR04
        dDataAte   := MV_PAR05
-       //lAglutina  := MV_PAR06 == 1
-       //lMostra    := MV_PAR07 == 1
-       //lCtbOnline := MV_PAR08 == 1
+     //lAglutina  := MV_PAR06 == 1
+     //lMostra    := MV_PAR07 == 1
+     //lCtbOnline := MV_PAR08 == 1
 
        // Posição no Array - Atenção a ordem deve ser a mesma do model
        For nY := 1 to Len(aFields)
@@ -406,15 +408,15 @@ Return aItConc
 
 Static Function FCSIG( aRet, aCpoSIG, cBanco, cAgencia, cConta, dDataDe, dDataAte )
        Local aAux       := {}
-       //Local lAglutina  := .F.
-       //Local lMostra    := .F.
-       //Local lCtbOnline := .F.
+     //Local lAglutina  := .F.
+     //Local lMostra    := .F.
+     //Local lCtbOnline := .F.
        Local cQuery     := ""
        Local cTabSIG    := "SIGCONTRB"
        Local aStru      := {}
        Local nX         := 0
        Local cCampo     := ""
-       //Local cCpoIGE5   := ""
+     //Local cCpoIGE5   := ""
        Local aArea      := GetArea()
        Local cTmpSIGFil := ""
        Local cTipoCH    := IIF( Type( "MVCHEQUES" ) == "C", MVCHEQUES, MVCHEQUE )
@@ -424,7 +426,7 @@ Static Function FCSIG( aRet, aCpoSIG, cBanco, cAgencia, cConta, dDataDe, dDataAt
        Local cNoCampos  := ''
 
        //Movimentos de Extratos não conciliados
-       cQuery += " SELECT  DISTINCT "   + CRLF
+       cQuery += " SELECT  DISTINCT " + CRLF
        cQuery += " IG_FILIAL ," + CRLF
        cQuery += " IG_IDPROC ," + CRLF
        cQuery += " IG_ITEM   ," + CRLF
@@ -484,17 +486,17 @@ Static Function FCSIG( aRet, aCpoSIG, cBanco, cAgencia, cConta, dDataDe, dDataAt
               cQuery += " IG_EFETIVA = '1' AND " + CRLF
        Endif
        cQuery += " SIG.D_E_L_E_T_ = ' '  " + CRLF
-       //cQuery += " AND SIF.IF_IDPROC = '" + SIF->IF_IDPROC + "' " + CRLF
-       //If mv_par01 == '001' //para banco do brasil filtrar codigo 205 - bloqueio de cheques.
-       //   cQuery += " AND SIG.IG_TIPEXT <> '205' " + CRLF
-       //Endif
-       cQuery += " ORDER BY " + CRLF
-       cQuery += " IG_FILIAL , " + CRLF
-       cQuery += " BANCO  ,	" + CRLF
-       cQuery += " IG_AGEEXT , " + CRLF
-       cQuery += " IG_CONEXT , " + CRLF
-       cQuery += " IG_DTEXTR , " + CRLF
-       cQuery += " IG_VLREXT " + CRLF
+     //cQuery += " AND SIF.IF_IDPROC = '" + SIF->IF_IDPROC + "' " + CRLF
+     //If mv_par01 == '001' //para banco do brasil filtrar codigo 205 - bloqueio de cheques.
+     //   cQuery += " AND SIG.IG_TIPEXT <> '205' " + CRLF
+     //Endif
+       cQuery += " ORDER BY "   + CRLF
+       cQuery += " IG_FILIAL, " + CRLF
+       cQuery += " BANCO, "     + CRLF
+       cQuery += " IG_AGEEXT, " + CRLF
+       cQuery += " IG_CONEXT, " + CRLF
+       cQuery += " IG_DTEXTR, " + CRLF
+       cQuery += " IG_VLREXT "  + CRLF
        cQuery := ChangeQuery( cQuery )
 
        aAdd( __aTmpFil, cTmpSIGFil )
@@ -556,15 +558,15 @@ Return
 
 Static Function FLMovi( oModelItem )
        Local aItConc    := {}
-       //Local aAux       := {}
+     //Local aAux       := {}
        Local cBanco     := ""
        Local cAgencia   := ""
        Local cConta     := ""
        Local dDataDe    := cTod("")
        Local dDataAte   := cTod("")
-       //Local lAglutina  := .F.
-       //Local lMostra    := .F.
-       //Local lCtbOnline := .F.
+     //Local lAglutina  := .F.
+     //Local lMostra    := .F.
+     //Local lCtbOnline := .F.
        Local aCpoSE5    := {}
        Local aArea      := GetArea()
        Local nSeqDig    := 0
@@ -578,9 +580,9 @@ Static Function FLMovi( oModelItem )
        Local nPosRec    := 0
        Local aAreaSE5   := SE5->(GetArea())
        Local nPosSeqCon := 0
-       //Local cFilX      := ""
+     //Local cFilX      := ""
 
-       //Pergunte( "FINA473", .F. )
+     //Pergunte( "FINA473", .F. )
        Pergunte( "ZFINF01", .F. )
 
        cBanco     := MV_PAR01
@@ -588,9 +590,9 @@ Static Function FLMovi( oModelItem )
        cConta     := MV_PAR03
        dDataDe    := MV_PAR04
        dDataAte   := MV_PAR05
-       //lAglutina  := MV_PAR06 == 1
-       //lMostra    := MV_PAR07 == 1
-       //lCtbOnline := MV_PAR08 == 1
+     //lAglutina  := MV_PAR06 == 1
+     //lMostra    := MV_PAR07 == 1
+     //lCtbOnline := MV_PAR08 == 1
 
        // Posição no Array - Atenção a ordem deve ser a mesma do model
        For nY := 1 to Len(aFields)
@@ -614,9 +616,9 @@ Static Function FLMovi( oModelItem )
            aItConc[nY][2][nPosCor] := u_FRETCOR( cStatus )	
            aItConc[nY][2][nPosSeq] := cValToChar( nSeqDig )
 	
-           //If Empty(aItConc[nY][2][nPosRec]) 
-              //aItConc[nY][2][nPosRec] := FSE5Rec(aItConc[nY][2][nPosSeqCon])
-           //EndIf
+         //If Empty(aItConc[nY][2][nPosRec]) 
+            //aItConc[nY][2][nPosRec] := FSE5Rec(aItConc[nY][2][nPosSeqCon])
+         //EndIf
        Next nY
 
        RestArea( aAreaSE5 )
@@ -624,19 +626,19 @@ Static Function FLMovi( oModelItem )
 Return aItConc
 
 Static Function FCMOV( aRet, aCpoSE5, cBanco, cAgencia, cConta, dDataDe, dDataAte )
-       //Local lAglutina  := .F.
-       //Local lMostra    := .F.
-       //Local lCtbOnline := .F.
+     //Local lAglutina  := .F.
+     //Local lMostra    := .F.
+     //Local lCtbOnline := .F.
        Local cQuery     := ""
        Local cTabSE5    := "SE5CONTRB"
-       //Local cTabSIG    := "SE5CONTRB"
-       //Local cTmpSIGFil := ""
+     //Local cTabSIG    := "SE5CONTRB"
+     //Local cTmpSIGFil := ""
        Local aStru      := {}
        Local nX         := 0
        Local cCampo     := ""
-       //Local cCpoIGE5   := ""
+     //Local cCpoIGE5   := ""
        Local cChave     := ""
-       //Local aCpoSE5    := {}
+     //Local aCpoSE5    := {}
        Local aArea      := GetArea()
        Local cTmpSE5Fil := ""
        Local cTipoCH    := IIF( Type( "MVCHEQUES" ) == "C", MVCHEQUES, MVCHEQUE )
@@ -645,7 +647,7 @@ Static Function FCMOV( aRet, aCpoSE5, cBanco, cAgencia, cConta, dDataDe, dDataAt
        Local cSA6Fil    := FWModeAccess( "SA6", 3 )
        Local cNoCampos  := ''
 
-       /*aAdd( aCpoSE5, { "IG_FILIAL", "E5_FILIAL"  } )
+     /*aAdd( aCpoSE5, { "IG_FILIAL", "E5_FILIAL"  } )
        aAdd( aCpoSE5, { "IG_CARTER", "E5_RECPAG"  } )
        aAdd( aCpoSE5, { "IG_DTMOVI", "E5_DTDISPO" } )
        aAdd( aCpoSE5, { "BANCO"    , "E5_BANCO"   } )
@@ -658,18 +660,18 @@ Static Function FCMOV( aRet, aCpoSE5, cBanco, cAgencia, cConta, dDataDe, dDataAt
        cChave := "E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+DTOS(E5_DTDISPO)"
        _aItSE5 := {}
        
-       cQuery += 	  " SELECT      "   + CRLF
+       cQuery += 	  " SELECT      "    + CRLF
        cQuery +=     " E5_FILIAL , "   + CRLF
        cQuery +=     " E5_RECPAG , "   + CRLF
-       cQuery +=     " E5_DTDISPO,	"   + CRLF
+       cQuery +=     " E5_DTDISPO,	"  + CRLF
        cQuery +=     " E5_BANCO  , "   + CRLF
-       cQuery +=     " E5_AGENCIA,	"   + CRLF
-       cQuery +=     " E5_CONTA  ,	"   + CRLF
-       cQuery +=     " E5_NUMCHEQ,	"   + CRLF
-       cQuery +=     " E5_VALOR  ,	"   + CRLF
-       cQuery +=     " E5_HISTOR ,	"   + CRLF
-       cQuery +=     " E5_MOTBX  ,	"   + CRLF
-       cQuery +=     " E5_TIPODOC,	"   + CRLF
+       cQuery +=     " E5_AGENCIA,	"  + CRLF
+       cQuery +=     " E5_CONTA  ,	"  + CRLF
+       cQuery +=     " E5_NUMCHEQ,	"  + CRLF
+       cQuery +=     " E5_VALOR  ,	"  + CRLF
+       cQuery +=     " E5_HISTOR ,	"  + CRLF
+       cQuery +=     " E5_MOTBX  ,	"  + CRLF
+       cQuery +=     " E5_TIPODOC,	"  + CRLF
        cQuery +=     " E5_PREFIXO, "   + CRLF
        cQuery +=     " E5_NUMERO , "   + CRLF
        cQuery +=     " E5_PARCELA, "   + CRLF
@@ -682,25 +684,25 @@ Static Function FCMOV( aRet, aCpoSE5, cBanco, cAgencia, cConta, dDataDe, dDataAt
        cQuery +=     " E5_MOEDA  , "   + CRLF
        cQuery +=     " E5_NATUREZ, "   + CRLF
        cQuery +=     " E5_DOCUMEN, "   + CRLF
-       cQuery +=     " E5_RECONC, "   + CRLF
+       cQuery +=     " E5_RECONC, "    + CRLF
        cQuery +=     " SE5.R_E_C_N_O_ RECONSE5 ,   "   + CRLF
-       cQuery +=     " E5_NUMCHEQ,  "   + CRLF
-       cQuery +=     " E5_SEQCON "   + CRLF
+       cQuery +=     " E5_NUMCHEQ,  "  + CRLF
+       cQuery +=     " E5_SEQCON "     + CRLF
        cQuery += " FROM " + RetSqlName("SE5") + " SE5 " + CRLF
        cQuery += " WHERE " + CRLF
        If ( cSA6Emp <>  "C" .Or. cSA6UNe <> "C" .Or. cSA6Fil <> "C") .Or. mv_par06 == 1 //mv_par09 == 1
           cQuery += "     E5_FILIAL " + GetRngFil( __aSelFil, "SE5", .T., @cTmpSE5Fil ) + " AND " + CRLF
        EndIf
-       cQuery += 		 " E5_DTDISPO >= '" + DTOS(dDataDe) + "' AND " + CRLF
+       cQuery += 		 " E5_DTDISPO >= '" + DTOS(dDataDe) + "' AND "  + CRLF
        cQuery += 		 " E5_DTDISPO <= '" + DTOS(dDataAte) + "' AND " + CRLF
-       cQuery += 		 " E5_BANCO = '" + cBanco + "' AND " + CRLF
+       cQuery += 		 " E5_BANCO = '" + cBanco + "' AND "     + CRLF
        cQuery += 		 " E5_AGENCIA = '" + cAgencia + "' AND " + CRLF
-       cQuery += 		 " E5_CONTA   = '" + cConta + "' AND " + CRLF
+       cQuery += 		 " E5_CONTA   = '" + cConta + "' AND "   + CRLF
        cQuery += 		 " E5_SITUACA <> 'C' AND " + CRLF
-       cQuery += 		 " E5_DTCANBX = ' ' AND " + CRLF
+       cQuery += 		 " E5_DTCANBX = ' ' AND "  + CRLF
        cQuery += 		 " UPPER( E5_HISTOR ) NOT LIKE('ESTORNO%') AND " + CRLF
        cQuery += 		 " E5_TIPODOC<> 'TE' AND " + CRLF
-       //cQuery += 		 " E5_RECONC = ' ' AND " + CRLF
+     //cQuery += 		 " E5_RECONC = ' ' AND " + CRLF
        cQuery += 		 " E5_TIPODOC NOT IN " + FormatIn("BA/DC/JR/MT/CM/D2/J2/M2/C2/V2/CP/TL","/") + " AND " + CRLF
        cQuery += 		 " E5_VALOR > 0 AND " + CRLF
        cQuery += 		 "(E5_MOEDA NOT IN " + FormatIn("C1/C2/C3/C4/C5/CH","/") + " OR (E5_MOEDA IN " + FormatIn("C1/C2/C3/C4/C5/CH","/") + " AND E5_NUMCHEQ <> ' ')) AND "
@@ -708,9 +710,9 @@ Static Function FCMOV( aRet, aCpoSE5, cBanco, cAgencia, cConta, dDataDe, dDataAt
        cQuery += 		 "((E5_TIPODOC  IN "+ FormatIn(cTipoCH,"|") + "AND  E5_DTDISPO BETWEEN  '" + DTOS(dDataDe)+ "' AND '"  + DTOS(dDataAte) +"' ) OR "   + CRLF
        cQuery += 		 "(E5_TIPODOC   NOT IN "+ FormatIn(cTipoCH,"|") + "AND  E5_DTDISPO BETWEEN  '" + DTOS(dDataDe)+ "' AND '"  + DTOS(dDataAte) +"' )) AND "   + CRLF
        cQuery += 		 "(E5_NUMCHEQ <> '*' OR (E5_NUMCHEQ = '*' AND E5_RECPAG <> 'P')) AND "   + CRLF
-       cQuery += 		 "D_E_L_E_T_ = ' ' " + CRLF
+       cQuery += 		 "D_E_L_E_T_ = ' ' "       + CRLF
        If mv_par07 == 2
-          cQuery += " AND E5_RECONC <> 'x' " + CRLF
+          cQuery += " AND E5_RECONC <> 'x' "    + CRLF
        elseIf mv_par07 == 3
               cQuery += " AND E5_RECONC = 'x' " + CRLF
        Endif
@@ -843,18 +845,18 @@ Static Function fLegenda()
        Local _oModel := FWModelActive()
 
        DEFINE MSDIALOG _oDlg2 FROM  69,70 TO 200,331 TITLE "Legenda - Reconciliação Automática" PIXEL
-              @ 05 , 5 BITMAP NAME "BR_VERDE" 		SIZE 8,8 of _oDlg2 PIXEL
-              @ 15 , 5 BITMAP NAME "BR_AMARELO" 		SIZE 8,8 of _oDlg2 PIXEL
-              @ 25 , 5 BITMAP NAME "BR_AZUL" 		SIZE 8,8 of _oDlg2 PIXEL
-              @ 35 , 5 BITMAP NAME "DISABLE" 			SIZE 8,8 of _oDlg2 PIXEL
-              //@ 45 , 5 BITMAP NAME "BR_CANCEL"		SIZE 8,8 of _oDlg2 PIXEL
-              //@ 55 , 5 BITMAP NAME "BR_PINK"			SIZE 8,8 of _oDlg2 PIXEL
+              @ 05 , 5 BITMAP NAME "BR_VERDE" 		               SIZE 8,8 of _oDlg2 PIXEL
+              @ 15 , 5 BITMAP NAME "BR_AMARELO"                   SIZE 8,8 of _oDlg2 PIXEL
+              @ 25 , 5 BITMAP NAME "BR_AZUL" 	               	SIZE 8,8 of _oDlg2 PIXEL
+              @ 35 , 5 BITMAP NAME "DISABLE" 		               SIZE 8,8 of _oDlg2 PIXEL
+            //@ 45 , 5 BITMAP NAME "BR_CANCEL"		               SIZE 8,8 of _oDlg2 PIXEL
+            //@ 55 , 5 BITMAP NAME "BR_PINK"			               SIZE 8,8 of _oDlg2 PIXEL
               @ 05 , 19 SAY "  Reconciliado"                      SIZE 115, 7 OF _oDlg2 PIXEL
               @ 15 , 19 SAY "  Reconciliado Parcial"              SIZE 100, 7 OF _oDlg2 PIXEL
-              @ 25 , 19 SAY "  Reconciliado Lançado"        SIZE 100, 7 OF _oDlg2 PIXEL
+              @ 25 , 19 SAY "  Reconciliado Lançado"              SIZE 100, 7 OF _oDlg2 PIXEL
               @ 35 , 19 SAY "  Não Reconciliado"                  SIZE 100, 7 OF _oDlg2 PIXEL
-              //@ 45 , 19 SAY "  Ignorado pelo usuário"             SIZE 100, 7 OF _oDlg2 PIXEL
-              //@ 55 , 19 SAY "  Ignorado conciliado anteriormente" SIZE 100, 7 OF _oDlg2 PIXEL
+            //@ 45 , 19 SAY "  Ignorado pelo usuário"             SIZE 100, 7 OF _oDlg2 PIXEL
+            //@ 55 , 19 SAY "  Ignorado conciliado anteriormente" SIZE 100, 7 OF _oDlg2 PIXEL
               DEFINE SBUTTON FROM 20, 100 TYPE 1 ENABLE ACTION ( _oDlg2:End() ) OF _oDlg2
        ACTIVATE MSDIALOG _oDlg2 CENTERED
        _oModel:GetModel("GRIDEXTR"):GoLine(1)
@@ -940,7 +942,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                       _oModelExt:SetValue( 'RECSE5'    , _oModelMov:aCols[_nLineMov][nSE5Rec]  )
                       _oModelExt:SetValue( 'IG_FILORIG', _oModelMov:aCols[_nLineMov][nSE5Fil]  )
                       _oModelExt:SetValue( 'IG_STATUS' , '3'                                   )
-                      //_oModelExt:SetValue( 'IG_EFETIVA', ' '                                   )
+                    //_oModelExt:SetValue( 'IG_EFETIVA', ' '                                   )
                    else
                       _oModelExt:SetValue( 'COR'      , u_FRETCOR( '2' ) )
                    Endif
@@ -978,7 +980,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                           _oModelExt:SetValue( 'IG_SEQMOV', _cChave )
                        Else
                           If _aConcNN[_nAchou][2] == _aConcNN[_nAchou][3] //Se a soma for igual, mudar o Flag
-                             For _nX := 1 To Len( _aConcNN[_nAchou][5] ) //Ajusto flag para o extrato
+                             For _nX := 1 To Len( _aConcNN[_nAchou][5] )  //Ajusto flag para o extrato
                                  _oModelExt:GoLine( _aConcNN[_nAchou][5][_nX][3] )
                                  _oModelExt:SetValue( 'COR', u_FRETCOR( '3' ) )
                              Next
@@ -991,7 +993,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                           Endif
                        Endif
                    Endif
-                Endif
+                Endif 
              else
                 //**********************************************************************/
                 //** Verifico se o item já está efetivo e se trata de desconciliação. **/
@@ -1000,7 +1002,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                       _lDesCon := .T.
                       _nLinAtu := _oModelExt:nLine
                       _cSeqExt := _oModelExt:GetValue( 'IG_SEQMOV')
-                      For _nX := 1 To _oModelExt:Length()
+                      For _nX  := 1 To _oModelExt:Length()
                           _oModelExt:GoLine( _nX )
                           If _oModelExt:GetValue( 'IG_SEQMOV') == _cSeqExt
                              _oModelExt:SetValue( 'EXT_MARK'  , .f.                )
@@ -1013,7 +1015,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                              _oModelExt:SetValue( 'IG_HISMOV' , ''                 )
                              _oModelExt:SetValue( 'IG_NATMOV' , ''                 )
                              _oModelExt:SetValue( 'IG_STATUS' , '1'                )
-                             //_oModelExt:SetValue( 'IG_EFETIVA', '2'                )
+                           //_oModelExt:SetValue( 'IG_EFETIVA', '2'                )
                              _oModelExt:SetValue( 'DESCONC'   , '1'                )
                           Endif
                       Next
@@ -1046,7 +1048,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                          If Len( _aConcNN ) <= 0
                             aAdd( _aConcNN, { _oModelExt:GetValue( 'IG_SEQMOV' ), 0, 0, '', { { _oModelExt:GetValue( 'IG_SEQMOV' ), _oModelExt:GetValue( 'IG_VLREXT' ), _oModelExt:nLine } }, {} } )
                             _oModelExt:SetValue( 'IG_STATUS' , '1' )
-                            //_oModelExt:SetValue( 'IG_EFETIVA', ' ' )
+                          //_oModelExt:SetValue( 'IG_EFETIVA', ' ' )'''
                             _oModelExt:SetValue( 'DESCONC'   , '1' )
                          else
                             
@@ -1097,7 +1099,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
                       _oModelExt:SetValue( 'IG_VLRMOV' , _oModelMov:aCols[_nLineMov][nSE5Valor])
                       _oModelExt:SetValue( 'IG_HISMOV' , _oModelMov:aCols[_nLineMov][nSE5His]  )
                       _oModelExt:SetValue( 'IG_NATMOV' , _oModelMov:aCols[_nLineMov][nSE5Nat]  )
-                      //_oModelExt:SetValue( 'IG_SEQMOV' , _oModelMov:aCols[_nLineMov][nSE5Rec]  )
+                    //_oModelExt:SetValue( 'IG_SEQMOV' , _oModelMov:aCols[_nLineMov][nSE5Rec]  )
                       _oModelExt:SetValue( 'IG_FILORIG', _oModelMov:aCols[_nLineMov][nSE5Fil]  )
                       _oModelExt:SetValue( 'IG_STATUS' , '3'                                   )
                    else
@@ -1185,7 +1187,7 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
              //**********************************************************************/
              //** Desmarcação de itens sem vinculo                                 **/
                 _cSeqMov := _oModelMov:GetValue( 'E5_SEQCON')
-                //aScan( _oModelExt:aHeader, { |x| x[2] == 'E5_SEQCON' } )
+              //aScan( _oModelExt:aHeader, { |x| x[2] == 'E5_SEQCON' } )
                 _nPosExt := aScan( _oModelExt:aCols, { |x| x[ aScan( _oModelExt:aHeader, { |x| x[2] == 'IG_SEQMOV' } ) ] == _cSeqMov } )
                 //Verifico se o movimento já está conciliado e não permito
                 If _oModelExt:aCols[ _nPosExt][ aScan( _oModelExt:aHeader, { |x| x[2] == 'IG_EFETIVA' } ) ] == '1'
@@ -1223,7 +1225,8 @@ Static Function FActionExt( oView, cIDView, cField, xValue, _cGrid )
        oView:Refresh( 'GRIDMOVI' )
 Return _lRet
 
-/*/{Protheus.doc} fConAuto
+/*/
+{Protheus.doc} fConAuto
 Função utilizada para conciliação automática
 Movimentos: 1 - Pagar(F6)   - Concilia movimentos a pagar com mesma chave extrato x movimento
             2 - Receber(F7) - Concilia movimentos a receber a partir de movimentos marcados no extrato.
@@ -1235,6 +1238,7 @@ Movimentos: 1 - Pagar(F6)   - Concilia movimentos a pagar com mesma chave extrat
 @param _xOpc, Numeric, Parametro que indica a Carteira: 1-Pagar / 2-Receber
 @return Nil, Sem retorno para essa função.
 /*/
+
 Static Function fConAuto( oView, _xOpc )
        Local _oView  as Object
        Local _oModel as Object
@@ -1273,18 +1277,18 @@ Static Function fConAuto( oView, _xOpc )
           nSIGMark  := aScan( _oModelExt:aHeader, { |x| x[2] == 'EXT_MARK'  } )
 
           If _xOpc == 1 //A Pagar
-             /*_cChaveSIG := Alltrim( DTOS( _oModelExt:aCols[_nLineExt][nSIGData] ) ) + Alltrim( _oModelExt:aCols[_nLineExt][nSIGAge] ) +;
+           /*_cChaveSIG := Alltrim( DTOS( _oModelExt:aCols[_nLineExt][nSIGData] ) ) + Alltrim( _oModelExt:aCols[_nLineExt][nSIGAge] ) +;
                            Alltrim( _oModelExt:aCols[_nLineExt][nSIGConta]  )       + Alltrim( _oModelExt:aCols[_nLineExt][nSIGNum] ) +;
-                           Alltrim( STR( _oModelExt:aCols[_nLineExt][nSIGValor] ) ) + Iif( Alltrim( _oModelExt:aCols[_nLineExt][nSIGDeb] ) == '1', 'R', 'P' )       */
+                           Alltrim( STR( _oModelExt:aCols[_nLineExt][nSIGValor] ) ) + Iif( Alltrim( _oModelExt:aCols[_nLineExt][nSIGDeb] ) == '1', 'R', 'P' )*/
              For _nX := 1 To _oModelExt:Length()
-                 /*_cChaveSE5 := Alltrim( DTOS( _oModelMov:aCols[_nX][nSE5Data] ) ) + Alltrim( _oModelMov:aCols[_nX][nSE5Age] ) +;
+               /*_cChaveSE5 := Alltrim( DTOS( _oModelMov:aCols[_nX][nSE5Data] ) ) + Alltrim( _oModelMov:aCols[_nX][nSE5Age] ) +;
                                Alltrim( _oModelMov:aCols[_nX][nSE5Conta]  )       + Alltrim( _oModelMov:aCols[_nX][nSE5Num] ) +;
                                Alltrim( STR( _oModelMov:aCols[_nX][nSE5Valor] ) ) + Alltrim( _oModelMov:aCols[_nX][nSE5Deb] )*/
                  _cChaveSIG := Alltrim( DTOS( _oModelExt:aCols[_nX][nSIGData] ) ) + Alltrim( _oModelExt:aCols[_nX][nSIGAge] ) +;
                                Alltrim( _oModelExt:aCols[_nX][nSIGConta]  )       + Alltrim( _oModelExt:aCols[_nX][nSIGNum] ) +;
                                Alltrim( STR( _oModelExt:aCols[_nX][nSIGValor] ) ) + Iif( Alltrim( _oModelExt:aCols[_nX][nSIGDeb] ) == '1', 'R', 'P' )
                  For _nY := 1 To _oModelMov:Length()
-                     //_nPosSIG := aScan( _oModelExt:aCols, { |aItem| Alltrim( DTOS( aItem[nSIGData] ) ) + Alltrim( aItem[nSIGAge] ) + Alltrim( aItem[nSIGConta] ) + Alltrim( aItem[nSIGNum] ) + Alltrim( STR( aItem[nSIGValor] ) ) + Alltrim( Iif( aItem[nSIGDeb]  == '1', 'R', 'P' ) ) == _cChaveSE5  } )
+                   //_nPosSIG := aScan( _oModelExt:aCols, { |aItem| Alltrim( DTOS( aItem[nSIGData] ) ) + Alltrim( aItem[nSIGAge] ) + Alltrim( aItem[nSIGConta] ) + Alltrim( aItem[nSIGNum] ) + Alltrim( STR( aItem[nSIGValor] ) ) + Alltrim( Iif( aItem[nSIGDeb]  == '1', 'R', 'P' ) ) == _cChaveSE5  } )
                      _nPosSE5 := aScan( _oModelMov:aCols, { |aItem| Alltrim( DTOS( aItem[nSE5Data] ) ) + Alltrim( aItem[nSE5Age] ) + Alltrim( aItem[nSE5Conta] ) + Alltrim( aItem[nSE5Num] ) + Alltrim( STR( aItem[nSE5Valor] ) ) + Alltrim( aItem[nSE5Deb] ) == _cChaveSIG  } )
                      If _nPosSE5 > 0
                         //Atualiza Dados do Movimento
@@ -1306,7 +1310,7 @@ Static Function fConAuto( oView, _xOpc )
                         _oModelExt:SetValue( 'IG_NATMOV' , _oModelMov:aCols[_nPosSE5][nSE5Nat]  )
                         _oModelExt:SetValue( 'IG_FILORIG', _oModelMov:aCols[_nPosSE5][nSE5Fil]  )
                         _oModelExt:SetValue( 'IG_STATUS' , '3'                                  )
-                        //_oModelExt:SetValue( 'IG_EFETIVA', ' '                                  )
+                      //_oModelExt:SetValue( 'IG_EFETIVA', ' '                                  )
                         _nY := _oModelMov:Length()
                      Endif
                  Next
@@ -1336,7 +1340,7 @@ Static Function fConAuto( oView, _xOpc )
                            _oModelExt:GoLine( _aConcNN[_nX][5][_nY][3] )
                            _oModelExt:SetValue( 'COR', u_FRETCOR( '3' ) )
                            _oModelExt:SetValue( 'IG_STATUS' , '3' )
-                           //_oModelExt:SetValue( 'IG_EFETIVA', ' ' )
+                         //_oModelExt:SetValue( 'IG_EFETIVA', ' ' )
                        Next
                     Endif
                 Next
@@ -1351,7 +1355,8 @@ Static Function fConAuto( oView, _xOpc )
        Endif
 Return
 
-/*/{Protheus.doc} fGeraLan
+/*/
+{Protheus.doc} fGeraLan
 description
 @type function
 @version 
@@ -1366,10 +1371,21 @@ Static Function fGeraLan( oView )
        Local _oModelExt as Object
        Local _oModelMOV as Object
        Local _oModelCAB as Object
-       //Local _nLineEXT  as Numeric
+     //Local _nLineEXT  as Numeric 
        Local _nX, _nY
-       Local _cNatMov := GetMV( 'ZP_PAR0030' )
-	   Local _cCusMov := GetMV( 'ZP_PAR0031' )
+       Local _cNatMov  := GetMV( 'ZP_PAR0030' ) // Jose 31/08/2023  Foi mudado o parametro 6201,6209 
+	    Local _cCusMov  := GetMV( 'ZP_PAR0031' ) // Jose 31/08/2023  Foi mudado o parametro 2102,2104
+//     Local _cNatMovn := "" // Jose 31/08/2023
+//	    Local _cCusMovn := "" // Jose 31/08/2023
+//     Local _RecPag   := '' // Jose 31/08/2023
+//     Local _cPesq    := "COBRANCA"  // Jose 31/08/2023
+//     Local _cString        // Jose 31/08/2023
+//     Local _nInd           // Jose 31/08/2023
+//     Local _nPos           // Jose 31/08/2023
+//     Local _Linha          // Jose 31/08/2023
+
+       _cNatMov   := (SubStr( _cNatMov, 1, 4) )  // Jose 31/08/2023 Tirar na Produção
+       _cCusMov   := (SubStr( _cCusMov, 1, 4) )  // Jose 31/08/2023 Tirar na Produção
 
        _oModel    := FWModelActive()
        _oView     := Iif( ValType( oView ) == 'O', oView, FWViewActive() )
@@ -1378,41 +1394,68 @@ Static Function fGeraLan( oView )
        _oModelCAB := _oModel:GetModel('MASTERCON')
        //Verifica se a linha do extrato está marcada e se o status da mesma está como não conciliada.
        For _nX := 1 To Len( _aConcNN )
-           If Empty( _aConcNN[_nX][4] )
-              cRecPag := ' '
+           If ( ( Empty( _aConcNN[_nX][4] ) ) )//  .OR. ( _aConcNN[_nX][4] =="S" ) ) ) // jose 31/08/2023 tirar quando estiver pronto
+ //             _RecPag   = ''  // Jose 31/08/2023
+ //             _cNatMovn = ''  // Jose 31/08/2023
+ //             _cCusMovn = ''  // Jose 31/08/2023
               _oModelMOV:AddLine()
+
+//-----------    Jose 31/08/2023
+//                  _Linha   := _aConcNN[_nX][5][1][3]
+//                  _cNatMov := "6201,6209" // jose 11/09/2023   tirar assim que testar
+//                  _cCusMov := "2102,2104" // jose 11/09/2023   tirar assim que testar
+//                  _cString := _oModelExtV:Acols[_Linha][13]
+//                  _nPos    := At(_cPesq,_cString,_nInd)  
+//                  if _nPos = 0 
+//                     _cNatMovn = (SubStr( _cNatMov, 1, 4) )
+//                     _cCusMovn = (SubStr( _cCusMov, 1, 4) )
+//                     _RecPag   = "P"
+//                     _oModelMOV:SetValue( 'E5_NATUREZ', _cNatMovn /*'904004'*/ ) 
+//                     _oModelMOV:SetValue( 'E5_RECPAG' , _RecPag ) 
+//                     _oModelMOV:SetValue( 'E5_X_REPA' , _RecPag )  
+//        		   	   _oModelMOV:SetValue( 'E5_CCUSTO' , _cCusMovn )  
+//                  Else
+//                     _cNatMovn = (SubStr( _cNatMov, 6, 4) )
+//                     _cCusMovn = (SubStr( _cCusMov, 6, 4) )
+//                     _RecPag   = "P" 
+//                     _oModelMOV:SetValue( 'E5_NATUREZ', _cNatMovn /*'904004'*/ ) 
+//                     _oModelMOV:SetValue( 'E5_RECPAG' , _RecPag ) 
+//                     _oModelMOV:SetValue( 'E5_X_REPA' , _RecPag )  
+//       		   	   _oModelMOV:SetValue( 'E5_CCUSTO' , _cCusMovn )  
+//                  EndIf
+//-----------------------------
               _oModelMOV:SetValue( 'MOV_MARK'  , .t. )
               _oModelMOV:SetValue( 'COR'       , u_FRETCOR( '4' ) )
               _oModelMOV:SetValue( 'SEQDIG'    , cValToChar( _oModelMOV:nLine ) )
               _oModelMOV:SetValue( 'E5_FILIAL' , FWxFilial("SE5") )
-              _oModelMOV:SetValue( 'E5_DATA'   , dDataBase        )
-              M->E5_DATA := dDataBase
-              _oModelMOV:SetValue( 'E5_DTDIGIT', dDataBase        )
-              _oModelMOV:SetValue( 'E5_DTDISPO', dDataBase        )
-              _oModelMOV:SetValue( 'E5_VENCTO' , dDataBase        )
-              M->E5_VENCTO := dDataBase
+              _oModelMOV:SetValue( 'E5_DATA'   , dDataBase        ) 
+              M->E5_DATA := dDataBase 
+              _oModelMOV:SetValue( 'E5_DTDIGIT', dDataBase        ) 
+              _oModelMOV:SetValue( 'E5_DTDISPO', dDataBase        ) 
+              _oModelMOV:SetValue( 'E5_VENCTO' , dDataBase        ) 
+              M->E5_VENCTO := dDataBase 
               _oModelMOV:SetValue( 'E5_NUMCHEQ', ''               )
-              _oModelMOV:SetValue( 'E5_VALOR' , ABS( _aConcNN[_nX][2] ) )
+              _oModelMOV:SetValue( 'E5_VALOR'  , ABS( _aConcNN[_nX][2] ) )
               _oModelMOV:SetValue( 'E5_HISTOR' , 'PAGAMENTO DE DESPESAS BANCARIAS' )
-              _oModelMOV:SetValue( 'E5_NATUREZ', _cNatMov /*'904004'*/ )
+              _oModelMOV:SetValue( 'E5_NATUREZ', _cNatMov /*'904004'*/ )  //   Jose 31/08/2023 mudado para o que está _cNatMovn
               _oModelMOV:SetValue( 'E5_BANCO'  , _oModelCAB:GetValue('BANCO')   )
               _oModelMOV:SetValue( 'E5_AGENCIA', _oModelCAB:GetValue('AGENCIA') )
               _oModelMOV:SetValue( 'E5_CONTA'  , _oModelCAB:GetValue('CONTA') )
-              _oModelMOV:SetValue( 'E5_RECPAG' , 'P' )
+              _oModelMOV:SetValue( 'E5_RECPAG' , 'P' )  //_RecPag ) //  Troca Jose 31/08/2023    _oModelMOV:SetValue( 'E5_RECPAG' , 'P' )
               _oModelMOV:SetValue( 'E5_DOCUMEN', SubStr( _oModelMOV:GetValue( 'E5_HISTOR' ), 1, 50 ) )
               _oModelMOV:SetValue( 'E5_TIPODOC', 'VL' )
-              _oModelMOV:SetValue( 'E5_X_REPA' , 'P' )
+              _oModelMOV:SetValue( 'E5_X_REPA' , 'P' ) //_RecPag )  //  Trocado Jose 31/08/2023  _oModelMOV:SetValue( 'E5_X_REPA' , 'P' )
               _oModelMOV:SetValue( 'E5_BENEF'  , SubStr( _oModelMOV:GetValue( 'E5_HISTOR' ), 1, 30 ) )
               _oModelMOV:SetValue( 'E5_FILORIG', FWxFilial("SE5") )
               _oModelMOV:SetValue( 'SE5_SOMA'  , _aConcNN[_nX][2] )
               _oModelMOV:SetValue( 'E5_SEQCON' , _aConcNN[_nX][1] )
               _oModelMOV:SetValue( 'E5_MOEDA'  , 'M1' )
-			  _oModelMOV:SetValue( 'E5_CCUSTO' , _cCusMov )
+       	     _oModelMOV:SetValue( 'E5_CCUSTO' , _cCusMov )  //   Jose 31/08/2023 mudado para o que está _cCusMovn
               _aConcNN[_nX][3] += _aConcNN[_nX][2]
               _aConcNN[_nX][4] := 'S'
               aAdd(_aConcNN[_nX][6], { _aConcNN[_nX][1], _aConcNN[_nX][3], _oModelMOV:nLine})
               //Troco a cor do Status
-              nSE5Data := aScan( _oModelMov:aHeader, { |x| x[2] == 'E5_DTDISPO' } )
+              nSE5Data := aScan( _oModelMov:aHeader, { |x| x[2] == 'E5_DTDISPO' } ) 
               nSE5Age  := aScan( _oModelMov:aHeader, { |x| x[2] == 'E5_AGENCIA' } )
               nSE5Conta:= aScan( _oModelMov:aHeader, { |x| x[2] == 'E5_CONTA'   } )
               nSE5Num  := aScan( _oModelMov:aHeader, { |x| x[2] == 'E5_NUMCHEQ' } )
@@ -1432,7 +1475,7 @@ Static Function fGeraLan( oView )
                   _oModelExt:SetValue( 'IG_NATMOV' , _oModelMov:aCols[_oModelMOV:nLine][nSE5Nat]  )
                   _oModelExt:SetValue( 'IG_FILORIG', _oModelMov:aCols[_oModelMOV:nLine][nSE5Fil]  )
                   _oModelExt:SetValue( 'IG_STATUS' , '3'  )
-                  //_oModelExt:SetValue( 'IG_EFETIVA', ' '  )
+                //_oModelExt:SetValue( 'IG_EFETIVA', ' '  )
               Next
               _oModelExt:GoLine( 1 )
            EndIf
@@ -1441,7 +1484,8 @@ Static Function fGeraLan( oView )
        _oView:Refresh( 'GRIDMOVI' )
 Return
 
-/*/{Protheus.doc} fPosValid
+/*/
+{Protheus.doc} fPosValid
 Validação antes da gravação, que verifica os valores selecionados, que devem ser iguais entre Extrato x Conciliados x Movimento
 @type function
 @version 
@@ -1469,7 +1513,7 @@ Static Function FGrava( oModel )
        Local _oModelSIG := oModel:GetModel( 'GRIDEXTR' )
        Local _oModelSE5 := oModel:GetModel( 'GRIDMOVI' )
        Local lAtuDtDisp := .T.
-       //Local _oModelSIF := oModel:GetModel( 'MASTERCON' )
+     //Local _oModelSIF := oModel:GetModel( 'MASTERCON' )
        Local _nX, _nY, _nContCon
        Local CIDORIG    := ""
        Local _lRet      := .t.
@@ -1477,7 +1521,15 @@ Static Function FGrava( oModel )
        Local _nPSeqCon  := aScan( _oModelSE5:aHeader, { |x| Alltrim( x[2] ) = 'E5_SEQCON' } )
        Local _nPRecSE5  := aScan( _oModelSE5:aHeader, { |x| Alltrim( x[2] ) = 'REC_NO' } )
        Local _nJaGrav   := aScan( _oModelSE5:aHeader, { |x| Alltrim( x[2] ) = 'E5_X_JAGR' } )
-       //Local _nPReconc  := aScan( _oModelSE5:aHeader, { |x| Alltrim( x[2] ) = 'E5_RECONC' } )
+     //Local _nPReconc  := aScan( _oModelSE5:aHeader, { |x| Alltrim( x[2] ) = 'E5_RECONC' } )
+       Local _cNatMov   := GetMV( 'ZP_PAR0030' ) // Jose 31/08/2023  Foi mudado o parametro 6201,6209 
+	    Local _cCusMov   := GetMV( 'ZP_PAR0031' ) // Jose 31/08/2023  Foi mudado o parametro 2102,2104
+       Local _cNatMovn  := '' // Jose 31/08/2023
+       Local _cCusMovn  := '' // Jose 31/08/2023
+       Local _cNatMovp  := '' // Jose 31/08/2023
+       Local _cCusMovp  := '' // Jose 31/08/2023
+       Local _cNatMovr  := '' // Jose 31/08/2023
+       Local _cCusMovr  := '' // Jose 31/08/2023
 
        DbSelectArea("FKA")
        DbSelectArea("FK5")
@@ -1527,6 +1579,33 @@ Static Function FGrava( oModel )
                  If SubStr( cSeqCon, 1, 1 ) $ 'R.P.C'
                     For _nY := 1 To _oModelSE5:Length()
                         _oModelSE5:GoLine( _nY )
+//-------   Joe  31/08/202023 ---------------------------------------                        
+//                      _cNatMov := "6201,6209" // jose 11/09/2023   tirar assim que testar
+//                      _cCusMov := "2102,2104" // jose 11/09/2023   tirar assim que testar
+                        _cNatMovp = (SubStr( _cNatMov, 1, 4) )
+                        _cCusMovp = (SubStr( _cCusMov, 1, 4) )
+                        _cNatMovr = (SubStr( _cNatMov, 6, 4) )
+                        _cCusMovr = (SubStr( _cCusMov, 6, 4) )
+
+                        If Alltrim( _oModelSE5:aCols[_nY][06] ) == _cNatMovp 
+                           _cNatMovn = _cNatMovp
+                           _cCusMovn = _cCusMovp
+                           _RecPag   = "P"
+                           _oModelSE5:SetValue( 'E5_NATUREZ', _cNatMovn /*'904004'*/ ) 
+                           _oModelSE5:SetValue( 'E5_RECPAG' , _RecPag ) 
+                           _oModelSE5:SetValue( 'E5_X_REPA' , _RecPag )  
+        		   	         _oModelSE5:SetValue( 'E5_CCUSTO' , _cCusMovn )  
+                        EndIf
+                        If Alltrim( _oModelSE5:aCols[_nY][06] ) == _cNatMovr 
+                           _cNatMovn = _cNatMovr
+                           _cCusMovn = _cCusMovr
+                           _RecPag   = "P" 
+                           _oModelSE5:SetValue( 'E5_NATUREZ', _cNatMovn /*'904004'*/ ) 
+                           _oModelSE5:SetValue( 'E5_RECPAG' , _RecPag ) 
+                           _oModelSE5:SetValue( 'E5_X_REPA' , _RecPag )  
+      		   	         _oModelSE5:SetValue( 'E5_CCUSTO' , _cCusMovn )  
+                        EndIf
+//--------------------------------------------------------------------
                         If !_oModelSE5:IsDeleted() .and. ( _oModelSE5:GetValue('MOV_MARK') .or. lDesconc ) //_oModelSE5:GetValue('MOV_MARK')
                            If _oModelSE5:aCols[_nY][_nPSeqCon] == cSeqCon .and. ( _oModelSE5:aCols[_nY][_nJaGrav] <> 'S' .or. lDesconc ) //_oModelSE5:aCols[_nY][_nJaGrav] <> 'S'
                               _nRECSE5 := _oModelSE5:aCols[_nY][_nPRecSE5]
@@ -1576,10 +1655,10 @@ Static Function FGrava( oModel )
                                               SE5->E5_NATUREZ := _oModelSE5:GetValue( 'E5_NATUREZ' )
                                               SE5->E5_BENEF   := _oModelSE5:GetValue( 'E5_BENEF'   )
                                               SE5->E5_HISTOR  := _oModelSE5:GetValue( 'E5_HISTOR'  )
-											  SE5->E5_CCUSTO  := _oModelSE5:GetValue( 'E5_CCUSTO'  )
+											             SE5->E5_CCUSTO  := _oModelSE5:GetValue( 'E5_CCUSTO'  )
                                            SE5->( MsUnLock() )
                                            Reclock("FK5", .F.)
-                                             FK5->FK5_DTCONC := dDataBase
+                                             FK5->FK5_DTCONC := dDataBase  
                                              FK5->FK5_SEQCON := cSeqCon
                                            FK5->( MsUnLock() )							
                                        Else //Desconciliou
@@ -1599,12 +1678,12 @@ Static Function FGrava( oModel )
                                  Else // Registro da SE5 não possui dados nas Tabelas FKs, não foi migrado.
                                     If !lDesconc //Conciliou
                                        Reclock( "SE5", .F. )
-                                          SE5->E5_RECONC := 'x'
-                                          SE5->E5_SEQCON := cSeqCon
+                                          SE5->E5_RECONC  := 'x'
+                                          SE5->E5_SEQCON  := cSeqCon
                                           SE5->E5_NATUREZ := _oModelSE5:GetValue( 'E5_NATUREZ' )
                                           SE5->E5_BENEF   := _oModelSE5:GetValue( 'E5_BENEF'   )
                                           SE5->E5_HISTOR  := _oModelSE5:GetValue( 'E5_HISTOR'  )
-										  SE5->E5_CCUSTO  := _oModelSE5:GetValue( 'E5_CCUSTO'  )
+										            SE5->E5_CCUSTO  := _oModelSE5:GetValue( 'E5_CCUSTO'  )
                                        SE5->( MsUnLock() )
                                     Else //Desconciliou
                                        Reclock( "SE5", .F. )
@@ -1822,7 +1901,7 @@ Static Function SIFStatus(  )
        cQuery += " WHERE "
        cQuery += "     IG_FILIAL = '" + cFilSIG   + "'  AND "
        cQuery += "     IG_IDPROC = '" + cProcesso + "'        AND "
-       //cQuery += "     IG_DTEXTR = '" + DTOS( mv_par04 ) + "' AND "
+     //cQuery += "     IG_DTEXTR = '" + DTOS( mv_par04 ) + "' AND "
        cQuery += "     SIG.D_E_L_E_T_ = ' ' "
        cQuery := ChangeQuery(cQuery)
 
@@ -1913,14 +1992,14 @@ Static Function fGeraMov( _aFINA100, _aHeadSE5, _nPosExt, _nPosMov, _aMovimen )
              _nNumRec := SE5->(Recno())
           Endif
        Else
-          //_nPosCon := aScan( _aConCNN, { |x| x[1] == _aFINA100[_nPosSeq]} )
-          //_nPosDes := _aConCNN[_nPosCon][6][2][3]
-          //If _nPosDes > 0
+        //_nPosCon := aScan( _aConCNN, { |x| x[1] == _aFINA100[_nPosSeq]} )
+        //_nPosDes := _aConCNN[_nPosCon][6][2][3]
+        //If _nPosDes > 0
              _cBcoOrig := _aFINA100[ _nPosBOri ]
              _cAgeOrig := _aFINA100[ _nPosAOri ]
              _cCtaOrig := _aFINA100[ _nPosCOri ]
              _cNatOrig := _aFINA100[ _nPosNOri ]
-             /*_cBcoDest := _aMovimen[_nPosDes][_nPosBan]
+           /*_cBcoDest := _aMovimen[_nPosDes][_nPosBan]
              _cAgeDest := _aMovimen[_nPosDes][_nPosAge]
              _cCtaDest := _aMovimen[_nPosDes][_nPosCta]
              _cNatDest := _aMovimen[_nPosDes][_nPosNat]*/
@@ -1950,8 +2029,8 @@ Static Function fGeraMov( _aFINA100, _aHeadSE5, _nPosExt, _nPosMov, _aMovimen )
              If lMsErroAuto
                 MostraErro()
              Else
-                //Recno do ultimo registro gravado na SE5, portando
-                //_aMovimen[_nPosDes][_nPosRec] := SE5->( Recno() )
+              //Recno do ultimo registro gravado na SE5, portando
+              //_aMovimen[_nPosDes][_nPosRec] := SE5->( Recno() )
                 If _aFINA100[ _nPosOrig ] == 'R'
                    _nNumRec := SE5->( Recno() )
                 Else
@@ -1984,12 +2063,12 @@ Static Function fGeraTra( oView )
        Local cBenef100   := CriaVar( "E5_BENEF" )
        Local nDiasDispo  := SUPERGETMV("MV_DIASCRD", .F., 0 )
        Local dDataCred   := dDatabase + nDiasDispo
-       //Local dDtdisp     := dDatabase
+     //Local dDtdisp     := dDatabase
        Local nValorTran  := 0
        Local nOpcA       := 0
        Local lSpbInUse   := SpbInUse()
-       //Local aModalSPB   := { "1=TED", "2=CIP", "3=COMP" }
-       //Local oModSPB     := NIL
+     //Local aModalSPB   := { "1=TED", "2=CIP", "3=COMP" }
+     //Local oModSPB     := NIL
        Local cModSpb     := ""
        Local _oView     as Object
        Local _oModel    as Object
@@ -1998,7 +2077,18 @@ Static Function fGeraTra( oView )
        Local _oModelCAB as Object
        Local _nLineEXT  as Numeric
        Local _nX, _nY
-
+//----------------------- Jose 31/08/2023 -----------------------------------------------------------
+//     Local _cNatMov  := GetMV( 'ZP_PAR0030' ) // Jose 31/08/2023  Foi mudado o parametro 6201,6209 
+//	    Local _cCusMov  := GetMV( 'ZP_PAR0031' ) // Jose 31/08/2023  Foi mudado o parametro 2102,2104
+//     Local _cNatMovn := "" // Jose 31/08/2023
+//	    Local _cCusMovn := "" // Jose 31/08/2023
+//     Local _RecPag   := '' // Jose 31/08/2023
+//     Local _cPesq    := "COBRANCA"  // Jose 31/08/2023
+//     Local _cString        // Jose 31/08/2023
+//     Local _nInd           // Jose 31/08/2023
+//     Local _nPos           // Jose 31/08/2023
+//     Local _Linha          // Jose 31/08/2023
+//---------------------------------------------------------------------------------------------------
        Private oBcoOrig  := NIL
        Private oAgenOrig := NIL
        Private oCtaOrig  := NIL
@@ -2008,7 +2098,7 @@ Static Function fGeraTra( oView )
        Private oDataCred := NIL
        Private cTipoTran := 'TB '
 
-       cDocTran   := GravaData( dDataBase, .f., 5 ) + StrTran( Time(),":", "",/*nStart*/,/*nCount*/)
+       cDocTran   := GravaData( dDataBase, .f., 5 ) + StrTran( Time(),":", "",/*nStart*/,/*nCount*/) 
 
        _oModel    := FWModelActive()
        _oView     := Iif( ValType( oView ) == 'O', oView, FWViewActive() )
@@ -2016,6 +2106,7 @@ Static Function fGeraTra( oView )
        _nLineEXT  := _oModelExt:nLine
        _oModelMOV := _oModel:GetModel('GRIDMOVI')
        _oModelCAB := _oModel:GetModel('MASTERCON')
+ 
        If _oModelExt:aCols[ _nLineExt ][aScan( _oModelExt:aHeader, { |x| x[2] == 'IG_CARTER' } )] == '1' //Receber
           cBcoDest  := _oModelExt:aCols[ _nLineExt ][aScan( _oModelExt:aHeader, { |x| x[2] == 'BANCO' } )]
           cAgenDest := _oModelExt:aCols[ _nLineExt ][aScan( _oModelExt:aHeader, { |x| x[2] == 'IG_AGEEXT' } )]
@@ -2100,16 +2191,42 @@ Static Function fGeraTra( oView )
               If Empty( _aConcNN[_nX][4] ) .and. Len( _aConcNN[_nX][5] ) == 1 //Garanto que somente 1 registro foi marcado para transferência
                  //1º Lançamento da transferência
                  _oModelMOV:AddLine()
+
+//-----------    Jose 31/08/2023
+//                  _Linha   := _aConcNN[_nX][5][1][3]
+//                  _cNatMov := "6201,6209" // jose 11/09/2023   tirar assim que testar
+//                  _cCusMov := "2102,2104" // jose 11/09/2023   tirar assim que testar
+//                  _cString := _oModelExtV:Acols[_Linha][13]
+//                  _nPos    := At(_cPesq,_cString,_nInd)  
+//                  if _nPos = 0 //  _oModelExtV:Acols[_nX][12] = "2" //"P"
+//                     _cNatMovn = (SubStr( _cNatMov, 1, 4) )
+//                     _cCusMovn = (SubStr( _cCusMov, 1, 4) )
+//                     _RecPag   = "P"
+//                     _oModelMOV:SetValue( 'E5_NATUREZ', _cNatMovn /*'904004'*/ ) 
+//                     _oModelMOV:SetValue( 'E5_RECPAG' , _RecPag ) 
+//                     _oModelMOV:SetValue( 'E5_X_REPA' , _RecPag )  
+//        		   	   _oModelMOV:SetValue( 'E5_CCUSTO' , _cCusMovn )  
+//                  Else
+//                     _cNatMovn = (SubStr( _cNatMov, 6, 4) )
+//                     _cCusMovn = (SubStr( _cCusMov, 6, 4) )
+//                     _RecPag   = "P" // "R"
+//                     _oModelMOV:SetValue( 'E5_NATUREZ', _cNatMovn /*'904004'*/ ) 
+//                     _oModelMOV:SetValue( 'E5_RECPAG' , _RecPag ) 
+//                     _oModelMOV:SetValue( 'E5_X_REPA' , _RecPag )  
+//       		   	   _oModelMOV:SetValue( 'E5_CCUSTO' , _cCusMovn )  
+//                  EndIf
+//-----------------------------
+
                  _oModelMOV:SetValue( 'MOV_MARK'  , .t. )
                  _oModelMOV:SetValue( 'COR'       , u_FRETCOR( '4' ) )
                  _oModelMOV:SetValue( 'SEQDIG'    , cValToChar( _oModelMOV:nLine ) )
                  _oModelMOV:SetValue( 'E5_FILIAL' , FWxFilial("SE5") )
-                 _oModelMOV:SetValue( 'E5_DATA'   , dDataBase        )
+                 _oModelMOV:SetValue( 'E5_DATA'   , dDataBase        ) 
                  M->E5_DATA := dDataBase
-                 _oModelMOV:SetValue( 'E5_DTDIGIT', dDataBase        )
-                 _oModelMOV:SetValue( 'E5_DTDISPO', dDataBase        )
-                 _oModelMOV:SetValue( 'E5_VENCTO' , dDataBase        )
-                 M->E5_VENCTO  := dDataBase
+                 _oModelMOV:SetValue( 'E5_DTDIGIT', dDataBase        ) 
+                 _oModelMOV:SetValue( 'E5_DTDISPO', dDataBase        ) 
+                 _oModelMOV:SetValue( 'E5_VENCTO' , dDataBase        ) 
+                 M->E5_VENCTO  := dDataBase 
                  M->E5_BANCO   := cBcoOrig
                  M->E5_AGENCIA := cAgenOrig
                  M->E5_CONTA   := cCtaOrig
@@ -2161,8 +2278,8 @@ Static Function fGeraTra( oView )
                  _aConcNN[_nX][3] += nValorTran * Iif( _oModelExt:aCols[_nLineExt][ aScan( _oModelExt:aHeader, { |x| x[2] == 'IG_CARTER' } ) ] == '1', 1, -1 )
                  aAdd(_aConcNN[_nX][6], { _aConcNN[_nX][1], _aConcNN[_nX][3], _oModelMOV:nLine})
                  
-                 //2º Lançamento da Transferência
-                 /*_oModelMOV:AddLine()
+               //2º Lançamento da Transferência
+               /*_oModelMOV:AddLine()
                  _oModelMOV:SetValue( 'MOV_MARK'  , .t. )
                  _oModelMOV:SetValue( 'COR'       , u_FRETCOR( '4' ) )
                  _oModelMOV:SetValue( 'SEQDIG'    , cValToChar( _oModelMOV:nLine ) )
@@ -2249,11 +2366,11 @@ Static Function fExcluiE( oView )
           _oModelMOV:SetValue( 'COR'       , 'BR_PRETO' )
           _oModelMOV:SetValue( 'SEQDIG'    , cValToChar( _oModelMOV:nLine ) )
           _oModelMOV:SetValue( 'E5_FILIAL' , FWxFilial("SE5")      )
-          _oModelMOV:SetValue( 'E5_DATA'   , dDataBase             )
-          M->E5_DATA := dDataBase
+          _oModelMOV:SetValue( 'E5_DATA'   , dDataBase             ) 
+          M->E5_DATA := dDataBase  
           _oModelMOV:SetValue( 'E5_DTDIGIT', dDataBase             )
-          _oModelMOV:SetValue( 'E5_DTDISPO', dDataBase             )
-          _oModelMOV:SetValue( 'E5_VENCTO' , dDataBase             )
+          _oModelMOV:SetValue( 'E5_DTDISPO', dDataBase             ) 
+          _oModelMOV:SetValue( 'E5_VENCTO' , dDataBase             ) 
           _oModelMOV:SetValue( 'E5_VALOR'  , 0.01                  )
           _oModelMOV:SetValue( 'E5_HISTOR' , 'Exclusão do extrato' )
           _oModelMOV:SetValue( 'E5_RECPAG' , 'R'                   )

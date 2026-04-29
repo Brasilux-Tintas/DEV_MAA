@@ -51,7 +51,9 @@ User Function BRFIN017()
      DbSelectArea("SZW")
      DbSetOrder(6)
      DbSeek(__CUSERID + cPRWRotina)
-	 if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) <> 0 .OR.  substr(ZW_ACESSOS,1,1) == "*"
+	 //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+    //if PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) <> 0 .OR.  substr(ZW_ACESSOS,1,1) == "*"
+    if /*PSWADMIN( , , RetCodUsr() ) <> 0 .OR.*/  Substr( ZW_ACESSOS, 1, 1 ) == "*"
         MsgBox("Acesso não autorizado!","Atenção","Alert")
         return
      endif 

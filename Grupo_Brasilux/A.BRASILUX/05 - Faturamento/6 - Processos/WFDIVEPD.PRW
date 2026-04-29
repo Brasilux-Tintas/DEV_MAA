@@ -20,16 +20,16 @@
 	+---------------------------------------------------------------------------+  
 */         
 User Function WFDIVEPD()
-   
-    Local cPara    	:= "expedicao@brasilux.com.br,eliana@brasilux.com.br,estoque@brasilux.com.br"
-    Local cAssunto  := "Pedidos com divergência em almoxarifados de faturamento"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0067")) //"expedicao@brasilux.com.br,vendas@brasilux.com.br,estoque@brasilux.com.br,faturamento@brasilux.com.br"
+    Local cAssunto  := "Pedidos com divergências em almoxarifados de Faturamento"
     Local cMsg		:= ""
     Local cQuery    := ""
 
-    u_zcfga01( 'WFDIVEPD' ) //LGS#2021119 - Gravação de log de utilização da rotina    
-
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
 
+    u_zcfga01( 'WFDIVEPD' ) //LGS#2021119 - Gravação de log de utilização da rotina    
+	cPara  := TRIM(GETMV("ZP_PAR0067"))
     cQuery := ""
     cQuery += " SELECT C5_NUM AS 'PEDIDO', C5_CLIENTE AS 'CLIENTE', A1_NOME AS 'NOME', SUBSTRING(C5_EMISSAO,7,2)+'/'+SUBSTRING(C5_EMISSAO,5,2)+'/'+SUBSTRING(C5_EMISSAO,1,4) AS 'EMISSAO', " 
     cQuery += " C5_TRANSP AS 'TRANSPORTADORA', SUBSTRING(C6_LOCAL,1,1) AS LOCALC6, SUBSTRING(C9_LOCAL,1,1) AS LOCALC9 "
@@ -44,6 +44,7 @@ User Function WFDIVEPD()
     cQuery += " AND ((C5_TRANSP NOT IN('00700','00800','00573') AND (SUBSTRING(C6_LOCAL,1,1) <>'0' OR SUBSTRING(C9_LOCAL,1,1) <>'0')) "
     cQuery += " OR (C5_TRANSP IN('00700','00800','00573') AND (SUBSTRING(C6_LOCAL,1,1) <>'G' OR SUBSTRING(C9_LOCAL,1,1) <>'G'))) "
     cQuery += " AND C5_NOTA ='' "
+	cQuery += " AND DATEDIFF(YEAR,C5_EMISSAO,GETDATE())<1 "
     cQuery += " AND B1_TIPO IN('MP','PI','PA') "
     cQuery += " GROUP BY C5_NUM, C5_CLIENTE, C5_TRANSP, SUBSTRING(C6_LOCAL,1,1), SUBSTRING(C9_LOCAL,1,1), C5_EMISSAO, A1_NOME "
 

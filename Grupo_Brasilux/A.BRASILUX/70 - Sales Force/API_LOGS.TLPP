@@ -1,0 +1,68 @@
+#include 'totvs.ch'
+#include 'protheus.ch'
+#include "topconn.ch"
+#include 'tlpp-core.th'
+#include "tlpp-rest.th"
+
+/*±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Função    ³ API_SALES_FORCE  ³ Autor ³ Nelieder M Corneta   ³ Data ³ 01/10/24    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄ´±±
+±±³Descrição ³ API de integração com Sales Force                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄßßßßßßßßßßßß*/
+
+//U_API_LOGS('A','TESTE','TESTEF','012345','AGORA VAI O LOG')
+
+User Function API_LOGS(cStatus,cRotina,Funcao,cPedido,cLog)
+Local oError         as object
+Local Ambiente       as character
+//Local cQry1          as character
+/*
+    Status
+    0 := Inclusão de Pedido de Venda com sucesso
+    1 := Erro na inclussão do Pedido de Vendas
+    A := Erro em rotina SQL
+    B := Erro interno Protheus 
+    402 := Informação Requerida
+    500 := Erro na consulta SQL
+    501 := Erro Interno
+
+*/
+    
+    Try
+       
+        //Se o dicionário não estiver aberto, irá preparar o ambiente
+        If Select("SX2") <= 0
+            RpcSetEnv('01','010101',"","","","",{"SC5","SC6","SA1","SB1","SB2","SF4"})
+        EndIf
+        
+        /*cQry1 := ""
+        cQry1 += "INSERT INTO ZAJ010 "  + CRLF
+        cQry1 += "(       ZAJ_FILIAL ,   ZAJ_STATUS             ,          ZAJ_ROTINA       ,     ZAJ_FUNCAO           ,       ZAJ_PEDIDO         ,   ZAJ_LOG ,                    ZAJ_DATA       ,  ZAJ_HORA      , R_E_C_N_O_) "  + CRLF 
+        cQry1 += "VALUES('010101'    , '"+SUBSTR(cStatus,1,1)+"', '"+SUBSTR(cRotina,1,20)+"', '"+SUBSTR(Funcao,1,20)+"', '"+SUBSTR(cPedido,1,6)+"', CONVERT(varbinary(max), '"+cLog+"'), CONVERT(VARCHAR, GETDATE(), 112),'"+Time()+"'    , (SELECT MAX(R_E_C_N_O_)+1 FROM ZAJ010)) "  + CRLF
+        nStatus := TCSqlExec(cQry1)*/
+
+        Ambiente := "Ambiente : " + GetEnvServer()
+        Ambiente := Ambiente + CRLF + CRLF + cLog
+       
+        RecLock("ZAJ",.T.)
+            ZAJ->ZAJ_FILIAL  := xFilial("ZAJ")
+            ZAJ->ZAJ_STATUS  := SUBSTR(cStatus,1,1)
+            ZAJ->ZAJ_ROTINA  := SUBSTR(cRotina,1,20)
+            ZAJ->ZAJ_FUNCAO  := SUBSTR(Funcao,1,20)
+            ZAJ->ZAJ_PEDIDO  := SUBSTR(cPedido,1,6)
+            ZAJ->ZAJ_LOG     := cLog
+            ZAJ->ZAJ_DATA    := dDataBase
+            ZAJ->ZAJ_HORA    := Time()
+        MsUnLock()
+
+   
+
+    CATCH oError
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro Ao Gerar Log - API_LOGS",oError:description,"neliedercorneta@brasilux.com.br","","")
+	ENDTRY      
+
+     
+
+return()

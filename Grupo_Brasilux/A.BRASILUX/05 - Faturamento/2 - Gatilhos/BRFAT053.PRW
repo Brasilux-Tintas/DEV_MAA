@@ -162,6 +162,13 @@ User Function BRFAT053(_cTipo, cCliente, cProduto)
             	
 	     	cQuery := "SELECT TES = dbo.DetTes('"+_cFilial+"','"+cTipoMov+"','"+cCliente+"','"+cGrTrib+"','"+cProduto+;
     	 	"','"+cGrProd+"','"+cUf+"','"+cSuframa+"','"+cTemSt+"','"+cCalcSuf+"','"+cInterUf+"')"
+
+		    /* Incluido por Nelieder em 15/12/2022 */
+			IF Select("TCQ") <> 0
+      			DbSelectArea("TCQ")
+      			DbCloseArea()
+   			ENDIF
+
      		TCQuery cQuery ALIAS "TCQ" NEW
 
 			DbSelectArea("TCQ")

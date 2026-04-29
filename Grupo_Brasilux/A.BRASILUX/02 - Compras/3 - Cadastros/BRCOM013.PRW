@@ -74,8 +74,6 @@ Else
 
 		//RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões
 		//RpcSetType(3) //seta tipo de consumo de licença
-		//RpcSetEnv( "01","010106",'Administrador' ,'843952' , "FAT" , , aTables, , , ,  )
-
 
 		cAuxMens := Replicate( "=", 80 ) + CHR( 13 ) + CHR( 10 )
 		cAuxMens += "-- INICIO INCLUSÃO DE PEDIDOS FILIAL "+_cFilial+" - BRCOM013"+ CHR( 13 ) + CHR( 10 )

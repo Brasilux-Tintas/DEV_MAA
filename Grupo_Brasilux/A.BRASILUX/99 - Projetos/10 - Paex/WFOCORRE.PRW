@@ -21,33 +21,19 @@
 */    
          
 User Function WFOCORRE()
-   
-	 
-
-	 Local cEmail   				:= "workflowbrasilux@gmail.com"//Trim(GetMV("MV_WFMAIL")) //conta de email utilizada para envio
-     Local cPass    				:= ""//Trim(GetMV("MV_WFPASSW")) //senha do email
-     //Local cServerSMTP  			:= ""//Trim(GetMV("MV_WFSMTP")) //servidor para envio de email 
-	 //Local cPortSMTP   		    	:=465  //GetMV("MV_PORSMTP") //porta para envio de email 
-     //Local cServerPOP3  		    :=""//Trim(GetMV("MV_WFPOP3")) //servidor para recebimento de email
-	 //Local cPortPOP3   		    	:=""//GetMV("MV_PORPOP3") //porta para recebimento de email 
-     //Local cDe		   			    := ""//Trim(GetMV("MV_WFMAIL")) //conta de email que é o rementente do email
-     Local cPara    			  //	:= Trim(GetMV("MV_XWFCCPC"))+";tiago.lucio@chaus.com.br"  //lista de rementes 
-     Local dData                    :=DATE()                    
-	 Local cAssunto				    := "WorkFlow Resumo de Ocorrências no PCP "+DTOC(dData)
-     Local cMsg						:= ""
-     LOcal cAnexo					:= ""  //"<img src='http://www.trianguloflorestal.com.br/image/logo.png' width='100' height='76'>"
-     Local nCont                    := 0        
-     Local cQuery                   := ""  
-     
+ 
+ 	Local cEmail   		:= "workflowbrasilux@gmail.com" //Trim(GetMV("MV_WFMAIL")) //conta de email utilizada para envio
+	Local cPass    		:= "" //Trim(GetMV("MV_WFPASSW")) //senha do email
+ 	Local cPara    		:= TRIM(GETMV("ZP_PAR0073")) //Trim(GetMV("MV_XWFCCPC")) //lista de remententes 
+ 	Local dData         :=DATE()                    
+ 	Local cAssunto		:= "WorkFlow Resumo de Ocorrências no PCP "+DTOC(dData)
+ 	Local cMsg			:= ""
+ 	Local cAnexo		:= ""  //"<img src='http://www.trianguloflorestal.com.br/image/logo.png' width='100' height='76'>"
+ 	Local nCont         := 0        
+ 	Local cQuery        := ""  
       
      PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" //TABLES "ZZR"   
-     
-     
-     //cPara    				:= "michelly@brasilux.com.br; gustavo@brasilux.com.br" //Trim(GetMV("MV_XWFSAA"))  //lista de rementes 
-     cPara    			   	    := Trim(GetMV("MV_XWFOCOR"))  //lista de rementes 
-     
-     
-      
+ 
     /**	Monta a query para buscar os dados	**/   
      cQuery:=" 		SELECT MAX(SUBSTRING(ZZR_DATA,1,6))AS ZZR_DATA, ZZR_CLASSI, COUNT(ZZR_SETOR) AS QTD , ZZR_SETOR "
      cQuery+=" 		FROM "+ RetSqlName("ZZR")+" ZZR  WITH (NOLOCK) "

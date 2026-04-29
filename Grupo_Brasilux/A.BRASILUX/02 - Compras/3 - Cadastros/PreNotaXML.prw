@@ -23,6 +23,28 @@
 #include "Topconn.ch"
 #INCLUDE "AP5MAIL.CH"
 
+/* ZP_PAR0054 
+--Habilita Tabela KITSCOCA para o padrao do protheus Tecpolpa   
+
+SELECT ZA7_FILIAL,ZA7_CODIGO,ZA7_SEQ,ZA7_EMBAL,ZA7_COMPON,ZA7_QTD,ZA7_PAI,ZA7_QTDFIL,ZA7_DESCRI,ZA7_DESCCO FROM ZA7110
+
+
+SELECT ZA7_FILIAL,
+	   ZA7_CODIGO AS CODIGO,
+	   ZA7_SEQ AS SEQ,
+	   ZA7_EMBAL AS EMBAL,
+	   ZA7_COMPON AS COMPON,
+	   ZA7_QTD AS QTDE,
+	   ZA7_PAI AS PAI,
+	   ZA7_QTDFIL AS QTDEFILHO,
+	   ZA7_DESCRI,
+	   ZA7_DESCCO 
+	   FROM ZA7110
+
+SELECT CODIGO,SEQ,EMBAL,COMPON,QTDE,PAI,QTDEFILHO FROM KITSCOCA
+
+*/
+
 /* ATENCAO PARA QUE A ROTINA FUNCIONE CORRETAMENTE
 EXISTE A NECESSIDADE DE CRIAÇÃO DE DOIS INDICES
 
@@ -1917,14 +1939,28 @@ if !empty(cAuxCod)
 	If Select("TMPCOMP") <> 0
 		TMPCOMP->(dbCloseArea())
 	endif 	
-	cQuery := "SELECT CODIGO,COMPON,QTDE FROM KITSCOCA WHERE (PAI = '"+_cCodPrf+"') ORDER BY COMPON"
+	
+	/* alterado por nelieder 18/08/2022 */
+	if (GETMV("ZP_PAR0052") == .F.)
+		cQuery := "SELECT CODIGO,COMPON,QTDE FROM KITSCOCA WHERE (PAI = '"+_cCodPrf+"') ORDER BY COMPON"
+	else
+		cQuery := "SELECT ZA7_CODIGO AS CODIGO,ZA7_COMPON AS COMPON,ZA7_QTD AS QTDE FROM ZA7110 WHERE (ZA7_PAI  = '"+_cCodPrf+"') ORDER BY ZA7_COMPON  "
+	endif	
+	
 	TCQuery cQuery ALIAS "TMPCOMP" NEW
 	dbselectarea("TMPCOMP")
 	dbgotop()
 	do while !eof()
 		//Descobrir se estrutura possui itens com subestrutura repetidos
 		nFator := 1 
-		cQuery := "SELECT QTDE FROM KITSCOCA WHERE (CODIGO = '"+TMPCOMP->CODIGO+"') AND (COMPON = '"+_cCodPrf+"')"
+		
+		/* alterado por nelieder 18/08/2022 */
+		if (GETMV("ZP_PAR0052") == .F.)
+			cQuery := "SELECT QTDE FROM KITSCOCA WHERE (CODIGO = '"+TMPCOMP->CODIGO+"') AND (COMPON = '"+_cCodPrf+"')"
+		else
+			cQuery := "SELECT ZA7_QTD AS QTDE FROM ZA7110 WHERE (ZA7_CODIGO  = '"+TMPCOMP->CODIGO+"') AND (ZA7_COMPON = '"+_cCodPrf+"')"
+		Endif	
+		
 		TCQuery cQuery ALIAS "TMPPAI" NEW
 		dbselectarea("TMPPAI")
 		dbgotop()
@@ -1975,7 +2011,14 @@ if !empty(cAuxCod)
 	If Select("TMPCOMP") <> 0
 		TMPCOMP->(dbCloseArea())
 	endif 	
-	cQuery := "SELECT COMPON,QTDE FROM KITSCOCA WHERE (PAI = '"+_cCodPrf+"') ORDER BY COMPON"
+	
+	/* alterado por nelieder 18/08/2022 */
+		if (GETMV("ZP_PAR0052") == .F.)
+			cQuery := "SELECT COMPON,QTDE FROM KITSCOCA WHERE (PAI = '"+_cCodPrf+"') ORDER BY COMPON"
+		else
+			cQuery := "SELECT ZA7_COMPON,ZA7_QTD FROM ZA7110  WHERE (ZA7_PAI = '"+_cCodPrf+"') ORDER BY ZA7_COMPON"
+		endif
+	
 	TCQuery cQuery ALIAS "TMPCOMP" NEW
 	dbselectarea("TMPCOMP")
 	dbgotop()
@@ -2031,7 +2074,15 @@ if !empty(cAuxCod)
 	If Select("TMPCOMP") <> 0
 		TMPCOMP->(dbCloseArea())
 	endif 	
-	cQuery := "SELECT CODIGO FROM KITSCOCA WHERE (COMPON = '"+_cCodPrf+"') AND (PAI > '')"
+	
+	/* alterado por nelieder 18/08/2022 */
+		if (GETMV("ZP_PAR0052") == .F.)
+			cQuery := "SELECT CODIGO FROM KITSCOCA WHERE (COMPON = '"+_cCodPrf+"') AND (PAI > '')"
+		else
+			cQuery := "SELECT ZA7_CODIGO FROM ZA7110  WHERE (ZA7_COMPON = '"+_cCodPrf+"') AND (ZA7_PAI > '')"
+		endif	
+	
+	
 	TCQuery cQuery ALIAS "TMPCOMP" NEW
 	dbselectarea("TMPCOMP")
 	dbgotop()

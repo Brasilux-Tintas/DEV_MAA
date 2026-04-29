@@ -1,0 +1,92 @@
+#INCLUDE "PROTHEUS.CH"
+#INCLUDE "TBICONN.CH"
+#Include "TOTVS.ch"
+#include 'tlpp-core.th'
+ 
+User Function SALES_PEDIDO_EXE(jBodyReq)
+
+Local nX        as numeric
+Local nOpcX     as numeric
+
+Local oError         as object
+Local cError         as character
+
+Private Atemp   as array
+Private Acab    as array
+Private AProd   as array
+Private cDoc    as character
+
+Private lMsErroAuto    as logical
+Private lAutoErrNoFile as logical
+
+nOpcX := 3
+    
+ Try
+ 
+    If nOpcX == 3
+        //****************************************************************
+        //* Inclusao - INÍCIO
+        //****************************************************************
+        aCabec   := {}
+        aItens   := {}
+        aLinha   := {}
+        aadd(aCabec, {"C5_TIPO"   , "N"                                             , Nil})
+        aadd(aCabec, {"C5_CLIENTE", jBodyReq[1]['Cabecalho']['Cliente']             , Nil})
+        aadd(aCabec, {"C5_LOJACLI", "01"                                            , Nil})
+        aadd(aCabec, {"C5_CONDPAG", jBodyReq[1]['Cabecalho']['CondicaoPagamento']   , Nil})
+        aadd(aCabec, {"C5_TRANSP" , jBodyReq[1]['Cabecalho']['Transportadora']      , Nil})
+        aadd(aCabec, {"C5_TABELA" , jBodyReq[1]['Cabecalho']['TabelaPreco']         , Nil})
+        aadd(aCabec, {"C5_VEND1" ,  jBodyReq[1]['Cabecalho']['Vendedor']            , Nil})
+        aadd(aCabec, {"C5_XIDSF" ,  jBodyReq[1]['Cabecalho']['IdPedido']            , Nil})
+        aadd(aCabec, {"C5_XIDRESE" ,jBodyReq[1]['Cabecalho']['IdReserva']           , Nil})
+
+
+        For nX := 1 To len(jBodyReq[1]['Itens'])
+            //--- Informando os dados do item do Pedido de Venda
+            cTes := U_BRFAT053('N',jBodyReq[1]['Cabecalho']['Cliente'],jBodyReq[1]['Itens'][nX]['Sku'])
+            aLinha := {}
+            aadd(aLinha,{"C6_ITEM"      ,   StrZero(nX,2)                           , Nil})
+            aadd(aLinha,{"C6_PRODUTO"   ,   jBodyReq[1]['Itens'][nX]['Sku']         , Nil})
+            aadd(aLinha,{"C6_LOCAL"     ,   jBodyReq[1]['Cabecalho']['Estoque']     , Nil})
+            aadd(aLinha,{"C6_QTDVEN"    ,   jBodyReq[1]['Itens'][nX]['Quantidade']  , Nil})
+            aadd(aLinha,{"C6_PRCVEN"    ,   jBodyReq[1]['Itens'][nX]['Preco']       , Nil})
+            aadd(aLinha,{"C6_PRUNIT"    ,   jBodyReq[1]['Itens'][nX]['Preco']       , Nil})
+            aadd(aLinha,{"C6_TES"       ,   cTes                                    , Nil})
+            aadd(aLinha,{"C6_RESERVA"   ,   jBodyReq[1]['Itens'][nX]['reserva']     , Nil})
+            
+            aadd(aItens, aLinha)
+        Next nX
+    
+        MSExecAuto({|a, b, c, d| MATA410(a, b, c, d)}, aCabec, aItens, nOpcX, .F.)
+        If (!lMsErroAuto) // OPERAÇÃO FOI EXECUTADA COM SUCESSO
+            ConOut(PadC("Automatic routine successfully ended", 80))
+        Else // OPERAÇÃO EXECUTADA COM ERRO
+            
+                cError := MostraErro("/ws_logs/salesforce", "error.log") // ARMAZENA A MENSAGEM DE ERRO
+                jResp           := jsonObject():new()
+                jResp['Status'] := .F.        
+                jResp['Erro']   := 'Erro na execução, '+cError
+                oRest:setStatusCode(501)
+                oRest:appendKeyHeaderResponse("Content-Type","application/json")
+                oRest:setResponse(jResp:toJson())
+                return .F.
+            
+        EndIf
+
+    
+    EndIF
+
+CATCH oError
+
+		jResp               := jsonObject():new()
+        jResp['Erro']  := 'Erro na execução, '+oError:description
+        U_EnvMail("[SALES FORCE]["+GetEnvServer()+"] - Erro API_SALES_PEDIDOS",cError,"neliedercorneta@brasilux.com.br","","")
+        oRest:appendKeyHeaderResponse("Content-Type","application/json")
+        oRest:setResponse(jResp:toJson())
+        return .T.
+
+ENDTRY         
+ 
+//RESET ENVIRONMENT
+
+Return(.T.)

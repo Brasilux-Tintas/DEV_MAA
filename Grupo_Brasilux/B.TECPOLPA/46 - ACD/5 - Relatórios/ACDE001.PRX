@@ -48,12 +48,11 @@ User Function ACDE001()
      Alfa     := 0
      Z        := 0
      M        := 0
-     //tamanho  := "M"
      tamanho  := "P"
      limite   := 110
 
      titulo   := "Etiquetas Estorno da Ordem Separação(BIP)"
-     cDesc1   := PADC("Relatório de Códigos das Etiquetas para Bipar Estornos Carregamento ",74)
+     cDesc1   := PADC("Relatório de Códigos das Etiquetas para Bipar Estornos Carregamento",74)
      cDesc2   := ""
      cDesc3   := PADC(" ",74)
      cCabec   := PADC("Relatório de Códigos das Etiquetas para Bipar Estornos Carregamento",68)
@@ -123,20 +122,21 @@ User Function ACDE001()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Montagem da Query                                         ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//Correção de erro na execução da Query - Chamado 027582 - (ajustes por Sergio Magri)
 
 cQuery := "SELECT   CB9_ORDSEP AS 'ORDSEP', CB9_CODETI AS 'CODETI', CB9_PROD   AS 'PROD',   CB9_LOTECT AS 'LOTECT', " + CHR(13) + CHR(10)
-cQuery := cQuery + "CB9_LOCAL  AS 'LOCALL',  CB9_LCALIZ AS 'LCALIZ', CB9_QTESEP AS 'QTESEP', CB9_PEDIDO AS 'PEDIDO'," + CHR(13) + CHR(10)
-cQuery := cQuery + "CB9_SEQUEN AS 'SEQUEN', CB9_ITESEP AS 'ITESEP', CB9_CODSEP AS 'CODSEP', CB9_STATUS AS 'STATUS'" + CHR(13) + CHR(10)
-cQuery := cQuery + " from CB9110 " + CHR(13) + CHR(10)
-cQuery := cQuery + "where D_E_L_E_T_ = '' " + CHR(13) + CHR(10)
-cQuery := cQuery + "AND CB9_FILIAL BETWEEN "+ MV_PAR01 +" AND "+ MV_PAR02 +" " + CHR(13) + CHR(10)
-cQuery := cQuery + "AND CB9_ORDSEP BETWEEN "+ MV_PAR03 +" AND "+ MV_PAR04 +" " + CHR(13) + CHR(10)
-cQuery := cQuery + "AND CB9_PEDIDO BETWEEN "+ MV_PAR05 +" AND "+ MV_PAR06 +" " + CHR(13) + CHR(10)
-cQuery := cQuery + "GROUP BY CB9_ORDSEP,CB9_CODETI,CB9_PROD,CB9_LOTECT,CB9_LOCAL,CB9_LCALIZ,CB9_QTESEP,CB9_PEDIDO, " + CHR(13) + CHR(10)
-cQuery := cQuery + "         CB9_SEQUEN,CB9_ITESEP,CB9_CODSEP,CB9_STATUS " + CHR(13) + CHR(10)
-cQuery := cQuery + "ORDER BY ORDSEP, CODETI" + CHR(13) + CHR(10)
+cQuery += "CB9_LOCAL  AS 'LOCALL',  CB9_LCALIZ AS 'LCALIZ', CB9_QTESEP AS 'QTESEP', CB9_PEDIDO AS 'PEDIDO', " + CHR(13) + CHR(10)
+cQuery += "CB9_SEQUEN AS 'SEQUEN', CB9_ITESEP AS 'ITESEP', CB9_CODSEP AS 'CODSEP', CB9_STATUS AS 'STATUS' " + CHR(13) + CHR(10)
+cQuery += "from CB9110 " + CHR(13) + CHR(10)
+cQuery += "where D_E_L_E_T_ = '' " + CHR(13) + CHR(10)
+cQuery += "AND CB9_FILIAL BETWEEN "+ MV_PAR01 +" AND "+ MV_PAR02 +" " + CHR(13) + CHR(10)
+cQuery += "AND CB9_ORDSEP BETWEEN "+ MV_PAR03 +" AND "+ MV_PAR04 +" " + CHR(13) + CHR(10)
+cQuery += "AND CB9_PEDIDO BETWEEN "+ MV_PAR05 +" AND "+ MV_PAR06 +" " + CHR(13) + CHR(10)
+cQuery += "GROUP BY CB9_ORDSEP, CB9_CODETI, CB9_PROD, CB9_LOTECT, CB9_LOCAL, CB9_LCALIZ, CB9_QTESEP, CB9_PEDIDO, " + CHR(13) + CHR(10)
+cQuery += "CB9_SEQUEN, CB9_ITESEP, CB9_CODSEP, CB9_STATUS " + CHR(13) + CHR(10)
+cQuery += "ORDER BY ORDSEP, CODETI" + CHR(13) + CHR(10)
 
-     TCQuery cQuery NEW ALIAS "TCQ" 
+     TCQuery cQuery NEW ALIAS "TCQ"
 
      _nLin := 80	
      DbSelectArea("TCQ")

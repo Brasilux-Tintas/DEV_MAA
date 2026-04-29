@@ -32,7 +32,9 @@ PRIVATE cCountEnc:= 0
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Verifica as perguntas selecionadas                           ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+//LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+//If PSWADMIN( cUsername, SubStr(cUsuario, 1, 6),RetCodUsr()) != 0
+    If PSWADMIN( , , RetCodUsr() ) != 0
         MsgBox("Acesso não autorizado!", "Atenção...", "STOP")
         Return
     Endif

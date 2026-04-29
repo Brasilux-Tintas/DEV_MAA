@@ -8,7 +8,8 @@
 User Function MA410MNU()
      Local _aArea   := GetArea()
      Local _cGrpEmp := Alltrim( FWGrpCompany() )
-
+     Local _ZPPAR0105 := GetMV( "ZP_PAR0105" ) // Habilita/Desabilita Divide Pedido Antigo
+     
      If _cGrpEmp <> '11'
         /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
         ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -22,9 +23,25 @@ User Function MA410MNU()
         ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
         ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
         ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-        aAdd( aRotina, { 'Divide Ped'     , 'U_DividePed(SC5->C5_NUM)', 0, 3, 0, NIL } )
-        aAdd( aRotina, { 'Estorna Div Ped', 'U_EstDivPed(SC5->C5_NUM)', 0, 3, 0, NIL } )
-        aAdd( aRotina, { 'Posicao Estoque', 'U_BRFATC02(SC5->C5_NUM)' , 0, 3, 0, NIL } )
+        
+        If _ZPPAR0105
+           aAdd( aRotina, { 'Divide Ped'          , 'U_DividePed(SC5->C5_NUM)', 0, 3, 0, NIL } )
+        Endif   
+        
+        aAdd( aRotina, { 'Divide Ped Novo'     , 'U_ZFATP01(SC5->C5_NUM)'  , 0, 3, 0, NIL } )
+        aAdd( aRotina, { 'Estorna Div Ped'     , 'U_EstDivPed(SC5->C5_NUM)', 0, 3, 0, NIL } )
+        aAdd( aRotina, { 'Posicao Estoque'     , 'U_BRFATC02(SC5->C5_NUM)' , 0, 3, 0, NIL } )
+        aAdd( aRotina, { 'Imprimi Pallets'     , 'U_BRPCP065(SC5->C5_NUM)' , 0, 3, 0, NIL } )
+        aAdd( aRotina, { 'Frete CIF'           , 'U_ZFATC01()'             , 0, 3, 0, NIL } )
+
+        aAdd( aRotina, { 'Politica x Frete CIF', 'U_ZFATC10(SC5->C5_NUM)'  , 0, 2, 0, NIL } )
+                
+        // Criado por Nelieder em 07/06/2023, aguardando aprovação de Gustavo para liberação
+        //aAdd( aRotina, { 'Politica Comercial1'  , 'U_ZFATC01()'             , 0, 3, 0, NIL } )
+
+        
+        SetKey( VK_F10, { || U_ZFATC01() } )
+        //SetKey( VK_F5,  { || U_ZFATC02() } )
      Else
         AADD( aRotina, { 'Mens. Padrão'   , 'U_MENU410'               , 0, 0, 0, .F. } )
      Endif
@@ -51,9 +68,17 @@ User Function DividePed(_cPed)
      Local aArea  := GetArea()
      Local aItens := {}
 
-     IF (SC5->C5_TPFRETE = "C") .AND. (SC5->C5_XVLRFRE > 0.0) .AND. (SC5->C5_TIPO = "N")
-        Messagebox( "Atenção! Pedido com FRETE CIF! NÃO PODE SER DIVIDIDO! ", "Atenção!", 16 )
-        return(.f.)
+     // Incluido por Nelieder em 04/05/2023
+     If GETMV("ZP_PAR0096")
+         IF (SC5->C5_TPFRETE = "C") .AND. (SC5->C5_XVLRFRE > 0.0) .AND. (SC5->C5_TIPO = "N")
+            Messagebox( "Atenção! Pedido com FRETE CIF! NÃO PODE SER DIVIDIDO! ", "Atenção!", 16 )
+            return(.f.)
+         Endif
+     Endif 
+    
+     If !Empty( SC5->C5_TABELA ) //LGS#20220308 - Não de deixar pedidos de campanha serem divididos. Indicativo que é pedido de campanha é a tabela de preços.
+        Messagebox( "Atenção! Pedido de Campanha! NÃO PODE SER DIVIDIDO! ", "Atenção!", 16 )
+        Return(.f.)
      Endif
      aItens := SelecionaItens(_cPed)
      restarea(aArea)
@@ -716,7 +741,9 @@ Static Function fConfirmaSel( _nOpc, _cPed )
          cTexto := "ATENÇÃO! O Pedido "+_cPed+"-"+ALLTRIM(cRazao)+", da filial "+xFilial("SC5")
          cTexto += ", foi dividido e o novo pedido gerado terá que passar por nova liberação! "+chr(13)+chr(10)
          cTexto += "Número do pedido novo gerado: "+cDoc
-         U_EnvMail("Pedido "+_cPed+" foi DIVIDIDO!!",cTexto,"vendas@brasilux.com.br",cAuxMail,"") //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
+         //U_EnvMail("Pedido "+_cPed+" foi DIVIDIDO!!",cTexto,"vendas@brasilux.com.br",cAuxMail,"") //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
+         MsgAlert(cAuxMail)
+         //U_EnvMail("Pedido "+_cPed+" foi DIVIDIDO!!",cTexto,"neliedercorneta@brasilux.com.br",cAuxMail,"") //para que seja enviado um arquivo em anexo o arquivo deve estar dentro da pasta protheus_data
 
 
       endif 
@@ -817,7 +844,7 @@ return(aLibs)
 Function  ³ VoltaLiberacoes()
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function VoltaLiberacoes(aLiberacoes)
-       Local aArea := getarea()
+          Local aArea := getarea()
        Local cPedDiv := "",_cPed,cQuery,lRet := .t.
 
        _cPed := aLiberacoes[1,2]

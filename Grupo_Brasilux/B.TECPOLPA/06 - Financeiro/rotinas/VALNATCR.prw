@@ -35,11 +35,13 @@ n - não faz nada
 a- só avisa que a natureza não é do contas a pagar
 b- avisa e bloqueia se natureza não é do c. pagar 
 */
-If Upper(xvalNat) == 'A' .AND. cED_USO != '1' .AND. cED_USO != '3' 
-	Alert("A natureza selecionada não foi classificada como a receber! (campo Uso Natureza - ED_USO)")
-ElseIf Upper(xvalNat) == 'B' .AND. cED_USO != '1' .AND. cED_USO != '3' 
-	 lRet := .F.
-	 Alert("A natureza selecionada não foi classificada como a receber (campo Uso Natureza - ED_USO). Selecione uma natureza válida!")
+If !Alltrim( UPPER( Funname( ) ) ) $ 'ZFINF01#ZFINF02'
+   If Upper(xvalNat) == 'A' .AND. cED_USO != '1' .AND. cED_USO != '3' 
+	  Alert("A natureza selecionada não foi classificada como a receber! (campo Uso Natureza - ED_USO)")
+   ElseIf Upper(xvalNat) == 'B' .AND. cED_USO != '1' .AND. cED_USO != '3' 
+          lRet := .F.
+	      Alert("A natureza selecionada não foi classificada como a receber (campo Uso Natureza - ED_USO). Selecione uma natureza válida!")
+   Endif
 Endif
 
 

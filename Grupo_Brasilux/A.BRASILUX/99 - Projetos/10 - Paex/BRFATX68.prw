@@ -22,116 +22,124 @@
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ*/
 User Function BRFATX68()
-     Private cGet1Env   := Space(11) //"      /    "	// Pallet
-     Private cGet2Env   := Space(06)				    // Bordero
-     Private cGet3Env   := "     .  .   -  "    // Produto
-     Private cSay1Env   := Space(01)
-     Private cSay2Env   := Space(01)
-     Private cSay4Env   := Space(20)
-     Private cSay3Env   := Space(30)
-     Private nCapPallet := 0
-     Private nCapAntPal := 0
-     Private nCount     := 0
-     Private lProdMist  :=.f.
-     Private nCBox1Co   := ""
-     Private cCBox2     := "2-DEPOSITO"
-     Private cCor4Env   := 0
-     Private nQtdeIni   := 0
-     Private cPallet    := ""
-     Private cMaxSeq    := ""
-     Private _CodProd   := ""
-     Private _cMaxSeq   := ""
-     Private nQtdTotal  := 0
-	 Private cCodBarra  := ""
-     //Private _cSeq      := ""
-     Private lJaFech    := .f.
-     Private lTelaJaFechada := .f.  
-     Private lCheck     := .t.
-  	 Private cRotina    := "BRFATX68"
-  	 Private cCodUsr   := RetCodUsr()
-  	 Private cAcessos  := Posicione("SZW", 4, xFilial("SZW")+cRotina+__cUserID+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")
-     Private oTempTbl1
+    Private cGet1Env   := Space(11) //"      /    "	// Pallet
+    Private cGet2Env   := Space(06)				    // Bordero
+    Private cGet3Env   := "     .  .   -  "    // Produto
+    Private cSay1Env   := Space(01)
+    Private cSay2Env   := Space(01)
+    Private cSay4Env   := Space(20)
+    Private cSay3Env   := Space(30)
+    Private nCapPallet := 0
+    Private nCapAntPal := 0
+    Private nCount     := 0
+    Private lProdMist  :=.f.
+    Private nCBox1Co   := ""
+	Private nCBox1Lo   := Space(04)
+    Private cCBox2     := "2-DEPOSITO"
+    Private cCor4Env   := 0
+    Private nQtdeIni   := 0
+    Private cPallet    := ""
+    Private cMaxSeq    := ""
+    Private _CodProd   := ""
+    Private _cMaxSeq   := ""
+    Private nQtdTotal  := 0
+	Private cCodBarra  := ""
+    //Private _cSeq      := ""
+    Private lJaFech    := .f.
+    Private lTelaJaFechada := .f.  
+    Private lCheck     := .t.
+	Private cRotina    := "BRFATX68"
+	Private cCodUsr   := RetCodUsr()
+	Private cAcessos  := Posicione("SZW", 4, xFilial("SZW")+cRotina+__cUserID+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")
+	Private oTempTbl1
+	Private _ZPPAR0118 := GetMV( "ZP_PAR0118" ) // Libera Bloqueio de Lotes
 
-     /*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±
-     ±± DeclaraÁ„o de Variaveis Private dos Objetos                             ±±
-     Ÿ±±¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
-     SetPrvt("oFontEnv", "oDlg1Env", "oGrp1Env", "oSay1Env", "oSay2Env", "oGet1Env", "oGet2Env", "oBtn1Env", "oBtn2Env")
-     SetPrvt("oBtn3Env", "oBtn4Env", "oBtn5Env", "oBtn6Env", "oBrw1Env", "oGrp3Env", "oBtn7Env", "oBtn8Env", "oBtn9Env")
-     SetPrvt("oSay4Env", "oBtn6Env", "oSay3Env", "oSay5Env", "oCBox1"  , "oBtnAEnv", "oBtnBEnv", "oSay6Env", "oSay7Env")
-     SetPrvt("oBtnCEnv", "oSay8Env", "oCBox2"  , "oSay9Env")
+    /*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±
+    ±± DeclaraÁ„o de Variaveis Private dos Objetos                             ±±
+    Ÿ±±¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
+    SetPrvt("oFontEnv", "oDlg1Env", "oGrp1Env", "oSay1Env", "oSay2Env", "oGet1Env", "oGet2Env", "oBtn1Env", "oBtn2Env")
+    SetPrvt("oBtn3Env", "oBtn4Env", "oBtn5Env", "oBtn6Env", "oBrw1Env", "oGrp3Env", "oBtn7Env", "oBtn8Env", "oBtn9Env")
+    SetPrvt("oSay4Env", "oBtn6Env", "oSay3Env", "oSay5Env", "oCBox1"  , "oBtnAEnv", "oBtnBEnv", "oSay6Env", "oSay7Env")
+    SetPrvt("oBtnCEnv", "oSay8Env", "oCBox2"  , "oSay9Env", "oSay2Loc", "oCBox1Lo")
 
- 	 If !u_VldAcesso(funname())
-      	MsgBox("Acesso n„o autorizado!---->"+funname(),"AtenÁ„o","Alert")
-     	Return 
-  	 Endif 
+	If !u_VldAcesso(funname())
+		MsgBox("Acesso n„o autorizado!---->"+funname(),"AtenÁ„o","Alert")
+		Return 
+	Endif 
 
-     /*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±
-     ±± Definicao do Dialog e todos os seus componentes.                        ±±
-     Ÿ±±¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
-     oFontEnv   := TFont():New( "MS Sans Serif", 0, -19, , .F., 0, , 400, .F., .F., , , , , , )
-     oFon2Env   := TFont():New( "Courier New"  , 0,  19, , .T., 0, , 400, .F., .F., , , , , , )
-     oFon3Env   := TFont():New( "Courier New"  , 0,  25, , .T., 0, , 400, .F., .F., , , , , , )
+    /*ƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ±±
+    ±± Definicao do Dialog e todos os seus componentes.                        ±±
+    Ÿ±±¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
+    oFontEnv   := TFont():New( "MS Sans Serif", 0, -19, , .F., 0, , 400, .F., .F., , , , , , )
+    oFon2Env   := TFont():New( "Courier New"  , 0,  19, , .T., 0, , 400, .F., .F., , , , , , )
+    oFon3Env   := TFont():New( "Courier New"  , 0,  25, , .T., 0, , 400, .F., .F., , , , , , )
 
-     oDlg1Env   := MSDialog():New( 140, 264, 700, 980, "Re Monta Compra (Monta Pallets nas Rampas)", , , .F., , , , , , .T., , , .T. )
-     oGrp1Env   := TGroup():New( 003, 004, 058, 356, "Dados do Pallet", oDlg1Env, CLR_RED, CLR_WHITE, .T., .F. )
-     oSay1Env   := TSay():New( 012, 008, { || "Pallet:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
-     oGet1Env   := TGet():New( 010, 060, { |u| If(PCount() > 0, cGet1Env := u, cGet1Env)}, oGrp1Env, 080, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet1Env", , ) 
-     oGet1Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet1Env)),fCarPall(cGet1Env),"")}
+    oDlg1Env   := MSDialog():New( 140, 264, 700, 980, "Re Monta Compra (Monta Pallets nas Rampas)", , , .F., , , , , , .T., , , .T. )
+    oGrp1Env   := TGroup():New( 003, 004, 058, 356, "Dados do Pallet", oDlg1Env, CLR_RED, CLR_WHITE, .T., .F. )
+    oSay1Env   := TSay():New( 012, 008, { || "Pallet:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
+    oGet1Env   := TGet():New( 010, 060, { |u| If(PCount() > 0, cGet1Env := u, cGet1Env)}, oGrp1Env, 080, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet1Env", , ) 
+    oGet1Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet1Env)),fCarPall(cGet1Env),"")}
 
-     oSay6Env   := TSay():New( 028, 150, { || "BorderÙ:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
-     oGet2Env   := TGet():New( 028, 200, { |u| If(PCount() > 0, cGet2Env := u, cGet2Env)}, oGrp1Env, 080, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet2Env", , ) 
-	 
-	 oSay9Env   := TSay():New( 012, 150, { || "Tipo Bor:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 045, 012)
-     oCBox2     := TComboBox():New( 010, 200, {|u| If(PCount() > 0, cCBox2 := u, cCBox2)}, {"1-AGLUTINADO","2-DEPOSITO", "3-REGIAO-RETIRA","4-EXPORTACAO","5-CARGA FECHADA","8-CARGA-MATRIZ"}, 080, 026, oGrp1Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , cCBox2 )
-     //oCBox2     := TComboBox():New( 010, 200, {|u| If(PCount() > 0, cCBox2 := u, cCBox2)}, {"1-AGLUTINADO","2-DEPOSITO", "3-REGIAO-RETIRA","4-EXPORTACAO","6-AMOSTRAS","7-VOL. QUEBRADO"}, 080, 026, oGrp1Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , cCBox2 )
+    oSay6Env   := TSay():New( 028, 150, { || "BorderÙ:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 040, 012)
+    oGet2Env   := TGet():New( 028, 200, { |u| If(PCount() > 0, cGet2Env := u, cGet2Env)}, oGrp1Env, 080, 014, '@!' , , CLR_BLACK, CLR_WHITE, oFontEnv,   , , .T., "", , , .F., .F., , .F., .F., "", "cGet2Env", , ) 
+	
+	oSay9Env   := TSay():New( 012, 150, { || "Tipo Bor:"}, oGrp1Env, , oFontEnv, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 045, 012)
+    oCBox2     := TComboBox():New( 010, 200, {|u| If(PCount() > 0, cCBox2 := u, cCBox2)}, {"1-AGLUTINADO","2-DEPOSITO - GRU", "3-REGIAO-RETIRA","4-EXPORTACAO","5-CARGA FECHADA","8-CARGA-MATRIZ","9-DEPOSITO - ARA"}, 080, 026, oGrp1Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , cCBox2 )
+    //oCBox2     := TComboBox():New( 010, 200, {|u| If(PCount() > 0, cCBox2 := u, cCBox2)}, {"1-AGLUTINADO","2-DEPOSITO", "3-REGIAO-RETIRA","4-EXPORTACAO","6-AMOSTRAS","7-VOL. QUEBRADO"}, 080, 026, oGrp1Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , cCBox2 )
 
-   	 
-     oBtn3Env   := TButton():New( 038, 008, "Novo Pallet", oGrp1Env, {|| fNPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oGet2Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet2Env)),fValBord(cGet2Env),"")}
+    oBtn3Env   := TButton():New( 038, 008, "Novo Pallet", oGrp1Env, {|| fNPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oGet2Env:bLostFocus := {|| Iif(!Empty(Alltrim(cGet2Env)),fValBord(cGet2Env),"")}
 
-     oSay4Env   := TSay():New( 030, 152, { || cSay4Env  }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., cCor4Env, CLR_WHITE, 106, 012)
-     oBtn1Env   := TButton():New( 009, 297, "Confirma", oGrp1Env, {|| fSMntPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oSay4Env   := TSay():New( 030, 152, { || cSay4Env  }, oGrp1Env, , oFontEnv, .F., .F., .F., .T., cCor4Env, CLR_WHITE, 106, 012)
+    oBtn1Env   := TButton():New( 009, 297, "Confirma", oGrp1Env, {|| fSMntPal()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
 
-     oBtn2Env   := TButton():New( 030, 297, "Abandona", oGrp1Env, {|| fSairMPa()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
-     oGrp2Env   := TGroup():New( 060, 004, 278, 356, "", oDlg1Env, CLR_BLACK, CLR_WHITE, .T., .F. )
-	 oCBox1     := TCheckBox():New( 266,287,"Pallet Padr„o",{|u| If(PCount() > 0, lCheck := u, lCheck)},oGrp2Env,080,012,,,oFontEnv,,CLR_BLUE ,CLR_WHITE,,.t.,"Bloqueia Bipe Qdo Ultrapassa Limite",, )	
+    oBtn2Env   := TButton():New( 030, 297, "Abandona", oGrp1Env, {|| fSairMPa()}, 052, 016, , oFontEnv, , .T., , "", , , , .F. )
+    oGrp2Env   := TGroup():New( 060, 004, 278, 356, "", oDlg1Env, CLR_BLACK, CLR_WHITE, .T., .F. )
+	oCBox1     := TCheckBox():New( 267,215,"Pallet Padr„o",{|u| If(PCount() > 0, lCheck := u, lCheck)},oGrp2Env,080,012,,,oFontEnv,,CLR_BLUE ,CLR_WHITE,,.t.,"Bloqueia Bipe Qdo Ultrapassa Limite",, )	// 266,287
 
-     oBtn4Env   := TButton():New( 068, 290, "<- Monta     " , oGrp2Env, {|| fMntPallet(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn5Env   := TButton():New( 088, 290, "<- Desmonta  " , oGrp2Env, {|| fMntPallet(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
+//  oCBox1Lo   := TComboBox():New( 062, 290, {|u| If(PCount() > 0, nCBox1Lo := u, nCBox1Lo)}, {"","FAB1", "FAB2","DEPO"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Lo ) // Jose 21/09/2024 Substituido pelo de baixo
+    oCBox1Lo   := TComboBox():New( 062, 290, {|u| If(PCount() > 0, nCBox1Lo := u, nCBox1Lo)}, {"","FAB1","FAB2","ARA","DEPO"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Lo ) 
+	oSay2Loc   := TSay():New( 077, 290, { || "LocalizaÁ„o"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
 
-     oSay7Env   := TSay():New( 108, 338, { || nCount}    , oGrp2Env, , oFon3Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 020, 020)
-     oSay8Env   := TSay():New( 108, 283, { || "Volumes:"}, oGrp2Env, , oFon3Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 050, 020)
+    oBtn4Env   := TButton():New( 088, 290, "<- Monta     " , oGrp2Env, {|| fMntPallet(1) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 068
+    oBtn5Env   := TButton():New( 105, 290, "<- Desmonta  " , oGrp2Env, {|| fMntPallet(2) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 088
 
-	 oSay2Env   := TSay():New( 138, 290, { || "Impressora"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012)
-     oCBox1Co   := TComboBox():New( 128, 290, {|u| If(PCount() > 0, nCBox1Co := u, nCBox1Co)}, {"", "ZEBRA S4M", "ZEBRA ZT230"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Co )
-     oBtn6Env   := TButton():New( 148, 290, "<- Imp.Etq ->" , oGrp2Env, {|| fIEtPallet(nCBox1Co) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn7Env 	:= TButton():New( 168, 290, "<- Res. Pro->" , oGrp2Env, {|| U_fResPallet(1) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtn9Env 	:= TButton():New( 188, 290, "<- Res. Emb->" , oGrp2Env, {|| U_fResPallet(2) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtnAEnv 	:= TButton():New( 208, 290, "<- Res. Grp->" , oGrp2Env, {|| U_fResPallet(3) }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtnBEnv 	:= TButton():New( 228, 290, "<- Rel. Bor->" , oGrp2Env, {|| U_fImpInf()     }, 060, 016, , oFon2Env, , .T., , "", , , , .F. )
-     oBtnCEnv 	:= TButton():New( 246, 310, "Destruir"      , oGrp2Env, {|| fDelPallet()    }, 040, 012, , oFon2Env, , .T., , "", , , , .F. )
-     
-     oSay3Env   := TSay():New( 046, 073, { || cSay3Env  },   oGrp1Env, , oFon2Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 240, 012)
-	 
+    oSay7Env   := TSay():New( 122, 338, { || nCount}    , oGrp2Env, , oFon3Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 020, 020) // 108
+    oSay8Env   := TSay():New( 122, 283, { || "Volumes:"}, oGrp2Env, , oFon3Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 050, 020) // 108
 
-     oTblIPall()
-     DbSelectArea("TMPITE")
-     DbSetOrder(1)
-     DbGoTop()
-     oBrw1Env   := MsSelect():New( "TMPITE", "", "", { {"TMPPRO", "", "Produto", "@R XX 99.99.999-99"}, {"TMPSEQ", "", "Sequ.", "@!"}, {"TMPLOT", "", "Lote   ", "@E 999999"}, { "TMPQTD", "", "Quantidade", "@E 999,999"} , {"TMPPED", "", "Pedido", "@E 999999"}, {"TMPCBR", "", "Cod. Barras", "@E 999999999999999999"}  }, .F., , {066, 007, 266, 280}, , , oGrp2Env ) 
+	oSay2Env   := TSay():New( 138, 290, { || "Impressora"}, oGrp2Env, , oFon2Env, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 060, 012) // 138
+    oCBox1Co   := TComboBox():New( 148, 290, {|u| If(PCount() > 0, nCBox1Co := u, nCBox1Co)}, {"", "ZEBRA S4M", "ZEBRA ZT230"}, 060, 016, oGrp2Env, , , , CLR_BLACK, CLR_WHITE, .T., oFon2Env, "", , , , ,  , , nCBox1Co ) // 138
+    
+	oBtn6Env   := TButton():New( 169, 290, "<- Imp.Etq ->" , oGrp2Env, {|| fIEtPallet(nCBox1Co) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 148
+    oBtn7Env   := TButton():New( 184, 290, "<- Res. Pro->" , oGrp2Env, {|| U_fResPallet(1) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 168
+    oBtn9Env   := TButton():New( 199, 290, "<- Res. Emb->" , oGrp2Env, {|| U_fResPallet(2) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 188
+    oBtnAEnv   := TButton():New( 214, 290, "<- Res. Grp->" , oGrp2Env, {|| U_fResPallet(3) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 208
+    oBtnBEnv   := TButton():New( 229, 290, "<- Rel. Bor->" , oGrp2Env, {|| U_fImpInf()     }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) // 218
+    oBtnBEnv   := TButton():New( 244, 290, "<- Rel. Exc->" , oGrp2Env, {|| U_fImpExc(SUBSTRING(cCBox2,1,1)) }, 060, 012, , oFon2Env, , .T., , "", , , , .F. ) 
+	oBtnCEnv   := TButton():New( 260, 310, "Destruir"      , oGrp2Env, {|| fDelPallet()    }, 040, 012, , oFon2Env, , .T., , "", , , , .F. ) // 246, 310
+    
+    oSay3Env   := TSay():New( 046, 073, { || cSay3Env  },   oGrp1Env, , oFon2Env, .F., .F., .F., .T., CLR_RED, CLR_WHITE, 240, 012)
+	
 
-     oBrw1Env:oBrowse:oFont          := oFon2Env
-     oBrw1Env:oBrowse:lAdjustColSize := .t.
-     oBrw1Env:oBrowse:Refresh()
-   	 oBtn3Env:SetFocus()
-     
-     oDlg1Env:Activate(,,,.T.)
-     
-     If !lJaFech
-     	lTelaJaFechada := .t.
+    oTblIPall()
+    DbSelectArea("TMPITE")
+    DbSetOrder(1)
+    DbGoTop()
+    oBrw1Env   := MsSelect():New( "TMPITE", "", "", { {"TMPPRO", "", "Produto", "@R XX 99.99.999-99"}, {"TMPSEQ", "", "Sequ.", "@!"}, {"TMPLOT", "", "Lote   ", "@R X99999"}, { "TMPQTD", "", "Quantidade", "@E 999,999"} , {"TMPPED", "", "Pedido", "@E 999999"}, {"TMPCBR", "", "Cod. Barras", "@R X99999999999999999"}  }, .F., , {066, 007, 266, 280}, , , oGrp2Env ) // Jose 07/03/2025  "Lote   ", "@E 999999"   "Cod. Barras", "@E 999999999999999999"
+
+    oBrw1Env:oBrowse:oFont          := oFon2Env
+    oBrw1Env:oBrowse:lAdjustColSize := .t.
+    oBrw1Env:oBrowse:Refresh()
+	oBtn3Env:SetFocus()
+    
+    oDlg1Env:Activate(,,,.T.)
+    
+    If !lJaFech
+		lTelaJaFechada := .t.
         fSairMPa()
-     Endif
-     oTempTbl1:Delete()
+    Endif
+    oTempTbl1:Delete()
+
 Return
 
 
@@ -207,10 +215,12 @@ Static Function fSMntPal()
 	    oBtn3Env:Enable()
 	    oGet2Env:Enable()
 	    oCBox2:Enable()
+		oCBox1Lo:Enable()
     Endif
     If !Empty(Alltrim(cGet1Env))
 	    fCarPall(cGet1Env)
 	Endif
+	
 
 Return
 
@@ -313,7 +323,7 @@ Static Function fValBord(cNumBord)
 		If Alltrim(SZF->ZF_TIPOBOR) ='1'
 			cCBox2 :="1-AGLUTINADO"
 		Elseif Alltrim(SZF->ZF_TIPOBOR) ='2'
-			cCBox2 :="2-DEPOSITO"
+			cCBox2 :="2-DEPOSITO - GRU"
 		Elseif Alltrim(SZF->ZF_TIPOBOR) ='3'
 			cCBox2 :="3-REGIAO-RETIRA"
 		Elseif Alltrim(SZF->ZF_TIPOBOR) ='4'
@@ -322,6 +332,8 @@ Static Function fValBord(cNumBord)
 			cCBox2 :="5-CARGA FECHADA"
 		Elseif Alltrim(SZF->ZF_TIPOBOR) ='8'
 			cCBox2 :="8-CARGA-MATRIZ"	
+		Elseif Alltrim(SZF->ZF_TIPOBOR) ='9' // Jose 11/11/2024
+			cCBox2 :="9-DEPOSITO - ARA" // Jose 11/11/2024
 		Endif	
 		
 		If Alltrim(SZF->ZF_TIPOBOR) <> Substr(cCBox2,1,1)
@@ -369,7 +381,7 @@ Static Function fCarPall(cPallet)
     nCount :=0
 
     cQry1 := ""
-    cQry1 += " SELECT ZZK_CODIGO, ZZK_LOTE, ZZK_SEQENV, ZZK_PRODUT, ZZK_QUANT, ZZK_LOCORI, ZZJ_FLAG, ZZK_CODBAR, ZZK_PEDIDO , ZZJ_BORDER, ZZJ_TIPBOR "
+    cQry1 += " SELECT ZZK_CODIGO, ZZK_LOTE, ZZK_SEQENV, ZZK_PRODUT, ZZK_QUANT, ZZK_LOCORI, ZZJ_FLAG, ZZK_CODBAR, ZZK_PEDIDO , ZZJ_BORDER, ZZJ_TIPBOR, ZZJ_LOCALI "
     cQry1 += " FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
     cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) ON ZZJ_FILIAL = ZZK_FILIAL AND ZZJ_CODIGO = ZZK_CODIGO AND ZZK.D_E_L_E_T_ ='' "
     cQry1 += " WHERE (ZZJ.ZZJ_FILIAL = '"+XFILIAL("ZZJ")+"') "
@@ -391,7 +403,7 @@ Static Function fCarPall(cPallet)
        			Case TCQ->ZZJ_TIPBOR $ '1'
 	            	cCBox2 := '1-AGLUTINADO'
     	   		Case TCQ->ZZJ_TIPBOR $ '2'
-        	    	cCBox2 := '2-DEPOSITO'
+        	    	cCBox2 := '2-DEPOSITO - GRU'
        			Case TCQ->ZZJ_TIPBOR $ '3'
 	            	cCBox2 := '3-REGIAO-RETIRA'
     	   		Case TCQ->ZZJ_TIPBOR $ '4'
@@ -404,14 +416,20 @@ Static Function fCarPall(cPallet)
 	            	cCBox2 := '7-VOL. QUEBRADO'
        			Case TCQ->ZZJ_TIPBOR $ '8'	            
 	            	cCBox2 := '8-CARGA-MATRIZ'
+    	   		Case TCQ->ZZJ_TIPBOR $ '9'
+        	    	cCBox2 := '9-DEPOSITO - ARA'
 				OtherWise
         	    	cCBox2 := '2-DEPOSITO'
 			EndCase       		
 	  		cGet2Env:=TCQ->ZZJ_BORDER
   			oGet2Env:Refresh()
+			nCBox1Lo:=TCQ->ZZJ_LOCALI
+			oCBox1Lo:Refresh()
 			oBtn3Env:Enable()
 		    oCBox2:Enable()
+			oCBox1Lo:Enable()
 		    While !Eof()
+
    			    nCapPallet := fVerCPall(TCQ->ZZK_PRODUT)
 			    If nCapPallet <> nCapAntPal .and. (nCapAntPal <> 0) .or. lProdMist
 					lProdMist := .t.
@@ -446,6 +464,7 @@ Static Function fCarPall(cPallet)
 		cGet1Env := Space(11)
 		oBtn3Env:Enable() 
 		oCBox2:Enable()
+		oCBox1Lo:Enable()
 		oGet1Env:Setfocus()
     Endif
     DbSelectArea("TCQ")
@@ -461,6 +480,7 @@ Static Function fCarPall(cPallet)
     Endif	
     oGet2Env:Disable()
     oCBox2:Disable()
+	oCBox1Lo:Disable()
 Return
 
 
@@ -571,6 +591,7 @@ Static Function fMntPallet(nOpcMnt) // 1 - Monta / 2 - Desmonta
 		Return		
     Endif
     oCBox2:Disable()
+	oCBox1Lo:Disable()
     oGet2Env:Disable()
     
     If ChkFile("TMPITE")
@@ -592,7 +613,7 @@ Static Function fMntPallet(nOpcMnt) // 1 - Monta / 2 - Desmonta
     oSay4Mnt   := TSay():New( 026, 003, {|| "Descr.:"   }, oDlg1Mnt, , oFontMn1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 048, 012)                                                                                         
     oGet4Mnt   := TGet():New( 025, 037, {|u| If(PCount() > 0, cGet4Mnt := u, cGet4Mnt)}, oDlg1Mnt, 206, 012, '@!'              , , CLR_BLACK, CLR_WHITE, oFontMn2, , , .T., "", , , .F., .F., , .T. , .F., ""   ,"cGet4Mnt", , )
     oSay5Mnt   := TSay():New( 026, 250, {|| "Lote"     }, oDlg1Mnt, , oFontMn1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 024, 012)
-    oGet5Mnt   := TGet():New( 025, 276, {|u| If(PCount() > 0, cGet5Mnt := u, cGet5Mnt)}, oDlg1Mnt, 024, 012, '@R 999999'       , , CLR_BLACK, CLR_WHITE, oFontMn2, , , .T., "", , , .F., .F., , .T. , .F., ""   ,"cGet5Mnt", , )
+    oGet5Mnt   := TGet():New( 025, 276, {|u| If(PCount() > 0, cGet5Mnt := u, cGet5Mnt)}, oDlg1Mnt, 024, 012, '@R X99999'       , , CLR_BLACK, CLR_WHITE, oFontMn2, , , .T., "", , , .F., .F., , .T. , .F., ""   ,"cGet5Mnt", , ) // Jose 07/03/2025   '@R 999999' 
     oSay2Mnt   := TSay():New( 009, 120, {|| "Seq"      }, oDlg1Mnt, , oFontMn1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 024, 012)
     oGet2Mnt   := TGet():New( 007, 143, {|u| If(PCount() > 0, cGet2Mnt := u, cGet2Mnt)}, oDlg1Mnt, 024, 012, '@R 999'          , , CLR_BLACK, CLR_WHITE, oFontMn2, , , .T., "", , , .F., .F., , .T. , .F., ""   ,"cGet2Mnt", , )
     oSay3Mnt   := TSay():New( 009, 180, {|| "Qtde"     }, oDlg1Mnt, , oFontMn1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 028, 012)
@@ -622,7 +643,7 @@ Function  ≥ fValCodPro() - ValidaÁ„o do cÛdigo do produto na manutenÁ„o do Palle
 ƒƒƒƒƒƒƒƒƒƒ≈ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ*/
 
 Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
-
+ 
     Local cQry 		:= ""
     Local nVol 		:= 0
     Local nPrazo    := 0
@@ -631,8 +652,8 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
     Local aGerEtq   := {}
     Local dDtValida := ""
     Local lMandarEmail,cEmailDest,cAssunto,cMensEmail
-    Local _nXVALIDA := GetMv("MV_XVALIDA") //LGS#20200210 - AdequaÁ„o de release 12.1.25 e posteriores
-    Local _nXVALESP := GetMv("MV_XVALESP") //LGS#20200210 - AdequaÁ„o de release 12.1.25 e posteriores
+    Local _nXVALIDA := GetMv("MV_XVALIDA") //LGS#20200210 - AdequaÁ„o de release 12.1.25 e posteriores ACIMA 120 dias
+    Local _nXVALESP := GetMv("MV_XVALESP") //LGS#20200210 - AdequaÁ„o de release 12.1.25 e posteriores   90 dias
     //Local _n
     
     //Local lProdMist :=.f.
@@ -679,12 +700,12 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
     DbSetOrder(5)
 	DbGoTop()    
     DbSeek(xFilial("ZZK")+cCodBarra, .t.)   
-	If Found()
+	If Found() 
 	    If nOpcMnt == 1
 			DbSelectArea("ZZJ")
 			DbSetOrder(1)
 			DbSeek(xFilial("ZZJ")+ZZK->ZZK_CODIGO, .t.)   
-			If Found() .and. ZZJ->ZZJ_FLAG $ '3.4.5'
+			If Found() .and. ZZJ->ZZJ_FLAG $ '3.4.5' .AND. (TRIM(ZZK->ZZK_PEDIDO <>''))
 				Messagebox("Produto j· digitado em OUTRO PALLET..: "+ZZK->ZZK_CODIGO+" !! Verifique ou faÁa a desmontagem antes de incluir neste Pallet !!","AtenÁ„o...",48)
 				DbSelectArea("ZZK")
 		    	DbCloseArea()
@@ -830,10 +851,15 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
    	   	//oGet1Mnt:SetFocus()
    	  	Return
     Endif
+
+/*---  Jose 26/12/2024   inibido por solicitaÁ„o do AndrÈ -------------------------------------------------------------
     If nOpcMnt = 1
 		// COMPRAR PRIMEIRO PEGANDO O MENOR QUANTIDADE E DEPOIS A SEQUENCIA DO PEDIDO MAIS ANTIGO
-		cQry :=" SELECT TOP 1 ZF_CODIGO, C6_NUM, C6_PRODUTO, B1_DESC, B1_TIPO, C6_QTDVEN, ISNULL(SUM(ZZK_QUANT),0) AS ZZK_QUANT, 'FALTA' =(ISNULL(SUM(ZZK_QUANT),0) - C6_QTDVEN) "
+		cQry :=" SELECT TOP 1 ZF_CODIGO, C5_DTAPR, C6_NUM, C6_PRODUTO, B1_DESC, B1_TIPO, C6_QTDVEN, ISNULL(SUM(ZZK_QUANT),0) AS ZZK_QUANT, 'FALTA' =(ISNULL(SUM(ZZK_QUANT),0) - C6_QTDVEN) "
 		cQry +=" FROM "+RetSqlName("SZG")+" SZG WITH(NOLOCK) "
+//-------------  ACRESCENTADO POR JOSE 28/07/2022 --------------------------
+		cQry +=" LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH(NOLOCK) ON (ZG_FILIAL  = C5_FILIAL) AND (SUBSTRING(ZG_PEDIDO,3,6) = C5_NUM) AND (SC5.D_E_L_E_T_ ='') "
+//--------------------------------------------------------------------------
 		cQry +=" LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON (ZG_FILIAL  = C6_FILIAL) AND (SUBSTRING(ZG_PEDIDO,3,6) = C6_NUM) AND (SC6.D_E_L_E_T_ ='') "
 		cQry +=" LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON (ZZK_FILIAL = C6_FILIAL) AND (ZZK_PRODUT = C6_PRODUTO) AND (ZZK_PEDIDO = C6_NUM) AND (ZZK.D_E_L_E_T_ ='') "
 		cQry +=" LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON (C6_FILIAL  = B1_FILIAL) AND (C6_PRODUTO = B1_COD) AND (SB1.D_E_L_E_T_ ='') " 
@@ -851,13 +877,60 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 		If GetMv("MV_XBIPFAT") == .F.
 			cQry +=" AND C6_NOTA ='' "
 		Endif
-		cQry +=" GROUP BY ZF_CODIGO, C6_NUM, C6_PRODUTO, C6_QTDVEN, B1_DESC, B1_TIPO "
+		cQry +=" GROUP BY ZF_CODIGO, C6_NUM, C6_PRODUTO, C6_QTDVEN, B1_DESC, B1_TIPO, C5_DTAPR "
 		cQry +=" HAVING ISNULL(SUM(ZZK_QUANT),0) < C6_QTDVEN " 
-		cQry +=" ORDER BY ZF_CODIGO, FALTA DESC, C6_NUM "
+//------------   INIBIDO POR JOSE 28/07/2022 E SUBSTITUIDO PELO DE BAIXO -----------------------------
+//		cQry +=" ORDER BY ZF_CODIGO, FALTA DESC, C6_NUM " --- 10/08/2022
+//      cQry +=" ORDER BY C5_DTAPR ASC, C6_NUM ASC , FALTA DESC"  //-----  23/08/2022
+//----------------------------------------------------------------------------------------------------
+        cQry +=" ORDER BY ZF_CODIGO ASC, C6_NUM ASC , FALTA DESC"
+			   	TCQuery cQry ALIAS "TCQ1" NEW
+    	DbSelectArea("TCQ1")	
+        If !(TCQ1->(Eof())) 
+----   Jose atÈ aqui 26/12/2024 -----------------------------------------------------------------------*/
+//   Acrescentado Jose 26/12/2024     por solicitaÁ„o do AndrÈ ------------------------------------------
+    If nOpcMnt = 1
+        // COMPRAR PRIMEIRO PEGANDO A MENOR QUANTIDADE E DEPOIS A SEQUENCIA DO PEDIDO MAIS ANTIGO
+        cQry :=" SELECT TOP 1 C6_FILIAL, C6_NUM, C6_PRODUTO, B1_DESC, ( SELECT dbo.DetVol(C6_FILIAL,C6_PRODUTO) )  AS 'VOL', B1_TIPO, B1_RELVOL, C6_QTDVEN, ISNULL(SUM(ZZK_QUANT),0) AS ZZK_QUANT, 'FALTA' =(ISNULL(SUM(ZZK_QUANT),0) - C6_QTDVEN), " //, Z1_DESCRE
+        cQry +="'VOLUME' = ( ( ISNULL ( SUM ( ZZK_QUANT ),0 ) - C6_QTDVEN ) / ( SELECT dbo.DetVol ( C6_FILIAL,C6_PRODUTO ) ) * -1) , "
+        cQry +=" C9_BLOQ = (SELECT COUNT(C9_ITEM) FROM "+RetSqlName("SC9")+" SC9 WITH(NOLOCK) WHERE (C9_FILIAL  = C6_FILIAL) AND (C9_PEDIDO = C6_NUM) AND (SC9.D_E_L_E_T_ ='')  AND (C9_BLEST ='02') ), "
+        cQry +=" TEMSC9  = (SELECT COUNT(*) FROM "+RetSqlName("SC9")+" SC9 WITH(NOLOCK) WHERE (C9_FILIAL  = C6_FILIAL) AND (C9_PEDIDO = C6_NUM) AND (SC9.D_E_L_E_T_ ='') ) "
+        cQry +=" FROM "+RetSqlName("SZG")+" SZG WITH(NOLOCK) "
+        cQry +=" LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON (ZG_FILIAL  = C6_FILIAL) AND (SUBSTRING(ZG_PEDIDO,3,6) = C6_NUM) AND (SC6.D_E_L_E_T_ ='') "
+        cQry +=" LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON (ZZK_FILIAL = C6_FILIAL) AND (ZZK_PRODUT = C6_PRODUTO) AND (ZZK_PEDIDO = C6_NUM) AND (ZZK.D_E_L_E_T_ ='') "
+        cQry +=" LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH(NOLOCK) ON (C6_FILIAL  = B1_FILIAL) AND (C6_PRODUTO = B1_COD) AND (SB1.D_E_L_E_T_ ='') "
+        cQry +=" LEFT OUTER JOIN "+RetSqlName("SF4")+" SF4 WITH(NOLOCK) ON (F4_FILIAL  ='"+XFilial("SF4")+"') AND (F4_CODIGO = C6_TES) AND (SF4.D_E_L_E_T_ ='') "
+        cQry +=" WHERE SZG.D_E_L_E_T_ ='' "
+        cQry +=" AND ZG_FILIAL ='"+XFilial("SZG")+"' "
+        cQry +=" AND ZG_CODIGO ='"+Alltrim(cGet2Env)+"' "
+        cQry +=" AND C6_PRODUTO ='"+Alltrim(cGet1Mnt)+"' "
+        cQry +=" AND F4_ESTOQUE ='S' "
+        If GetMv("MV_XBIPFAT") == .F.
+            cQry +=" AND C6_NOTA ='' "
+        Endif      
+        cQry +=" GROUP BY C6_NUM, C6_PRODUTO, C6_QTDVEN, B1_DESC, B1_TIPO, C6_FILIAL, B1_RELVOL"
+        cQry +=" HAVING ISNULL(SUM(ZZK_QUANT),0) < C6_QTDVEN "
+        cQry +=" ORDER BY FALTA DESC, C6_NUM "
 
 	   	TCQuery cQry ALIAS "TCQ1" NEW
     	DbSelectArea("TCQ1")	
         If !(TCQ1->(Eof())) 
+            If GetMv("ZP_PAR0332") // verificar se o pedido que esta sendo separado
+                If TCQ1->TEMSC9 == 0
+                    Messagebox("Pedido( "+TCQ1->C6_NUM+" ) n„o pode ser separado pois N√O tem itens COM estoque liberado!  Verifique com o Planejamento LogÌstico !!","AtenÁ„o...",48)
+                    DbSelectArea("TCQ1")
+                    DbCloseArea()
+                    Return
+                Elseif TCQ1->C9_BLOQ >0
+                    Messagebox("Pedido( "+TCQ1->C6_NUM+" ) n„o pode ser separado pois tem itens SEM liberaÁ„o de estoque!  Verifique com o Planejamento LogÌstico !!","AtenÁ„o...",48)
+                    DbSelectArea("TCQ1")
+                    DbCloseArea()
+                    Return
+                Endif
+            Endif
+
+//  Jose 26/12/2024  AtÈ aqui ---------------------------------------------------------------------------
+
 	    	If TCQ1->B1_TIPO $ 'PA.PI.MP.MC'
 			   If ChkFile("TCR")
 				  DbSelectArea("TCR")
@@ -942,6 +1015,18 @@ Static Function fValCodPro(nOpcMnt)  //1 - Montagem do Pallet 2- Desmontagem
 				    DbSelectArea("TCR")
 	   				DbCloseArea()
 		    	Endif
+
+				//Nelieder - 21/07/23 Bloqueio de Lote
+				If BLQLOTE(cGet5Mnt)
+					oSay7Env:Refresh()
+					oSay3Env:Refresh()
+					oGet1Mnt:SetFocus()
+					DbSelectArea("TCQ1")
+			    	DbCloseArea()
+					return()
+				EndIf	
+
+
 			   	Begin Transaction
 				   	If cGet1Env $ "NOVO PALLET"  // gravar o n˙mero do pallet na primeira inclus„o do produto
 				    	fGrvNPal()
@@ -1269,6 +1354,13 @@ Static Function fNPal()
 
     If MsgYesNo("Confirma novo Pallet com tipo de borderÙ "+Alltrim(cCBox2)+" ?", "AtenÁ„o")
 
+		If Empty(Alltrim(nCBox1Lo)) .and. alltrim(FWCodFil()) =='010101'
+			Messagebox("Informe o local onde o Pallet esta sendo montado (FAB-1 / FAB-2 / ARA / DEPOS) !!","Verifique...",48)		
+			oCBox1Lo:Setfocus()
+			Return
+		Endif
+
+
 		cGet1Env := "NOVO PALLET"
 		cSay3Env := ""
 		lCheck   := .t.
@@ -1282,6 +1374,7 @@ Static Function fNPal()
 		Endif 
 		oBtn3Env:Disable()
 	    oCBox2:Disable()
+		oCBox1Lo:Disable()
 	    oGet2Env:Enable()
 		oBrw1Env:oBrowse:GoTop()
 		oBrw1Env:oBrowse:Refresh()
@@ -1295,82 +1388,103 @@ Static Function fNPal()
 Return
 
 Static Function fGrvNPal() // Grava NumeraÁ„o do Pallet Antes de Salvar
-       
+
 	Local cQry1   := ""
-	Local cQry2   := ""
+	//Local cQry2   := ""
     Local nCodReg := ""
-    Local cLocali := ""
-	Local cNumIP  := GetClientIP()
+    //Local cLocali := ""
+	//Local cNumIP  := GetClientIP()
 	Local cBordero:= "VARIOS"    
-       
+
     If cGet1Env $ "NOVO PALLET"  
        //Buscar o ultimo R_E_C_N_O_ para Inclus„o
-       cQry1 += " SELECT MAX(R_E_C_N_O_) AS R_E_C_N_O_ "
-       cQry1 += " FROM  "+RetSqlName("ZZJ")+" WITH (NOLOCK) "
+		cQry1 += " SELECT MAX(R_E_C_N_O_) AS R_E_C_N_O_ "
+		cQry1 += " FROM  "+RetSqlName("ZZJ")+" WITH (NOLOCK) "
 
-       TCQUERY cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
-       nCodReg := Str(TCQ->R_E_C_N_O_ + 1, 10)
+		TCQUERY cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+		nCodReg := Str(TCQ->R_E_C_N_O_ + 1, 10)
 
-       DbSelectArea("TCQ")
-       DbCloseArea()
+		DbSelectArea("TCQ")
+		DbCloseArea()
+/*
+       	// Buscar LocalizaÁ„o baseado no cadastro de IP do Antivirus
+		cQry2 += " SELECT Z11_LOCALI FROM "+RetSqlName("Z11")+" WITH(NOLOCK) "
+		cQry2 += " WHERE D_E_L_E_T_ ='' AND D_E_L_E_T_ ='' AND Z11_CODIGO IN('000006') AND Z11_IP ='"+Alltrim(cNumIP)+"'"
 
-       // Buscar LocalizaÁ„o baseado no cadastro de IP do Antivirus
-       cQry2 += " SELECT Z11_LOCALI FROM "+RetSqlName("Z11")+" WITH(NOLOCK) "
-       cQry2 += " WHERE D_E_L_E_T_ ='' AND D_E_L_E_T_ ='' AND Z11_CODIGO IN('000006') AND Z11_IP ='"+Alltrim(cNumIP)+"'"
+		TCQUERY cQry2 ALIAS "TCR" NEW
+		DbSelectArea("TCR")
+		DbGoTop()
+		If !Eof()
+			cLocali := Alltrim(TCR->Z11_LOCALI)
+		Endif		       
+		DbSelectArea("TCR")
+		DbCloseArea()
+*/
+		cQry1 := ""
+		cQry1 += " SELECT TOP 1 ZZJ.ZZJ_CODIGO "
+		cQry1 += " FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
+		cQry1 += " WHERE ZZJ.ZZJ_FILIAL = '"+xFilial("ZZJ")+"'"
+       	//cQry1 += "  AND ZZJ.D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZZJ.ZZJ_DTINI  = '"+DTOS(Date())+"' "
+		cQry1 += " ORDER BY ZZJ.ZZJ_CODIGO DESC "
 
-       TCQUERY cQry2 ALIAS "TCR" NEW
-       DbSelectArea("TCR")
-       DbGoTop()
-	   If !Eof()
-	   	   cLocali := Alltrim(TCR->Z11_LOCALI)
-	   Endif		       
-       DbSelectArea("TCR")
-       DbCloseArea()
+		TCQUERY cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
 
-	   cQry1 := ""
-       cQry1 += " SELECT TOP 1 ZZJ.ZZJ_CODIGO "
-       cQry1 += " FROM "+RetSqlName("ZZJ")+" ZZJ WITH (NOLOCK) "
-       cQry1 += " WHERE ZZJ.ZZJ_FILIAL = '"+xFilial("ZZJ")+"'"
-       //cQry1 += "  AND ZZJ.D_E_L_E_T_ = '' "
-       cQry1 += "  AND ZZJ.ZZJ_DTINI  = '"+DTOS(Date())+"' "
-       cQry1 += " ORDER BY ZZJ.ZZJ_CODIGO DESC "
+		cCodSeq := Iif(Empty(TCQ->ZZJ_CODIGO), SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CODIGO, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CODIGO, 8, 4))+1, 4) )
+		cNomArq := SubStr(cCodSeq, 8, 4)
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		
+		cBordero := Iif(Alltrim(cGet2Env) ="", "VARIOS", Alltrim(cGet2Env))
 
-       TCQUERY cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
+		DbSelectArea("ZZJ")
+		DbSetOrder(1)
+		DbSeek(xFilial("ZZJ")+cCodSeq, .t.)   
+		If !Found() 
+			Reclock("ZZJ",.t.)
+				ZZJ->ZZJ_FILIAL := xFilial("ZZJ")
+				ZZJ->ZZJ_CODIGO := cCodSeq
+				ZZJ->ZZJ_DTINI  := Date()
+				ZZJ->ZZJ_HINI   := SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)
+				ZZJ->ZZJ_FLAG   := '3'
+				ZZJ->ZZJ_BORDER	:= cGet2Env
+				ZZJ->ZZJ_USER   := __cUserId
+				ZZJ->ZZJ_BORDER := cBordero
+				ZZJ->ZZJ_LOCALI := nCBox1Lo
+				ZZJ->ZZJ_TIPBOR := Substr(cCBox2,1,1)
+			MsUnlock()
+		Endif
 
-	   cCodSeq := Iif(Empty(TCQ->ZZJ_CODIGO), SubStr(Dtos(Date()), 7, 2)+SubStr(Dtos(Date()), 5, 2)+SubStr(Dtos(Date()), 3, 2)+'/'+'0001', SubStr(TCQ->ZZJ_CODIGO, 1, 7)+StrZero(Val(SubStr(TCQ->ZZJ_CODIGO, 8, 4))+1, 4) )
-       cNomArq := SubStr(cCodSeq, 8, 4)
-       DbSelectArea("TCQ")
-       DbCloseArea()
-       
-       cBordero := Iif(Alltrim(cGet2Env) ="", "VARIOS", Alltrim(cGet2Env))
-       
-       cQry1 := ""
-       cQry1 += "INSERT INTO "+RetSqlName("ZZJ")+" (ZZJ_FILIAL,  ZZJ_CODIGO  ,  ZZJ_DTINI         , ZZJ_HINI                                       ,  R_E_C_N_O_ , ZZJ_FLAG,   ZZJ_USER     ,   ZZJ_BORDER  ,  ZZJ_LOCALI  ,   ZZJ_TIPBOR  ) "
-       cQry1 += "                  VALUES('"+xFilial("ZZJ")+"', '"+cCodSeq+"',  '"+DTOS(Date())+"', '"+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+"', "+nCodReg+" ,  '3'    , '"+__cUserId+"', '"+cBordero+"', '"+cLocali+"', '"+Substr(cCBox2,1,1)+"'  ) "
-	   XXX := TCSQLExec(cQry1)		
-       If XXX <> 0
-       	   cNomArq := 'C:\TEMP\ERR'+DTOS(MsDate())+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+'.ERR'
-           MemoWrit(cNomArq, cQry1)
-       Endif
+/*
+		cBordero := Iif(Alltrim(cGet2Env) ="", "VARIOS", Alltrim(cGet2Env))
+		cQry1 := ""
+		cQry1 += "INSERT INTO "+RetSqlName("ZZJ")+" (ZZJ_FILIAL,  ZZJ_CODIGO  ,  ZZJ_DTINI         , ZZJ_HINI                                       ,  R_E_C_N_O_ , ZZJ_FLAG,   ZZJ_USER     ,   ZZJ_BORDER  ,  ZZJ_LOCALI  ,   ZZJ_TIPBOR  ) "
+		cQry1 += "                  VALUES('"+xFilial("ZZJ")+"', '"+cCodSeq+"',  '"+DTOS(Date())+"', '"+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+"', "+nCodReg+" ,  '3'    , '"+__cUserId+"', '"+cBordero+"', '"+cLocali+"', '"+Substr(cCBox2,1,1)+"'  ) "
+		XXX := TCSQLExec(cQry1)		
+		If XXX <> 0
+			cNomArq := 'C:\TEMP\ERR'+DTOS(MsDate())+SubStr(Time(), 1, 2)+SubStr(Time(), 4, 2)+'.ERR'
+			MemoWrit(cNomArq, cQry1)
+		Endif
+*/
+		If ChkFile("TMPITE")
+			DbSelectArea("TMPITE")
+		   	//DbGoTop()
+	   	   	//Zap
+           	//LGS#20191029 - Substituido comando ZAP devido a utilizaÁ„o de funÁ„o do banco.
+			TCSqlExec("DELETE FROM " + oTempTbl1:GetRealName() )
+		Endif 
 
-       If ChkFile("TMPITE")
-		   DbSelectArea("TMPITE")
-		   //DbGoTop()
-	   	   //Zap
-           //LGS#20191029 - Substituido comando ZAP devido a utilizaÁ„o de funÁ„o do banco.
-           TCSqlExec("DELETE FROM " + oTempTbl1:GetRealName() )
-	   Endif 
-	   
-	   oBtn3Env:Disable()  
-	   oCBox2:Disable()
-       cGet1Env := cCodSeq
-       oGet1Env:Refresh()
+		oBtn3Env:Disable()  
+		oCBox2:Disable()
+		oCBox1Lo:Disable()
+		cGet1Env := cCodSeq
+		oGet1Env:Refresh()
     Endif
-       
+
 Return()
 
 
@@ -1556,6 +1670,34 @@ Static Function fDelPallet()
 
 Return()
 
+
+/*/
+{Protheus.doc} BLQLOTE
+(long_description)
+@type  Function
+@author Nelieder Corneta
+@since 20/07/2023
+@param cLote
+@return return
+/*/
+Static Function BLQLOTE(cLote)
+Local cReturn := .F.
+
+If _ZPPAR0118 // Bloqueio de lote = .T.
+
+	DbSelectArea("ZAE")
+	DbSetOrder(2)
+	If DbSeek(xFilial("ZAE")+cLote)
+		If ZAE->ZAE_TIPO == "1"
+			U_ZPCPC02(cLote)
+			cReturn := .T. // Lote est· bloqueado
+		EndIf 
+	EndIf
+
+EndIf	
+
+Return cReturn
+
 /*/
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -1596,6 +1738,7 @@ Static Function fImpInf()
        Private wnrel       := "BRFATX66" // Coloque aqui o nome do arquivo usado para impressao em disco
        Private cString     := ''
        Private cRetLin     := ''
+
 
        If Empty(Alltrim(cGet2Env))
 			Messagebox("Informe o cÛdigo do BorderÙ de pedidos antes de consultar !","AtenÁ„o...",48)

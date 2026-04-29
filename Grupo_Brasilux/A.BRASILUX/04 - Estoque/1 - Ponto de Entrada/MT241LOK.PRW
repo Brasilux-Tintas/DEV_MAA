@@ -21,7 +21,8 @@ User function MT241LOK()
      Local n := ParamIxb[1]
      Local cArea := Alias()
      Local aArea := U_PegaArea({"SB1"})
-     u_zcfga01( 'MT241LOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
+     //---------------- LGS#20231023 ----- RETIRADA DA GRAVAÇÃO DO LOG DE ROTINA PARA MELHORA DE PERFORMANCE.
+     //u_zcfga01( 'MT241LOK' ) //LGS#2021119 - Gravação de log de utilização da rotina
      If FWCodEmp() <> '11' //Empresas que não são do grupo 11(Tecpolpa).
         DbSelectArea("SB1")
         DbSetorder(1)
@@ -30,7 +31,9 @@ User function MT241LOK()
            cValida := Posicione("SB1", 1, xFilial("SB1")+(aCols[n][1]),"B1_TIPO")                                                                        
         EndIf
         If cValida == "PA" 
-           If !((PSWADMIN( cUsername, SubStr(cUsuario, 6, 1),RetCodUsr()) = 0) .OR. (PSWADMIN( cUsername, SubStr(cUsuario, 6, 1),RetCodUsr()) = 4) ) 
+           //LGS#12/07/2023 - Ajuste dos parametros da função PSWAdmin
+           //If !((PSWADMIN( cUsername, SubStr(cUsuario, 6, 1),RetCodUsr()) = 0) .OR. (PSWADMIN( cUsername, SubStr(cUsuario, 6, 1),RetCodUsr()) = 4) ) 
+           If !( ( PSWADMIN( , , RetCodUsr() ) == 0 ) .OR. ( PSWADMIN( , , RetCodUsr() ) == 4 ) )
               Messagebox("Não é permitido inclusão/baixa de produtos acabados por esta rotina!!!","Atenção...",48)
               Return .F.
            Endif

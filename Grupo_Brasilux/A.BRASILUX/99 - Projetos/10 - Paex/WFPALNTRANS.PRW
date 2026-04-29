@@ -20,8 +20,8 @@
 	+---------------------------------------------------------------------------+  
 */         
 User Function WFPNTRAN()
-   
-    Local cPara    	:= "mirinho@brasilux.com.br,edevilson@brasilux.com.br,faturamento@brasilux.com.br,kiko@brasilux.com.br,marcosazevedo@brasilux.com.br,estoque@brasilux.com.br"
+    
+    Local cPara    	:= "" //TRIM(GETMV("ZP_PAR0070")) //"mirinho@brasilux.com.br,edevilson@brasilux.com.br,faturamento@brasilux.com.br,kiko@brasilux.com.br,marcosazevedo@brasilux.com.br,estoque@brasilux.com.br"
     Local cAssunto  := "Pallets montados na Fabrica 2 e não transferidos"
     Local cMsg		:= ""
     Local cQuery    := ""
@@ -29,7 +29,7 @@ User Function WFPNTRAN()
 
     
     PREPARE ENVIRONMENT EMPRESA "01" FILIAL "010101" 
-
+	cPara  := TRIM(GETMV("ZP_PAR0070"))
     cQuery := ""
     cQuery += " SELECT ZZJ_CODIGO AS 'PALLET', SUBSTRING(ZZJ_HINI,1,2)+':'+SUBSTRING(ZZJ_HINI,3,2) AS 'HORAINICIO', ZZJ_LOCALI AS 'BIPADOEM', "
     cQuery += " CASE WHEN ZZJ_FLAG ='5' THEN 'FATURADO' ELSE 'NÃO FATURADO' END AS 'STATUS', ZH_NOME AS 'MONTADOPOR', " 
