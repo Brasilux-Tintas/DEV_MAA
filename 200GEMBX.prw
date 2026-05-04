@@ -3,6 +3,7 @@ User Function FA200FIL()
     Local cNumeroTit    As Character
  
  a:=1
+ b:=1
     cNumeroTit  := AllTrim(paramIXB[1][1])
  
     //Sua forma para pesquisa do título a receber
