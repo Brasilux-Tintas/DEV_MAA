@@ -7,18 +7,22 @@ Ponto de entrada para liberação automatica de SC quando vier de ponto de pedido
 @return character, sem retorno
 /*/
 User Function MT170SC1()
-Local aArea:=FWGetArea()
-    RecLock("SC1",.F.)
-    SC1->C1_APROV:="L"
-    MsUnLock()
-
-    // Apaga registro na SCR caso tenha
-    SCR->(dbSetOrder(1))
-    If SCR->(dbSeek(xFilial("SCR")+"SC"+SC1->C1_NUM))
-        RecLock("SCR",.F.)
-        SCR->(dbDelete())
+    Local aArea:=FWGetArea()
+    If SoftLock("SC1")
+        RecLock("SC1",.F.)
+        SC1->C1_APROV:="L"
         MsUnLock()
     End
-    
-FWRestArea(aArea)    
+    // Apaga registro na SCR caso tenha
+    SCR->(dbSetOrder(1))
+
+    If SCR->(dbSeek(xFilial("SCR")+"SC"+SC1->C1_NUM))
+        If SoftLock("SCR")
+            RecLock("SCR",.F.)
+            SCR->(dbDelete())
+            MsUnLock()
+        End
+    End
+
+    FWRestArea(aArea)
 Return (NIL)

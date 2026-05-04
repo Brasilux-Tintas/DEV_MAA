@@ -4250,7 +4250,7 @@ User Function FATA03_A(cOpcCon)
 //  até aqui Jose 21/08/2024 ---------------------------------
 
 
-   oGrpPrE    := TGroup():New( 048, 004, 080, 510, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
+   oGrpPrE    := TGroup():New( 048, 004, 080, 600, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
  //oSayOrd  := TSay():New( 056, 008, {||"Pallet:"}                                 , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 032, 008)
  //oOrdPro  := TGet():New( 064, 008, {|u| If(PCount() > 0, cOrdPro := u, cOrdPro)}, oGrpPrE, 060, 10, '999999/9999'  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "cOrdPro", , )
  //oOrdPro:bLostFocus := {|| fOrdPro() }
@@ -4280,6 +4280,11 @@ User Function FATA03_A(cOpcCon)
 /*-------------- Aqui Jose 05/072024  ------------------------------------*/
    oSayMark   := TSay():New( 056, 470, {||"Marcados"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
    oQtdMark   := TGet():New( 064, 470, {|u| If(PCount() > 0, nQtdMark := u, nQtdMark)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdMark", , )  // Jose 05/07/2024   056, 344,
+
+  // maa
+  nQtdAvar	:= 0     
+   oSayMark   := TSay():New( 056, 510, {||"Avarias"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
+   oQtdMark   := TGet():New( 064, 510, {|u| If(PCount() > 0, nQtdAvar := u, nQtdAvar)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdAvar", , )  // Jose 05/07/2024   056, 344,
 
    //oQtdG3:bLostFocus := {|| nQtdSepG := nQtdG3 + nQtdSep3, oQtdG3:Refresh(), oQtdSepG:Refresh() }
       
@@ -4707,6 +4712,7 @@ Static Function fCodPro()
    nQtdDis   := 0
    nQtdPro   := 0
    nQtdMark  := 0
+   nQtdAvar  := 0  // MAA 20260430
    //oOrdPro:Refresh()
    //oQtdPro:Refresh()
    oQtdSep3:Refresh()
@@ -4750,6 +4756,8 @@ Static Function fCodPro()
          oQtd30:Refresh()
          nQtdMark :=0
          oQtdMark:Refresh()
+	     nQtdAvar :=0 //MAA 20260430
+         oQtdAvar:Refresh() //MAA 20260430
          Return(.f.)
       Else
          If !SB1->B1_TIPO $ 'PA'
@@ -4777,6 +4785,8 @@ Static Function fCodPro()
             oQtd30:Refresh()
             nQtdMark :=0
             oQtdMark:Refresh()
+			nQtdAvar :=0 // MAA 20260430
+			oQtdAvar:Refresh() // MAA 20260430
             Return(.f.)
          Else
             cCodPro := SB1->B1_COD
@@ -4821,6 +4831,8 @@ Static Function fCodPro()
          oQtd30:Refresh()
          nQtdMark:=0
          oQtdMark:Refresh()
+		 nQtdAvar :=0 // MAA 20260430
+		 oQtdAvar:Refresh() // MAA 20260430
          Return(.f.)
       Endif	    
       DbSelectArea("SC2")
@@ -4855,6 +4867,8 @@ Static Function fCodPro()
       oQtd30:Refresh()
       nQtdMark:=0
       oQtdMark:Refresh()
+	  nQtdAvar :=0 // MAA 20260430
+	  oQtdAvar:Refresh() // MAA 20260430
       Return(.f.)
    Else
       If !SB1->B1_TIPO $ 'PA' .and. !Substr(Alltrim(cCodPro),4,2) $ '96.97.98.99'
@@ -4882,6 +4896,8 @@ Static Function fCodPro()
          oQtd30:Refresh()
          nQtdMark:=0
          oQtdMark:Refresh()
+		 nQtdAvar :=0 // MAA 20260430
+		 oQtdAvar:Refresh() // MAA 20260430
          Return(.f.)
       Else
          cCodPro := TransForm(SB1->B1_COD, "@R! XX 99.99.999-XX")
@@ -4914,6 +4930,8 @@ Static Function fCodPro()
             oQtd30:Refresh()
             nQtdMark:=0
             oQtdMark:Refresh()
+		 nQtdAvar :=0 // MAA 20260430
+		 oQtdAvar:Refresh() // MAA 20260430
          Else
             cLocPro := SB2->B2_LOCALIZ
             oLocPro:Refresh()
@@ -4953,6 +4971,8 @@ Static Function fCodPro()
             oQtd30:Refresh()
             nQtdMark:=0
             oQtdMark:Refresh()
+		 nQtdAvar :=0 // MAA 20260430
+		 oQtdAvar:Refresh() // MAA 20260430
          Else
             cLocProA:= SB2->B2_LOCALIZ
             oLocPro:Refresh()
@@ -5004,6 +5024,50 @@ Static Function fCodPro()
             nQtdSepA := 0       // Jose 05/07/2024
             oQtdSepA:Refresh()  // Jose 05/07/2024
          Endif
+
+//---------    Acrescentado por MAA 20260430 ----------------------
+         SB2->(DbSetOrder(1))
+         If .NOT. SB2->(DbSeek(xFilial("SB2")+SB1->B1_COD+"AV"))
+            cLocProA := space(15)
+            nQtd03 := 0
+            nQtdSep3 := 0
+            nQtdG3 := 0
+            nQtdA3 := 0        
+            nQtdSepG := 0
+            nQtdSepA := 0      
+            nQtd30 := 0
+            nQtdMark:=0
+		 	nQtdAvar :=0  
+
+            oLocPro:Refresh()
+            oQtd03:Refresh()
+            oQtdSep3:Refresh()
+            oQtdG3:Refresh()
+            oQtdA3:Refresh()
+            oQtdSepG:Refresh()
+            oQtdSepA:Refresh()
+            oQtd30:Refresh()
+            oQtdMark:Refresh()
+		 	oQtdAvar:Refresh()
+         Else
+            cLocProA:= SB2->B2_LOCALIZ
+        	 nQtdMark:=SB2->B2_QATU
+            oQtdMark:Refresh()
+		
+		    oLocPro:Refresh()
+            nQtdSep3 := 0
+            oQtdSep3:Refresh()
+            nQtdG3 := 0
+            oQtdG3:Refresh()
+            nQtdA3 := 0         // Jose 05/07/2024
+            oQtdA3:Refresh()    // Jose 05/07/2024
+            nQtdSepG := 0
+            oQtdSepG:Refresh()
+            nQtdSepA := 0       // Jose 05/07/2024
+            oQtdSepA:Refresh()  // Jose 05/07/2024
+         Endif
+//---------   Fim do  Acrescentado por MAA 20260430 ----------------------
+
 //----------    Até aqui Jose  021/08/2024 ----------------------------------
       Endif
       cQry1 := ""
