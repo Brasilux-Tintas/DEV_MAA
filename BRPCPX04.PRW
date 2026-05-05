@@ -27,13 +27,7 @@
 User Function BRPCPX04()
      Local aTcq          := {}
      Local aGerTxt       := {}
-   //Local cFlagRot      := ""
-   //Local cAuxQbr       := ""
-   //Local cQbr1Tx       := ""
-   //Local cQbr2Tx       := ""
-   //Local cQbr3Tx       := ""
-   //Local cQbr4Tx       := ""
-   //Local cMsgTel       := ""
+
      Local cArqBloq, aBloq,_cAreaBloq,cAux
      Local _lOpen        := .F. //LGS#20200204 - Adequação para release 12.1.25
      Private aGerTxtOps  := {}
@@ -89,27 +83,12 @@ User Function BRPCPX04()
 	endif
 	_cAreaBloq := aBloq[1,4]
 
-
-     
-     /*
-     If !Empty( Alltrim( GetMV( 'ZP_PAR0014' ) ) )
-        cAux := "O programa já está sendo usado por: " + Alltrim( GetMV( 'ZP_PAR0014' ) )
-           MessageBox( cAux, "Atenção!", 16 )
-        return
-     Else
-		PutMV( "ZP_PAR0014", RTRIM( cUserName ) )
-     Endif
-     
-     */
-     /********************************************************************************************************************************/
-     //   If Empty(cFlagRot)
-     //      PutMv("MV_BXOPLAN", "N"+"|"+Alltrim(cUserName)+"|"+Time()+"|"+Dtoc(MsDate()) )
      aTcq = {}    
      AADD( aTcq, { "LOTE", "C", 6, 0 } )
 
      /********************************************************************************************************************************/
      /*** BLOCO ALTERADO EM 06/02/2020 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-     //xLotes = CriaTrab(aTcq, .t.)
+   
      xLotes := GetNextAlias()
      //Use &xLotes Alias &xLotes new
      oTempTbl01 := FWTemporaryTable():New( xLotes )

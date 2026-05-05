@@ -8,47 +8,45 @@
 #INCLUDE 'vkey.CH'
 #xtranslate bsetget(<uvar>) => { | u | If( PCount() == 0, <uvar>, <uvar> := u ) }
 
-/*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³ BRFATA03 ºAutor  ³ Luís G. de Souza   º Data ³  23/02/06   º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDesc.     ³ Bordero de Pedidos Aprovados.                              º±±
-±±º          ³ Antigo BRFAT065.                                           º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ BRASILUX TINTAS TÉCNICAS LTDA.                             º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-*/
+
+/*/{Protheus.doc} BRFATA03
+Bordero de Pedidos Aprovados.  Antigo BRFAT065.
+@type function Tela
+@version  1.00
+@author Luís G. de Souza /  Modificado por Mario Antonaccio
+@since 23/02/06 -  Alterado em 30/04/2026
+@return character, sem retorno
+/*/
 User Function BRFATA03()
 
-	Private cAcessos  := ""
-	Private cCadastro := "Bordero de Pedidos (Novo)"
-	Private aRotina   := { { OemToAnsi('&Pesquisa'		   )      , "AxPesqui"       , 0, 1 },;
-		{ OemToAnsi('&Visualizar'			)	    , 'u_FATA03_1("V")', 0, 2 },;
-		{ OemToAnsi('&Incluir'				)      , 'u_FATA03_1("I")', 0, 3 },;
-		{ OemToAnsi('&Alterar'				)      , 'u_FATA03_1("A")', 0, 4 },;
-		{ OemToAnsi('&Excluir'				)      , 'u_FATA03_1("E")', 0, 5 },;
-		{ OemToAnsi("Atualiza Status"   )	    , 'u_FATA02_9()   ', 0, 6 }}
-	u_zcfga01( 'BRFATA03' ) //LGS#2021201 - Gravação de log de utilização da rotina
+	Private aCores    := {}                          as Array
+	Private aRotina   := {}                          as Array
+	Private cAcessos  := ""                          as character
+	Private cCadastro := "Bordero de Pedidos (Novo)" as character
+	Private cOpcMen   := ''                          as character
+
+	aRotina :={{ OemToAnsi( '&Pesquisa' ) , "AxPesqui" , 0, 1},;
+		{OemToAnsi( '&Visualizar' )                    , 'u_FATA03_1("V")', 0, 2},;
+		{OemToAnsi( '&Incluir' )                       , 'u_FATA03_1("I")', 0, 3},;
+		{OemToAnsi( '&Alterar' )                       , 'u_FATA03_1("A")', 0, 4},;
+		{OemToAnsi( '&Excluir' )                       , 'u_FATA03_1("E")', 0, 5},;
+		{OemToAnsi("Atualiza Status" )                 , 'u_FATA02_9()   ', 0, 6 }}
+
+
 	If GETMV("MV_QUALCON") == 1
-		aadd(aRotina,    { OemToAnsi('&Consultar')    , 'u_FATA03_3("M")', 0, 9 } )
+		AADD(aRotina, {OemToAnsi( '&Consultar' )  , 'u_FATA03_3("M")', 0, 9})
 	ElseIf GETMV("MV_QUALCON") == 2
-		aadd(aRotina,    { OemToAnsi('Consultar II')  , 'u_FATA03_A("M")', 0, 9 } )
+		AADD(aRotina, {OemToAnsi( 'Consultar II' ), 'u_FATA03_A("M")', 0, 9})
 	Else
-		aadd(aRotina,    { OemToAnsi('&Consultar')    , 'u_FATA03_3("M")', 0, 9 } )
-		aadd(aRotina,    { OemToAnsi('Consultar II')  , 'u_FATA03_A("M")', 0, 9 } )
+		AADD(aRotina, {OemToAnsi( '&Consultar' )  , 'u_FATA03_3("M")', 0, 9})
+		AADD(aRotina, {OemToAnsi( 'Consultar II' ), 'u_FATA03_A("M")', 0, 9})
 	Endif
 
-
-	DbSelectArea("SZW")
-	DbSetOrder(4)
-	DbSeek(xFilial("SZW")+'BRFATA03  '+RetCodUsr()+substr(cNumEmp,1,2)+substr(cNumEmp,FWSizeFilial()+1,2), .t.)
-	If Found()
+	SZW->(DbSetOrder(4))
+	IF SZW->(DbSeek(xFilial("SZW")+'BRFATA03  '+RetCodUsr()+substr(cNumEmp,1,2)+substr(cNumEmp,FWSizeFilial()+1,2)))
 		cAcessos := SZW->ZW_ACESSOS
 	Endif
+
 	If SubStr(cAcessos, 10, 1) $ '*' //Usuário Ativo
 		If SUBSTR(cNumEmp,3,2) ='06'
 			If SubStr(cAcessos, 1, 1) $ '*'
@@ -80,156 +78,147 @@ User Function BRFATA03()
 			aAdd(aRotina,  { OemToAnsi('Acessa Localiz. Provis.'), 'fAbrLoc()', 0, 9} )
 		Endif
 	Endif
-
 	aadd(aRotina,          { OemToAnsi("Le&genda")      , 'u_FATA03_9()   ', 0 , 9 } )
 
-	Private aCores    := { { 'SZF->ZF_FLAG == "D"', 'ENABLE'    },; //Bordero digitado
-	{ 'SZF->ZF_FLAG == "Y"', 'BR_MARRON' },; //Baixa Retirada
-	{ 'SZF->ZF_FLAG == "X"', 'BR_LARANJA'},; //Totalmente Destinado
-	{ 'SZF->ZF_FLAG == "Z"', 'BR_BRANCO' } } //Totalmente Bipado
+	aCores    := { { 'SZF->ZF_FLAG == "D"', 'ENABLE'    },; //Bordero digitado
+		{ 'SZF->ZF_FLAG == "Y"', 'BR_MARRON' },; //Baixa Retirada
+		{ 'SZF->ZF_FLAG == "X"', 'BR_LARANJA'},; //Totalmente Destinado
+		{ 'SZF->ZF_FLAG == "Z"', 'BR_BRANCO' } } //Totalmente Bipado
 
-	//{ 'SZF->ZF_FLAG == "E"', 'BR_AMARELO'},; //Endereçado
-	//{ 'SZF->ZF_FLAG == "P"', 'BR_AZUL'   },; //Parcialmente separado
-	//{ 'SZF->ZF_FLAG == "T"', 'DISABLE'   },; //Totalmente separado
-	//{ 'SZF->ZF_FLAG == "R"', 'BR_PRETO'  },; //Totalmente destinado
+	u_zcfga01( 'BRFATA03' ) //LGS#2021201 - Gravação de log de utilização da rotina
 
-	Private cOpcMen := ''
+	SC5->(DbSetOrder(1))
+	SZF->(DbSetOrder(1))
 
-	DbSelectArea("SC5")
-	DbSetOrder(1)
-
-	DbSelectArea("SZF")
-	DbSetOrder(1)
 	mBrowse(06, 01, 22, 80, "SZF",,,,,, aCores)
+
 Return
 
-/******************************************************************************************************************/
-/*** FATA03_1 - Visualização / Inclusão / Alteração / Exclusão do Bordero de Pedidos                            ***/
-/***            FATA03_2 - Validação da digitação do campo pedido e localização                                 ***/
-/***            fVldPed  - Verificação de pedido não liberado                                                   ***/
-/******************************************************************************************************************/
+/*/{Protheus.doc} FATA03_1
+Visualização / Inclusão / Alteração / Exclusão do Bordero de Pedidos
+ FATA03_2 - Validação da digitação do campo pedido e localização
+ fVldPed  - Verificação de pedido não liberado
+@type function Processamento
+@version  1.00
+@author ? / Alterado por Mario Antonaccio
+@since  ? / Alterado em 30/04/2026
+@param cOpcMen, character, opcao de menu selecionada para definir o comportamento da função
+@return Character, sem retorno
+/*/
 User Function FATA03_1(cOpcMen)
-	Local cAux, nPosPEDIDO, cValCpo, nPosRAZAO, nPosLOCAL, _ni, nY
-	Local _lOpen     := .F. // Adequação para release 12.1.25
-	Local _cAliasSX3 := GetNextAlias() // Adequação para release 12.1.25
-	Private aTroBor  := {}
+
+	Local cAliasSX3 := GetNextAlias() as character // Adequação para release 12.1.25
+	Local cAux                        as character
+	Local cValCpo                     as character
+	Local lOpen     := .F.            as logical // Adequação para release 12.1.25
+	Local nI                          as numeric
+	Local nPosLOCAL                   as numeric
+	Local nPosPEDIDO                  as numeric
+	Local nPosRAZAO                   as numeric
+	Local nY                          as numeric
+	Private aTroBor := {}             as array
 
 	// ABERTURA DO DICIONÁRIO SX3 - Adequação para release 12.1.25
-	OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
-	_lOpen := Select( _cAliasSX3 ) > 0
+	OpenSXs( NIL, NIL, NIL, NIL, Nil, cAliasSX3, "SX3", NIL, .F. )
+	lOpen := Select(cAliasSX3 ) > 0
 
-	If !_lOpen // Adequação para release 12.1.25
-		MessageBox( "Não foi possível abrir dicionário de dados.", "Atenção", 16 )
-		Return
+	If .NOT. _lOpen // Adequação para release 12.1.25
+		FWAlertError( "Não foi possível abrir dicionário de dados.", "Atenção" )
+		Return (NIL)
 	Endif
 
 	Do Case
-	Case cOpcMen == "I"
-		cOpcMen := "I"; nOpcE := 3; nOpcG := 3
-	Case cOpcMen == "A"
-		cOpcMen := "A"; nOpcE := 3; nOpcG := 3
-	Case cOpcMen == "V"
-		cOpcMen := "V"; nOpcE := 2; nOpcG := 2
-	Case cOpcMen == "E"
-		cOpcMen := "E"; nOpcE := 2; nOpcG := 2
+		Case cOpcMen == "I" .or. cOpcMen == "A"
+			nOpcE   := 3
+			nOpcG   := 3
+		Case cOpcMen == "V" .or. cOpcMen == "E"
+			nOpcE   := 2
+			nOpcG   := 2
 	EndCase
 
-	If cOpcMen $ 'A' .and. SZF->ZF_FLAG $ 'E.P.T.R.X.Y.Z'
-		MsgBox("Esse bordero não pode ser alterado!", "Atenção", "STOP")
-		Return
-	ElseIf cOpcMen $ 'E' .and. SZF->ZF_FLAG $ 'E.P.T.R.X.Y.Z'
-		MsgBox("Esse bordero não pode ser excluido!", "Atenção", "STOP")
+	If cOpcMen == 'A' .and. SZF->ZF_FLAG $ 'E.P.T.R.X.Y.Z'
+		FWAlertErro("Esse bordero não pode ser alterado!", "Atenção")
+		Return (NIL)
+	ElseIf cOpcMen == 'E' .and. SZF->ZF_FLAG $ 'E.P.T.R.X.Y.Z'
+		FWAlertError( "Esse bordero não pode ser excluido!", "Atenção" )
 		Return
 	EndIf
 
 	RegToMemory("SZF", (cOpcMen == "I"))
 	aHeader := {}
-
 	nUsado := 0
-  /* DESABILITADO RELEASE 12.1.25
-     DbSelectArea("SX3")
-     DbSetOrder(1)
-     DbSeek("SZG")
-     While !Eof() .And. (X3_ARQUIVO == "SZG")
-           If Alltrim(X3_CAMPO) == "ZG_CODIGO"
-              DbSkip()
-              Loop
-           Endif	
-           If X3USO(X3_USADO) .And. cNivel >= X3_NIVEL
-              nUsado := nUsado + 1
-              If "ZG_PEDIDO" $ Trim(X3_CAMPO)
-                 cValCpo := Iif(cOpcMen $ 'I.A', 'u_FATA03_2("P", "I", @aTroBor)', 'u_FATA03_2("P")')
-              ElseIf "ZG_LOCALIZ" $ Trim(X3_CAMPO)
-                     cValCpo := Iif(cOpcMen $ 'I.A', 'u_FATA03_2("L", "I")', 'u_FATA03_2("L")')
-              Else
-                 cValCpo := "AllwaysTrue()"
-              Endif
-              aAdd(aHeader, { TRIM(X3_TITULO), X3_CAMPO, X3_PICTURE, X3_TAMANHO, X3_DECIMAL, cValCpo, X3_USADO, x3_tipo, X3_ARQUIVO, X3_CONTEXT } )
-           Endif
-           DbSkip()
-     EndDo
-     */
-	DbSelectArea( _cAliasSX3 )
-	( _cAliasSX3 )->( DbSetOrder(1) )
-	( _cAliasSX3 )->( DbSeek("SZG") )
-	While !Eof() .and. ( _cAliasSX3 )->( X3_ARQUIVO ) == "SZG"
-		If AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZG_CODIGO"
-			DbSkip()
+
+	( cAliasSX3 )->( DbSetOrder(1) )
+	( cAliasSX3 )->( DbSeek("SZG") )
+	While .NOT. ( cAliasSX3 )->(Eof()) .and. ( cAliasSX3 )->( X3_ARQUIVO ) == "SZG"
+
+		If AllTRIM( ( cAliasSX3 )->( X3_CAMPO ) ) == "ZG_CODIGO"
+			( cAliasSX3 )->(DbSkip())
 			Loop
 		Endif
-		If X3Uso( ( _cAliasSX3 )->( X3_USADO ) ) .and. cNivel >= ( _cAliasSX3 )->( X3_NIVEL )
 
-			nUsado := nUsado + 1
-			If AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZG_PEDIDO"
+		If X3Uso( ( cAliasSX3 )->( X3_USADO ) ) .and. cNivel >= ( cAliasSX3 )->( X3_NIVEL )
+
+			nUsado++
+
+			If AllTRIM( ( cAliasSX3 )->( X3_CAMPO ) ) == "ZG_PEDIDO"
 				cValCpo := Iif(cOpcMen $ 'I.A', 'u_FATA03_2("P", "I", @aTroBor)', 'u_FATA03_2("P")')
-			ElseIf AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZG_LOCALIZ"
+			ElseIf AllTRIM( ( cAliasSX3 )->( X3_CAMPO ) ) == "ZG_LOCALIZ"
 				cValCpo := Iif(cOpcMen $ 'I.A', 'u_FATA03_2("L", "I")', 'u_FATA03_2("L")')
 			Else
 				cValCpo := "AllwaysTrue()"
 			Endif
-			aAdd(aHeader, { ( _cAliasSX3 )->(X3_TITULO), ( _cAliasSX3 )->( X3_CAMPO ), ( _cAliasSX3 )->( X3_PICTURE ), ( _cAliasSX3 )->( X3_TAMANHO ), ( _cAliasSX3 )->( X3_DECIMAL ), cValCpo, ( _cAliasSX3 )->( X3_USADO ), ( _cAliasSX3 )->( X3_TIPO) , ( _cAliasSX3 )->( X3_ARQUIVO ), ( _cAliasSX3 )->( X3_CONTEXT ) } )
+
+			aadd(aHeader, { ( cAliasSX3 )->(X3_TITULO),;
+				( cAliasSX3 )->( X3_CAMPO ),;
+				( cAliasSX3 )->( X3_PICTURE ),;
+				( cAliasSX3 )->( X3_TAMANHO ),;
+				( cAliasSX3 )->( X3_DECIMAL ),;
+				cValCpo,;
+				( cAliasSX3 )->( X3_USADO ),;
+				( cAliasSX3 )->( X3_TIPO) ,;
+				( cAliasSX3 )->( X3_ARQUIVO ),;
+				( cAliasSX3 )->( X3_CONTEXT ) } )
 		Endif
-		DbSkip()
+		( cAliasSX3 )->(DbSkip())
 	EndDo
+
 	nPosPEDIDO := aScan(aHeader, {|x| Trim(x[2]) == "ZG_PEDIDO" })
 	nPosRAZAO  := aScan(aHeader, {|x| Trim(x[2]) == "ZG_RAZAO"  })
 	nPosLOCAL  := aScan(aHeader, {|x| Trim(x[2]) == "ZG_LOCALIZ"})
 
+	( cAliasSX3 )->(DbCloseArea())
 
-	DbSelectArea( _cAliasSX3 )
-	DbCloseArea()
+	SZF->(DbSetOrder(1))
+	SZG->(DbSetOrder(1))
 
-	DbSelectArea("SZF")
-	DbSetOrder(1)
-	DbSelectArea("SZG")
-	DbSetOrder(1)
 	aCols := {Array(nUsado+1)}
 	aCols[1][nUsado+1] := .F.
-	For _ni := 1 To nUsado
-		aCols[1][_ni] := CriaVar(aHeader[_ni][2])
+	For nI := 1 To nUsado
+		aCols[1][nI] := CriaVar(aHeader[nI][2])
 	Next
 	If cOpcMen == "I"
 		M->ZF_EMISSAO := dDatabase
 	Else
 		aCols := {}
-		DbSelectArea("SZG")
-		DbSetOrder(1)
-		DbSeek(xFilial("SZG")+M->ZF_CODIGO)
-		While !Eof() .and. (SZG->ZG_FILIAL == xFilial("SZG")) .and. (ZG_CODIGO == M->ZF_CODIGO)
+		SZG->(dbSetOrder(1))
+		SZG->(DbSeek(xFilial("SZG")+M->ZF_CODIGO))
+		While  .NOT. SZG->(EOF()) .and. (SZG->ZG_FILIAL == xFilial("SZG")) .and. (SZG->ZG_CODIGO == M->ZF_CODIGO)
 			aAdd(aCols, Array(nUsado+1))
-			For _ni := 1 To nUsado
-				cAux := Upper(Alltrim(aHeader[_ni][2]))
+			For nI := 1 To nUsado
+				cAux := Upper(Alltrim(aHeader[nI][2]))
 				If cAux # "ZG_RAZAO" //Campo Virtual não entra no FieldGet
-					aCols[Len(aCols)][_ni] := FieldGet(FieldPos(aHeader[_ni][2]))
+					aCols[Len(aCols)][nI] := FieldGet(FieldPos(aHeader[nI][2]))
 				Endif
 			Next
 			M->ZF_PESO   += Posicione("SC5", 1, xFilial("SC5")+SubStr(aCols[Len(aCols)][nPosPEDIDO], 3, 6), "C5_PBRUTO")
 			M->ZF_VOLUME += Posicione("SC5", 1, xFilial("SC5")+SubStr(aCols[Len(aCols)][nPosPEDIDO], 3, 6), "C5_VOLUME1")
 			aCols[Len(aCols)][nUsado+1]  := .F.
 			aCols[Len(aCols)][nPosRAZAO] := Posicione("SA1", 1, xFilial("SA1")+Posicione("SC5", 1, xFilial("SC5")+SubStr(aCols[Len(aCols)][nPosPEDIDO], 3, 6), "C5_CLIENTE"), "A1_NOME")
-			DbSkip()
+			SZG->(DbSkip())
 		EndDo
 	Endif
+	//MAA - 30/04/2026 - Início - Validação de pedidos não liberados, bloqueados ou não encontrados
 	If Len(aCols) > 0
 		fVldPed(aCols, cOpcMen)
 		cTitulo        := "Bordero de Pedidos Aprovados"
@@ -239,147 +228,176 @@ User Function FATA03_1(cOpcMen)
 		cTudOk         := "AllwaysTrue()"
 		cFieldOk       := "AllwaysTrue()"
 		aCpoEnchoice   := {"ZG_PEDIDO"}
-		_lRet          := Modelo3(cTitulo, cAliasEnchoice, cAliasGetD, aCpoEnchoice, cLinOk, cTudOk, nOpcE, nOpcG, cFieldOk, , 1000)
-		If _lRet
-			Do Case
-			Case cOpcMen $ "I_A"
-				nPosPEDIDO := aScan(aHeader, {|x| Trim(x[2]) == "ZG_PEDIDO"})
-				nPosLOCAL  := aScan(aHeader, {|x| Trim(x[2]) == "ZG_LOCALIZ"})
-				If cOpcMen == "I"
-					M->ZF_CODIGO := U_NumSeqLot("SZF")
+
+		lRet          := Modelo3(cTitulo, cAliasEnchoice, cAliasGetD, aCpoEnchoice, cLinOk, cTudOk, nOpcE, nOpcG, cFieldOk, , 1000)
+
+		If lRet
+
+			nPosPEDIDO := aScan(aHeader, {|x| Trim(x[2]) == "ZG_PEDIDO"})
+			nPosLOCAL  := aScan(aHeader, {|x| Trim(x[2]) == "ZG_LOCALIZ"})
+
+			//Inclusao
+			If cOpcMen == "I"
+				M->ZF_CODIGO := U_NumSeqLot("SZF")
+				lGrv:=.F.
+				//Roda o Acols primeiro, se Ok, grava o Aheadr
+				For nY := 1 To Len(aCols)
+					If aCols[nY][Len(aHeader)+1]
+						Loop
+					End
+
+					cAux            := alltrim(aCols[nY][nPosPEDIDO])
+					cAux            := Substr(cNumEmp,1,2)+Substr(cAux,Len(cAux)-5,6)
+					RecLock("SZG", .T.)
+					SZG->ZG_FILIAL  := xFilial("SZG")
+					SZG->ZG_CODIGO  := M->ZF_CODIGO
+					SZG->ZG_PEDIDO  := cAux //aCols[nY][nPosPEDIDO]
+					SZG->ZG_LOCALIZ := aCols[nY][nPosLOCAL]
+					MsUnlock()
+					lGrv:=.T.
+				Next
+
+				//Se gravaou algo, gera o cabec
+				If lGrv
 					DbSelectArea("SZF")
-					RecLock("SZF", .t.)
+					RecLock("SZF", .T.)
 					SZF->ZF_FILIAL  := xFilial("SZF")
 					SZF->ZF_CODIGO  := M->ZF_CODIGO
 					SZF->ZF_EMISSAO := M->ZF_EMISSAO
 					SZF->ZF_TIPOBOR := M->ZF_TIPOBOR
 					SZF->ZF_FLAG    := 'D'
 					MsUnLock()
-					For nY := 1 To Len(aCols)
-						If !(aCols[nY][Len(aHeader)+1])
-							RecLock("SZG", .t.)
-							SZG->ZG_FILIAL  := xFilial("SZG")
-							SZG->ZG_CODIGO  := M->ZF_CODIGO
-							cAux := alltrim(aCols[nY][nPosPEDIDO])
-							cAux := substr(cNumEmp,1,2)+substr(cAux,len(cAux)-5,6)
-							SZG->ZG_PEDIDO  := cAux //aCols[nY][nPosPEDIDO]
-							SZG->ZG_LOCALIZ := aCols[nY][nPosLOCAL]
-							MsUnlock()
+				End
+			End
+			// FIm Inclusao
+			//Alteração
+
+			If cOpcMen == "A"
+				lGrv:=.F.
+				For nY := 1 To Len(aCols)
+
+					//Deleta o registro da localização na tabela de detalhes para depois excluir no Arquivo header
+					If aCols[nY][Len(aHeader)+1]
+						ZZC->(DbSetOrder(1))
+						If ZZC->(DbSeek(xFilial("ZZC")+M->ZF_CODIGO+Substr(aCols[nY][nPosPEDIDO],3,6)))
+							While .NOT. ZZC->(EOF()) .and. ;
+									(ZZC->ZZC_FILIAL == xFilial("ZZC")) .and.;
+									(Substr(aCols[nY][nPosPEDIDO],3,6) == ZZC->ZZC_PEDIDO)
+								RecLock("ZZC", .F.)
+								ZZC->(DbDelete())
+								ZZC->(MsUnLock())
+								ZZC->(dbSkip())
+							Enddo
 						Endif
-					Next
-				Else // Alteração
-					RecLock("SZF", .f.)
+						ZZC->(DbCloseArea())
+
+						RecLock("SZG", .f.)
+						SZG->(DbDelete())
+						MsUnLock()
+						Loop
+					End
+
+					SZG->(DbSetOrder(1))
+					If SZG->(DbSeek(xFilial("SZG")+M->ZF_CODIGO+aCols[nY][nPosPEDIDO]))
+						RecLock("SZG", .F.)
+						cAux := alltrim(aCols[nY][nPosPEDIDO])
+						cAux := Substr(cNumEmp,1,2)+Substr(cAux,Len(cAux)-5,6)
+						SZG->ZG_PEDIDO  := cAux //aCols[nY][nPosPEDIDO]
+						SZG->ZG_LOCALIZ := aCols[nY][nPosLOCAL]
+						MsUnLock()
+					Else
+						//Se nao encontrou. então é linha nova ai inclui
+						cAux := alltrim(aCols[nY][nPosPEDIDO])
+						cAux := substr(cNumEmp,1,2)+substr(cAux,len(cAux)-5,6)
+						RecLock("SZG", .t.)
+						SZG->ZG_FILIAL  := xFilial("SZG")
+						SZG->ZG_CODIGO  := M->ZF_CODIGO
+						SZG->ZG_PEDIDO  := cAux //aCols[nY][nPosPEDIDO]
+						SZG->ZG_LOCALIZ := aCols[nY][nPosLOCAL]
+						MsUnlock()
+						lGrv:=.T.
+					Endif
+				Next
+				If lgrv
+					DbSelectArea("SZF")
+					RecLock("SZF", .F.)
 					SZF->ZF_EMISSAO := M->ZF_EMISSAO
 					SZF->ZF_TIPOBOR := M->ZF_TIPOBOR
 					MsUnLock()
-					For nY := 1 To Len(aCols)
-						DbSelectArea("SZG")
-						DbSetOrder(1)
-						DbSeek(xFilial("SZG")+M->ZF_CODIGO+aCols[nY][nPosPEDIDO], .t.)
-						If Found()
-							If !(aCols[nY][Len(aHeader)+1])
-								RecLock("SZG", .f.)
-								cAux := alltrim(aCols[nY][nPosPEDIDO])
-								cAux := substr(cNumEmp,1,2)+substr(cAux,len(cAux)-5,6)
-								SZG->ZG_PEDIDO  := cAux //aCols[nY][nPosPEDIDO]
-								SZG->ZG_LOCALIZ := aCols[nY][nPosLOCAL]
-								MsUnLock()
-							Else
-								DbSelectArea("ZZC")
-								DbSetOrder(1)
-								DbSeek(xFilial("ZZC")+M->ZF_CODIGO+Substr(aCols[nY][nPosPEDIDO],3,6), .t.)
-								If Found()
-									While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. (Substr(aCols[nY][nPosPEDIDO],3,6) == ZZC->ZZC_PEDIDO)
-										RecLock("ZZC", .f.)
-										DbDelete()
-										MsUnLock()
-										DbSelectArea("ZZC")
-										DbSkip()
-									Enddo
-								Endif
-								DbSelectArea("ZZC")
-								DbCloseArea()
+				End
+			Endif
 
-								RecLock("SZG", .f.)
-								DbDelete()
-								MsUnLock()
-							Endif
-						Else
-							If !(aCols[nY][Len(aHeader)+1])
-								RecLock("SZG", .t.)
-								SZG->ZG_FILIAL  := xFilial("SZG")
-								SZG->ZG_CODIGO  := M->ZF_CODIGO
-								cAux := alltrim(aCols[nY][nPosPEDIDO])
-								cAux := substr(cNumEmp,1,2)+substr(cAux,len(cAux)-5,6)
-								SZG->ZG_PEDIDO  := cAux //aCols[nY][nPosPEDIDO]
-								SZG->ZG_LOCALIZ := aCols[nY][nPosLOCAL]
-								MsUnlock()
-							Endif
-						Endif
-					Next
-				Endif
-				DbSelectArea("SZG")
-				DbSetOrder(1)
-				DbSeek(xFilial("SZG")+SZF->ZF_CODIGO ,.t.)
-				If Found()
-					While !Eof() .and. (SZG->ZG_FILIAL == xFilial("SZG")) .and. (SZG->ZG_CODIGO == SZF->ZF_CODIGO)
-						nPos := aScan(aCols, { |x| Upper(AllTrim(x[nPosPEDIDO])) == SZG->ZG_PEDIDO })
-						If nPos <= 0
-							RecLock("SZG", .f.)
-							DbDelete()
-							MsUnLock()
-						Endif
-						DbSelectArea("SZG")
+			//Verifica se foi gravado, se nao deleta
+			SZG->(DbSetOrder(1))
+			If SZG->(DbSeek(xFilial("SZG")+SZF->ZF_CODIGO ,.t.))
+
+				While .NOT. SZG->(EOF()) .and.;
+						(SZG->ZG_FILIAL == xFilial("SZG")) .and.;
+						(SZG->ZG_CODIGO == SZF->ZF_CODIGO)
+					nPos := aScan(aCols, { |x| Upper(AllTrim(x[nPosPEDIDO])) == SZG->ZG_PEDIDO })
+					If nPos == 0
+						RecLock("SZG", .f.)
+						SZG->(DbDelete())
+						MsUnLock()
+					Endif
+
+					SZG->(DbSkip())
+				Enddo
+			Endif
+			//Fim Alteração
+
+			//Exclusao
+			If cOpcMen == "E"
+				SZG->(DbSetOrder(1))
+				If SZG->(DbSeek(xFilial("SZG")+SZF->ZF_CODIGO))
+					While .NOT. SZG->(EOF()) .and. ;
+							(SZG->ZG_FILIAL == xFilial("SZG")) .and.;
+							(SZG->ZG_CODIGO == SZF->ZF_CODIGO)
+						RecLock("SZG", .f.)
+						SZG->(DbDelete())
+						MsUnLock()
 						DbSkip()
 					Enddo
-				Endif
-			Case cOpcMen == "E"
-				If Select( "SZG" ) > 0   // Jose 21/10/2024
-					DbSelectArea("SZG") // Jose 21/10/2024
-					DbCloseArea()         // Jose 21/10/2024
-				Else                     // Jose 21/10/2024
-					DbSelectArea("SZG")
-				Endif                    // Jose 21/10/2024
-				DbSetOrder(1)
-				DbSeek(xFilial("SZG")+SZF->ZF_CODIGO)
-				While !Eof() .and. (SZG->ZG_FILIAL == xFilial("SZG")) .and. (SZG->ZG_CODIGO == SZF->ZF_CODIGO)
-					RecLock("SZG", .f.)
-					DbDelete()
+					DbSelectArea("SZF")
+					RecLock("SZF", .f.)
+					SZF->(DbDelete())
 					MsUnLock()
-					DbSkip()
-				Enddo
-				DbSelectArea("SZF")
+				Endif
+
+			Endif
+			//Fim Exclusao
+
+		Else
+			If cOpcMen $ "I_A_E"
 				RecLock("SZF", .f.)
-				DbDelete()
+				SZF->(DbDelete())
 				MsUnLock()
-			EndCase
-		Endif
-	Else
-		Do Case
-		Case cOpcMen $ "I_A_E"
-			RecLock("SZF", .f.)
-			DbDelete()
-			MsUnLock()
-		EndCase
-	Endif
+			Endif
+		End
+	End
 Return
 
-/********/
-/***  ***/
-/********/
+/*/{Protheus.doc} LinFATA03_1
+?
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 30/04/2026
+@return logical, segue o processo
+/*/
 User Function LinFATA03_1()
 	Local nTotPes := 0
 	Local nTotVol := 0
 	Local nY
 	For nY := 1 To Len(aCols)
-		If !aCols[nY][Len(aHeader)+1]
+		If .NOT. aCols[nY][Len(aHeader)+1]
 			nTotPes += Posicione("SC5", 1, xFilial("SC5")+SubStr(aCols[nY][1], 3, 6), "C5_PBRUTO")
 			nTotVol += Posicione("SC5", 1, xFilial("SC5")+SubStr(aCols[nY][1], 3, 6), "C5_VOLUME1")
 		Endif
 	Next
 	M->ZF_PESO   := nTotPes
 	M->ZF_VOLUME := nTotVol
-Return(.t.)
+Return(.T.)
 
 /******************************************************************************************************************/
 /*** FATA03_2 - Validação do pedido e da localização digitada pelo usuário.                                     ***/
@@ -456,19 +474,17 @@ User Function FATA03_2(cOpcVal, cOpcTip, aTroBor)
 			If !Empty(Posicione("SC5", 1, xFilial("SC5")+SubStr(M->ZG_PEDIDO, 3, 6), "C5_NOTA"))
 				MsgBox("Pedido já foi faturado!", "Atenção", "INFO")
 			Endif
-			DbSelectArea("SA1")
-			DbSetOrder(1)
-			DbSeek(xFilial("SA1")+Posicione("SC5", 1, xFilial("SC5")+SubStr(M->ZG_PEDIDO, 3, 6), "C5_CLIENTE"), .t.)
-			If Found()
+			SA1->(DbSetOrder(1))
+			If SA1->(DbSeek(xFilial("SA1")+Posicione("SC5", 1, xFilial("SC5")+SubStr(M->ZG_PEDIDO, 3, 6), "C5_CLIENTE"), .t.))
 				aCols[n][nPosRAZAO] := Posicione("SA1", 1, xFilial("SA1")+SC5->C5_CLIENTE, "A1_NOME")
 				M->ZG_RAZAO         := Posicione("SA1", 1, xFilial("SA1")+SC5->C5_CLIENTE, "A1_NOME")
 			Endif
-			lRet := .t.
+			lRet := .T.
 		Endif
 		nTotPes := 0
 		nTotVol := 0
 		For nY := 1 To Len(aCols)
-			If !aCols[nY][Len(aHeader)+1]
+			If .NOT. aCols[nY][Len(aHeader)+1]
 				nTotPes += Posicione("SC5", 1, xFilial("SC5")+SubStr(M->ZG_PEDIDO, 3, 6), "C5_PBRUTO")
 				nTotVol += Posicione("SC5", 1, xFilial("SC5")+SubStr(M->ZG_PEDIDO, 3, 6), "C5_VOLUME1")
 			Endif
@@ -476,18 +492,16 @@ User Function FATA03_2(cOpcVal, cOpcTip, aTroBor)
 		M->ZF_PESO   := nTotPes
 		M->ZF_VOLUME := nTotVol
 	ElseIf cOpcVal $ 'L' //Validação da Localização
-		DbSelectArea("SC5")
-		DbSetOrder(1)
-		DbSeek(xFilial("SC5")+Substr(aCols[n][1],3,6), .t.)
-		If Found()
+		SC5->(DbSetOrder(1))
+		IF SC5->(DbSeek(xFilial("SC5")+Substr(aCols[n][1],3,6), .t.))
 			cNumNot := SC5->C5_NOTA
 		Endif
-		If !Empty(cNumNot)
-			cMsgNot := "        ATENÇÃO: Esse pedido está faturado!        "+chr(13)+chr(10)
+		If .NOT. Empty(cNumNot)
+			cMsgNot := "        ATENÇÃO: Esse pedido está faturado!        "+CRLF
 			cMsgNot += "Verifique com a Expedição se o mesmo será retirado!"
-			MsgBox(cMsgNot, "Atenção", "ALERT")
+			FWAlertWarning(cMsgNot, "Atenção")
 		Endif
-		lRet := .t.
+		lRet := .T.
 	Endif
 	DbSelectArea(nArea)
 Return(lRet)
@@ -635,7 +649,7 @@ User Function FATA03_3(cOpc)
 	Local nQtdOrd := 0
 	Local nQtdSep3 := 0
 	Local nQtdG3  := 0
-//   Local nQtdA3  := 0   // Jose 05/07/2024
+	//   Local nQtdA3  := 0   // Jose 05/07/2024
 	Local nQtdApt := 0
 	Local aHeaPED := {}
 	Local aDespac := {}
@@ -1252,18 +1266,11 @@ Static Function fMonArq()
 	aadd(aStrArq, {"PED_LOCAL",  "C", 03, 0}) //LOCAL PEDIDO / joSE 21/08/2024
 
 
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-/*     CriaTrab(aStrArq, .t.)
-       DbUseArea(.t., cDrvArq, cTrbArq, "PED", .f., .f.)
-*/
-	//cTrbArq := U_NovoArqTrab("dbf")
-	//dbcreate(cTrbArq+".dbf", aStrArq, "DBFCDXADS")
-	//Use (cTrbArq+".Dbf") Alias "PED" VIA "DBFCDXADS" New Exclusive
+	/********************************************************************************************************************************/
 	oTempTbl7 := FWTemporaryTable():New( 'PED' )
 	oTempTbl7:SetFields( aStrArq )
 	oTempTbl7:Create()
-       /********************************************************************************************************************************/
+	/********************************************************************************************************************************/
 Return
 
 /******************************************************************************************************************/
@@ -1315,7 +1322,7 @@ Static Function fMarDES(nQtdSep3, oQtdSep3, nQtdG3, oQtdG3, nQtdApt, oQtdApt, aC
 	oQtdApt:Refresh()
 Return(.t.)
 
-/******************************************************************************************************************/   
+/******************************************************************************************************************/
 /*** fMarPed - Atualiza browse com marca e desmarca - produtos em bordero de pedidos.                           ***/
 /******************************************************************************************************************/
 Static Function fMarPED(nQtdSep3, oQtdSep3, nQtdG3, oQtdG3, nQtdApt, oQtdApt, aCodLot, cCodLot, nQtdOrd)
@@ -1361,7 +1368,7 @@ Static Function fMarPED(nQtdSep3, oQtdSep3, nQtdG3, oQtdG3, nQtdApt, oQtdApt, aC
 	DbSelectArea("PED")
 Return(.t.)
 
-/******************************************************************************************************************/   
+/******************************************************************************************************************/
 /*** fAtuRet - Atualiza baixa de produtos retirados e/ou produção.                                              ***/
 /***           fCalVol - Calcula volume dos produtos no pedido                                                  ***/
 /******************************************************************************************************************/
@@ -1369,9 +1376,9 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 	Local nY, nX
 	Local cAPTOPCO := GETMV("MV_APTOPCO")
 	Local cQry1    := ""
-       /**************************************************************/
-       /*** Baixa Ordens de Produção por item na consulta.         ***/
-       /**************************************************************/
+	/**************************************************************/
+	/*** Baixa Ordens de Produção por item na consulta.         ***/
+	/**************************************************************/
 	//Gravar quantidade a baixar no arquivo producao e empenho
 	If GETMV("MV_APTOPCO") $ 'S'
 		lAptLot := .f.
@@ -1436,9 +1443,9 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 	oQtdG3:Refresh()
 	oQtdApt:Refresh()
 	If GetMv("MV_ATURETE") $ 'N' //Método antigo de baixa do pedido. Será apagado depois de estar funcionando o novo.
-          /**************************************************************/
-          /*** Bordero de despacho - Somente com gavetas cadastradas. ***/
-          /**************************************************************/
+		/**************************************************************/
+		/*** Bordero de despacho - Somente com gavetas cadastradas. ***/
+		/**************************************************************/
 		For nY := 1 To Len(aDespac)
 			If aDespac[nY][2]
 				DbSelectArea("ZZC")
@@ -1492,9 +1499,9 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 		Next
 		oDespac:Refresh()
 	Else //Método novo, de baixa do pedido. Apagar linhas de código do antigo depois de estar funcionando.
-          /**************************************************************/
-          /*** Bordero de DESPACHO - Somente com gavetas cadastradas. ***/
-          /**************************************************************/
+		/**************************************************************/
+		/*** Bordero de DESPACHO - Somente com gavetas cadastradas. ***/
+		/**************************************************************/
 		aNewDes := {}
 		For nY := 1 To Len(aDespac)
 			If aDespac[nY][2]
@@ -1522,23 +1529,26 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 						If !lNaoAtu
 							nPos := aScan(aCols, {|x| Alltrim(x[1]) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))})
 							If nPos > 0
-								cQry1 := ""
-								cQry1 += "SELECT SUM(ZZC.ZZC_QUANTI - ZZC.ZZC_RETIRA) AS FALTA "
-								cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC "
-								cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("SZF")+"' "
-								cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-								cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-								cQry1 += "  AND ZZC.ZZC_PRODUT = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
-								cQry1 += "  AND ZZC.ZZC_SEPARA <> 'S' "
-								TCQuery cQry1 ALIAS "FAL" NEW
-								DbSelectArea("FAL")
-								aCols[nPos][5] := FAL->FALTA
-								DbSelectArea("FAL")
-								DbCloseArea()
-								If aCols[nPos][5] == 0
+								BEGINSQL Alias "FAL"
+								SELECT 
+								SUM(ZZC.ZZC_QUANTI - ZZC.ZZC_RETIRA) AS FALTA 
+								FROM 
+								%TABLE:ZZC% ZZC 
+								WHERE 
+								ZZC.ZZC_FILIAL = %XFILIAL:SZF%
+								AND ZZC.%NOTDEL%
+								AND ZZC.ZZC_BORDER = %EXP:SZF->ZF_CODIGO%
+								AND ZZC.ZZC_PRODUT = %EXP:Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))%
+								AND ZZC.ZZC_SEPARA <> 'S' 
+								ENDSQL
+								If FAL->FALTA == 0
 									aCols[nPos][5] := 999999
 									aCols[nPos][6] := space(03)
+								Else
+									aCols[nPos][5] := FAL->FALTA
 								Endif
+								FAL->(DbCloseArea())
+
 							Endif
 						Endif
 					Endif
@@ -1551,11 +1561,11 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 		aDespac := aNewDes
 		oDespac:SetArray(aDespac)
 		oDespac:bLine := { || {Iif(aDespac[oDespac:nAt][1], oOk, oNo), Iif(aDespac[oDespac:nAt][2], hOk, hNo), aDespac[oDespac:nAt][3], aDespac[oDespac:nAt][4], aDespac[oDespac:nAt][5], aDespac[oDespac:nAt][6], aDespac[oDespac:nAt][7], aDespac[oDespac:nAt][8], oDespac:aArray[oDespac:nAt][10], oDespac:aArray[oDespac:nAt][9], oDespac:aArray[oDespac:nAt][12]}}
-       /**************************************************************/
+		/**************************************************************/
 	Endif
-       /**************************************************************/
-       /*** Bordero de PEDIDOS - Somente com gavetas cadastradas.  ***/
-       /**************************************************************/
+	/**************************************************************/
+	/*** Bordero de PEDIDOS - Somente com gavetas cadastradas.  ***/
+	/**************************************************************/
 	DbSelectArea("PED")
 	DbGoTop()
 	While !Eof()
@@ -1574,7 +1584,7 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 				MsUnLock()
 				If ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI
 					RecLock("PED", .f.)
-					DELETE
+					PED->(Delete())
 					MsUnLock()
 					lNaoAtu := .t.
 				Else
@@ -1597,13 +1607,12 @@ Static Function fAtuRet(cCodPro, cOpc, aDespac, oDespac, aCodLot, nQtdOrd, oQtdP
 				Endif
 			Endif
 		Endif
-		DbSelectArea("PED")
-		DbSkip()
+		PED->(DbSkip())
 	Enddo
 	DbSelectArea("PED")
 	DbGoTop()
 	If Eof() .and. Bof()
-		ZAP
+		PED->(ZAP)
 	Endif
 	oPed:oBrowse:Refresh()
 	DbSelectArea("ZZC")
@@ -1629,286 +1638,236 @@ Static Function fValPro(oCodPro, cCodPro, oDesPro, cDesPro, oCodLoc, cCodLoc, cO
 		oCodPro:SetFocus()
 		DbSelectArea("PED")
 		Return(.f.)
-        /*ElseIf SubStr(cCodPro, 1, 3) $ '789'        // CHAMADO 007848
-              DbSelectArea("SB1")
-              DbSetOrder(5)
-              DbSeek(xFilial("SB1")+SubStr(Alltrim(cCodPro), 1, Len(Alltrim(cCodPro))-1), .t.)
-              If Found()
-                 If SB1->B1_TIPO $ 'PA'
-                    cCodPro := TransForm(SB1->B1_COD, "@R! XX 99.99.999-99")
-                    cDesPro := SB1->B1_DESC
-                    DbSelectArea("SB2")
-                    DbSetOrder(1)
-                    DbSeek(xFilial("SB2")+SB1->B1_COD+SB1->B1_LOCPAD, .t.)
-                    If Found()
-                       cCodLoc := Alltrim(SB2->B2_LOCALIZ)
-                       nSalEst := SB2->B2_QATU
-                    Endif
-                    MsAguarde( {|| fMonDad(cCodPro, cOpc, @aDespac)}, "Aguarde...", "Buscando registros...")
-                    oSalEst:Refresh()
-                    cQry1 := ""
-                    cQry1 += "SELECT SC2.C2_NUM+SC2.C2_ITEM+SC2.C2_SEQUEN AS ORDEM, SC2.C2_LOTE AS LOTE, (SC2.C2_QUANT - SC2.C2_QUJE) AS PENDENTE "
-                    cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
-                    cQry1 += "WHERE SC2.C2_FILIAL  = '"+xFilial("SC2")+"' "
-                    cQry1 += "  AND SC2.D_E_L_E_T_ = '' "
-                    cQry1 += "  AND SC2.C2_PRODUTO = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
-                    cQry1 += "  AND SC2.C2_DATRF   = '' "
-                    TCQuery cQry1 ALIAS "BSC" NEW
-                    DbSelectArea("BSC")
-                    While !Eof()
-                          cQry1 := ""
-                          cQry1 += "SELECT SUM(EMP.QUANT) AS QUANT "
-                          cQry1 += "FROM EMPENHO EMP "
-                          cQry1 += "WHERE ('"+xFilial("SC2")+"' = '010101') AND (EMP.ORDEM = '"+BSC->ORDEM+"') "
-                          cQry1 += "  AND EMP.LOTE  = '"+BSC->LOTE+"' "
-                          cQry1 += "  AND EMP.FLAG = '' "
-                          TCQuery cQry1 ALIAS "APT" NEW
-                          DbSelectArea("APT")
-                          If (BSC->PENDENTE - APT->QUANT) > 0.0
-                             aAdd(aCodLot, {.f., BSC->LOTE, (BSC->PENDENTE - APT->QUANT), BSC->ORDEM})
-                          Endif
-                          DbSelectArea("APT")
-                          DbCloseArea()
-                          DbSelectArea("BSC")
-                          DbSkip()
-                    Enddo
-                    DbSelectArea("BSC")
-                    DbCloseArea()
-                    oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
-                    DbSelectArea("PED")
-                    Return(.t.)
-                 Else
-                    ApMsgStop("Codigo Inválido !!!")
-                    cCodPro := space(15)
-                    cDesPro := space(30)
-                    cCodLoc := space(15)
-                    oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
-                    oCodPro:SetFocus()
-                    DbSelectArea("PED")
-                    Return(.f.)
-                 Endif
-              Else
-                 ApMsgStop("Codigo Inválido !!!")
-                 cCodPro := space(15)
-                 cDesPro := space(30)
-                 cCodLoc := space(15)
-                 oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
-                 oCodPro:SetFocus()
-                 DbSelectArea("PED")
-                 Return(.f.)
-              Endif */
-       Else 
-          DbSelectArea("SB1")
-          DbSetOrder(1)
-          DbSeek(xFilial("SB1")+cCodPro, .t.)
-          If Found()
-             If SB1->B1_TIPO $ 'PA' .or. (Len(Alltrim(SB1->B1_COD)) <= 5 .and. SB1->B1_TIPO $ 'MP.MC.PI')
-                cCodPro := Iif(Len(Alltrim(SB1->B1_COD)) <= 5, SB1->B1_COD, TransForm(cCodPro, "@R! XX 99.99.999-XX"))
-                cDesPro := SB1->B1_DESC
-                DbSelectArea("SB2")
-                DbSetOrder(1)
-                DbSeek(xFilial("SB2")+SB1->B1_COD+SB1->B1_LOCPAD, .t.)
-                If Found()
-                   cCodLoc := Alltrim(SB2->B2_LOCALIZ)
-                   nSalEst := SB2->B2_QATU
-                Endif
-                MsAguarde( {|| fMonDad(cCodPro, cOpc, @aDespac)}, "Aguarde...", "Buscando registros...")
-                oSalEst:Refresh()
-                cQry1 := ""
-                cQry1 += "SELECT SC2.C2_NUM+SC2.C2_ITEM+SC2.C2_SEQUEN AS ORDEM, SC2.C2_LOTE AS LOTE, (SC2.C2_QUANT - SC2.C2_QUJE) AS PENDENTE "
-                cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
-                cQry1 += "WHERE SC2.C2_FILIAL  = '"+xFilial("SC2")+"' "
-                cQry1 += "  AND SC2.D_E_L_E_T_ = '' "
-                cQry1 += "  AND SC2.C2_PRODUTO = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
-                cQry1 += "  AND SC2.C2_DATRF   = '' "
-                TCQuery cQry1 ALIAS "BSC" NEW
-                DbSelectArea("BSC")
-                While !Eof()
-                      cQry1 := ""
-                      cQry1 += "SELECT SUM(EMP.QUANT) AS QUANT "
-                      cQry1 += "FROM EMPENHO EMP "
-                      cQry1 += "WHERE ('"+xFilial("SC2")+"' = '010101') AND (EMP.ORDEM = '"+BSC->ORDEM+"') "
-                      cQry1 += "  AND EMP.LOTE  = '"+BSC->LOTE+"' "
-                      cQry1 += "  AND EMP.FLAG = '' "
-                      TCQuery cQry1 ALIAS "APT" NEW
-                      DbSelectArea("APT")
-                      If (BSC->PENDENTE - APT->QUANT) > 0.0
-                         aAdd(aCodLot, {.f., BSC->LOTE, (BSC->PENDENTE - APT->QUANT), BSC->ORDEM})
-                      Endif
-                      DbSelectArea("APT")
-                      DbCloseArea()
-                      DbSelectArea("BSC")
-                      DbSkip()
-                Enddo
-                DbSelectArea("BSC")
-                DbCloseArea()
-                oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
-                DbSelectArea("PED")
-                Return(.t.)
-             Else
-                ApMsgStop("Codigo Inválido !!!")
-                cCodPro := space(15)
-                cDesPro := space(30)
-                cCodLoc := space(15)
-                oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
-                oCodPro:SetFocus()
-                DbSelectArea("PED")
-                Return(.f.)
-             Endif
-          Else
-             ApMsgStop("Codigo Inválido !!!")
-             cCodPro := space(15)
-             cDesPro := space(30)
-             cCodLoc := space(15)
-             oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
-             oCodPro:SetFocus()
-             DbSelectArea("PED")
-             Return(.f.)
-          Endif
-       Endif
+	Else
+		SB1->(DbSetOrder(1))
+		If DbSeek(xFilial("SB1")+cCodPro, .t.)
+			If SB1->B1_TIPO $ 'PA' .or. (Len(Alltrim(SB1->B1_COD)) <= 5 .and. SB1->B1_TIPO $ 'MP.MC.PI')
+				cCodPro := Iif(Len(Alltrim(SB1->B1_COD)) <= 5, SB1->B1_COD, TransForm(cCodPro, "@R! XX 99.99.999-XX"))
+				cDesPro := SB1->B1_DESC
+				DbSelectArea("SB2")
+				DbSetOrder(1)
+				DbSeek(xFilial("SB2")+SB1->B1_COD+SB1->B1_LOCPAD, .t.)
+				If Found()
+					cCodLoc := Alltrim(SB2->B2_LOCALIZ)
+					nSalEst := SB2->B2_QATU
+				Endif
+				MsAguarde( {|| fMonDad(cCodPro, cOpc, @aDespac)}, "Aguarde...", "Buscando registros...")
+				oSalEst:Refresh()
+				cQry1 := ""
+				cQry1 += "SELECT SC2.C2_NUM+SC2.C2_ITEM+SC2.C2_SEQUEN AS ORDEM, SC2.C2_LOTE AS LOTE, (SC2.C2_QUANT - SC2.C2_QUJE) AS PENDENTE "
+				cQry1 += "FROM "+RetSqlName("SC2")+" SC2 WITH (NOLOCK) "
+				cQry1 += "WHERE SC2.C2_FILIAL  = '"+xFilial("SC2")+"' "
+				cQry1 += "  AND SC2.D_E_L_E_T_ = '' "
+				cQry1 += "  AND SC2.C2_PRODUTO = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
+				cQry1 += "  AND SC2.C2_DATRF   = '' "
+				TCQuery cQry1 ALIAS "BSC" NEW
+				DbSelectArea("BSC")
+				While !Eof()
+					cQry1 := ""
+					cQry1 += "SELECT SUM(EMP.QUANT) AS QUANT "
+					cQry1 += "FROM EMPENHO EMP "
+					cQry1 += "WHERE ('"+xFilial("SC2")+"' = '010101') AND (EMP.ORDEM = '"+BSC->ORDEM+"') "
+					cQry1 += "  AND EMP.LOTE  = '"+BSC->LOTE+"' "
+					cQry1 += "  AND EMP.FLAG = '' "
+					TCQuery cQry1 ALIAS "APT" NEW
+					DbSelectArea("APT")
+					If (BSC->PENDENTE - APT->QUANT) > 0.0
+						aAdd(aCodLot, {.f., BSC->LOTE, (BSC->PENDENTE - APT->QUANT), BSC->ORDEM})
+					Endif
+					DbSelectArea("APT")
+					DbCloseArea()
+					DbSelectArea("BSC")
+					DbSkip()
+				Enddo
+				DbSelectArea("BSC")
+				DbCloseArea()
+				oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
+				DbSelectArea("PED")
+				Return(.t.)
+			Else
+				ApMsgStop("Codigo Inválido !!!")
+				cCodPro := space(15)
+				cDesPro := space(30)
+				cCodLoc := space(15)
+				oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
+				oCodPro:SetFocus()
+				DbSelectArea("PED")
+				Return(.f.)
+			Endif
+		Else
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(15)
+			cDesPro := space(30)
+			cCodLoc := space(15)
+			oQtdPro:Refresh() ; oQtdSep3:Refresh() ; oQtdG3:Refresh() ; oQtdApt:Refresh()
+			oCodPro:SetFocus()
+			DbSelectArea("PED")
+			Return(.f.)
+		Endif
+	Endif
 Return(.f.)
 
 /******************************************************************************************************************/
 /*** fMonDad - Monta matrizes com os dados que irão aparecer na consulta de produtos                            ***/
 /******************************************************************************************************************/
 Static Function fMonDad(cCodPro, cOpc, aDespac)
-       Local cQry1 := ""
-       Local cAux1 := ""
-       Local cREFTAL := GetMv("MV_RETFAL")
-             
-       aDespac := {}
-       
-       cQry1 := ""
-       cQry1 += "SELECT ISNULL(SZB.ZB_CODIGO, '') AS DESPACHO, ISNULL(SZA.ZA_DESCR, '') AS REGIAO, ISNULL(ZA_PREVDSP, '') AS PREVISAO, ZZC.ZZC_PEDIDO AS PEDIDO, ZZC.ZZC_QUANTI AS QUANTIDADE, SZA.ZA_FLAG AS FLAG "
-       cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-       cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON ZZC.ZZC_FILIAL  = SZB.ZB_FILIAL AND ZZC.ZZC_PEDIDO = SUBSTRING(SZB.ZB_PEDIDO, 3, 6) AND SZB.D_E_L_E_T_ = '' "
-       cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON SZB.ZB_FILIAL  = SZA.ZA_FILIAL AND SZB.ZB_CODIGO = SZA.ZA_CODIGO AND SZA.D_E_L_E_T_ = '' "
-       cQry1 += "WHERE ZZC.ZZC_FILIAL  = '"+xFilial("ZZC")+"' "
-       cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-       cQry1 += "  AND ZZC.ZZC_DESPAC NOT IN('S') "
-       cQry1 += "  AND ZZC.ZZC_PRODUT = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
-       cQry1 += "  AND ISNULL(SZB.ZB_CODIGO, '') NOT IN('') "
-       cQry1 += "ORDER BY 3, 1, 4 "
-       TCQuery cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
-       While !Eof()
-             cBorPed := Posicione("SZG", 2, xFilial("SZG")+'01'+TCQ->PEDIDO, "ZG_CODIGO")
-             If !Empty(cBorPed)
-                DbSelectArea("ZZC")
-                DbSetOrder(1)
-                DbSeek(xFilial("ZZC")+cBorPed+TCQ->PEDIDO+StrTran(StrTran(cCodPro, '-'), '.'), .t.)
-                If !Found()
-                   RecLock("ZZC", .t.)
-                      ZZC->ZZC_FILIAL := xFilial("ZZC")
-                      ZZC->ZZC_BORDER := Posicione("SZG", 2, xFilial("SZG")+'01'+TCQ->PEDIDO, "ZG_CODIGO")
-                      ZZC->ZZC_PEDIDO := TCQ->PEDIDO
-                      ZZC->ZZC_PRODUT := StrTran(StrTran(cCodPro, '.'), '-')
-                      ZZC->ZZC_QUANTI := TCQ->QUANTIDADE
-                      ZZC->ZZC_RETIRA := 0
-                      ZZC->ZZC_VOLUME := fCalVol(StrTran(StrTran(cCodPro, '.'), '-'), TCQ->QUANTIDADE)
-                      ZZC->ZZC_VOLRET := 0
-                      ZZC->ZZC_CARGA  := TCQ->DESPACHO
-                      ZZC->ZZC_OCUPAC := 0
-                      ZZC->ZZC_DESPAC := ""
-                      ZZC->ZZC_GAVETA := ""
-                      ZZC->ZZC_SEPARA := ""
-                      ZZC->ZZC_TPINCL := "B"
-                   MsUnLock()
-                Else
-                   If ZZC->ZZC_SEPARA <> 'S'
-                      If !Empty(ZZC->ZZC_GAVETA)
-                         // DESABILITADO RELEASE 12.1.25
-                         //aAdd(aDespac, {Iif(TCQ->FLAG $ 'C', .f., .t.), .f., TCQ->DESPACHO, cBorPed, TCQ->REGIAO, CTOD(SubStr(TCQ->PREVISAO, 7, 2)+'/'+SubStr(TCQ->PREVISAO, 5, 2)+'/'+SubStr(TCQ->PREVISAO, 1, 4)), TCQ->PEDIDO, Iif(GetMv("MV_RETFAL") $ 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)), Posicione("SZG", 1, xFilial("SZG")+ZZC->ZZC_BORDER+'01'+TCQ->PEDIDO, "ZG_LOCALIZ"), ZZC->ZZC_GAVETA, 'N', ''})
-                         aAdd(aDespac, {Iif(TCQ->FLAG $ 'C', .f., .t.), .f., TCQ->DESPACHO, cBorPed, TCQ->REGIAO, CTOD(SubStr(TCQ->PREVISAO, 7, 2)+'/'+SubStr(TCQ->PREVISAO, 5, 2)+'/'+SubStr(TCQ->PREVISAO, 1, 4)), TCQ->PEDIDO, Iif(Alltrim(cREFTAL) == 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)), Posicione("SZG", 1, xFilial("SZG")+ZZC->ZZC_BORDER+'01'+TCQ->PEDIDO, "ZG_LOCALIZ"), ZZC->ZZC_GAVETA, 'N', ''})
-                         cAux1 += TCQ->PEDIDO+"', '"
-                      Endif
-                   Endif
-                Endif
-             Else
-                DbSelectArea("ZZC")
-                DbSetOrder(4)
-                DbSeek(xFilial("ZZC")+TCQ->DESPACHO+TCQ->PEDIDO, .t.)
-                If Found()
-                   While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_CARGA == TCQ->DESPACHO .and. ZZC->ZZC_PEDIDO == TCQ->PEDIDO
-                         If Alltrim(ZZC->ZZC_PRODUT) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))
-                            If ZZC->ZZC_SEPARA <> 'S'
-                               If !Empty(ZZC->ZZC_GAVETA)
-                                  //DESABILITADO RELEASE 12.1.25
-                                  //aAdd(aDespac, {Iif(TCQ->FLAG $ 'C', .f., .t.), .f., TCQ->DESPACHO, cBorPed, TCQ->REGIAO, CTOD(SubStr(TCQ->PREVISAO, 7, 2)+'/'+SubStr(TCQ->PREVISAO, 5, 2)+'/'+SubStr(TCQ->PREVISAO, 1, 4)), TCQ->PEDIDO, Iif(GetMv("MV_RETFAL") $ 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)), Posicione("SZG", 1, xFilial("SZG")+ZZC->ZZC_BORDER+'01'+TCQ->PEDIDO, "ZG_LOCALIZ"), ZZC->ZZC_GAVETA, 'N', ''})
-                                  aAdd(aDespac, {Iif(TCQ->FLAG $ 'C', .f., .t.), .f., TCQ->DESPACHO, cBorPed, TCQ->REGIAO, CTOD(SubStr(TCQ->PREVISAO, 7, 2)+'/'+SubStr(TCQ->PREVISAO, 5, 2)+'/'+SubStr(TCQ->PREVISAO, 1, 4)), TCQ->PEDIDO, Iif(Alltrim(cREFTAL) == 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)), Posicione("SZG", 1, xFilial("SZG")+ZZC->ZZC_BORDER+'01'+TCQ->PEDIDO, "ZG_LOCALIZ"), ZZC->ZZC_GAVETA, 'N', ''})
-                                  cAux1 += TCQ->PEDIDO+"', '"
-                               Endif
-                            Endif
-                         Endif
-                         DbSelectArea("ZZC")
-                         DbSkip()
-                   Enddo
-                Endif
-             Endif
-             DbSelectArea("TCQ")
-             DbSkip()
-       Enddo
-       DbSelectArea("TCQ")
-       DbCloseArea()
-       If Len(aDespac) <= 0
-          aAdd(aDespac, {.t., .f., space(06), space(06), space(20), Ctod('  /  / '), space(06), 0, space(03), space(03), space(01), ''})
-       Endif
-       oDespac:nAt := 1
-       oDespac:SetArray(aDespac)
-       oDespac:bLine:= { || {Iif(aDespac[oDespac:nAt][1], oOk, oNo), Iif(aDespac[oDespac:nAt][2], hOk, hNo), aDespac[oDespac:nAt][3], aDespac[oDespac:nAt][4], aDespac[oDespac:nAt][5], aDespac[oDespac:nAt][6], aDespac[oDespac:nAt][7], aDespac[oDespac:nAt][8], oDespac:aArray[oDespac:nAt][10], oDespac:aArray[oDespac:nAt][9], oDespac:aArray[oDespac:nAt][12]}}
-       oDespac:Refresh()
+	Local cQry1 := ""
+	Local cAux1 := ""
+	Local cREFTAL := GetMv("MV_RETFAL")
 
-       /***          MONTANDO BORDERO DE PEDIDOS          ***/
-       If ChkFile("PED")
-          DbSelectArea("PED")
-          ZAP
-       Endif
-       cQry1 := ""
-       cQry1 += "SELECT ISNULL(SZG.ZG_CODIGO, '') AS BORDERO, ISNULL(SZF.ZF_EMISSAO, '') AS EMISSAO, ZZC.ZZC_PEDIDO AS PEDIDO, ZZC.ZZC_QUANTI AS QUANTIDADE "
-       cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-       cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH (NOLOCK) ON ZZC.ZZC_FILIAL = SZG.ZG_FILIAL AND ZZC.ZZC_PEDIDO = SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AND SZG.D_E_L_E_T_ = '' "
-       cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZF")+" SZF WITH (NOLOCK) ON SZG.ZG_FILIAL  = SZF.ZF_FILIAL AND SZG.ZG_CODIGO = SZF.ZF_CODIGO AND SZF.D_E_L_E_T_ = '' "
-       cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-       cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-       cQry1 += "  AND ZZC.ZZC_DESPAC IN('', 'N') "
-       cQry1 += "  AND ZZC.ZZC_PRODUT = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
-       cQry1 += "  AND ISNULL(SZG.ZG_CODIGO, '') NOT IN('') "
-       cQry1 += Iif(!Empty(cAux1), "  AND ZZC.ZZC_PEDIDO NOT IN('"+SubStr(cAux1, 1, Len(cAux1) - 3)+") ", "")
-       cQry1 += "ORDER BY 3, 1, 4 "
-       TCQuery cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
-       While !Eof()
-             DbSelectArea("ZZC")
-             DbSetOrder(1)
-             DbSeek(xFilial("ZZC")+TCQ->BORDERO+TCQ->PEDIDO+StrTran(StrTran(cCodPro, '.'), '-'), .t.)
-             If Found()
-                If ZZC->ZZC_SEPARA <> 'S'
-                   If !Empty(ZZC->ZZC_GAVETA)
-                      RecLock("PED", .t.)
-                         PED->PED_FLAG   := '  '
-                         PED->PED_NUMBOR := TCQ->BORDERO
-                         PED->PED_EMISSA := CTOD(SubStr(TCQ->EMISSAO, 7, 2)+'/'+SubStr(TCQ->EMISSAO, 5, 2)+'/'+SubStr(TCQ->EMISSAO, 1, 4))
-                         PED->PED_PEDIDO := TCQ->PEDIDO
-                         //PED->PED_QUANTI := Iif(GetMv("MV_RETFAL") $ 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)) DESABILITADO RELEASE 12.1.25
-                         PED->PED_QUANTI := Iif(Alltrim(cREFTAL) == 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)) 
-                         PED->PED_LOCEXP := Posicione("SZG", 1, xFilial("SZG")+TCQ->BORDERO+'01'+TCQ->PEDIDO, "ZG_LOCALIZ")
-                         PED->PED_GAVETA := ZZC->ZZC_GAVETA
-                      MsUnLock()
-                   Endif
-                Endif
-             Endif
-             DbSelectArea("TCQ")
-             DbSkip()
-       Enddo
-       DbSelectArea("TCQ")
-       DbCloseArea()
-       DbSelectArea("PED")
-       DbGoTop()
-       oPED:oBrowse:Refresh()
-       DbSelectArea("PED")
-       DbGoTop()
+	aDespac := {}
+
+	cQry1 := ""
+	cQry1 += "SELECT ISNULL(SZB.ZB_CODIGO, '') AS DESPACHO, ISNULL(SZA.ZA_DESCR, '') AS REGIAO, ISNULL(ZA_PREVDSP, '') AS PREVISAO, ZZC.ZZC_PEDIDO AS PEDIDO, ZZC.ZZC_QUANTI AS QUANTIDADE, SZA.ZA_FLAG AS FLAG "
+	cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+	cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON ZZC.ZZC_FILIAL  = SZB.ZB_FILIAL AND ZZC.ZZC_PEDIDO = SUBSTRING(SZB.ZB_PEDIDO, 3, 6) AND SZB.D_E_L_E_T_ = '' "
+	cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON SZB.ZB_FILIAL  = SZA.ZA_FILIAL AND SZB.ZB_CODIGO = SZA.ZA_CODIGO AND SZA.D_E_L_E_T_ = '' "
+	cQry1 += "WHERE ZZC.ZZC_FILIAL  = '"+xFilial("ZZC")+"' "
+	cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
+	cQry1 += "  AND ZZC.ZZC_DESPAC NOT IN('S') "
+	cQry1 += "  AND ZZC.ZZC_PRODUT = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
+	cQry1 += "  AND ISNULL(SZB.ZB_CODIGO, '') NOT IN('') "
+	cQry1 += "ORDER BY 3, 1, 4 "
+	TCQuery cQry1 ALIAS "TCQ" NEW
+	DbSelectArea("TCQ")
+	DbGoTop()
+
+	BEGINSQL Alias "TCQ"
+	SELECT 
+		ISNULL(SZB.ZB_CODIGO, '') AS DESPACHO, 
+		ISNULL(SZA.ZA_DESCR, '') AS REGIAO, 
+		ISNULL(ZA_PREVDSP, '') AS PREVISAO, 
+		ZZC.ZZC_PEDIDO AS PEDIDO, 
+		ZZC.ZZC_QUANTI AS QUANTIDADE, 
+		SZA.ZA_FLAG AS FLAG 
+		FROM 
+		%TABLE:ZZC% ZZC WITH (NOLOCK) 
+		LEFT OUTER JOIN %TABLE:SZB% SZB WITH (NOLOCK) 
+			ON ZZC.ZZC_FILIAL  = SZB.ZB_FILIAL 
+			AND ZZC.ZZC_PEDIDO = SUBSTRING(SZB.ZB_PEDIDO, 3, 6) 
+			AND %NOTDEL%
+		LEFT OUTER JOIN %TABLE:SZA% SZA WITH (NOLOCK) 
+			ON SZB.ZB_FILIAL  = SZA.ZA_FILIAL 
+			AND SZB.ZB_CODIGO = SZA.ZA_CODIGO 
+			AND SZA.%NOTDEL%
+			WHERE 
+			ZZC.ZZC_FILIAL  = %XFILIAL:ZZC%
+			AND ZZC.%NOTDEL%
+			AND ZZC.ZZC_DESPAC <> 'S'
+			AND ZZC.ZZC_PRODUT = %EXP:StrTran(StrTran(cCodPro, '-'), '.')%
+			AND ISNULL(SZB.ZB_CODIGO, '') <> '' 
+			ORDER BY 3, 1, 4 
+	ENDSQL
+	
+While .NOT. TCQ->(Eof())
+		cBorPed := Posicione("SZG", 2, xFilial("SZG")+'01'+TCQ->PEDIDO, "ZG_CODIGO")
+		If .NOT. Empty(cBorPed)
+			ZZC->(DbSetOrder(1))
+			cCodProd:=StrTran(cCodPro, '-')
+			cCodProd:=StrTran(cCodPro, '.')
+			If ZZC->(DbSeek(xFilial("ZZC")+cBorPed+TCQ->PEDIDO+cCodProd))
+			
+				RecLock("ZZC", .t.)
+				ZZC->ZZC_FILIAL := xFilial("ZZC")
+				ZZC->ZZC_BORDER := Posicione("SZG", 2, xFilial("SZG")+'01'+TCQ->PEDIDO, "ZG_CODIGO")
+				ZZC->ZZC_PEDIDO := TCQ->PEDIDO
+				ZZC->ZZC_PRODUT := cCodProd
+				ZZC->ZZC_QUANTI := TCQ->QUANTIDADE
+				ZZC->ZZC_RETIRA := 0
+				ZZC->ZZC_VOLUME := fCalVol(cCodProd, TCQ->QUANTIDADE)
+				ZZC->ZZC_VOLRET := 0
+				ZZC->ZZC_CARGA  := TCQ->DESPACHO
+				ZZC->ZZC_OCUPAC := 0
+				ZZC->ZZC_DESPAC := ""
+				ZZC->ZZC_GAVETA := ""
+				ZZC->ZZC_SEPARA := ""
+				ZZC->ZZC_TPINCL := "B"
+				MsUnLock()
+			Else
+				If ZZC->ZZC_SEPARA <> 'S'
+					If !Empty(ZZC->ZZC_GAVETA)
+						aAdd(aDespac, {Iif(TCQ->FLAG $ 'C', .f., .t.), .f., TCQ->DESPACHO, cBorPed, TCQ->REGIAO, CTOD(SubStr(TCQ->PREVISAO, 7, 2)+'/'+SubStr(TCQ->PREVISAO, 5, 2)+'/'+SubStr(TCQ->PREVISAO, 1, 4)), TCQ->PEDIDO, Iif(Alltrim(cREFTAL) == 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)), Posicione("SZG", 1, xFilial("SZG")+ZZC->ZZC_BORDER+'01'+TCQ->PEDIDO, "ZG_LOCALIZ"), ZZC->ZZC_GAVETA, 'N', ''})
+						cAux1 += TCQ->PEDIDO+"', '"
+					Endif
+				Endif
+			Endif
+		Else
+			ZZC->(DbSetOrder(4))
+			If ZZC->(DbSeek(xFilial("ZZC")+TCQ->DESPACHO+TCQ->PEDIDO))
+				While .NOT. EOF() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_CARGA == TCQ->DESPACHO .and. ZZC->ZZC_PEDIDO == TCQ->PEDIDO
+					If Alltrim(ZZC->ZZC_PRODUT) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))
+						If ZZC->ZZC_SEPARA <> 'S'
+							If .NOT. Empty(ZZC->ZZC_GAVETA)
+								aAdd(aDespac, {Iif(TCQ->FLAG $ 'C', .f., .t.), .f., TCQ->DESPACHO, cBorPed, TCQ->REGIAO, STOD(TCQ->PREVISAO), TCQ->PEDIDO, Iif(Alltrim(cREFTAL) == 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)), Posicione("SZG", 1, xFilial("SZG")+ZZC->ZZC_BORDER+'01'+TCQ->PEDIDO, "ZG_LOCALIZ"), ZZC->ZZC_GAVETA, 'N', ''})
+								cAux1 += TCQ->PEDIDO+"', '"
+							Endif
+						Endif
+					Endif
+					ZZC->(DbSkip())
+				Enddo
+			Endif
+		Endif
+		TCQ->(DbSkip())
+	Enddo
+	TCQ->(DbCloseArea())
+	If Len(aDespac) <= 0
+		aAdd(aDespac, {.t., .f., space(06), space(06), space(20), Ctod('  /  / '), space(06), 0, space(03), space(03), space(01), ''})
+	Endif
+	oDespac:nAt := 1
+	oDespac:SetArray(aDespac)
+	oDespac:bLine:= { || {Iif(aDespac[oDespac:nAt][1], oOk, oNo), Iif(aDespac[oDespac:nAt][2], hOk, hNo), aDespac[oDespac:nAt][3], aDespac[oDespac:nAt][4], aDespac[oDespac:nAt][5], aDespac[oDespac:nAt][6], aDespac[oDespac:nAt][7], aDespac[oDespac:nAt][8], oDespac:aArray[oDespac:nAt][10], oDespac:aArray[oDespac:nAt][9], oDespac:aArray[oDespac:nAt][12]}}
+	oDespac:Refresh()
+
+	/***          MONTANDO BORDERO DE PEDIDOS          ***/
+	If ChkFile("PED")
+		DbSelectArea("PED")
+		PED->(ZAP)	
+	Endif
+	cQry1 := ""
+	cQry1 += "SELECT ISNULL(SZG.ZG_CODIGO, '') AS BORDERO, ISNULL(SZF.ZF_EMISSAO, '') AS EMISSAO, ZZC.ZZC_PEDIDO AS PEDIDO, ZZC.ZZC_QUANTI AS QUANTIDADE "
+	cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+	cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH (NOLOCK) ON ZZC.ZZC_FILIAL = SZG.ZG_FILIAL AND ZZC.ZZC_PEDIDO = SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AND SZG.D_E_L_E_T_ = '' "
+	cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZF")+" SZF WITH (NOLOCK) ON SZG.ZG_FILIAL  = SZF.ZF_FILIAL AND SZG.ZG_CODIGO = SZF.ZF_CODIGO AND SZF.D_E_L_E_T_ = '' "
+	cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+	cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
+	cQry1 += "  AND ZZC.ZZC_DESPAC IN('', 'N') "
+	cQry1 += "  AND ZZC.ZZC_PRODUT = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
+	cQry1 += "  AND ISNULL(SZG.ZG_CODIGO, '') NOT IN('') "
+	cQry1 += Iif(!Empty(cAux1), "  AND ZZC.ZZC_PEDIDO NOT IN('"+SubStr(cAux1, 1, Len(cAux1) - 3)+") ", "")
+	cQry1 += "ORDER BY 3, 1, 4 "
+	TCQuery cQry1 ALIAS "TCQ" NEW
+	DbSelectArea("TCQ")
+	DbGoTop()
+	While !Eof()
+		DbSelectArea("ZZC")
+		DbSetOrder(1)
+		DbSeek(xFilial("ZZC")+TCQ->BORDERO+TCQ->PEDIDO+StrTran(StrTran(cCodPro, '.'), '-'), .t.)
+		If Found()
+			If ZZC->ZZC_SEPARA <> 'S'
+				If !Empty(ZZC->ZZC_GAVETA)
+					RecLock("PED", .t.)
+					PED->PED_FLAG   := '  '
+					PED->PED_NUMBOR := TCQ->BORDERO
+					PED->PED_EMISSA := CTOD(SubStr(TCQ->EMISSAO, 7, 2)+'/'+SubStr(TCQ->EMISSAO, 5, 2)+'/'+SubStr(TCQ->EMISSAO, 1, 4))
+					PED->PED_PEDIDO := TCQ->PEDIDO
+					//PED->PED_QUANTI := Iif(GetMv("MV_RETFAL") $ 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)) DESABILITADO RELEASE 12.1.25
+					PED->PED_QUANTI := Iif(Alltrim(cREFTAL) == 'S', ZZC->ZZC_QUANTI, (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA))
+					PED->PED_LOCEXP := Posicione("SZG", 1, xFilial("SZG")+TCQ->BORDERO+'01'+TCQ->PEDIDO, "ZG_LOCALIZ")
+					PED->PED_GAVETA := ZZC->ZZC_GAVETA
+					MsUnLock()
+				Endif
+			Endif
+		Endif
+		DbSelectArea("TCQ")
+		DbSkip()
+	Enddo
+	DbSelectArea("TCQ")
+	DbCloseArea()
+	DbSelectArea("PED")
+	DbGoTop()
+	oPED:oBrowse:Refresh()
+	DbSelectArea("PED")
+	DbGoTop()
 Return
 
 /******************************************************************************************************************/
@@ -1919,46 +1878,46 @@ Return
 /***            fExcEnd    - Exclui endereços do bordero de pedidos                                             ***/
 /******************************************************************************************************************/
 User Function FATA03_4(cOpc)
-     If cOpc $ '1' //Endereça
-        /*
+	If cOpc $ '1' //Endereça
+		/*
         If SZF->ZF_TIPOBOR $ '1.2' .or. Empty(Alltrim(SZF->ZF_TIPOBOR)) // POR EQTO SÓ PRA SP
 			Messagebox("Bordero não pode ser endereçado!","Atenção...",48)
 			Return
 		Endif        	*/
-        If SZF->ZF_FLAG $ 'D' 
-           //fVlPer1() desabilitado release 12.1.25
-           If Pergunte("FATA03", .t.)
-              aPallet := {}
-              aQuadra := {}
-              aProPal := {}
-              aProQua := {}
-              
-              U_fBusEndLiv(@aPallet, @aQuadra, @aProPal, @aProQua) //Montas Matrizes para endereços livres
+		If SZF->ZF_FLAG $ 'D'
+			//fVlPer1() desabilitado release 12.1.25
+			If Pergunte("FATA03", .t.)
+				aPallet := {}
+				aQuadra := {}
+				aProPal := {}
+				aProQua := {}
 
-              Processa({|| fEndBor(mv_par01, @aPallet, @aQuadra, @aProPal, @aProQua)}, OemToAnsi("Endereçamento de pedidos na expedição"))
-           Endif
-        Else
-           MsgBox("Bordero não pode ser endereçado!", "Atenção", "STOP")
-           Return
-        Endif
-     ElseIf cOpc $ '2' //Exclui endereços
-        /*
+				U_fBusEndLiv(@aPallet, @aQuadra, @aProPal, @aProQua) //Montas Matrizes para endereços livres
+
+				Processa({|| fEndBor(mv_par01, @aPallet, @aQuadra, @aProPal, @aProQua)}, OemToAnsi("Endereçamento de pedidos na expedição"))
+			Endif
+		Else
+			MsgBox("Bordero não pode ser endereçado!", "Atenção", "STOP")
+			Return
+		Endif
+	ElseIf cOpc $ '2' //Exclui endereços
+		/*
         If SZF->ZF_TIPOBOR $ '1.2' // POR EQTO SÓ PRA SP
 			Messagebox("Bordero não pode ter seus endereços excluídos !","Atenção...",48)
 			Return
 		Endif        	*/
 
-     
-            If SZF->ZF_FLAG $ 'E'
-               Processa({|| fExcEnd()}, OemToAnsi("Exclusão de endereçamento na expedição"))
-            ElseIf SZF->ZF_FLAG $ 'T'
-                   MsgBox("Esse bordero já foi totalmente separado.", "Atenção", "STOP")
-                   Return Nil
-            Else
-               MsgBox("Esse bordero não foi endereçado ou já está sendo separado.", "Atenção", "STOP")
-               Return Nil
-            Endif               
-     Endif
+
+		If SZF->ZF_FLAG $ 'E'
+			Processa({|| fExcEnd()}, OemToAnsi("Exclusão de endereçamento na expedição"))
+		ElseIf SZF->ZF_FLAG $ 'T'
+			MsgBox("Esse bordero já foi totalmente separado.", "Atenção", "STOP")
+			Return Nil
+		Else
+			MsgBox("Esse bordero não foi endereçado ou já está sendo separado.", "Atenção", "STOP")
+			Return Nil
+		Endif
+	Endif
 Return
 
 /******************************************************************************************************************/
@@ -1989,16 +1948,16 @@ Static Function fEndBor(nEndereca, aPallet, aQuadra, aProPal, aProQua)
 				cLocaliz := '   '
 			Endif
 		Endif
-          /****************************************************************************************/
-          /*** Verificar se o bordero já teve algum endereçamento anterior e exclui-lo.         ***/
-          /****************************************************************************************/
+		/****************************************************************************************/
+		/*** Verificar se o bordero já teve algum endereçamento anterior e exclui-lo.         ***/
+		/****************************************************************************************/
 		cQry1 := ""
 		cQry1 += "UPDATE "+RetSqlName("ZZC")+" SET D_E_L_E_T_ = '' WHERE ZZC_FILIAL = '"+xFilial("ZZC")+"' AND D_E_L_E_T_ = '' AND ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
 		TCSQLEXEC(cQry1)
-          /****************************************************************************************/
-          /*** Incluir pedidos do bordero em uma matriz para ordenar em ordem de transportadora ***/
-          /*** para facilitar o carregamento.                                                   ***/
-          /****************************************************************************************/
+		/****************************************************************************************/
+		/*** Incluir pedidos do bordero em uma matriz para ordenar em ordem de transportadora ***/
+		/*** para facilitar o carregamento.                                                   ***/
+		/****************************************************************************************/
 		aMatBor := {}
 		DbSelectArea("SZG")
 		DbSetOrder(1)
@@ -2256,10 +2215,10 @@ Return
 /*
 Static Function fVlPer2()
        PutSX1("XFATA3", "01", "Endereço Especifico", "", "", "mv_ch1", "C", 3, 0, 0, "G", "!Vazio(mv_par01)", "XBE", " ", " ", "mv_par01", "", " ", " ", " ", "", " ", " ", "", " ", " ", "", " ", " ", "", " ", " ", Nil, Nil, Nil, "XFATA3" )
-       
+
        cAlias := Alias()
        nOrdem := IndexOrd()
-       
+
        DbSelectArea("SX1")
        DbSetOrder(1)
        DbSeek('XFATA301')
@@ -2379,21 +2338,21 @@ Static Function fExcEnd()
 			DbSkip()
 		Enddo
 		//Liberar endereços
-         /* cQry1 := ""
+		/* cQry1 := ""
           cQry1 += "UPDATE "+RetSqlName("SBE")+" SET BE_BORDERO = '', BE_PEDIDO = '', BE_STATUS = '1' WHERE BE_FILIAL = '"+xFilial("SBE")+"' AND BE_BORDERO = '"+SZF->ZF_CODIGO+"' "
-          TCSqlExec(cQry1) 
-                 
+          TCSqlExec(cQry1)
+
           //Excluir ZZC
           cQry1 := ""
           cQry1 += "UPDATE "+RetSqlName("ZZC")+" SET D_E_L_E_T_ = '*' WHERE ZZC_FILIAL = '"+xFilial("ZZC")+"' AND ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-          TCSqlExec(cQry1) */
+		TCSqlExec(cQry1) */
 
-       	  RecLock("SZF", .f.)
-            SZF->ZF_FLAG := "D"
-       	  MsUnLock()
-       Else
-          MsgBox("Atenção, não foi possível excluir o endereçamento do Borderô "+SZF->ZF_CODIGO+" !", "Atenção", "ALERT")	
-       Endif
+		RecLock("SZF", .f.)
+		SZF->ZF_FLAG := "D"
+		MsUnLock()
+	Else
+		MsgBox("Atenção, não foi possível excluir o endereçamento do Borderô "+SZF->ZF_CODIGO+" !", "Atenção", "ALERT")
+	Endif
 Return
 
 /******************************************************************************************************************/
@@ -2401,66 +2360,66 @@ Return
 /***            fRetBor    - Retirada/Baixa de produtos do bordero.                                             ***/
 /******************************************************************************************************************/
 User Function FATA03_5(cOpc)
-    /*
+	/*
     If SZF->ZF_TIPOBOR $ '1.2' .or. Empty(Alltrim(SZF->ZF_TIPOBOR)) // POR EQTO SÓ PRA SP
 		Messagebox("Bordero não pode ser endereçado!","Atenção...",48)
 		Return
 	Endif      */
-    If cOpc $ '1' //Retirada do estoque pela expedição
-        fRetBor("R")
-    ElseIf cOpc $ '2' //Baixa Retirada do estoque pela expedição
-            fRetBor("B")
-    Endif
+	If cOpc $ '1' //Retirada do estoque pela expedição
+		fRetBor("R")
+	ElseIf cOpc $ '2' //Baixa Retirada do estoque pela expedição
+		fRetBor("B")
+	Endif
 Return
-                        
+
 /******************************************************************************************************************/
 /*** fRetBor - Retirada por bordero de pedidos.                                                                 ***/
 /***         u_FATA03_6 - Validação da retirada de produtos.                                                    ***/
 /******************************************************************************************************************/
 Static Function fRetBor(cOpc)
-       Local oDlg, nX, nY
-       Local nOpcA     := 0
-       Local nOpcE     := Iif(cOpc $ 'R', 4, 2)
-       Local cLinOk    := 'AllwaysTrue()'
-       Local cTudoOk   := 'AllwaysTrue()'
-       Local cFieldOk  := "U_FATA03_6(aCols, aHeader, @aMatPed, oGetD)"
-       //Local nLinhas   := 400
-       Local aAltGet   := {"ZZC_RETIRA", "ZZC_GAVETA"}
-       Local lPriCar   := .f.
-       Local _lOpen    := .F. // Adequação para release 12.1.25
-       Local _cAliasSX3:= GetNextAlias() // Adequação para release 12.1.25
-       Local cQry1     := ""
-       Local cRETFAL   := GetMv("MV_RETFAL")
-       // ABERTURA DO DICIONÁRIO SX3 - Adequação para release 12.1.25
-       Private aCols   := {}
-       Private aHeader := {}
-       Private nUsado  := 0
-       Private aMatPed := {}
-       Private aMatTCQ := {}
+	Local oDlg, nX, nY
+	Local nOpcA     := 0
+	Local nOpcE     := Iif(cOpc $ 'R', 4, 2)
+	Local cLinOk    := 'AllwaysTrue()'
+	Local cTudoOk   := 'AllwaysTrue()'
+	Local cFieldOk  := "U_FATA03_6(aCols, aHeader, @aMatPed, oGetD)"
+	//Local nLinhas   := 400
+	Local aAltGet   := {"ZZC_RETIRA", "ZZC_GAVETA"}
+	Local lPriCar   := .f.
+	Local _lOpen    := .F. // Adequação para release 12.1.25
+	Local _cAliasSX3:= GetNextAlias() // Adequação para release 12.1.25
+	Local cQry1     := ""
+	Local cRETFAL   := GetMv("MV_RETFAL")
+	// ABERTURA DO DICIONÁRIO SX3 - Adequação para release 12.1.25
+	Private aCols   := {}
+	Private aHeader := {}
+	Private nUsado  := 0
+	Private aMatPed := {}
+	Private aMatTCQ := {}
 
-       OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
-       _lOpen := Select( _cAliasSX3 ) > 0
-       
-       
-       If SZF->ZF_FLAG $ 'T.X'
-          If !SZF->ZF_CODIGO $ '000000'
-             ApMsgStop("Bordero já foi totalmente destinado.")
-             Return
-          Endif
-       ElseIf SZF->ZF_FLAG $ 'D'
-              ApMsgStop("Bordero não está endereçado.")
-              Return
-       ElseIf SZF->ZF_FLAG $ 'E'
-              RecLock("SZF", .f.)
-                 SZF->ZF_FLAG    := 'P'
-                 SZF->ZF_DATAINI := dDataBase
-                 SZF->ZF_HORAINI := Time()
-              MsUnLock()
-              lPriCar := .t.
-       Endif
+	OpenSXs( NIL, NIL, NIL, NIL, Nil, _cAliasSX3, "SX3", NIL, .F. )
+	_lOpen := Select( _cAliasSX3 ) > 0
 
-       //Montagem do aHeader
-       /*
+
+	If SZF->ZF_FLAG $ 'T.X'
+		If !SZF->ZF_CODIGO $ '000000'
+			ApMsgStop("Bordero já foi totalmente destinado.")
+			Return
+		Endif
+	ElseIf SZF->ZF_FLAG $ 'D'
+		ApMsgStop("Bordero não está endereçado.")
+		Return
+	ElseIf SZF->ZF_FLAG $ 'E'
+		RecLock("SZF", .f.)
+		SZF->ZF_FLAG    := 'P'
+		SZF->ZF_DATAINI := dDataBase
+		SZF->ZF_HORAINI := Time()
+		MsUnLock()
+		lPriCar := .t.
+	Endif
+
+	//Montagem do aHeader
+	/*
        DbSelectArea("SX3")
        DbSetOrder(1)
        DbSeek("ZZC")
@@ -2471,117 +2430,102 @@ Static Function fRetBor(cOpc)
              EndIf
              dbSkip()
        Enddo
-       */
-		DbSelectArea( _cAliasSX3 )
-		( _cAliasSX3 )->( DbSetOrder(1) )
-		( _cAliasSX3 )->( DbSeek("ZZC") )
-		While !Eof() .and. ( _cAliasSX3 )->( X3_ARQUIVO ) == "ZZC"
-			IF X3Uso( ( _cAliasSX3 )->( X3_USADO ) ) .and. cNivel >= ( _cAliasSX3 )->( X3_NIVEL ) .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_FILIAL") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) ==  "ZZC_BORDERO") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_PEDIDO") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_CARGA") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_OCUPAC") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_LOCEXP") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_RESERV")
-				nUsado += 1
-				AADD(aHeader, { ( _cAliasSX3 )->(X3_TITULO), ( _cAliasSX3 )->(X3_CAMPO), ( _cAliasSX3 )->(X3_PICTURE), ( _cAliasSX3 )->(X3_TAMANHO), ( _cAliasSX3 )->(X3_DECIMAL), ( _cAliasSX3 )->(X3_VALID), ( _cAliasSX3 )->(X3_USADO), ( _cAliasSX3 )->(X3_TIPO), ( _cAliasSX3 )->(X3_ARQUIVO), ( _cAliasSX3 )->(X3_CONTEXT) } )
-			EndIf
-			DbSkip()
-		EndDo
+	*/
+	DbSelectArea( _cAliasSX3 )
+	( _cAliasSX3 )->( DbSetOrder(1) )
+	( _cAliasSX3 )->( DbSeek("ZZC") )
+	While !Eof() .and. ( _cAliasSX3 )->( X3_ARQUIVO ) == "ZZC"
+		IF X3Uso( ( _cAliasSX3 )->( X3_USADO ) ) .and. cNivel >= ( _cAliasSX3 )->( X3_NIVEL ) .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_FILIAL") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) ==  "ZZC_BORDERO") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_PEDIDO") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_CARGA") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_OCUPAC") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_LOCEXP") .And. !(AllTRIM( ( _cAliasSX3 )->( X3_CAMPO ) ) == "ZZC_RESERV")
+			nUsado += 1
+			AADD(aHeader, { ( _cAliasSX3 )->(X3_TITULO), ( _cAliasSX3 )->(X3_CAMPO), ( _cAliasSX3 )->(X3_PICTURE), ( _cAliasSX3 )->(X3_TAMANHO), ( _cAliasSX3 )->(X3_DECIMAL), ( _cAliasSX3 )->(X3_VALID), ( _cAliasSX3 )->(X3_USADO), ( _cAliasSX3 )->(X3_TIPO), ( _cAliasSX3 )->(X3_ARQUIVO), ( _cAliasSX3 )->(X3_CONTEXT) } )
+		EndIf
+		DbSkip()
+	EndDo
 
-		DbSelectArea( _cAliasSX3 )
-		DbCloseArea()
+	DbSelectArea( _cAliasSX3 )
+	DbCloseArea()
 
-		If GetMv("MV_RETFAL") $ 'N' //Padrão N (faltante)
-			aHeader[aScan(aHeader, {|x| Alltrim(x[2]) == "ZZC_RETIRA"})][1] := "Qtd Faltante"
-		Endif
+	If GetMv("MV_RETFAL") $ 'N' //Padrão N (faltante)
+		aHeader[aScan(aHeader, {|x| Alltrim(x[2]) == "ZZC_RETIRA"})][1] := "Qtd Faltante"
+	Endif
 
-		//Montagem do aCols
-		If !SZF->ZF_CODIGO $ '000000'
-			cQry1 := ""
-			cQry1 += "SELECT ZZC.ZZC_PRODUT AS PRODUTO, SB1.B1_DESC AS DESCRICAO, SB2.B2_LOCALIZ AS LOCALIZ, ZZC.ZZC_QUANTI AS QUANTIDADE, ZZC.ZZC_RETIRA AS RETIRA, ZZC.ZZC_GAVETA AS GAVETA, ZZC.ZZC_VOLUME AS VOLUME, ZZC.ZZC_VOLRET, ZZC.ZZC_SEPARA AS SEPARA "
-			cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON ZZC.ZZC_FILIAL = SB1.B1_FILIAL AND ZZC.ZZC_PRODUT = SB1.B1_COD AND SB1.D_E_L_E_T_ = '' "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB1.B1_FILIAL = SB2.B2_FILIAL AND SB1.B1_COD = SB2.B2_COD AND SB1.B1_LOCPAD = SB2.B2_LOCAL AND SB2.D_E_L_E_T_ = '' "
-			cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-			cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-			cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-			cQry1 += "  AND (ZZC.ZZC_SEPARA <> 'S' AND (ZZC.ZZC_QUANTI <> ZZC.ZZC_RETIRA)) "
-			cQry1 += "ORDER BY 3, 1 "
-		Else
-			//Nesse caso, verificar antes se todos os itens estão carregados depois refazer a query novamente com os dados já gravados
-			cQry1 := ""
-			cQry1 += "SELECT SZF.ZF_CODIGO, SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AS ZG_PEDIDO, SC6.C6_ITEM, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_VOLITEM, ZZC.ZZC_PRODUT AS PRODUTO, SB1.B1_DESC AS DESCRICAO, SB2.B2_LOCALIZ AS LOCALIZ, ZZC.ZZC_QUANTI AS QUANTIDADE, ZZC.ZZC_RETIRA AS RETIRA, ZZC.ZZC_GAVETA AS GAVETA, ZZC.ZZC_VOLUME AS VOLUME, ZZC.ZZC_VOLRET, ZZC.ZZC_SEPARA AS SEPARA "
-			cQry1 += "FROM "+RetSqlName("SZF")+" SZF WITH (NOLOCK) "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH (NOLOCK) ON SZG.ZG_FILIAL = SZF.ZF_FILIAL AND SZG.ZG_CODIGO = SZF.ZF_CODIGO AND SZG.D_E_L_E_T_ = '' "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) ON SC6.C6_FILIAL = SZG.ZG_FILIAL AND SC6.C6_NUM    = SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AND SC6.D_E_L_E_T_ = '' "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) ON ZZC.ZZC_FILIAL = SC6.C6_FILIAL AND ZZC.ZZC_BORDER = SZF.ZF_CODIGO AND ZZC.ZZC_PEDIDO = SC6.C6_NUM AND ZZC.ZZC_PRODUT = SC6.C6_PRODUTO AND ZZC.D_E_L_E_T_ = '' "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON SB1.B1_FILIAL  = ZZC.ZZC_FILIAL AND SB1.B1_COD = ZZC.ZZC_PRODUT AND SB1.D_E_L_E_T_ = '' "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB2.B2_FILIAL = SB1.B1_FILIAL AND SB2.B2_COD = SB1.B1_COD AND SB2.B2_LOCAL = SB1.B1_LOCPAD AND SB2.D_E_L_E_T_ = '' "
-			cQry1 += "WHERE SZF.ZF_FILIAL  = '"+xFilial("SZF")+"' "
-			cQry1 += "  AND SZF.D_E_L_E_T_ = '' "
-			cQry1 += "  AND SZF.ZF_CODIGO  = '000000' "
-			cQry1 += "ORDER BY SZG.ZG_PEDIDO, SC6.C6_ITEM "
+	//Montagem do aCols
+	If !SZF->ZF_CODIGO $ '000000'
+		cQry1 := ""
+		cQry1 += "SELECT ZZC.ZZC_PRODUT AS PRODUTO, SB1.B1_DESC AS DESCRICAO, SB2.B2_LOCALIZ AS LOCALIZ, ZZC.ZZC_QUANTI AS QUANTIDADE, ZZC.ZZC_RETIRA AS RETIRA, ZZC.ZZC_GAVETA AS GAVETA, ZZC.ZZC_VOLUME AS VOLUME, ZZC.ZZC_VOLRET, ZZC.ZZC_SEPARA AS SEPARA "
+		cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON ZZC.ZZC_FILIAL = SB1.B1_FILIAL AND ZZC.ZZC_PRODUT = SB1.B1_COD AND SB1.D_E_L_E_T_ = '' "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB1.B1_FILIAL = SB2.B2_FILIAL AND SB1.B1_COD = SB2.B2_COD AND SB1.B1_LOCPAD = SB2.B2_LOCAL AND SB2.D_E_L_E_T_ = '' "
+		cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+		cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
+		cQry1 += "  AND (ZZC.ZZC_SEPARA <> 'S' AND (ZZC.ZZC_QUANTI <> ZZC.ZZC_RETIRA)) "
+		cQry1 += "ORDER BY 3, 1 "
+	Else
+		//Nesse caso, verificar antes se todos os itens estão carregados depois refazer a query novamente com os dados já gravados
+		cQry1 := ""
+		cQry1 += "SELECT SZF.ZF_CODIGO, SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AS ZG_PEDIDO, SC6.C6_ITEM, SC6.C6_PRODUTO, SC6.C6_QTDVEN, SC6.C6_VOLITEM, ZZC.ZZC_PRODUT AS PRODUTO, SB1.B1_DESC AS DESCRICAO, SB2.B2_LOCALIZ AS LOCALIZ, ZZC.ZZC_QUANTI AS QUANTIDADE, ZZC.ZZC_RETIRA AS RETIRA, ZZC.ZZC_GAVETA AS GAVETA, ZZC.ZZC_VOLUME AS VOLUME, ZZC.ZZC_VOLRET, ZZC.ZZC_SEPARA AS SEPARA "
+		cQry1 += "FROM "+RetSqlName("SZF")+" SZF WITH (NOLOCK) "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH (NOLOCK) ON SZG.ZG_FILIAL = SZF.ZF_FILIAL AND SZG.ZG_CODIGO = SZF.ZF_CODIGO AND SZG.D_E_L_E_T_ = '' "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) ON SC6.C6_FILIAL = SZG.ZG_FILIAL AND SC6.C6_NUM    = SUBSTRING(SZG.ZG_PEDIDO, 3, 6) AND SC6.D_E_L_E_T_ = '' "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) ON ZZC.ZZC_FILIAL = SC6.C6_FILIAL AND ZZC.ZZC_BORDER = SZF.ZF_CODIGO AND ZZC.ZZC_PEDIDO = SC6.C6_NUM AND ZZC.ZZC_PRODUT = SC6.C6_PRODUTO AND ZZC.D_E_L_E_T_ = '' "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 WITH (NOLOCK) ON SB1.B1_FILIAL  = ZZC.ZZC_FILIAL AND SB1.B1_COD = ZZC.ZZC_PRODUT AND SB1.D_E_L_E_T_ = '' "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) ON SB2.B2_FILIAL = SB1.B1_FILIAL AND SB2.B2_COD = SB1.B1_COD AND SB2.B2_LOCAL = SB1.B1_LOCPAD AND SB2.D_E_L_E_T_ = '' "
+		cQry1 += "WHERE SZF.ZF_FILIAL  = '"+xFilial("SZF")+"' "
+		cQry1 += "  AND SZF.D_E_L_E_T_ = '' "
+		cQry1 += "  AND SZF.ZF_CODIGO  = '000000' "
+		cQry1 += "ORDER BY SZG.ZG_PEDIDO, SC6.C6_ITEM "
 
-			TCQuery cQry1 ALIAS "TCQ" NEW
-			DbSelectArea("TCQ")
-			DbGoTop()
-			While !Eof()
-				If Empty(TCQ->PRODUTO)
-					RecLock("ZZC", .t.)
-					ZZC->ZZC_FILIAL := xFilial("SC6")
-					ZZC->ZZC_BORDER := '000000'
-					ZZC->ZZC_PEDIDO := TCQ->ZG_PEDIDO
-					ZZC->ZZC_PRODUT := TCQ->C6_PRODUTO
-					ZZC->ZZC_QUANTI := TCQ->C6_QTDVEN
-					ZZC->ZZC_RETIRA := 0.0
-					ZZC->ZZC_RESERV := 0.0
-					ZZC->ZZC_GAVETA := Iif(Empty(Posicione("SB2", 1, xFilial("SB2")+SC6->C6_PRODUTO+Posicione("SB1", 1, xFilial("SB1")+SC6->C6_PRODUTO, "B1_LOCPAD"), "B2_LOCALIZ")), '000', '')
-					ZZC->ZZC_VOLUME := TCQ->C6_VOLITEM
-					ZZC->ZZC_VOLRET := 0.0
-					ZZC->ZZC_CARGA  := ''
-					ZZC->ZZC_OCUPAC := 0.0
-					ZZC->ZZC_DESPAC := ''
-					ZZC->ZZC_SEPARA := 'N'
-					ZZC->ZZC_LOTE   := ''
-					ZZC->ZZC_SEMID  := ''
-					ZZC->ZZC_DTHOT  := ''
-					ZZC->ZZC_TPINCL := ''
-					ZZC->ZZC_LOCEXP := ''
-					MsUnLock()
-				Endif
-				DbSelectArea("TCQ")
-				DbSkip()
-			Enddo
-			DbSelectArea("TCQ")
-			DbCloseArea()
-			cQry1 := ""
-			cQry1 += "SELECT ZZC.ZZC_PRODUT AS PRODUTO, SB1.B1_DESC AS DESCRICAO, SB2.B2_LOCALIZ AS LOCALIZ, ZZC.ZZC_QUANTI AS QUANTIDADE, ZZC.ZZC_RETIRA AS RETIRA, ZZC.ZZC_GAVETA AS GAVETA, ZZC.ZZC_VOLUME AS VOLUME, ZZC.ZZC_VOLRET, ZZC.ZZC_SEPARA AS SEPARA "
-			cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 ON ZZC.ZZC_FILIAL = SB1.B1_FILIAL AND ZZC.ZZC_PRODUT = SB1.B1_COD AND SB1.D_E_L_E_T_ = '' "
-			cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 ON SB1.B1_FILIAL = SB2.B2_FILIAL AND SB1.B1_COD = SB2.B2_COD AND SB1.B1_LOCPAD = SB2.B2_LOCAL AND SB2.D_E_L_E_T_ = '' "
-			cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-			cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-			cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-			cQry1 += "  AND (ZZC.ZZC_SEPARA <> 'S' AND (ZZC.ZZC_QUANTI <> ZZC.ZZC_RETIRA)) "
-			cQry1 += "ORDER BY 3, 1 "
-		Endif
 		TCQuery cQry1 ALIAS "TCQ" NEW
 		DbSelectArea("TCQ")
+		DbGoTop()
 		While !Eof()
-			//If GetMv("MV_RETFAL") $ 'S' //Quantidade Retirada DESABILITADO RELEASE 12.1.25
-			If Alltrim(cRETFAL) == 'S' //Quantidade Retirada
-				If aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO}) == 0
-					If TCQ->QUANTIDADE > TCQ->RETIRA
-						If TCQ->SEPARA == 'N'
-							nQtdRet := 0
-							nQtdVol := 0
-						ElseIf Empty(TCQ->SEPARA)
-							nQtdRet := 999999
-							nQtdVol := TCQ->VOLUME
-						ElseIf TCQ->SEPARA $ 'S'
-							nQtdRet := TCQ->RETIRA
-							nQtdVol := TCQ->ZZC_VOLRET
-						Endif
-						aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, nQtdRet, TCQ->GAVETA, TCQ->VOLUME, nQtdVol, .f. })
-					ElseIf TCQ->QUANTIDADE == TCQ->RETIRA
-						aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, TCQ->QUANTIDADE, TCQ->GAVETA, TCQ->VOLUME, TCQ->VOLUME, .f. })
-					Endif
-				Else
+			If Empty(TCQ->PRODUTO)
+				RecLock("ZZC", .t.)
+				ZZC->ZZC_FILIAL := xFilial("SC6")
+				ZZC->ZZC_BORDER := '000000'
+				ZZC->ZZC_PEDIDO := TCQ->ZG_PEDIDO
+				ZZC->ZZC_PRODUT := TCQ->C6_PRODUTO
+				ZZC->ZZC_QUANTI := TCQ->C6_QTDVEN
+				ZZC->ZZC_RETIRA := 0.0
+				ZZC->ZZC_RESERV := 0.0
+				ZZC->ZZC_GAVETA := Iif(Empty(Posicione("SB2", 1, xFilial("SB2")+SC6->C6_PRODUTO+Posicione("SB1", 1, xFilial("SB1")+SC6->C6_PRODUTO, "B1_LOCPAD"), "B2_LOCALIZ")), '000', '')
+				ZZC->ZZC_VOLUME := TCQ->C6_VOLITEM
+				ZZC->ZZC_VOLRET := 0.0
+				ZZC->ZZC_CARGA  := ''
+				ZZC->ZZC_OCUPAC := 0.0
+				ZZC->ZZC_DESPAC := ''
+				ZZC->ZZC_SEPARA := 'N'
+				ZZC->ZZC_LOTE   := ''
+				ZZC->ZZC_SEMID  := ''
+				ZZC->ZZC_DTHOT  := ''
+				ZZC->ZZC_TPINCL := ''
+				ZZC->ZZC_LOCEXP := ''
+				MsUnLock()
+			Endif
+			DbSelectArea("TCQ")
+			DbSkip()
+		Enddo
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		cQry1 := ""
+		cQry1 += "SELECT ZZC.ZZC_PRODUT AS PRODUTO, SB1.B1_DESC AS DESCRICAO, SB2.B2_LOCALIZ AS LOCALIZ, ZZC.ZZC_QUANTI AS QUANTIDADE, ZZC.ZZC_RETIRA AS RETIRA, ZZC.ZZC_GAVETA AS GAVETA, ZZC.ZZC_VOLUME AS VOLUME, ZZC.ZZC_VOLRET, ZZC.ZZC_SEPARA AS SEPARA "
+		cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB1")+" SB1 ON ZZC.ZZC_FILIAL = SB1.B1_FILIAL AND ZZC.ZZC_PRODUT = SB1.B1_COD AND SB1.D_E_L_E_T_ = '' "
+		cQry1 += "LEFT OUTER JOIN "+RetSqlName("SB2")+" SB2 ON SB1.B1_FILIAL = SB2.B2_FILIAL AND SB1.B1_COD = SB2.B2_COD AND SB1.B1_LOCPAD = SB2.B2_LOCAL AND SB2.D_E_L_E_T_ = '' "
+		cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+		cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
+		cQry1 += "  AND (ZZC.ZZC_SEPARA <> 'S' AND (ZZC.ZZC_QUANTI <> ZZC.ZZC_RETIRA)) "
+		cQry1 += "ORDER BY 3, 1 "
+	Endif
+	TCQuery cQry1 ALIAS "TCQ" NEW
+	DbSelectArea("TCQ")
+	While !Eof()
+		//If GetMv("MV_RETFAL") $ 'S' //Quantidade Retirada DESABILITADO RELEASE 12.1.25
+		If Alltrim(cRETFAL) == 'S' //Quantidade Retirada
+			If aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO}) == 0
+				If TCQ->QUANTIDADE > TCQ->RETIRA
 					If TCQ->SEPARA == 'N'
 						nQtdRet := 0
 						nQtdVol := 0
@@ -2591,35 +2535,33 @@ Static Function fRetBor(cOpc)
 					ElseIf TCQ->SEPARA $ 'S'
 						nQtdRet := TCQ->RETIRA
 						nQtdVol := TCQ->ZZC_VOLRET
-						aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][5] += nQtdRet
-						aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][8] += nQtdVol
 					Endif
-					If Empty(aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6])
-						aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6] := TCQ->GAVETA
-					Endif
-					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][4] += TCQ->QUANTIDADE
-					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][7] += TCQ->VOLUME
+					aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, nQtdRet, TCQ->GAVETA, TCQ->VOLUME, nQtdVol, .f. })
+				ElseIf TCQ->QUANTIDADE == TCQ->RETIRA
+					aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, TCQ->QUANTIDADE, TCQ->GAVETA, TCQ->VOLUME, TCQ->VOLUME, .f. })
 				Endif
-			Else //Quantidade Faltante
-				If aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO}) == 0
-					If TCQ->QUANTIDADE > TCQ->RETIRA
-						If Empty(TCQ->SEPARA)
-							nQtdRet := 0
-							nQtdVol := TCQ->VOLUME
-						Else
-							If TCQ->SEPARA == 'N'
-								nQtdRet := TCQ->QUANTIDADE - TCQ->RETIRA
-								nQtdVol := TCQ->ZZC_VOLRET
-							ElseIf TCQ->SEPARA $ 'S'
-								nQtdRet := 0
-								nQtdVol := TCQ->ZZC_VOLRET
-							Endif
-						Endif
-						aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, nQtdRet, TCQ->GAVETA, TCQ->VOLUME, nQtdVol, .f. })
-					ElseIf TCQ->QUANTIDADE == TCQ->RETIRA
-						aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, 0, TCQ->GAVETA, TCQ->VOLUME, TCQ->VOLUME, .f. })
-					Endif
-				Else
+			Else
+				If TCQ->SEPARA == 'N'
+					nQtdRet := 0
+					nQtdVol := 0
+				ElseIf Empty(TCQ->SEPARA)
+					nQtdRet := 999999
+					nQtdVol := TCQ->VOLUME
+				ElseIf TCQ->SEPARA $ 'S'
+					nQtdRet := TCQ->RETIRA
+					nQtdVol := TCQ->ZZC_VOLRET
+					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][5] += nQtdRet
+					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][8] += nQtdVol
+				Endif
+				If Empty(aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6])
+					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6] := TCQ->GAVETA
+				Endif
+				aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][4] += TCQ->QUANTIDADE
+				aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][7] += TCQ->VOLUME
+			Endif
+		Else //Quantidade Faltante
+			If aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO}) == 0
+				If TCQ->QUANTIDADE > TCQ->RETIRA
 					If Empty(TCQ->SEPARA)
 						nQtdRet := 0
 						nQtdVol := TCQ->VOLUME
@@ -2627,299 +2569,316 @@ Static Function fRetBor(cOpc)
 						If TCQ->SEPARA == 'N'
 							nQtdRet := TCQ->QUANTIDADE - TCQ->RETIRA
 							nQtdVol := TCQ->ZZC_VOLRET
-							aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][5] += nQtdRet
-							aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][8] += nQtdVol
-						ElseIf TCQ->SEPARA == 'S'
+						ElseIf TCQ->SEPARA $ 'S'
 							nQtdRet := 0
 							nQtdVol := TCQ->ZZC_VOLRET
 						Endif
 					Endif
-					If Empty(aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6])
-						aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6] := TCQ->GAVETA
-					Endif
-					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][4] += TCQ->QUANTIDADE
-					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][7] += TCQ->VOLUME
-				Endif
-			Endif
-			DbSelectArea("TCQ")
-			DbSkip()
-		Enddo
-		DbSelectArea("TCQ")
-		DbCloseArea()
-
-		//Ordem matriz com dados do Bordero de Pedidos
-		cOrdAtu  := "N"
-		cLocaliz := ""
-		aMatOrd  := {}
-		For nY := 1 To Len(aMatTCQ)
-			cLocaliz := SubStr(Alltrim(aMatTCq[nY][3]), 1, 3)
-			If Empty(cLocaliz)
-				If aScan(aMatOrd, {|x| Alltrim(x[1]) == Alltrim(cLocaliz)}) == 0
-					aadd(aMatOrd, {cLocaliz, "N"})
+					aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, nQtdRet, TCQ->GAVETA, TCQ->VOLUME, nQtdVol, .f. })
+				ElseIf TCQ->QUANTIDADE == TCQ->RETIRA
+					aadd(aMatTCQ, {TCQ->PRODUTO, TCQ->DESCRICAO, TCQ->LOCALIZ, TCQ->QUANTIDADE, 0, TCQ->GAVETA, TCQ->VOLUME, TCQ->VOLUME, .f. })
 				Endif
 			Else
-				For nX := 1 To Len(aMatTCQ)
-					If cLocaliz == SubStr(Alltrim(aMatTCQ[nY][3]), 1, 3)
-						If aScan(aMatOrd, {|x| Alltrim(x[1]) == Alltrim(cLocaliz)}) == 0
-							aadd(aMatOrd, {SubStr(cLocaliz, 1, 3), cOrdAtu})
+				If Empty(TCQ->SEPARA)
+					nQtdRet := 0
+					nQtdVol := TCQ->VOLUME
+				Else
+					If TCQ->SEPARA == 'N'
+						nQtdRet := TCQ->QUANTIDADE - TCQ->RETIRA
+						nQtdVol := TCQ->ZZC_VOLRET
+						aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][5] += nQtdRet
+						aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][8] += nQtdVol
+					ElseIf TCQ->SEPARA == 'S'
+						nQtdRet := 0
+						nQtdVol := TCQ->ZZC_VOLRET
+					Endif
+				Endif
+				If Empty(aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6])
+					aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][6] := TCQ->GAVETA
+				Endif
+				aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][4] += TCQ->QUANTIDADE
+				aMatTCQ[aScan(aMatTCQ, {|x| x[1] == TCQ->PRODUTO})][7] += TCQ->VOLUME
+			Endif
+		Endif
+		DbSelectArea("TCQ")
+		DbSkip()
+	Enddo
+	DbSelectArea("TCQ")
+	DbCloseArea()
+
+	//Ordem matriz com dados do Bordero de Pedidos
+	cOrdAtu  := "N"
+	cLocaliz := ""
+	aMatOrd  := {}
+	For nY := 1 To Len(aMatTCQ)
+		cLocaliz := SubStr(Alltrim(aMatTCq[nY][3]), 1, 3)
+		If Empty(cLocaliz)
+			If aScan(aMatOrd, {|x| Alltrim(x[1]) == Alltrim(cLocaliz)}) == 0
+				aadd(aMatOrd, {cLocaliz, "N"})
+			Endif
+		Else
+			For nX := 1 To Len(aMatTCQ)
+				If cLocaliz == SubStr(Alltrim(aMatTCQ[nY][3]), 1, 3)
+					If aScan(aMatOrd, {|x| Alltrim(x[1]) == Alltrim(cLocaliz)}) == 0
+						aadd(aMatOrd, {SubStr(cLocaliz, 1, 3), cOrdAtu})
+					Endif
+				Endif
+			Next
+			cOrdAtu := Iif(cOrdAtu == "I", "N", "I")
+		Endif
+	Next
+	For nY := 1 To Len(aMatOrd)
+		aMatAux := {}
+		For nX := 1 To Len(aMatTCQ)
+			If SubStr(Alltrim(aMatTCQ[nX][3]), 1, 3) == aMatOrd[nY][1]
+				lSepDep := .f.
+				If lPriCar
+					If Len(Alltrim(aMatTCQ[nX][1])) == 4
+						//lSepDep := .t.
+					ElseIf Len(Alltrim(aMatTCQ[nX][1])) == 12
+						If Empty(aMatTCQ[nX][3]) //Produto sem endereços (Produto Específico)
+							lSepDep := .t.
 						Endif
 					Endif
-				Next
-				cOrdAtu := Iif(cOrdAtu == "I", "N", "I")
+				Endif
+				If lSepDep
+					DbSelectArea("ZZC")
+					DbGoTop()
+					DbSetOrder(3)
+					DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aMatTCQ[nX][1], .t.)
+					If Found()
+						While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. (ZZC->ZZC_BORDER == SZF->ZF_CODIGO) .and. (ZZC->ZZC_PRODUT == aMatTCQ[nX][1])
+							RecLock("ZZC", .f.)
+							ZZC->ZZC_RETIRA :=  0
+							ZZC->ZZC_VOLRET :=  0
+							ZZC->ZZC_GAVETA := '999'
+							ZZC->ZZC_SEPARA := 'N'
+							ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
+							MsUnLock()
+							DbSelectArea("ZZC")
+							DbSkip()
+						Enddo
+					Endif
+				Endif
+				aadd(aMatAux, { aMatTCQ[nX][1], aMatTCQ[nX][2], aMatTCQ[nX][3], aMatTCQ[nX][4], Iif(lSepDep, aMatTCQ[nX][4], aMatTCQ[nX][5]), Iif(lSepDep, '999',aMatTCQ[nX][6]), aMatTCQ[nX][7], aMatTCQ[nX][8], .f. })
 			Endif
 		Next
-		For nY := 1 To Len(aMatOrd)
-			aMatAux := {}
-			For nX := 1 To Len(aMatTCQ)
-				If SubStr(Alltrim(aMatTCQ[nX][3]), 1, 3) == aMatOrd[nY][1]
-					lSepDep := .f.
-					If lPriCar
-						If Len(Alltrim(aMatTCQ[nX][1])) == 4
-							//lSepDep := .t.
-						ElseIf Len(Alltrim(aMatTCQ[nX][1])) == 12
-							If Empty(aMatTCQ[nX][3]) //Produto sem endereços (Produto Específico)
-								lSepDep := .t.
-							Endif
+		//Ordena Matriz
+		If aMatOrd[nY][2] $ 'I'
+			aSort(aMatAux, , , {|x, y| x[4] > y[4]})
+		Endif
+		For nX := 1 To Len(aMatAux)
+			If SZF->ZF_CODIGO $ '000000'
+				If Empty(aMatAux[nX][3])//Somente produtos específicos para o bordero 000000
+					aAdd(aCols, {aMatAux[nX][01], aMatAux[nX][02], aMatAux[nX][03], aMatAux[nX][04], Iif(aMatAux[nX][05] == 0, 999999, aMatAux[nX][05]), Iif(aMatAux[nX][05] == 0, '   ', aMatAux[nX][06]), aMatAux[nX][07], aMatAux[nX][08], aMatAux[nX][09] })
+				Endif
+			Else
+				aAdd(aCols, {aMatAux[nX][01], aMatAux[nX][02], aMatAux[nX][03], aMatAux[nX][04], Iif(aMatAux[nX][05] == 0, 999999, aMatAux[nX][05]), Iif(aMatAux[nX][05] == 0, '   ', aMatAux[nX][06]), aMatAux[nX][07], aMatAux[nX][08], aMatAux[nX][09] })
+			Endif
+		Next
+	Next
+
+	//Monta tela para Retirada / Baixa Bordero
+	DbSelectArea("ZZC")
+	DEFINE MSDIALOG oDlg FROM 000,000 TO 032,100 TITLE OemToAnsi("Retirada de itens do estoque - "+SZF->ZF_CODIGO) OF oMainWnd
+	oGetD := MsGetDados():New( 020, 004, 240, 393, nOpcE, cLinOk, cTudoOk, "", .f., aAltGet, 2, , Len(aCols), cFieldOk )
+	If cOpc $ 'B'
+		@ 001,001 GROUP oGrp1 TO 020,071 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
+		@ 10,008 BTNBMP oBtnCRe RESOURCE "OK"             SIZE 127,24 ACTION(nOpca := 1, oDlg:End()) PIXEL OF oDlg
+	Endif
+	@ 001,325 GROUP oGrp2 TO 020,395 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
+	@ 10,657 BTNBMP oBtnSRe RESOURCE "CANCEL"         SIZE 127,24 ACTION(nOpca := 0, oDlg:End()) PIXEL OF oDlg
+
+	If cOpc $ 'R'
+		If GETMV("MV_QUALCON") == 1
+			@ 001,250 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
+			@ 10,507 BTNBMP oBtnPRe RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_3("R"))        PIXEL OF oDlg
+		ElseIf GETMV("MV_QUALCON") == 2
+			@ 001,250 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
+			@ 10,507 BTNBMP oBtnCII RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_A("R"))     PIXEL OF oDlg
+		Else
+			@ 001,250 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
+			@ 10,507 BTNBMP oBtnPRe RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_3("R"))        PIXEL OF oDlg
+			@ 001,175 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
+			@ 10,357 BTNBMP oBtnCII RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_A("R"))        PIXEL OF oDlg
+		Endif
+	Endif
+	If cOpc $ 'B'
+		oBtnCRe:cCaption := PADR(OemToAnsi("Confirma Retirada"), 20)
+		oBtnCRe:cToolTip := OemToAnsi("Confirma retirada dos itens...")
+	Endif
+
+	oBtnSRe:cCaption := PADR(OemToAnsi("Sair Retirada"), 20)
+	oBtnSRe:cToolTip := OemToAnsi("Sai da retirada sem atualizar...")
+
+	If cOpc $ 'R'
+		If GETMV("MV_QUALCON") == 1
+			oBtnPRe:cCaption := PADR(OemToAnsi("Consulta Produto"), 20)
+			oBtnPRe:cToolTip := OemToAnsi("Consulta produtos em outros borderos...")
+		ElseIf GETMV("MV_QUALCON") == 2
+			oBtnCII:cCaption := PADR(OemToAnsi("Consulta II Produto"), 20)
+			oBtnCII:cToolTip := OemToAnsi("Consulta II produtos em outros borderos...")
+		Else
+			oBtnPRe:cCaption := PADR(OemToAnsi("Consulta Produto"), 20)
+			oBtnPRe:cToolTip := OemToAnsi("Consulta produtos em outros borderos...")
+			oBtnCII:cCaption := PADR(OemToAnsi("Consulta II Produto"), 20)
+			oBtnCII:cToolTip := OemToAnsi("Consulta II produtos em outros borderos...")
+		Endif
+	Endif
+
+	ACTIVATE MSDIALOG oDlg CENTERED
+	If nOpca == 1
+		lValGav := .f.
+		cMsgGav := "Atenção, existe produto sem gaveta cadastrada. VERIFIQUE!!!"+Chr(13)+Chr(10)
+		For nX := 1 To Len(aCols)
+			If aCols[nX][5] <> 999999
+				DbSelectArea("ZZC")
+				DbSetOrder(3)
+				DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
+				If Found()
+					If ZZC->ZZC_RETIRA < ZZC->ZZC_QUANTI .and. aCols[nX][5] <> 999999
+						If Empty(ZZC->ZZC_GAVETA)
+							lValGav := .t.
+							cMsgGav += aCols[nX][1]+Chr(13)+Chr(10)
 						Endif
 					Endif
-					If lSepDep
+				Endif
+			Endif
+		Next
+		If lValGav
+			MsgStop(cMsgGav)
+			Return
+		Endif
+		If MsgYesNo("Confirma todos os itens retirados do estoque ?", "Atenção")
+			//Ajuste das retiradas totais
+			For nX := 1 To Len(aCols)
+				//If GetMv("MV_RETFAL") $ 'S' DESABILITADA RELEASE 12.1.25
+				If Alltrim(cREFFAL) == 'S'
+					If aCols[nX][5] == 0                                            //Retira igual a zero
+						//Não há a necessidade de nenhuma atualização, pois a mesma já é feita on-line;
+					ElseIf aCols[nX][5] == 999999 .or. aCols[nX][5] == aCols[nX][4] //Retira igual a 999999 ou Retira igual a quantidade solicitada
 						DbSelectArea("ZZC")
-						DbGoTop()
 						DbSetOrder(3)
-						DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aMatTCQ[nX][1], .t.)
+						DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
 						If Found()
-							While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. (ZZC->ZZC_BORDER == SZF->ZF_CODIGO) .and. (ZZC->ZZC_PRODUT == aMatTCQ[nX][1])
+							While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. (ZZC->ZZC_BORDER == SZF->ZF_CODIGO) .and. (ZZC->ZZC_PRODUT == aCols[nX][1])
 								RecLock("ZZC", .f.)
-								ZZC->ZZC_RETIRA :=  0
-								ZZC->ZZC_VOLRET :=  0
-								ZZC->ZZC_GAVETA := '999'
-								ZZC->ZZC_SEPARA := 'N'
+								ZZC->ZZC_RETIRA := ZZC->ZZC_QUANTI
+								ZZC->ZZC_VOLRET := ZZC->ZZC_VOLUME
+								ZZC->ZZC_SEPARA := 'S'
 								ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
 								MsUnLock()
 								DbSelectArea("ZZC")
 								DbSkip()
-							Enddo
+							EndDo
 						Endif
-					Endif
-					aadd(aMatAux, { aMatTCQ[nX][1], aMatTCQ[nX][2], aMatTCQ[nX][3], aMatTCQ[nX][4], Iif(lSepDep, aMatTCQ[nX][4], aMatTCQ[nX][5]), Iif(lSepDep, '999',aMatTCQ[nX][6]), aMatTCQ[nX][7], aMatTCQ[nX][8], .f. })
-				Endif
-			Next
-			//Ordena Matriz
-			If aMatOrd[nY][2] $ 'I'
-				aSort(aMatAux, , , {|x, y| x[4] > y[4]})
-			Endif
-			For nX := 1 To Len(aMatAux)
-				If SZF->ZF_CODIGO $ '000000'
-					If Empty(aMatAux[nX][3])//Somente produtos específicos para o bordero 000000
-						aAdd(aCols, {aMatAux[nX][01], aMatAux[nX][02], aMatAux[nX][03], aMatAux[nX][04], Iif(aMatAux[nX][05] == 0, 999999, aMatAux[nX][05]), Iif(aMatAux[nX][05] == 0, '   ', aMatAux[nX][06]), aMatAux[nX][07], aMatAux[nX][08], aMatAux[nX][09] })
+					ElseIf aCols[nX][5] < aCols[nX][4]  //Retira menor do que a quantidade solicidado
+						//Ajuste de retiradas parciais
+						For nY := 1 To Len(aMatPed)
+							DbSelectArea("ZZC")
+							DbSetOrder(1)
+							DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aMatPed[nY][1]+aMatPed[nY][2], .t.)
+							If Found()
+								RecLock("ZZC", .f.)
+								ZZC->ZZC_RETIRA := aMatPed[nY][3]
+								ZZC->ZZC_VOLRET := fCalVol(aMatPed[nY][2], aMatPed[nY][3])
+								ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
+								MsUnLock()
+							Endif
+						Next
 					Endif
 				Else
-					aAdd(aCols, {aMatAux[nX][01], aMatAux[nX][02], aMatAux[nX][03], aMatAux[nX][04], Iif(aMatAux[nX][05] == 0, 999999, aMatAux[nX][05]), Iif(aMatAux[nX][05] == 0, '   ', aMatAux[nX][06]), aMatAux[nX][07], aMatAux[nX][08], aMatAux[nX][09] })
-				Endif
-			Next
-		Next
-
-		//Monta tela para Retirada / Baixa Bordero
-		DbSelectArea("ZZC")
-		DEFINE MSDIALOG oDlg FROM 000,000 TO 032,100 TITLE OemToAnsi("Retirada de itens do estoque - "+SZF->ZF_CODIGO) OF oMainWnd
-		oGetD := MsGetDados():New( 020, 004, 240, 393, nOpcE, cLinOk, cTudoOk, "", .f., aAltGet, 2, , Len(aCols), cFieldOk )
-		If cOpc $ 'B'
-			@ 001,001 GROUP oGrp1 TO 020,071 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
-			@ 10,008 BTNBMP oBtnCRe RESOURCE "OK"             SIZE 127,24 ACTION(nOpca := 1, oDlg:End()) PIXEL OF oDlg
-		Endif
-		@ 001,325 GROUP oGrp2 TO 020,395 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
-		@ 10,657 BTNBMP oBtnSRe RESOURCE "CANCEL"         SIZE 127,24 ACTION(nOpca := 0, oDlg:End()) PIXEL OF oDlg
-
-		If cOpc $ 'R'
-			If GETMV("MV_QUALCON") == 1
-				@ 001,250 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
-				@ 10,507 BTNBMP oBtnPRe RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_3("R"))        PIXEL OF oDlg
-			ElseIf GETMV("MV_QUALCON") == 2
-				@ 001,250 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
-				@ 10,507 BTNBMP oBtnCII RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_A("R"))     PIXEL OF oDlg
-			Else
-				@ 001,250 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
-				@ 10,507 BTNBMP oBtnPRe RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_3("R"))        PIXEL OF oDlg
-				@ 001,175 GROUP oGrp3 TO 020,320 LABEL OemToAnsi('')    COLOR CLR_HRED                        PIXEL OF oDlg
-				@ 10,357 BTNBMP oBtnCII RESOURCE "PESQUISA_OCEAN" SIZE 127,24 ACTION(U_FATA03_A("R"))        PIXEL OF oDlg
-			Endif
-		Endif
-		If cOpc $ 'B'
-			oBtnCRe:cCaption := PADR(OemToAnsi("Confirma Retirada"), 20)
-			oBtnCRe:cToolTip := OemToAnsi("Confirma retirada dos itens...")
-		Endif
-
-		oBtnSRe:cCaption := PADR(OemToAnsi("Sair Retirada"), 20)
-		oBtnSRe:cToolTip := OemToAnsi("Sai da retirada sem atualizar...")
-
-		If cOpc $ 'R'
-			If GETMV("MV_QUALCON") == 1
-				oBtnPRe:cCaption := PADR(OemToAnsi("Consulta Produto"), 20)
-				oBtnPRe:cToolTip := OemToAnsi("Consulta produtos em outros borderos...")
-			ElseIf GETMV("MV_QUALCON") == 2
-				oBtnCII:cCaption := PADR(OemToAnsi("Consulta II Produto"), 20)
-				oBtnCII:cToolTip := OemToAnsi("Consulta II produtos em outros borderos...")
-			Else
-				oBtnPRe:cCaption := PADR(OemToAnsi("Consulta Produto"), 20)
-				oBtnPRe:cToolTip := OemToAnsi("Consulta produtos em outros borderos...")
-				oBtnCII:cCaption := PADR(OemToAnsi("Consulta II Produto"), 20)
-				oBtnCII:cToolTip := OemToAnsi("Consulta II produtos em outros borderos...")
-			Endif
-		Endif
-
-		ACTIVATE MSDIALOG oDlg CENTERED
-		If nOpca == 1
-			lValGav := .f.
-			cMsgGav := "Atenção, existe produto sem gaveta cadastrada. VERIFIQUE!!!"+Chr(13)+Chr(10)
-			For nX := 1 To Len(aCols)
-				If aCols[nX][5] <> 999999
-					DbSelectArea("ZZC")
-					DbSetOrder(3)
-					DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
-					If Found()
-						If ZZC->ZZC_RETIRA < ZZC->ZZC_QUANTI .and. aCols[nX][5] <> 999999
-							If Empty(ZZC->ZZC_GAVETA)
-								lValGav := .t.
-								cMsgGav += aCols[nX][1]+Chr(13)+Chr(10)
-							Endif
-						Endif
-					Endif
-				Endif
-			Next
-			If lValGav
-				MsgStop(cMsgGav)
-				Return
-			Endif
-			If MsgYesNo("Confirma todos os itens retirados do estoque ?", "Atenção")
-				//Ajuste das retiradas totais
-				For nX := 1 To Len(aCols)
-					//If GetMv("MV_RETFAL") $ 'S' DESABILITADA RELEASE 12.1.25
-					If Alltrim(cREFFAL) == 'S'
-						If aCols[nX][5] == 0                                            //Retira igual a zero
-							//Não há a necessidade de nenhuma atualização, pois a mesma já é feita on-line;
-							ElseIf aCols[nX][5] == 999999 .or. aCols[nX][5] == aCols[nX][4] //Retira igual a 999999 ou Retira igual a quantidade solicitada
-							DbSelectArea("ZZC")
-							DbSetOrder(3)
-							DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
-							If Found()
-								While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. (ZZC->ZZC_BORDER == SZF->ZF_CODIGO) .and. (ZZC->ZZC_PRODUT == aCols[nX][1])
+					/**********************************************************************************************/
+					//Quantidade Faltante
+					If aCols[nX][5] == 0 .OR. aCols[nX][5] == aCols[nX][4] //Retira igual a zero ou Retira igual a quantidade solicitada
+						DbSelectArea("ZZC")
+						DbSetOrder(3)
+						DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
+						If Found()
+							While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PRODUT == aCols[nX][1]
+								If ZZC->ZZC_SEPARA <> "S"
 									RecLock("ZZC", .f.)
-									ZZC->ZZC_RETIRA := ZZC->ZZC_QUANTI
-									ZZC->ZZC_VOLRET := ZZC->ZZC_VOLUME
-									ZZC->ZZC_SEPARA := 'S'
-									ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-									MsUnLock()
-									DbSelectArea("ZZC")
-									DbSkip()
-								EndDo
-							Endif
-						ElseIf aCols[nX][5] < aCols[nX][4]  //Retira menor do que a quantidade solicidado
-							//Ajuste de retiradas parciais
-							For nY := 1 To Len(aMatPed)
-								DbSelectArea("ZZC")
-								DbSetOrder(1)
-								DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aMatPed[nY][1]+aMatPed[nY][2], .t.)
-								If Found()
-									RecLock("ZZC", .f.)
-									ZZC->ZZC_RETIRA := aMatPed[nY][3]
-									ZZC->ZZC_VOLRET := fCalVol(aMatPed[nY][2], aMatPed[nY][3])
+									ZZC->ZZC_RETIRA := 0
+									ZZC->ZZC_VOLRET := 0
+									ZZC->ZZC_SEPARA := 'N'
 									ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
 									MsUnLock()
 								Endif
-							Next
+								DbSelectArea("ZZC")
+								DbSkip()
+							EndDo
 						Endif
-					Else
-                    /**********************************************************************************************/
-						//Quantidade Faltante
-						If aCols[nX][5] == 0 .OR. aCols[nX][5] == aCols[nX][4] //Retira igual a zero ou Retira igual a quantidade solicitada
-							DbSelectArea("ZZC")
-							DbSetOrder(3)
-							DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
-							If Found()
-								While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PRODUT == aCols[nX][1]
-									If ZZC->ZZC_SEPARA <> "S"
-										RecLock("ZZC", .f.)
-										ZZC->ZZC_RETIRA := 0
-										ZZC->ZZC_VOLRET := 0
-										ZZC->ZZC_SEPARA := 'N'
-										ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-										MsUnLock()
-									Endif
-									DbSelectArea("ZZC")
-									DbSkip()
-								EndDo
-							Endif
-						ElseIf aCols[nX][5] == 999999  //Quantidade igual a 999999, tudo retirado.
-							DbSelectArea("ZZC")
-							DbSetOrder(3)
-							DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
-							If Found()
-								While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PRODUT == aCols[nX][1]
+					ElseIf aCols[nX][5] == 999999  //Quantidade igual a 999999, tudo retirado.
+						DbSelectArea("ZZC")
+						DbSetOrder(3)
+						DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
+						If Found()
+							While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PRODUT == aCols[nX][1]
+								RecLock("ZZC", .f.)
+								ZZC->ZZC_RETIRA := ZZC->ZZC_QUANTI
+								ZZC->ZZC_VOLRET := ZZC->ZZC_VOLUME
+								ZZC->ZZC_SEPARA := 'S'
+								ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
+								MsUnLock()
+								DbSelectArea("ZZC")
+								DbSkip()
+							EndDo
+						Endif
+					ElseIf aCols[nX][4] > aCols[nX][5]
+						DbSelectArea("ZZC")
+						DbSetOrder(3)
+						DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
+						If Found()
+							While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PRODUT == aCols[nX][1]
+								If ZZC->ZZC_SEPARA $ ' .S'
 									RecLock("ZZC", .f.)
 									ZZC->ZZC_RETIRA := ZZC->ZZC_QUANTI
 									ZZC->ZZC_VOLRET := ZZC->ZZC_VOLUME
 									ZZC->ZZC_SEPARA := 'S'
 									ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
 									MsUnLock()
-									DbSelectArea("ZZC")
-									DbSkip()
-								EndDo
-							Endif
-						ElseIf aCols[nX][4] > aCols[nX][5]
-							DbSelectArea("ZZC")
-							DbSetOrder(3)
-							DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO+aCols[nX][1], .t.)
-							If Found()
-								While !Eof() .and. (ZZC->ZZC_FILIAL == xFilial("ZZC")) .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO .and. ZZC->ZZC_PRODUT == aCols[nX][1]
-									If ZZC->ZZC_SEPARA $ ' .S'
-										RecLock("ZZC", .f.)
-										ZZC->ZZC_RETIRA := ZZC->ZZC_QUANTI
-										ZZC->ZZC_VOLRET := ZZC->ZZC_VOLUME
-										ZZC->ZZC_SEPARA := 'S'
-										ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-										MsUnLock()
-									Endif
-									DbSelectArea("ZZC")
-									DbSkip()
-								EndDo
-							Endif
+								Endif
+								DbSelectArea("ZZC")
+								DbSkip()
+							EndDo
 						Endif
-                    /**********************************************************************************************/
 					Endif
-				Next
-				DbSelectArea("SZF")
-				RecLock("SZF", .f.)
-				SZF->ZF_FLAG    := 'T'
-				SZF->ZF_DATAFIM := dDataBase
-				SZF->ZF_HORAFIM := Time()
-				MsUnLock()
-			Endif
+					/**********************************************************************************************/
+				Endif
+			Next
+			DbSelectArea("SZF")
+			RecLock("SZF", .f.)
+			SZF->ZF_FLAG    := 'T'
+			SZF->ZF_DATAFIM := dDataBase
+			SZF->ZF_HORAFIM := Time()
+			MsUnLock()
 		Endif
-		//Verificação se o bordero foi totalmente retirado.
-		//nConReg := 0
-		//aRetTot := {}
-		//DbSelectArea("ZZC")
-		//DbSetOrder(1)
-		//DbGoTop()
-		//DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO, .t.)
-		//If Found()
-		//   While !Eof() .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO
-		//         nConReg += 1
-		//         If ZZC->ZZC_SEPARA $ 'S'
-		//            aadd(aRetTot, 'S')
-		//         Endif
-		//         DbSelectArea("ZZC")
-		//         DbSkip()
-		//   Enddo
-		//Endif
-		//If Len(aRetTot) == nConReg
-		//   RecLock("SZF", .f.)
-		//      SZF->ZF_FLAG := 'T'
-		//      SZF->ZF_DATAFIM := dDataBase
-		//      SZF->ZF_HORAFIM := Time()
-		//   MsUnLock()
-		//Endif
-		Return
+	Endif
+	//Verificação se o bordero foi totalmente retirado.
+	//nConReg := 0
+	//aRetTot := {}
+	//DbSelectArea("ZZC")
+	//DbSetOrder(1)
+	//DbGoTop()
+	//DbSeek(xFilial("ZZC")+SZF->ZF_CODIGO, .t.)
+	//If Found()
+	//   While !Eof() .and. ZZC->ZZC_BORDER == SZF->ZF_CODIGO
+	//         nConReg += 1
+	//         If ZZC->ZZC_SEPARA $ 'S'
+	//            aadd(aRetTot, 'S')
+	//         Endif
+	//         DbSelectArea("ZZC")
+	//         DbSkip()
+	//   Enddo
+	//Endif
+	//If Len(aRetTot) == nConReg
+	//   RecLock("SZF", .f.)
+	//      SZF->ZF_FLAG := 'T'
+	//      SZF->ZF_DATAFIM := dDataBase
+	//      SZF->ZF_HORAFIM := Time()
+	//   MsUnLock()
+	//Endif
+Return
 
 /******************************************************************************************************************/
 /*** FATA03_6 - Validação da retirada de produtos do bordero                                                    ***/
@@ -3144,12 +3103,12 @@ Static Function fMonPed(aHeaderA, aColsA, cBorder, cProdu, nQuant, aMatPed)
 
 
 	//Montagem do aHeader
-       /* DESABILITADO RELEASE 12.1.25
+	/* DESABILITADO RELEASE 12.1.25
        DbSelectArea("SX3")
        DbSetOrder(1)
        DbSeek("ZZC")
        While !Eof() .And. (X3_ARQUIVO == "ZZC")
-             IF X3USO(X3_USADO) .And. cNivel >= X3_NIVEL 
+             IF X3USO(X3_USADO) .And. cNivel >= X3_NIVEL
                If (TRIM(X3_CAMPO) $ "ZZC_PEDIDO") .OR. (TRIM(X3_CAMPO) $ "ZZC_QUANTI") .OR. (TRIM(X3_CAMPO) $ "ZZC_RETIRA")
                   nUsado += 1
                   AADD(aHeader, { Trim(X3_TITULO), X3_CAMPO, X3_PICTURE, X3_TAMANHO, X3_DECIMAL, X3_VALID, X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
@@ -3161,7 +3120,7 @@ Static Function fMonPed(aHeaderA, aColsA, cBorder, cProdu, nQuant, aMatPed)
              EndIf
              dbSkip()
        Enddo
-       */
+	*/
 
 	DbSelectArea( _cAliasSX3 )
 	( _cAliasSX3 )->( DbSetOrder(1) )
@@ -3346,9 +3305,9 @@ Return(.t.)
 Static Function fCalVol(cProduto, nQuantid)
 	Local nQtdeVol := 0
 
-/**
+	/**
 ** Cleber (05/03/10) -> Retirado gravação de volume por item pois um pedido pode juntar volumes, etc..
-*/       
+	*/
 Return(nQtdeVol)
 
 /******************************************************************************************************************/
@@ -3407,15 +3366,15 @@ User Function FATA03_8()
 	aadd(aStrArq, {"CAR_ORDEMA", "C", 08, 0}) //Ordem do Arquivo
 
 
-     /********************************************************************************************************************************/
-     /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
 
- /*  cTrbArq := CriaTrab(aStrArq, .t.)
+	/*  cTrbArq := CriaTrab(aStrArq, .t.)
      DbUseArea(.t., cDrvArq, cTrbArq, "CAR", Iif(.f. .or. .t., !.t., Nil), .f.)
      cKey01  := "CAR_ORDEMA"
      cInd01  := SubStr(cTrbArq, 1, 10)+"_1"
      DbCreateIndex(cInd01, cKey01, {||cKey01} )
- */
+	*/
 	//cTrbArq := U_NovoArqTrab("dbf")
 	//dbcreate(cTrbArq+".dbf", aStrArq, "DBFCDXADS")
 	//Use (cTrbArq+".Dbf") Alias "CAR" VIA "DBFCDXADS" New
@@ -3430,7 +3389,7 @@ User Function FATA03_8()
 	oTempTbl8:SetFields( aStrArq )
 	oTempTbl8:AddIndex( "cInd01", { "CAR_ORDEMA" } )
 	oTempTbl8:Create()
-     /********************************************************************************************************************************/
+	/********************************************************************************************************************************/
 
 	aadd(aHeaCAR, {"CAR_FLAG"  , "", OemToAnsi(""       )    , ""          } )
 	aadd(aHeaCAR, {"CAR_PEDIDO", "", OemToAnsi("Pedido" )    , "999999"    } )
@@ -3860,9 +3819,9 @@ User Function FATA03_9()
 		{"BR_BRANCO"  ,"Totalmente Destinado e Bipado"} })
 
 	//{"BR_AMARELO" ,"Endereçado"             	 } ,;
-		//{"BR_AZUL"    ,"Parcialmente Separado"  	 } ,;
-		//{"DISABLE"    ,"Totalmente Separado"    	 } ,;
-		//{"BR_PRETO"   ,"Totalmente Destinado"   	 } ,;
+	//{"BR_AZUL"    ,"Parcialmente Separado"  	 } ,;
+	//{"DISABLE"    ,"Totalmente Separado"    	 } ,;
+	//{"BR_PRETO"   ,"Totalmente Destinado"   	 } ,;
 
 Return(.t.)
 
@@ -3886,7 +3845,7 @@ Static Function fBaiFin()
        Local nUsado    := 0
        Private aCols   := {}
        Private aHeader := {}
-       
+
        //Montagem do aHeader
        DbSelectArea("SX3")
        DbSetOrder(2)
@@ -3905,7 +3864,7 @@ Static Function fBaiFin()
        MsSeek("C2_PRODUTO")
        nUsado += 1
        AADD(aHeader, { 'Embalagem'  , 'CODEMB', '9999'     ,  4, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
-       
+
        DEFINE MSDIALOG oDlgF FROM 000,000 TO 023,085 TITLE OemToAnsi("Ops. de Envase - Finalizadas") OF oMainWnd
        DEFINE FONT oFont1 SIZE 9,0 BOLD
        DEFINE FONT oFont2 NAME 'ARIAL' SIZE 10,0 BOLD
@@ -3931,7 +3890,7 @@ Static Function fBaiFin()
               @ 049, 170 MSGET oCodEn4 VAR cCodEn4 PICTURE "@R!"     SIZE 035,10 COLOR CLR_BLUE PIXEL OF oDlgF FONT oFont1
               @ 049, 207 MSGET oEnvas4 VAR cEnvas4 PICTURE "@R!"     SIZE 128,10 COLOR CLR_BLUE PIXEL OF oDlgF FONT oFont1
               oGetEnv := MsGetDados():New( 065, 003, 160, 335, 3, "AllwaysTrue()", "AllwaysTrue()", "", .f., {"QTDAPT"}, 3, , Len(aCols), "AllwaysTrue()" )
-              
+
               DEFINE SBUTTON oBtnECf FROM 161, 260 TYPE 1 ACTION(lSaida := .t., oDlgF:End()) ENABLE OF oDlgF
               DEFINE SBUTTON oBtnESa FROM 161, 300 TYPE 2 ACTION(lSaida := .t., oDlgF:End()) ENABLE OF oDlgF
 
@@ -3955,7 +3914,7 @@ Static Function fValOrd(oNumOrd, cNumOrd, cCodPro, nQtdOrd, oQtdPro, nQtdJaE, oQ
        Local cQry1 :=""
        If Empty(cNumOrd)
           Return(.t.)
-       Else 
+       Else
           //1º) Buscar numero do lote
           cQry1 := ""
           cQry1 += "SELECT SC2.C2_LOTE, SC2.C2_NUM "
@@ -3991,7 +3950,7 @@ Static Function fValOrd(oNumOrd, cNumOrd, cCodPro, nQtdOrd, oQtdPro, nQtdJaE, oQ
           Endif
           DbSelectArea("BXO")
           DbCloseArea()
-          
+
           //2º) Buscar dados da Ordem de Produção
           cQry1 := ""
           cQry1 += "SELECT SC2.C2_LOTE, SC2.C2_NUM, SC2.C2_ITEM, SC2.C2_SEQUEN, SC2.C2_QUANT, SC2.C2_QUJE, SC2.C2_DATRF "
@@ -4031,7 +3990,7 @@ Static Function fValOrd(oNumOrd, cNumOrd, cCodPro, nQtdOrd, oQtdPro, nQtdJaE, oQ
              Return(.t.)
           Endif
           DbSelectArea("BXO")
-          DbCloseArea()          
+          DbCloseArea()
        Endif
 Return(.f.)
 */
@@ -4144,180 +4103,175 @@ Return(.t.)
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function FATA03_A(cOpcCon)
 
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Declaração de cVariable dos componentes                                 ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   //Private cOpcCon    := Iif(cOpcCon == Nil, "M", cOpcCon)
-   
-   Private aCores     := { { ' ZT1->ZT1_FLAG $ "C" ' , "BR_VERMELHO"}, { '!ZT1->ZT1_FLAG $ "C" ' , "BR_VERDE"} }
-   Private cSayPro    := Space(1)
-   Private cCodPro    := Space(15)
-   Private cSayDes    := Space(1)
-   Private cDesPro    := Space(30)
-   Private cSayLoc    := Space(1)
-   Private cLocPro    := Space(15)
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	//Private cOpcCon    := Iif(cOpcCon == Nil, "M", cOpcCon)
 
-   Private cLocProA    := Space(15)  // Jose 21/08/2024
-   Private cLocProG    := Space(15)  // Jose 21/08/2024
+	Private aCores     := { { ' ZT1->ZT1_FLAG $ "C" ' , "BR_VERMELHO"}, { '!ZT1->ZT1_FLAG $ "C" ' , "BR_VERDE"} }
+	Private cSayPro    := Space(1)
+	Private cCodPro    := Space(15)
+	Private cSayDes    := Space(1)
+	Private cDesPro    := Space(30)
+	Private cSayLoc    := Space(1)
+	Private cLocPro    := Space(15)
 
-   Private cSayOrd    := Space(1)
-   Private cOrdPro    := Space(11)
-   Private aOrdPro    := {}
-   Private cCodLot    := Space(06)
-   Private cSayCon    := Space(1)
-   Private nQtdOrd    := 0
-   Private cSayMar    := Space(1)
-   Private nQtdSep3   := 0
-   Private cSayEst    := Space(1)
-   Private nQtdG3     := 0
-   Private nQtdA3     := 0     // Jose 05/07/2024
-   Private nQtdSepA   := 0     // Jose 05/07/2024
-   Private nQtdDispA  := 0     // Jose 05/07/2024
-   Private cSayEnv    := Space(1)
-   Private nQtdSepG   := 0
-   Private cSayAtu    := Space(1)     
-   Private nQtd03     := 0
-   Private nQtd30     := 0
-   Private nQtdMark   := 0
-   Private cSayDis    := Space(1)     
-   Private nQtdDis    := 0
-   Private cSaySep    := Space(1)     
-   Private nQtdDispG  := 0
-   Private cMarca     := GetMark()
-   Private cAuxPed    := ""
-   Private nQtdPro    := 0
-   Private lProest    := .f.
-   Private oTempTbl1                //Variável criada para arquivo temporário compatibilização com release 12.1.25
-   Private oTempTbl2                //Variável criada para arquivo temporário compatibilização com release 12.1.25
-   Private oTempTbl3                //Variável criada para arquivo temporário compatibilização com release 12.1.25
-   Private oTempTbl4                //Variável criada para arquivo temporário compatibilização com release 12.1.25
-   Private oTempTbl5                //Variável criada para arquivo temporário compatibilização com release 12.1.25
-   Private oTempTbl6                //Variável criada para arquivo temporário compatibilização com release 12.1.25
-   
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	Private cLocProA    := Space(15)  // Jose 21/08/2024
+	Private cLocProG    := Space(15)  // Jose 21/08/2024
+
+	Private cSayOrd    := Space(1)
+	Private cOrdPro    := Space(11)
+	Private aOrdPro    := {}
+	Private cCodLot    := Space(06)
+	Private cSayCon    := Space(1)
+	Private nQtdOrd    := 0
+	Private cSayMar    := Space(1)
+	Private nQtdSep3   := 0
+	Private cSayEst    := Space(1)
+	Private nQtdG3     := 0
+	Private nQtdA3     := 0     // Jose 05/07/2024
+	Private nQtdSepA   := 0     // Jose 05/07/2024
+	Private nQtdDispA  := 0     // Jose 05/07/2024
+	Private cSayEnv    := Space(1)
+	Private nQtdSepG   := 0
+	Private cSayAtu    := Space(1)
+	Private nQtd03     := 0
+	Private nQtd30     := 0
+	Private nQtdMark   := 0
+	Private cSayDis    := Space(1)
+	Private nQtdDis    := 0
+	Private cSaySep    := Space(1)
+	Private nQtdDispG  := 0
+	Private cMarca     := GetMark()
+	Private cAuxPed    := ""
+	Private nQtdPro    := 0
+	Private lProest    := .f.
+	Private oTempTbl1                //Variável criada para arquivo temporário compatibilização com release 12.1.25
+	Private oTempTbl2                //Variável criada para arquivo temporário compatibilização com release 12.1.25
+	Private oTempTbl3                //Variável criada para arquivo temporário compatibilização com release 12.1.25
+	Private oTempTbl4                //Variável criada para arquivo temporário compatibilização com release 12.1.25
+	Private oTempTbl5                //Variável criada para arquivo temporário compatibilização com release 12.1.25
+	Private oTempTbl6                //Variável criada para arquivo temporário compatibilização com release 12.1.25
+
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Declaração de Variaveis Private dos Objetos                             ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   SetPrvt("oFont1" , "oFont2" , "oDlg1"  , "oBtnPed", "oBtnNes", "oBtnAtu", "oBtnSai", "oGrpDiv", "oSayPro", "oCodPro")
-   SetPrvt("oSayDes", "oDesPro", "oSayLoc", "oLocPro", "oGrpPrE", "oSayOrd", "oOrdPro", "oSayPro", "oQtdPro", "oSaySep3")
-   SetPrvt("oQtdSep3", "oSayG3", "oQtdG3", "oSaySepG", "oQtdSepG", "oSay03", "oQtd03", "oSayDispG", "oQtdDispG", "oSayDis", "oQtdA3", "oSaySepA", "oQtdSepA", "oSayDispA", "oQtdDispA")
-   SetPrvt("oQtdDis", "oGrpDes", "oBrwDes", "oGrpPed", "oBrwPed", "oSay30", "oQtd30")
-   SetPrvt("oBtnSal", "oBtnTra", "oBtnMoP", "oBtnTrP","oBtnINF", "oSayMark", "oQtdMark")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oFont1" , "oFont2" , "oDlg1"  , "oBtnPed", "oBtnNes", "oBtnAtu", "oBtnSai", "oGrpDiv", "oSayPro", "oCodPro")
+	SetPrvt("oSayDes", "oDesPro", "oSayLoc", "oLocPro", "oGrpPrE", "oSayOrd", "oOrdPro", "oSayPro", "oQtdPro", "oSaySep3")
+	SetPrvt("oQtdSep3", "oSayG3", "oQtdG3", "oSaySepG", "oQtdSepG", "oSay03", "oQtd03", "oSayDispG", "oQtdDispG", "oSayDis", "oQtdA3", "oSaySepA", "oQtdSepA", "oSayDispA", "oQtdDispA")
+	SetPrvt("oQtdDis", "oGrpDes", "oBrwDes", "oGrpPed", "oBrwPed", "oSay30", "oQtd30")
+	SetPrvt("oBtnSal", "oBtnTra", "oBtnMoP", "oBtnTrP","oBtnINF", "oSayMark", "oQtdMark")
 
 
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Definicao do Dialog e todos os seus componentes.                        ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   
-   oFont1     := TFont():New( "Courier New", 0, -11, , .F., 0, , 400, .F., .F., , , , , , )
-   oFont2     := TFont():New( "Courier New", 0, -13, , .T., 0, , 700, .F., .F., , , , , , )
-// oDlg1      := MSDialog():New( 265, 241, 850, 1470, "Consulta de Produtos", , , .F., , , , , , .T., , , .T. ) //   jose 05/05/2025 
-   oDlg1      := MSDialog():New( 255, 231, 850, 1470, "Consulta de Produtos", , , .F., , , , , , .T., , , .T. ) // Jose onde 1270 era 1020 ERA 1270  jose 05/05/2025 265, 241, 850, 1470,
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 
-   oBtnPed    := TButton():New( 004, 001, "Pedidos"     , oDlg1, {|| fConPed()   }, 037, 012, , , , .T., , "", , , , .F. )
-   oBtnNes    := TButton():New( 004, 044, "Necessidade" , oDlg1, {|| fConNec()   }, 037, 012, , , , .T., , "", , , , .F. )
-   oBtnLoc    := TButton():New( 004, 088, "Localização" , oDlg1, {|| fAbrLoc()   }, 037, 012, , , , .T., , "", , , , .F. )
+	oFont1     := TFont():New( "Courier New", 0, -11, , .F., 0, , 400, .F., .F., , , , , , )
+	oFont2     := TFont():New( "Courier New", 0, -13, , .T., 0, , 700, .F., .F., , , , , , )
+	// oDlg1      := MSDialog():New( 265, 241, 850, 1470, "Consulta de Produtos", , , .F., , , , , , .T., , , .T. ) //   jose 05/05/2025
+	oDlg1      := MSDialog():New( 255, 231, 850, 1470, "Consulta de Produtos", , , .F., , , , , , .T., , , .T. ) // Jose onde 1270 era 1020 ERA 1270  jose 05/05/2025 265, 241, 850, 1470,
 
-//  jOSE 05/05/2025 ---------------------------------------
-   oBtnLoc    := TButton():New( 004, 160, "Etiq. Arara" , oDlg1, {|| fIEtProA()   }, 037, 012, , , , .T., , "", , , , .F. ) 
-// ATÉ AQUI jOSE 05/05/2025 ------------------------------
-// desativado botão de saldo em estoque na tela de consulta 2 por conta da rampa não enxergar o saldo do produto e não transferir pela consulta do saldo. 26/01/16
-// Jose 05/07/2024 pedido André TI     oBtnSal    := TButton():New( 003, 100, "Saldos Est." , oDlg1, {|| MATA225()   }, 037, 012, , , , .F., , "", , , , .F. ) // Jose 05/07/2024 antes 132
- //oBtnTra    := TButton():New( 004, 176, "Transfer."   , oDlg1, {|| MATA260()   }, 037, 012, , , , .T., , "", , , , .F. )
- //oBtnTra    := TButton():New( 004, 176, "Transfer."   , oDlg1, {|| MsgStop('Rotina desativada,transferências somente de pallets. Atenção !')   }, 037, 012, , , , .T., , "", , , , .F. )
+	oBtnPed    := TButton():New( 004, 001, "Pedidos"     , oDlg1, {|| fConPed()   }, 037, 012, , , , .T., , "", , , , .F. )
+	oBtnNes    := TButton():New( 004, 044, "Necessidade" , oDlg1, {|| fConNec()   }, 037, 012, , , , .T., , "", , , , .F. )
+	oBtnLoc    := TButton():New( 004, 088, "Localização" , oDlg1, {|| fAbrLoc()   }, 037, 012, , , , .T., , "", , , , .F. )
 
-   oBtnMoP    := TButton():New( 004, 220, "Monta Pallet", oDlg1, {|| u_BRFATX64()}, 037, 012, , , , .T., , "", , , , .F. )
-   oBtnTrP    := TButton():New( 004, 264, "Trans Pallet", oDlg1, {|| u_BRFATX65()}, 037, 012, , , , .T., , "", , , , .F. )
-   oBtnINF    := TButton():New( 004, 303, "i", oDlg1, {|| fResProd()}, 010, 012, , , , .T., , "", , , , .F. )
+	//  jOSE 05/05/2025 ---------------------------------------
+	oBtnLoc    := TButton():New( 004, 160, "Etiq. Arara" , oDlg1, {|| fIEtProA()   }, 037, 012, , , , .T., , "", , , , .F. )
+	// ATÉ AQUI jOSE 05/05/2025 ------------------------------
+	// desativado botão de saldo em estoque na tela de consulta 2 por conta da rampa não enxergar o saldo do produto e não transferir pela consulta do saldo. 26/01/16
+	// Jose 05/07/2024 pedido André TI     oBtnSal    := TButton():New( 003, 100, "Saldos Est." , oDlg1, {|| MATA225()   }, 037, 012, , , , .F., , "", , , , .F. ) // Jose 05/07/2024 antes 132
+	//oBtnTra    := TButton():New( 004, 176, "Transfer."   , oDlg1, {|| MATA260()   }, 037, 012, , , , .T., , "", , , , .F. )
+	//oBtnTra    := TButton():New( 004, 176, "Transfer."   , oDlg1, {|| MsgStop('Rotina desativada,transferências somente de pallets. Atenção !')   }, 037, 012, , , , .T., , "", , , , .F. )
 
- //oBtnAtu  := TButton():New( 004, 308, "Atualizar"   , oDlg1, {|| MsAguarde( {|| fAtuDad(cOpcCon)}, "Aguarde...", "Atualizando...") }, 037, 012, , , , .T., , "", , , , .F. )
-   oBtnSai    := TButton():New( 004, 550, "Sair"        , oDlg1, {|| oDlg1:End() }, 037, 012, , , , .T., , "", , , , .F. ) // Jose 05/05/2025      004, 352, "Sair"    
+	oBtnMoP    := TButton():New( 004, 220, "Monta Pallet", oDlg1, {|| u_BRFATX64()}, 037, 012, , , , .T., , "", , , , .F. )
+	oBtnTrP    := TButton():New( 004, 264, "Trans Pallet", oDlg1, {|| u_BRFATX65()}, 037, 012, , , , .T., , "", , , , .F. )
+	oBtnINF    := TButton():New( 004, 303, "i", oDlg1, {|| fResProd()}, 010, 012, , , , .T., , "", , , , .F. )
 
-   oGrpDiv    := TGroup():New( 016, 004, 016, 392, "", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )
-   oSayPro    := TSay():New( 024, 004, {||"Produto:"}                               , oDlg1  , ,oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 032, 008)
-   oCodPro    := TGet():New( 032, 004, {|u| If(PCount() > 0, cCodPro := u, cCodPro)}, oDlg1  , 072, 10, '@!', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "cCodPro", , )
-   oCodPro:bLostFocus := {|| fCodPro(), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl1(2)}, "Aguarde...", "Buscando despachos..."), ), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl2(2)}, "Aguarde...", "Buscando pedidos..."), )}
-   oSayDes    := TSay():New( 024, 084, {||"Descrição:"}                             , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 036, 008)
-   oDesPro    := TGet():New( 032, 084, {|u| If(PCount() > 0, cDesPro := u, cDesPro)}, oDlg1  , 200, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cDesPro", , )
-// Jose 21/08/2024 oSayLoc    := TSay():New( 024, 292, {||"Localização:"}                           , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-   oSayLoc    := TSay():New( 024, 292, {||"Matão:"}                                 , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-   oLocPro    := TGet():New( 032, 292, {|u| If(PCount() > 0, cLocPro := u, cLocPro)}, oDlg1  , 096, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cLocPro", , )
+	//oBtnAtu  := TButton():New( 004, 308, "Atualizar"   , oDlg1, {|| MsAguarde( {|| fAtuDad(cOpcCon)}, "Aguarde...", "Atualizando...") }, 037, 012, , , , .T., , "", , , , .F. )
+	oBtnSai    := TButton():New( 004, 550, "Sair"        , oDlg1, {|| oDlg1:End() }, 037, 012, , , , .T., , "", , , , .F. ) // Jose 05/05/2025      004, 352, "Sair"
 
-//-------- acrescentado por Jose 21/08/2024 ------------------
-   oSayLoc    := TSay():New( 024, 392, {||"Araraquara:"}                                 , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-   oLocPro    := TGet():New( 032, 392, {|u| If(PCount() > 0, cLocProA := u, cLocProA)}, oDlg1  , 096, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cLocProA", , )
-   oSayLoc    := TSay():New( 024, 492, {||"Guarulhos:"}                                 , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-   oLocPro    := TGet():New( 032, 492, {|u| If(PCount() > 0, cLocProG := u, cLocProG)}, oDlg1  , 096, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cLocProG", , )
-//  até aqui Jose 21/08/2024 ---------------------------------
+	oGrpDiv    := TGroup():New( 016, 004, 016, 392, "", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )
+	oSayPro    := TSay():New( 024, 004, {||"Produto:"}                               , oDlg1  , ,oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 032, 008)
+	oCodPro    := TGet():New( 032, 004, {|u| If(PCount() > 0, cCodPro := u, cCodPro)}, oDlg1  , 072, 10, '@!', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "cCodPro", , )
+	oCodPro:bLostFocus := {|| fCodPro(), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl1(2)}, "Aguarde...", "Buscando despachos..."), ), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl2(2)}, "Aguarde...", "Buscando pedidos..."), )}
+	oSayDes    := TSay():New( 024, 084, {||"Descrição:"}                             , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 036, 008)
+	oDesPro    := TGet():New( 032, 084, {|u| If(PCount() > 0, cDesPro := u, cDesPro)}, oDlg1  , 200, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cDesPro", , )
+	// Jose 21/08/2024 oSayLoc    := TSay():New( 024, 292, {||"Localização:"}                           , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+	oSayLoc    := TSay():New( 024, 292, {||"Matão:"}                                 , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+	oLocPro    := TGet():New( 032, 292, {|u| If(PCount() > 0, cLocPro := u, cLocPro)}, oDlg1  , 096, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cLocPro", , )
 
+	//-------- acrescentado por Jose 21/08/2024 ------------------
+	oSayLoc    := TSay():New( 024, 392, {||"Araraquara:"}                                 , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+	oLocPro    := TGet():New( 032, 392, {|u| If(PCount() > 0, cLocProA := u, cLocProA)}, oDlg1  , 096, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cLocProA", , )
+	oSayLoc    := TSay():New( 024, 492, {||"Guarulhos:"}                                 , oDlg1  , , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+	oLocPro    := TGet():New( 032, 492, {|u| If(PCount() > 0, cLocProG := u, cLocProG)}, oDlg1  , 096, 10, ''  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cLocProG", , )
+	//
+	oGrpPrE    := TGroup():New( 048, 004, 080, 550, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
+	oSayPro    := TSay():New( 056, 007, {||"P1 / P2"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtdPro    := TGet():New( 064, 007, {|u| If(PCount() > 0, nQtdPro := u, nQtdPro)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdPro", , )
+	oSay30     := TSay():New( 056, 050, {||"Almo. 30"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtd30     := TGet():New( 064, 050, {|u| If(PCount() > 0, nQtd30 := u, nQtd30)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtd30", , )
+	oSay03     := TSay():New( 056, 092, {||"Almo. 03"}                                 , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtd03     := TGet():New( 064, 092, {|u| If(PCount() > 0, nQtd03 := u, nQtd03)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtd03", , )
+	oSaySep3   := TSay():New( 056, 134, {||"Separado03"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtdSep3   := TGet():New( 064, 134, {|u| If(PCount() > 0, nQtdSep3 := u, nQtdSep3)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdSep3", , )
+	oSayDis    := TSay():New( 056, 176, {||"Disp. 03"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 045, 008)
+	oQtdDis    := TGet():New( 064, 176, {|u| If(PCount() > 0, nQtdDis := u, nQtdDis)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdDis", , )
+	oSayG3     := TSay():New( 056, 218, {||"Saldo G3"}                               , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtdG3     := TGet():New( 064, 218, {|u| If(PCount() > 0, nQtdG3 := u, nQtdG3)}, oGrpPrE, 032, 10, '@E 999999', {|| positivo() }, CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "nQtdG3", , )
+	oSaySepG   := TSay():New( 056, 260, {||"SeparadoG3"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtdSepG   := TGet():New( 064, 260, {|u| If(PCount() > 0, nQtdSepG := u, nQtdSepG)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdSepG", , )
+	oSayDispG  := TSay():New( 056, 302, {||"Disp. G3"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+	oQtdDispG  := TGet():New( 064, 302, {|u| If(PCount() > 0, nQtdDispG := u, nQtdDispG)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdDispG", , )
+	/*-----------   Jose 05/07/2024 ----------------------------------------*/
+	oSayA3     := TSay():New( 056, 344, {||"Saldo A3"}                               , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtdA3     := TGet():New( 064, 344, {|u| If(PCount() > 0, nQtdA3 := u, nQtdA3)}, oGrpPrE, 032, 10, '@E 999999', {|| positivo() }, CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "nQtdA3", , )
+	oSaySepA   := TSay():New( 056, 386, {||"SeparadoA3"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
+	oQtdSepA   := TGet():New( 064, 386, {|u| If(PCount() > 0, nQtdSepA := u, nQtdSepA)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdSepA", , )
+	oSayDispA  := TSay():New( 056, 428, {||"Disp. A3"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+	oQtdDispA  := TGet():New( 064, 428, {|u| If(PCount() > 0, nQtdDispA := u, nQtdDispA)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdDispA", , )
+	/*-------------- Aqui Jose 05/072024  ------------------------------------*/
+	oSayMark   := TSay():New( 056, 470, {||"Marcados"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
+	oQtdMark   := TGet():New( 064, 470, {|u| If(PCount() > 0, nQtdMark := u, nQtdMark)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdMark", , )  // Jose 05/07/2024   056, 344,
 
-   oGrpPrE    := TGroup():New( 048, 004, 080, 600, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
- //oSayOrd  := TSay():New( 056, 008, {||"Pallet:"}                                 , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 032, 008)
- //oOrdPro  := TGet():New( 064, 008, {|u| If(PCount() > 0, cOrdPro := u, cOrdPro)}, oGrpPrE, 060, 10, '999999/9999'  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "cOrdPro", , )
- //oOrdPro:bLostFocus := {|| fOrdPro() }
-   oSayPro    := TSay():New( 056, 007, {||"P1 / P2"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtdPro    := TGet():New( 064, 007, {|u| If(PCount() > 0, nQtdPro := u, nQtdPro)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdPro", , )
-   oSay30     := TSay():New( 056, 050, {||"Almo. 30"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtd30     := TGet():New( 064, 050, {|u| If(PCount() > 0, nQtd30 := u, nQtd30)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtd30", , )     
-   oSay03     := TSay():New( 056, 092, {||"Almo. 03"}                                 , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtd03     := TGet():New( 064, 092, {|u| If(PCount() > 0, nQtd03 := u, nQtd03)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtd03", , )
-   oSaySep3   := TSay():New( 056, 134, {||"Separado03"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtdSep3   := TGet():New( 064, 134, {|u| If(PCount() > 0, nQtdSep3 := u, nQtdSep3)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdSep3", , )
-   oSayDis    := TSay():New( 056, 176, {||"Disp. 03"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 045, 008)
-   oQtdDis    := TGet():New( 064, 176, {|u| If(PCount() > 0, nQtdDis := u, nQtdDis)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdDis", , )
-   oSayG3     := TSay():New( 056, 218, {||"Saldo G3"}                               , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtdG3     := TGet():New( 064, 218, {|u| If(PCount() > 0, nQtdG3 := u, nQtdG3)}, oGrpPrE, 032, 10, '@E 999999', {|| positivo() }, CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "nQtdG3", , )
-   oSaySepG   := TSay():New( 056, 260, {||"SeparadoG3"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtdSepG   := TGet():New( 064, 260, {|u| If(PCount() > 0, nQtdSepG := u, nQtdSepG)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdSepG", , )
-   oSayDispG  := TSay():New( 056, 302, {||"Disp. G3"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-   oQtdDispG  := TGet():New( 064, 302, {|u| If(PCount() > 0, nQtdDispG := u, nQtdDispG)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdDispG", , )
-/*-----------   Jose 05/07/2024 ----------------------------------------*/
-   oSayA3     := TSay():New( 056, 344, {||"Saldo A3"}                               , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtdA3     := TGet():New( 064, 344, {|u| If(PCount() > 0, nQtdA3 := u, nQtdA3)}, oGrpPrE, 032, 10, '@E 999999', {|| positivo() }, CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "nQtdA3", , )
-   oSaySepA   := TSay():New( 056, 386, {||"SeparadoA3"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)
-   oQtdSepA   := TGet():New( 064, 386, {|u| If(PCount() > 0, nQtdSepA := u, nQtdSepA)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdSepA", , )
-   oSayDispA  := TSay():New( 056, 428, {||"Disp. A3"}                              , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-   oQtdDispA  := TGet():New( 064, 428, {|u| If(PCount() > 0, nQtdDispA := u, nQtdDispA)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdDispA", , )
-/*-------------- Aqui Jose 05/072024  ------------------------------------*/
-   oSayMark   := TSay():New( 056, 470, {||"Marcados"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
-   oQtdMark   := TGet():New( 064, 470, {|u| If(PCount() > 0, nQtdMark := u, nQtdMark)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdMark", , )  // Jose 05/07/2024   056, 344,
+	// maa
+	nQtdAvar	:= 0
+	oSayMark   := TSay():New( 056, 510, {||"Avarias"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
+	oQtdMark   := TGet():New( 064, 510, {|u| If(PCount() > 0, nQtdAvar := u, nQtdAvar)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdAvar", , )  // Jose 05/07/2024   056, 344,
 
-  // maa
-  nQtdAvar	:= 0     
-   oSayMark   := TSay():New( 056, 510, {||"Avarias"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
-   oQtdMark   := TGet():New( 064, 510, {|u| If(PCount() > 0, nQtdAvar := u, nQtdAvar)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdAvar", , )  // Jose 05/07/2024   056, 344,
+	//oQtdG3:bLostFocus := {|| nQtdSepG := nQtdG3 + nQtdSep3, oQtdG3:Refresh(), oQtdSepG:Refresh() }
 
-   //oQtdG3:bLostFocus := {|| nQtdSepG := nQtdG3 + nQtdSep3, oQtdG3:Refresh(), oQtdSepG:Refresh() }
-      
-   oGrpDes    := TGroup():New( 084,004,160,510,"Bordero de Despacho",oDlg1,CLR_BLACK,CLR_WHITE,.T.,.F. )  // Jose 05/07/2024 388
-   
-   oTbl1(1)
-   DbSelectArea("ZT1")
-   DbGoTop()
-   oBrwDes    := MsSelect():New( "ZT1", "ZT1_MARCA", "", { {"ZT1_MARCA", "", "", ""}, {"ZT1_BORDES", "", "Despacho", ""}, {"ZT1_BORPED", "", "Pedido", ""}, {"ZT1_REGIAO", "", "Regiao", ""}, {"ZT1_PREVIS", "", "Previsão", ""}, {"ZT1_PEDIDO", "", "Pedido", ""}, {"ZT1_QUANTI", "", "Quantidade", ""}, {"ZT1_LOCALI", "", "Expedição", ""},{"ZT1_GAVETA", "", "Vol. Ped.", ""} }, .F., cMarca, {092, 008, 156, 506}, , , oGrpDes, , aCores ) // Jose 05/07/2024 384
-   oBrwDes:oBrowse:bChange := {||DbSelectArea("ZT1") }
-   oBrwDes:bAval := {||ZT1Mark()}
-   oBrwDes:oBrowse:lHasMark := .T.
-   oBrwDes:oBrowse:lCanAllmark := .F.
+	oGrpDes    := TGroup():New( 084,004,160,510,"Bordero de Despacho",oDlg1,CLR_BLACK,CLR_WHITE,.T.,.F. )  // Jose 05/07/2024 388
 
-   oGrpPed    := TGroup():New( 164, 004, 280, 510, "Bordero de Pedidos",oDlg1,CLR_BLACK,CLR_WHITE,.T.,.F. )  // Jose 05/07/2024 388   Jose 05/05/2025   164, 004, 240, 510,
-   oTbl2(1)
-   DbSelectArea("ZT2")
-   oBrwPed    := MsSelect():New( "ZT2", "ZT2_MARCA", "", { {"ZT2_MARCA", "", "", ""}, {"ZT2_NUMBOR", "", "Bord. Ped.", "@R 999999"}, {"ZT2_EMISSA", "", "Emissão"   , ""}, {"ZT2_PEDIDO", "", "Pedido"    , "999999"}, {"ZT2_QUANTI", "", "Quantidade", "@E 99,999.9999"},  {"ZT2_LOCEXP", "", "Expedição" , ""},  {"ZT2_LOCAL", "", "Local Ped" , ""} , {"ZT2_GAVETA", "", "Vol. Ped."    , ""} }, .F., cMarca, {172, 008, 276, 506}, , , oGrpPed )  // Jose 05/07/2024 384 // Jose 21/08/2024  jose 05/05/2025  172, 008, 236, 506}
-   oBrwPed:oBrowse:bChange := {||DbSelectArea("ZT2") }
-   oBrwPed:bAval               := {||ZT2Mark()}
-   oBrwPed:oBrowse:lHasMark    := .T.
-   oBrwPed:oBrowse:lCanAllmark := .F.
-   //oBrwPed:oBrowse:bLDBLClick  := { || fBordEspec() }
+	oTbl1(1)
+	DbSelectArea("ZT1")
+	DbGoTop()
+	oBrwDes    := MsSelect():New( "ZT1", "ZT1_MARCA", "", { {"ZT1_MARCA", "", "", ""}, {"ZT1_BORDES", "", "Despacho", ""}, {"ZT1_BORPED", "", "Pedido", ""}, {"ZT1_REGIAO", "", "Regiao", ""}, {"ZT1_PREVIS", "", "Previsão", ""}, {"ZT1_PEDIDO", "", "Pedido", ""}, {"ZT1_QUANTI", "", "Quantidade", ""}, {"ZT1_LOCALI", "", "Expedição", ""},{"ZT1_GAVETA", "", "Vol. Ped.", ""} }, .F., cMarca, {092, 008, 156, 506}, , , oGrpDes, , aCores ) // Jose 05/07/2024 384
+	oBrwDes:oBrowse:bChange := {||DbSelectArea("ZT1") }
+	oBrwDes:bAval := {||ZT1Mark()}
+	oBrwDes:oBrowse:lHasMark := .T.
+	oBrwDes:oBrowse:lCanAllmark := .F.
 
-   oDlg1:nStyle := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
-   oCodPro:SetFocus()
-   oDlg1:Activate(,,,.T.)
-   DbSelectArea("ZT1")
-   DbCloseArea()
-   oTempTbl1:Delete()
-   DbSelectArea("ZT2")
-   DbCloseArea()
-   oTempTbl2:Delete()
+	oGrpPed    := TGroup():New( 164, 004, 280, 510, "Bordero de Pedidos",oDlg1,CLR_BLACK,CLR_WHITE,.T.,.F. )  // Jose 05/07/2024 388   Jose 05/05/2025   164, 004, 240, 510,
+	oTbl2(1)
+	DbSelectArea("ZT2")
+	oBrwPed    := MsSelect():New( "ZT2", "ZT2_MARCA", "", { {"ZT2_MARCA", "", "", ""}, {"ZT2_NUMBOR", "", "Bord. Ped.", "@R 999999"}, {"ZT2_EMISSA", "", "Emissão"   , ""}, {"ZT2_PEDIDO", "", "Pedido"    , "999999"}, {"ZT2_QUANTI", "", "Quantidade", "@E 99,999.9999"},  {"ZT2_LOCEXP", "", "Expedição" , ""},  {"ZT2_LOCAL", "", "Local Ped" , ""} , {"ZT2_GAVETA", "", "Vol. Ped."    , ""} }, .F., cMarca, {172, 008, 276, 506}, , , oGrpPed )  // Jose 05/07/2024 384 // Jose 21/08/2024  jose 05/05/2025  172, 008, 236, 506}
+	oBrwPed:oBrowse:bChange := {||DbSelectArea("ZT2") }
+	oBrwPed:bAval               := {||ZT2Mark()}
+	oBrwPed:oBrowse:lHasMark    := .T.
+	oBrwPed:oBrowse:lCanAllmark := .F.
+	//oBrwPed:oBrowse:bLDBLClick  := { || fBordEspec() }
+
+	oDlg1:nStyle := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
+	oCodPro:SetFocus()
+	oDlg1:Activate(,,,.T.)
+	DbSelectArea("ZT1")
+	DbCloseArea()
+	oTempTbl1:Delete()
+	DbSelectArea("ZT2")
+	DbCloseArea()
+	oTempTbl2:Delete()
 
 Return
 
@@ -4329,16 +4283,16 @@ Static Function fResProd()
 
 	Local nY
 	Local aResPal := {}
-   Local cMsgRes := ""
+	Local cMsgRes := ""
 	Local nTQtd   := 0
-	
-   cQry1 := " "
+
+	cQry1 := " "
 	cQry1 += "  SELECT C6_PRODUTO AS 'CODIGO', C6_LOCAL AS 'ALMOX', ZZK_CODIGO AS 'PALLET', SUM(ZZK_QUANT) AS QTDESEPARADA, "
 	cQry1 += "  CASE WHEN ZZJ_FLAG ='5' AND ZZJ_LOCDES <> '' THEN '5-HOUVE TRANSF INTERNA E NF GERADA' ELSE "
-   cQry1 += "  CASE WHEN ZZJ_FLAG ='5' AND ZZJ_LOCDES =  ''  THEN '5-NF GERADA SEM TRANF INTERNA' ELSE "
+	cQry1 += "  CASE WHEN ZZJ_FLAG ='5' AND ZZJ_LOCDES =  ''  THEN '5-NF GERADA SEM TRANF INTERNA' ELSE "
 	cQry1 += "  CASE WHEN ZZJ_FLAG ='4' AND ZZJ_LOCDES <> '' THEN '4-TRANSF INTERNA SEM NF TRANSF' ELSE "
 	cQry1 += "  CASE WHEN ZZJ_FLAG ='4' AND ZZJ_LOCALI = 'FAB1' THEN '4-PALLET FAB1 - SEM NF TRANSF' ELSE "
-   cQry1 += "  CASE WHEN ZZJ_FLAG ='3' AND ZZJ_LOCDES =  ''  THEN '3-PALLET MONTADO' END END END END END AS 'STATUS', "
+	cQry1 += "  CASE WHEN ZZJ_FLAG ='3' AND ZZJ_LOCDES =  ''  THEN '3-PALLET MONTADO' END END END END END AS 'STATUS', "
 	cQry1 += "  ZZJ_FLAG AS 'STATUSPALLET', CASE WHEN ZZJ_LOCDES <>'' THEN 'TRANSF. ALMOX' ELSE 'NÃO HOUVE TRANSF.' END AS 'STATUSPALLET', "
 	cQry1 += "  ZZJ_LOCORI AS 'ORIGEM', ZZJ_LOCDES AS 'DESTINO', ZZJ_TIPBOR  AS 'TIPOBORDERO', ZZJ_LOCALI AS 'LOCALORIGEM' "
 	cQry1 += "  FROM "+RetSqlName("SC6")+" SC6 WITH(NOLOCK)  "
@@ -4352,64 +4306,64 @@ Static Function fResProd()
 	cQry1 += "  GROUP BY C6_PRODUTO, C6_LOCAL, ZZK_CODIGO, ZZJ_FLAG, ZZJ_LOCORI, ZZJ_LOCDES, ZZJ_TIPBOR, ZZJ_LOCALI "
 	cQry1 += "  ORDER BY C6_LOCAL, ZZJ_FLAG, ZZK_CODIGO "
 
-   TCQuery cQry1 ALIAS "TCQ" NEW
-   
-   DbSelectArea("TCQ")
-   DbGoTop()
+	TCQuery cQry1 ALIAS "TCQ" NEW
+
+	DbSelectArea("TCQ")
+	DbGoTop()
 	If !Eof()
-      While !Eof()
-         aAdd(aResPal, {TCQ->PALLET ,TCQ->STATUS ,TCQ->QTDESEPARADA, TCQ->LOCALORIGEM})
-			nTQtd += TCQ->QTDESEPARADA 
-         DbSelectArea("TCQ")
-         DbSkip()
-      Enddo
-   Endif
-   DbSelectArea("TCQ")
-   DbCloseArea()
+		While !Eof()
+			aAdd(aResPal, {TCQ->PALLET ,TCQ->STATUS ,TCQ->QTDESEPARADA, TCQ->LOCALORIGEM})
+			nTQtd += TCQ->QTDESEPARADA
+			DbSelectArea("TCQ")
+			DbSkip()
+		Enddo
+	Endif
+	DbSelectArea("TCQ")
+	DbCloseArea()
 
 	If Len(aResPal) > 0
-      cMsgRes += '    RESUMO DA MONTAGEM DO PRODUTO '+Alltrim(cCodPro)+'   '+Chr(13)+Chr(10)
-      cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
-		cMsgRes += '|  PALLET    |   STATUS                          |QTDE |ORIGEM|'+Chr(13)+Chr(10)                
-      cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
-      For nY := 1 To Len(aResPal)
-         cMsgRes += '| '+Substr(aResPal[nY][1],1,12)+'| '+Substr(aResPal[nY][2],1,35)+'|'+Transform(aResPal[nY][3], "@E 9999")+' | '+aResPal[nY][4]+' |'+Chr(13)+Chr(10)
-      Next   
-         cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
-	      cMsgRes += '|            |                     TOTAIS        |'+Transform(nTQtd, "@E 99999")+'|      |'+Chr(13)+Chr(10)
-	      cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
-      
-   Endif
+		cMsgRes += '    RESUMO DA MONTAGEM DO PRODUTO '+Alltrim(cCodPro)+'   '+Chr(13)+Chr(10)
+		cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
+		cMsgRes += '|  PALLET    |   STATUS                          |QTDE |ORIGEM|'+Chr(13)+Chr(10)
+		cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
+		For nY := 1 To Len(aResPal)
+			cMsgRes += '| '+Substr(aResPal[nY][1],1,12)+'| '+Substr(aResPal[nY][2],1,35)+'|'+Transform(aResPal[nY][3], "@E 9999")+' | '+aResPal[nY][4]+' |'+Chr(13)+Chr(10)
+		Next
+		cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
+		cMsgRes += '|            |                     TOTAIS        |'+Transform(nTQtd, "@E 99999")+'|      |'+Chr(13)+Chr(10)
+		cMsgRes += '+------------+-----------------------------------+-----+------+'+Chr(13)+Chr(10)
 
-   If !Empty(cMsgRes)
-      /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	Endif
+
+	If !Empty(cMsgRes)
+		/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
       ±± Declaração de cVariable dos componentes                                 ±±
-      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-      Private cMGet1Ms
+		Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+		Private cMGet1Ms
 
 		/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
       ±± Declaração de Variaveis Private dos Objetos                             ±±
-      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-      SetPrvt("oFontMsg", "oDlg1Msg", "oMGet1Ms")
+		Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+		SetPrvt("oFontMsg", "oDlg1Msg", "oMGet1Ms")
 
 		/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
       ±± Definicao do Dialog e todos os seus componentes.                        ±±
-      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-      cMGet1Ms   := cMsgRes
-      oFontMsg   := TFont():New( "Courier New", 0, -12, , .F., 0, , 480, .F., .F., , , , , , )
-      oDlg1Msg   := MSDialog():New( 229, 262, 650, 800, "Resumo do Produto nos Pallets", , , .F., , , , , , .T., , , .T. ) // Jose  05/07/2024 730
-      oMGet1Ms   := TMultiGet():New( 003, 003, {|u| If(PCount() > 0, cMGet1Ms := u, cMGet1Ms)}, oDlg1Msg, 230,230, oFontMsg, , CLR_BLACK, CLR_WHITE, , .T., "", , , .F., .F., .F., , , .F., , )
+		Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+		cMGet1Ms   := cMsgRes
+		oFontMsg   := TFont():New( "Courier New", 0, -12, , .F., 0, , 480, .F., .F., , , , , , )
+		oDlg1Msg   := MSDialog():New( 229, 262, 650, 800, "Resumo do Produto nos Pallets", , , .F., , , , , , .T., , , .T. ) // Jose  05/07/2024 730
+		oMGet1Ms   := TMultiGet():New( 003, 003, {|u| If(PCount() > 0, cMGet1Ms := u, cMGet1Ms)}, oDlg1Msg, 230,230, oFontMsg, , CLR_BLACK, CLR_WHITE, , .T., "", , , .F., .F., .F., , , .F., , )
 		oDlg1Msg:Activate(, , , .T.)
 
 		If ChkFile("TMPITE")
-         DbSelectArea("TMPITE")
+			DbSelectArea("TMPITE")
 			DbSetOrder(1)
 			DbGoTop()
 
-         oBrw1Env:oBrowse:GoTop()
-         oBrw1Env:oBrowse:Refresh()
-      Endif	    
-   Endif
+			oBrw1Env:oBrowse:GoTop()
+			oBrw1Env:oBrowse:Refresh()
+		Endif
+	Endif
 Return()
 
 
@@ -4424,138 +4378,138 @@ Return .T.
 Function  ³ fConPed() - Busca informações de pedidos de vendas
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fConPed()
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Declaração de cVariable dos componentes                                 ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   Private cEndExp    := Space(1)
-   Private cSayExp    := Space(1)
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	Private cEndExp    := Space(1)
+	Private cSayExp    := Space(1)
 
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Declaração de Variaveis Private dos Objetos                             ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   SetPrvt("oFont1", "oFont2", "oDlg2", "oSayExp", "oBrwXXX", "oEndExp")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oFont1", "oFont2", "oDlg2", "oSayExp", "oBrwXXX", "oEndExp")
 
-   If Empty(cCodPro)
-      ApMsgStop('Favor informar código do produto')
-      Return
-   Else
-      /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	If Empty(cCodPro)
+		ApMsgStop('Favor informar código do produto')
+		Return
+	Else
+		/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
       ±± Definicao do Dialog e todos os seus componentes.                        ±±
-      Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-      oFont1     := TFont():New( "Courier New", 0, -13, , .F., 0, , 400, .F., .F., , , , , , )
-      oFont2     := TFont():New( "Courier New", 0, -16, , .T., 0, , 700, .F., .F., , , , , , )
-      oDlg2      := MSDialog():New( 500, 449, 850, 1200, "Pedidos do Item", , , .F., , , , , , .T., , , .T. )
-      oSayExp    := TSay():New( 154, 004, {||"Expedição:"}, oDlg2, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
-      oTbl4()
-      DbSelectArea("TPD")
-      DbGoTop()
-      oBrwXXX    := MsSelect():New( "TPD", "", "", { {"TPD_PEDIDO", "", "Pedido", "999999"}, {"TPD_QTDE", "", "Qtde.", "99999"},{"TPD_SEPAR", "", "Bipado", "99999"}, {"TPD_BORPED", "", "Bordero", "999999"}, {"TPD_DESPAC", "", "Despacho", "@!"}, {"TPD_VOLITE", "", "Vol.Item", "99999"}, {"TPD_VOLPED", "", "Vol.Ped", "99999"}, {"TPD_PALLET", "", "Local", "@!"}, {"TPD_PEDPRO", "", "Ped. Prog.", ""}, {"TPD_STAPED", "", "Status Ped.", ""} }, .F., , {000, 000, 147, 375}, , , oDlg2 )
-      oBrwXXX:oBrowse:bChange := {|| fMosExp() }
-      oEndExp    := TGet():New( 152, 052, {|u| If(PCount() > 0, cEndExp := u, cEndExp) }, oDlg2, 060, 011, '', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cEndExp", , )
+		Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+		oFont1     := TFont():New( "Courier New", 0, -13, , .F., 0, , 400, .F., .F., , , , , , )
+		oFont2     := TFont():New( "Courier New", 0, -16, , .T., 0, , 700, .F., .F., , , , , , )
+		oDlg2      := MSDialog():New( 500, 449, 850, 1200, "Pedidos do Item", , , .F., , , , , , .T., , , .T. )
+		oSayExp    := TSay():New( 154, 004, {||"Expedição:"}, oDlg2, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 044, 008)
+		oTbl4()
+		DbSelectArea("TPD")
+		DbGoTop()
+		oBrwXXX    := MsSelect():New( "TPD", "", "", { {"TPD_PEDIDO", "", "Pedido", "999999"}, {"TPD_QTDE", "", "Qtde.", "99999"},{"TPD_SEPAR", "", "Bipado", "99999"}, {"TPD_BORPED", "", "Bordero", "999999"}, {"TPD_DESPAC", "", "Despacho", "@!"}, {"TPD_VOLITE", "", "Vol.Item", "99999"}, {"TPD_VOLPED", "", "Vol.Ped", "99999"}, {"TPD_PALLET", "", "Local", "@!"}, {"TPD_PEDPRO", "", "Ped. Prog.", ""}, {"TPD_STAPED", "", "Status Ped.", ""} }, .F., , {000, 000, 147, 375}, , , oDlg2 )
+		oBrwXXX:oBrowse:bChange := {|| fMosExp() }
+		oEndExp    := TGet():New( 152, 052, {|u| If(PCount() > 0, cEndExp := u, cEndExp) }, oDlg2, 060, 011, '', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "cEndExp", , )
 
-      oDlg2:Activate(,,,.T.)
-      DbSelectArea("TPD")
-      DbCloseArea()
-      oTempTbl4:Delete()
-   Endif
+		oDlg2:Activate(,,,.T.)
+		DbSelectArea("TPD")
+		DbCloseArea()
+		oTempTbl4:Delete()
+	Endif
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ oTbl4() - Cria temporario para o Alias: TMP
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl4()
-   Local cQry1 := ""
-   Local aFds := {}
- //Local cTmp
+	Local cQry1 := ""
+	Local aFds := {}
+	//Local cTmp
 
-   aAdd( aFds , {"TPD_PEDIDO", "C", 006, 000} )
-   aAdd( aFds , {"TPD_QTDE"  , "N", 005, 000} )
-   aAdd( aFds , {"TPD_BORPED", "C", 006, 000} )
-   aAdd( aFds , {"TPD_DESPAC", "C", 050, 000} )
-   aAdd( aFds , {"TPD_VOLITE", "N", 005, 000} )
-   aAdd( aFds , {"TPD_VOLPED", "N", 005, 000} )
-   aAdd( aFds , {"TPD_PALLET", "C", 002, 000} )
-   aAdd( aFds , {"TPD_SEPAR" , "N", 005, 000} )
-   aAdd( aFds , {"TPD_PEDPRO", "D", 008, 000} )
-   aAdd( aFds , {"TPD_STAPED", "C", 030, 000} )
- //aAdd( aFds , {"TPD_STAITE", "C", 020, 000} )
+	aAdd( aFds , {"TPD_PEDIDO", "C", 006, 000} )
+	aAdd( aFds , {"TPD_QTDE"  , "N", 005, 000} )
+	aAdd( aFds , {"TPD_BORPED", "C", 006, 000} )
+	aAdd( aFds , {"TPD_DESPAC", "C", 050, 000} )
+	aAdd( aFds , {"TPD_VOLITE", "N", 005, 000} )
+	aAdd( aFds , {"TPD_VOLPED", "N", 005, 000} )
+	aAdd( aFds , {"TPD_PALLET", "C", 002, 000} )
+	aAdd( aFds , {"TPD_SEPAR" , "N", 005, 000} )
+	aAdd( aFds , {"TPD_PEDPRO", "D", 008, 000} )
+	aAdd( aFds , {"TPD_STAPED", "C", 030, 000} )
+	//aAdd( aFds , {"TPD_STAITE", "C", 020, 000} )
 
-   oTempTbl4 := FWTemporaryTable():New( 'TPD' )
-   oTempTbl4:SetFields( aFds )
-   oTempTbl4:AddIndex( "cInd01", { "TPD_PALLET"},{"TPD_PEDIDO" } )
- //oTempTbl4:AddIndex( "cInd01", { "TPD_PEDIDO" } )
-   oTempTbl4:Create()
-   /********************************************************************************************************************************/       
-   
-   cQry1 := ""
-   cQry1 += " SELECT SC6.C6_FILIAL, SC6.C6_NUM, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC5.C5_VOLUME1, SC5.C5_PEDPROG, SC6.R_E_C_N_O_, ISNULL(SUM(ZZK_QUANT),0) AS 'QTDBIPADO' , SC6.C6_LOCAL AS 'ALMOXARIDADO' "
-   cQry1 += " FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
-   cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND  SC5.C5_FILIAL = SC6.C6_FILIAL AND SC5.C5_NUM = SC6.C6_NUM "
-   cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) ON (ZZK.D_E_L_E_T_ <> '*') AND ZZK.ZZK_FILIAL = SC6.C6_FILIAL AND ZZK_PEDIDO = SC6.C6_NUM AND ZZK_PRODUT = SC6.C6_PRODUTO "
-   cQry1 += " WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL  = '"+xFilial("SC6")+"') "
-   cQry1 += "  AND SC6.C6_PRODUTO = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
-   cQry1 += "  AND SC6.C6_NOTA    = '' "
-   cQry1 += "  AND C5_APROVA      ='1' "
-   cQry1 += " GROUP BY SC6.C6_FILIAL, SC6.C6_NUM, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC5.C5_VOLUME1, SC5.C5_PEDPROG, SC6.R_E_C_N_O_, SC6.C6_LOCAL "
-   cQry1 += " ORDER BY SC6.C6_LOCAL, SC6.C6_NUM  "
+	oTempTbl4 := FWTemporaryTable():New( 'TPD' )
+	oTempTbl4:SetFields( aFds )
+	oTempTbl4:AddIndex( "cInd01", { "TPD_PALLET"},{"TPD_PEDIDO" } )
+	//oTempTbl4:AddIndex( "cInd01", { "TPD_PEDIDO" } )
+	oTempTbl4:Create()
+	/********************************************************************************************************************************/
 
-   TCQuery cQry1 ALIAS "TCQ" NEW
-   DbSelectArea("TCQ")
-   
-   While !Eof()
-      cQry1 := ""
-      cQry1 += "SELECT TOP 1 * "
-      cQry1 += "FROM "+RetSqlName("ZZB")+" ZZB WITH (NOLOCK) "
-      cQry1 += "WHERE ZZB.ZZB_FILIAL = '"+xFilial("ZZB")+"' "
-      cQry1 += "  AND ZZB.D_E_L_E_T_ = '' "
-      cQry1 += "  AND ZZB.ZZB_PEDIDO = '"+TCQ->C6_NUM+"' "
-    //cQry1 += "  AND ZZB.ZZB_IDLOG IN('INC', 'ALT', 'EXC', 'LCA', 'LVE', 'LCR', 'LDI', 'APR') "
-      cQry1 += "  AND ZZB.ZZB_IDLOG IN('LDI', 'APR') "
-      cQry1 += "ORDER BY ZZB.ZZB_DATLOG+ZZB.ZZB_HORLOG DESC "
-      TCQuery cQry1 ALIAS "TLG" NEW
-      DbSelectArea("TLG")
-      cLogPed := ""
-      If TLG->ZZB_IDLOG $ 'INC'
-         cLogPed := TLG->ZZB_IDLOG+' - Inclusão - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'ALT'
-         cLogPed := TLG->ZZB_IDLOG+' - Alteração - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'EXC'
-         cLogPed := TLG->ZZB_IDLOG+' - Exclusão - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'LCA'
-         cLogPed := TLG->ZZB_IDLOG+' - Liberação Cadastro - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'LVE'
-         cLogPed := TLG->ZZB_IDLOG+' - Liberação Vendas - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'LCR'
-         cLogPed := TLG->ZZB_IDLOG+' - Liberação Credito - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'LDI'
-         cLogPed := TLG->ZZB_IDLOG+' - Liberação Diretoria - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      ElseIf TLG->ZZB_IDLOG $ 'APR'
-         cLogPed := TLG->ZZB_IDLOG+' - Aprovação - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
-      Endif
-      
-      DbSelectArea("TLG")
-      DbCloseArea()
+	cQry1 := ""
+	cQry1 += " SELECT SC6.C6_FILIAL, SC6.C6_NUM, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC5.C5_VOLUME1, SC5.C5_PEDPROG, SC6.R_E_C_N_O_, ISNULL(SUM(ZZK_QUANT),0) AS 'QTDBIPADO' , SC6.C6_LOCAL AS 'ALMOXARIDADO' "
+	cQry1 += " FROM "+RetSqlName("SC6")+" SC6 WITH (NOLOCK) "
+	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH (NOLOCK) ON (SC5.D_E_L_E_T_ <> '*') AND  SC5.C5_FILIAL = SC6.C6_FILIAL AND SC5.C5_NUM = SC6.C6_NUM "
+	cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) ON (ZZK.D_E_L_E_T_ <> '*') AND ZZK.ZZK_FILIAL = SC6.C6_FILIAL AND ZZK_PEDIDO = SC6.C6_NUM AND ZZK_PRODUT = SC6.C6_PRODUTO "
+	cQry1 += " WHERE (SC6.D_E_L_E_T_ <> '*') AND (SC6.C6_FILIAL  = '"+xFilial("SC6")+"') "
+	cQry1 += "  AND SC6.C6_PRODUTO = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
+	cQry1 += "  AND SC6.C6_NOTA    = '' "
+	cQry1 += "  AND C5_APROVA      ='1' "
+	cQry1 += " GROUP BY SC6.C6_FILIAL, SC6.C6_NUM, SC6.C6_QTDVEN, SC6.C6_VOLITEM, SC5.C5_VOLUME1, SC5.C5_PEDPROG, SC6.R_E_C_N_O_, SC6.C6_LOCAL "
+	cQry1 += " ORDER BY SC6.C6_LOCAL, SC6.C6_NUM  "
 
-      RecLock("TPD", .t.)
-         TPD->TPD_PEDIDO := TCQ->C6_NUM
-         TPD->TPD_QTDE   := TCQ->C6_QTDVEN
-         TPD->TPD_BORPED := Posicione("SZG", 2, xFilial("SZG")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZG_CODIGO")
-         TPD->TPD_DESPAC := Posicione("SZB", 2, xFilial("SZB")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZB_CODIGO")+' - '+Posicione("SZA", 1, xFilial("SZA")+Posicione("SZB", 2, xFilial("SZB")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZB_CODIGO"), "ZA_DESCR")+' - '+DTOC(Posicione("SZA", 1, xFilial("SZA")+Posicione("SZB", 2, xFilial("SZB")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZB_CODIGO"), "ZA_PREVDSP"))
-         TPD->TPD_VOLITE := TCQ->C6_VOLITEM
-         TPD->TPD_VOLPED := TCQ->C5_VOLUME1
-         TPD->TPD_PALLET := TCQ->ALMOXARIDADO
-         TPD->TPD_SEPAR  := TCQ->QTDBIPADO
-         TPD->TPD_PEDPRO := stod(TCQ->C5_PEDPROG)
-         TPD->TPD_STAPED := cLogPed
-         //TPD->TPD_STAITE := Iif(TCQ->DELETADO = '*', 'Item Excluido', '')
-      MsUnLock()
-      
-      DbSelectArea("TCQ")
-      DbSkip()
-   Enddo
-   
-   DbSelectArea("TCQ")
-   DbCloseArea()
+	TCQuery cQry1 ALIAS "TCQ" NEW
+	DbSelectArea("TCQ")
+
+	While !Eof()
+		cQry1 := ""
+		cQry1 += "SELECT TOP 1 * "
+		cQry1 += "FROM "+RetSqlName("ZZB")+" ZZB WITH (NOLOCK) "
+		cQry1 += "WHERE ZZB.ZZB_FILIAL = '"+xFilial("ZZB")+"' "
+		cQry1 += "  AND ZZB.D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZZB.ZZB_PEDIDO = '"+TCQ->C6_NUM+"' "
+		//cQry1 += "  AND ZZB.ZZB_IDLOG IN('INC', 'ALT', 'EXC', 'LCA', 'LVE', 'LCR', 'LDI', 'APR') "
+		cQry1 += "  AND ZZB.ZZB_IDLOG IN('LDI', 'APR') "
+		cQry1 += "ORDER BY ZZB.ZZB_DATLOG+ZZB.ZZB_HORLOG DESC "
+		TCQuery cQry1 ALIAS "TLG" NEW
+		DbSelectArea("TLG")
+		cLogPed := ""
+		If TLG->ZZB_IDLOG $ 'INC'
+			cLogPed := TLG->ZZB_IDLOG+' - Inclusão - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'ALT'
+			cLogPed := TLG->ZZB_IDLOG+' - Alteração - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'EXC'
+			cLogPed := TLG->ZZB_IDLOG+' - Exclusão - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'LCA'
+			cLogPed := TLG->ZZB_IDLOG+' - Liberação Cadastro - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'LVE'
+			cLogPed := TLG->ZZB_IDLOG+' - Liberação Vendas - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'LCR'
+			cLogPed := TLG->ZZB_IDLOG+' - Liberação Credito - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'LDI'
+			cLogPed := TLG->ZZB_IDLOG+' - Liberação Diretoria - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		ElseIf TLG->ZZB_IDLOG $ 'APR'
+			cLogPed := TLG->ZZB_IDLOG+' - Aprovação - '+SubStr(TLG->ZZB_DATLOG, 7, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 5, 2)+'/'+SubStr(TLG->ZZB_DATLOG, 1, 4)+' - '+TLG->ZZB_HORLOG
+		Endif
+
+		DbSelectArea("TLG")
+		DbCloseArea()
+
+		RecLock("TPD", .t.)
+		TPD->TPD_PEDIDO := TCQ->C6_NUM
+		TPD->TPD_QTDE   := TCQ->C6_QTDVEN
+		TPD->TPD_BORPED := Posicione("SZG", 2, xFilial("SZG")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZG_CODIGO")
+		TPD->TPD_DESPAC := Posicione("SZB", 2, xFilial("SZB")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZB_CODIGO")+' - '+Posicione("SZA", 1, xFilial("SZA")+Posicione("SZB", 2, xFilial("SZB")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZB_CODIGO"), "ZA_DESCR")+' - '+DTOC(Posicione("SZA", 1, xFilial("SZA")+Posicione("SZB", 2, xFilial("SZB")+substr(cnumemp,1,2)+TCQ->C6_NUM, "ZB_CODIGO"), "ZA_PREVDSP"))
+		TPD->TPD_VOLITE := TCQ->C6_VOLITEM
+		TPD->TPD_VOLPED := TCQ->C5_VOLUME1
+		TPD->TPD_PALLET := TCQ->ALMOXARIDADO
+		TPD->TPD_SEPAR  := TCQ->QTDBIPADO
+		TPD->TPD_PEDPRO := stod(TCQ->C5_PEDPROG)
+		TPD->TPD_STAPED := cLogPed
+		//TPD->TPD_STAITE := Iif(TCQ->DELETADO = '*', 'Item Excluido', '')
+		MsUnLock()
+
+		DbSelectArea("TCQ")
+		DbSkip()
+	Enddo
+
+	DbSelectArea("TCQ")
+	DbCloseArea()
 
 Return
 
@@ -4563,618 +4517,609 @@ Return
 Function  ³ fMosExp() - Mostra endereços da expedição
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fMosExp()
-       If Empty(TPD->TPD_BORPED)
-          If SubStr(TPD->TPD_STAPED, 1, 3) $ 'APR'
-             If !lProEst
-                oEndExp:lReadOnly := .f.
-                //oEndExp:SetFocus()
-                cEndExp := Space(09)
-             Else
-                oEndExp:lReadOnly := .t.
-                cEndExp := Space(09)
-             Endif
-          ElseIf SubStr(TPD->TPD_STAPED, 1, 3) $ 'EXC' .or. Empty(SubStr(TPD->TPD_STAPED, 1, 3))
-                 oEndExp:lReadOnly := .t.
-                 cEndExp := Space(09)
-          Else
-             oEndExp:lReadOnly := .f.
-             cEndExp := Space(09)
-             //oEndExp:SetFocus()
-          Endif
-       Else
-          DbSelectArea("SZG")
-          DbSetOrder(2)
-          DbSeek(xFilial("SZG")+substr(cnumemp,1,2)+TPD->TPD_PEDIDO, .t.)
-          If Found()
-             If Empty(SZG->ZG_LOCALIZ)
-                If !lProEst
-                   oEndExp:lReadOnly := .f.
-                   //oEndExp:SetFocus()
-                   cEndExp := Space(09)
-                Else
-                   oEndExp:lReadOnly := .t.
-                Endif
-             Else
-                oEndExp:lReadOnly := .t.
-                cEndExp := SZG->ZG_LOCALIZ
-             Endif
-          Endif
-       Endif
-       oBrwXXX:oBrowse:Refresh()
-       oEndExp:Refresh()
+	If Empty(TPD->TPD_BORPED)
+		If SubStr(TPD->TPD_STAPED, 1, 3) $ 'APR'
+			If !lProEst
+				oEndExp:lReadOnly := .f.
+				//oEndExp:SetFocus()
+				cEndExp := Space(09)
+			Else
+				oEndExp:lReadOnly := .t.
+				cEndExp := Space(09)
+			Endif
+		ElseIf SubStr(TPD->TPD_STAPED, 1, 3) $ 'EXC' .or. Empty(SubStr(TPD->TPD_STAPED, 1, 3))
+			oEndExp:lReadOnly := .t.
+			cEndExp := Space(09)
+		Else
+			oEndExp:lReadOnly := .f.
+			cEndExp := Space(09)
+			//oEndExp:SetFocus()
+		Endif
+	Else
+		DbSelectArea("SZG")
+		DbSetOrder(2)
+		DbSeek(xFilial("SZG")+substr(cnumemp,1,2)+TPD->TPD_PEDIDO, .t.)
+		If Found()
+			If Empty(SZG->ZG_LOCALIZ)
+				If !lProEst
+					oEndExp:lReadOnly := .f.
+					//oEndExp:SetFocus()
+					cEndExp := Space(09)
+				Else
+					oEndExp:lReadOnly := .t.
+				Endif
+			Else
+				oEndExp:lReadOnly := .t.
+				cEndExp := SZG->ZG_LOCALIZ
+			Endif
+		Endif
+	Endif
+	oBrwXXX:oBrowse:Refresh()
+	oEndExp:Refresh()
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ fConNec() - Busca informações de todas as embalagens necessárias do produto
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fConNec()
-       /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
        ±± Declaração de cVariable dos componentes                                 ±±
-       Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-       //Local nOpc        := GD_INSERT+GD_DELETE+GD_UPDATE
-       Private aCoBrwNec := {}
-       Private aHoBrwNec := {}
-       Private noBrwNec  := 0
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	//Local nOpc        := GD_INSERT+GD_DELETE+GD_UPDATE
+	Private aCoBrwNec := {}
+	Private aHoBrwNec := {}
+	Private noBrwNec  := 0
 
-       /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
        ±± Declaração de Variaveis Private dos Objetos                             ±±
-       Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-       SetPrvt("oDlg2", "oBrwNec")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oDlg2", "oBrwNec")
 
-       /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
        ±± Definicao do Dialog e todos os seus componentes.                        ±±
-       Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-       oTbl3()
-       DbSelectArea("TNE")
-       If RecCount() <= 0
-          ApMsgStop('Não existe necessidade especifica para esse produto')          
-       Else
-          oDlg3      := MSDialog():New( 226,455,396,838,"Necessidade por Embalagem",,,.F.,,,,,,.T.,,,.T. )
-          DbSelectArea("TNE")
-          DbSetOrder(1)
-          DbGotop()
-          oBrwNec    := MsSelect():New( "TNE", "", "", { {"TNE_PRODU", "", "Produto", "XXX999999999"}, {"TNE_EMBAL", "", "Embalagem", "99"}, {"TNE_TOTAL", "", "Total", "99999"} }, .F., , {000, 000, 080, 188}, , , oDlg3 ) 
-          oDlg3:Activate( , , , .T.)
-       Endif
-       DbSelectArea("TNE")
-       DbGotop()
-       DbCloseArea()
-       oTempTbl3:Delete()
-Return       
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	oTbl3()
+	DbSelectArea("TNE")
+	If RecCount() <= 0
+		ApMsgStop('Não existe necessidade especifica para esse produto')
+	Else
+		oDlg3      := MSDialog():New( 226,455,396,838,"Necessidade por Embalagem",,,.F.,,,,,,.T.,,,.T. )
+		DbSelectArea("TNE")
+		DbSetOrder(1)
+		DbGotop()
+		oBrwNec    := MsSelect():New( "TNE", "", "", { {"TNE_PRODU", "", "Produto", "XXX999999999"}, {"TNE_EMBAL", "", "Embalagem", "99"}, {"TNE_TOTAL", "", "Total", "99999"} }, .F., , {000, 000, 080, 188}, , , oDlg3 )
+		oDlg3:Activate( , , , .T.)
+	Endif
+	DbSelectArea("TNE")
+	DbGotop()
+	DbCloseArea()
+	oTempTbl3:Delete()
+Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ oTbl3() - Cria temporario para o Alias: TNE
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl3()
-   
-   Local aFds := {}
-   //Local cTmp
-   Local cQry := ""
 
-   aAdd( aFds , {"TNE_PRODU" , "C", 012, 000} )
-   aAdd( aFds , {"TNE_EMBAL" , "C", 002, 000} )
-   aAdd( aFds , {"TNE_TOTAL" , "N", 005, 000} )
+	Local aFds := {}
+	//Local cTmp
+	Local cQry := ""
 
-   oTempTbl3 := FWTemporaryTable():New( 'TNE' )
-   oTempTbl3:SetFields( aFds )
-   oTempTbl3:AddIndex( "cInd01", { "TNE_EMBAL" } )
-   oTempTbl3:Create()
-   /********************************************************************************************************************************/
-   cQry := ""
-   cQry += " SELECT ZZC_PRODUT AS PRODUTO, SUBSTRING(ZZC_PRODUT,11,2) AS EMB, SUM(ZZC.ZZC_QUANTI) AS QUANTIDADE "
-   cQry += " FROM "+RetSqlName("ZZC")+"  ZZC WITH (NOLOCK)  "
-   cQry += " LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON ZZC.ZZC_FILIAL  = SZB.ZB_FILIAL AND ZZC.ZZC_PEDIDO = SUBSTRING(SZB.ZB_PEDIDO, 3, 6) AND SZB.D_E_L_E_T_ = ''  "
-   cQry += " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON SZB.ZB_FILIAL  = SZA.ZA_FILIAL AND SZB.ZB_CODIGO = SZA.ZA_CODIGO AND SZA.D_E_L_E_T_ = ''  "
-   cQry += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-   cQry += " AND ZZC.D_E_L_E_T_ = '' " 
-   cQry += " AND ZZC.ZZC_DESPAC NOT IN('S')  "
-   cQry += " AND ZZC.ZZC_SEPARA <>'S' "
-   cQry += " AND ZZC.ZZC_GAVETA <>'' "
-   cQry += " AND SUBSTRING(ZZC.ZZC_PRODUT, 1, 10) = '"+SubStr(Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), 1, 10)+"' "
-   cQry += " AND ISNULL(SZB.ZB_CODIGO, '') NOT IN('')  "
-   cQry += " GROUP BY ZZC_PRODUT, SUBSTRING(ZZC_PRODUT,11,2) "
-   cQry += " ORDER BY ZZC_PRODUT "
+	aAdd( aFds , {"TNE_PRODU" , "C", 012, 000} )
+	aAdd( aFds , {"TNE_EMBAL" , "C", 002, 000} )
+	aAdd( aFds , {"TNE_TOTAL" , "N", 005, 000} )
 
-   TCQuery cQry ALIAS "NEC" NEW
-   DbSelectArea("NEC")
-   While !Eof()
-      RecLock("TNE", .t.)
-         TNE->TNE_PRODU  := NEC->PRODUTO 
-         TNE->TNE_EMBAL  := NEC->EMB
-         TNE->TNE_TOTAL  := NEC->QUANTIDADE
-      MsUnLock()
-      DbSelectArea("NEC")
-      DbSkip()
-   Enddo
-   DbSelectArea("NEC")
-   DbGotop()
-   DbCloseArea()
-Return 
+	oTempTbl3 := FWTemporaryTable():New( 'TNE' )
+	oTempTbl3:SetFields( aFds )
+	oTempTbl3:AddIndex( "cInd01", { "TNE_EMBAL" } )
+	oTempTbl3:Create()
+	/********************************************************************************************************************************/
+	cQry := ""
+	cQry += " SELECT ZZC_PRODUT AS PRODUTO, SUBSTRING(ZZC_PRODUT,11,2) AS EMB, SUM(ZZC.ZZC_QUANTI) AS QUANTIDADE "
+	cQry += " FROM "+RetSqlName("ZZC")+"  ZZC WITH (NOLOCK)  "
+	cQry += " LEFT OUTER JOIN "+RetSqlName("SZB")+" SZB WITH (NOLOCK) ON ZZC.ZZC_FILIAL  = SZB.ZB_FILIAL AND ZZC.ZZC_PEDIDO = SUBSTRING(SZB.ZB_PEDIDO, 3, 6) AND SZB.D_E_L_E_T_ = ''  "
+	cQry += " LEFT OUTER JOIN "+RetSqlName("SZA")+" SZA WITH (NOLOCK) ON SZB.ZB_FILIAL  = SZA.ZA_FILIAL AND SZB.ZB_CODIGO = SZA.ZA_CODIGO AND SZA.D_E_L_E_T_ = ''  "
+	cQry += " WHERE ZZC.ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+	cQry += " AND ZZC.D_E_L_E_T_ = '' "
+	cQry += " AND ZZC.ZZC_DESPAC NOT IN('S')  "
+	cQry += " AND ZZC.ZZC_SEPARA <>'S' "
+	cQry += " AND ZZC.ZZC_GAVETA <>'' "
+	cQry += " AND SUBSTRING(ZZC.ZZC_PRODUT, 1, 10) = '"+SubStr(Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), 1, 10)+"' "
+	cQry += " AND ISNULL(SZB.ZB_CODIGO, '') NOT IN('')  "
+	cQry += " GROUP BY ZZC_PRODUT, SUBSTRING(ZZC_PRODUT,11,2) "
+	cQry += " ORDER BY ZZC_PRODUT "
+
+	TCQuery cQry ALIAS "NEC" NEW
+	DbSelectArea("NEC")
+	While !Eof()
+		RecLock("TNE", .t.)
+		TNE->TNE_PRODU  := NEC->PRODUTO
+		TNE->TNE_EMBAL  := NEC->EMB
+		TNE->TNE_TOTAL  := NEC->QUANTIDADE
+		MsUnLock()
+		DbSelectArea("NEC")
+		DbSkip()
+	Enddo
+	DbSelectArea("NEC")
+	DbGotop()
+	DbCloseArea()
+Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ fCodPro() - Busca informações de tela após da digitação do código de barras ou do produto
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fCodPro()
-   
-   cCodPro   := StrTran(StrTran(cCodPro, '-'), '.')
-   cOrdPro   := space(11)
-   nQtdOrd   := 0
-   nQtdSep3  := 0
-   nQtdG3    := 0
-   nQtdA3    := 0   //  Jose 05/07/2024
-   nQtdSepA  := 0   //  Jose 05/07/2024
-   nQtdDispA := 0   //  Jose 05/07/2024 
-   nQtdSepG  := 0
-   nQtdSepG  := 0
-   nQtd30    := 0
-   nQtd03    := 0
-   nQtdDispG := 0
-   nQtdDis   := 0
-   nQtdPro   := 0
-   nQtdMark  := 0
-   nQtdAvar  := 0  // MAA 20260430
-   //oOrdPro:Refresh()
-   //oQtdPro:Refresh()
-   oQtdSep3:Refresh()
-   oQtdG3:Refresh()
-   oQtdSepG:Refresh()
-   oQtdSepG:Refresh()
-   oQtd30:Refresh()
-   oQtd03:Refresh()
-   oQtdDispG:Refresh()
-   oQtdDis:Refresh()
-   
-   lProEst := !Empty(Posicione("SB2", 1, xFilial("SB2")+Posicione("SB1", 1, xFilial("SB1")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), "B1_LOCPAD"), "B2_LOCALIZ"))
-   If Empty(cCodPro)
-      Return
-   ElseIf SubStr(cCodPro, 1, 3) $ '789' 
-      DbSelectArea("SB1")
-      DbSetOrder(5)
-      DbSeek(xFilial("SB1")+Substr(cCodPro,1,12), .t.)
-      If !Found()
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(15)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         cLocPro := space(15)
- 
-         cLocProA := space(15) // Jose 21/08/2024
-         cLocProG := space(15) // Jose 21/08/2024
 
-         oLocPro:Refresh()
-         oCodPro:SetFocus()
-         cLocPro := space(15)
+	cCodPro   := StrTran(StrTran(cCodPro, '-'), '.')
+	cOrdPro   := space(11)
+	nQtdOrd   := 0
+	nQtdSep3  := 0
+	nQtdG3    := 0
+	nQtdA3    := 0   //  Jose 05/07/2024
+	nQtdSepA  := 0   //  Jose 05/07/2024
+	nQtdDispA := 0   //  Jose 05/07/2024
+	nQtdSepG  := 0
+	nQtdSepG  := 0
+	nQtd30    := 0
+	nQtd03    := 0
+	nQtdDispG := 0
+	nQtdDis   := 0
+	nQtdPro   := 0
+	nQtdMark  := 0
+	nQtdAvar  := 0  // MAA 20260430
+	//oOrdPro:Refresh()
+	//oQtdPro:Refresh()
+	oQtdSep3:Refresh()
+	oQtdG3:Refresh()
+	oQtdSepG:Refresh()
+	oQtdSepG:Refresh()
+	oQtd30:Refresh()
+	oQtd03:Refresh()
+	oQtdDispG:Refresh()
+	oQtdDis:Refresh()
 
-         cLocProA := space(15) // Jose 21/08/2024
-         cLocProG := space(15) // Jose 21/08/2024
+	lProEst := !Empty(Posicione("SB2", 1, xFilial("SB2")+Posicione("SB1", 1, xFilial("SB1")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), "B1_LOCPAD"), "B2_LOCALIZ"))
+	If Empty(cCodPro)
+		Return
+	ElseIf SubStr(cCodPro, 1, 3) $ '789'
+		DbSelectArea("SB1")
+		DbSetOrder(5)
+		DbSeek(xFilial("SB1")+Substr(cCodPro,1,12), .t.)
+		If !Found()
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(15)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			cLocPro := space(15)
 
-         oLocPro:Refresh()
-         nQtd03 := 0
-         oQtd03:Refresh()
-         nQtd30 := 0
-         oQtd30:Refresh()
-         nQtdMark :=0
-         oQtdMark:Refresh()
-	     nQtdAvar :=0 //MAA 20260430
-         oQtdAvar:Refresh() //MAA 20260430
-         Return(.f.)
-      Else
-         If !SB1->B1_TIPO $ 'PA'
-            ApMsgStop("Codigo Inválido !!!")
-            cCodPro := space(15)
-            oCodPro:Refresh()
-            cDesPro := space(30)
-            oDesPro:Refresh()
-            cLocPro := space(15)
+			cLocProA := space(15) // Jose 21/08/2024
+			cLocProG := space(15) // Jose 21/08/2024
 
-            cLocProA := space(15) // Jose 21/08/2024
-            cLocProG := space(15) // Jose 21/08/2024
+			oLocPro:Refresh()
+			oCodPro:SetFocus()
+			cLocPro := space(15)
 
-            oLocPro:Refresh()
-            oCodPro:SetFocus()
-            cLocPro := space(15)
+			cLocProA := space(15) // Jose 21/08/2024
+			cLocProG := space(15) // Jose 21/08/2024
 
-            cLocProA := space(15) // Jose 21/08/2024
-            cLocProG := space(15) // Jose 21/08/2024
+			oLocPro:Refresh()
+			nQtd03 := 0
+			oQtd03:Refresh()
+			nQtd30 := 0
+			oQtd30:Refresh()
+			nQtdMark :=0
+			oQtdMark:Refresh()
+			nQtdAvar :=0 //MAA 20260430
+			oQtdAvar:Refresh() //MAA 20260430
+			Return(.f.)
+		Else
+			If !SB1->B1_TIPO $ 'PA'
+				ApMsgStop("Codigo Inválido !!!")
+				cCodPro := space(15)
+				oCodPro:Refresh()
+				cDesPro := space(30)
+				oDesPro:Refresh()
+				cLocPro := space(15)
 
-            oLocPro:Refresh()
-            nQtd03 := 0
-            oQtd03:Refresh()
-            nQtd30 := 0
-            oQtd30:Refresh()
-            nQtdMark :=0
-            oQtdMark:Refresh()
+				cLocProA := space(15) // Jose 21/08/2024
+				cLocProG := space(15) // Jose 21/08/2024
+
+				oLocPro:Refresh()
+				oCodPro:SetFocus()
+				cLocPro := space(15)
+
+				cLocProA := space(15) // Jose 21/08/2024
+				cLocProG := space(15) // Jose 21/08/2024
+
+				oLocPro:Refresh()
+				nQtd03 := 0
+				oQtd03:Refresh()
+				nQtd30 := 0
+				oQtd30:Refresh()
+				nQtdMark :=0
+				oQtdMark:Refresh()
+				nQtdAvar :=0 // MAA 20260430
+				oQtdAvar:Refresh() // MAA 20260430
+				Return(.f.)
+			Else
+				cCodPro := SB1->B1_COD
+			Endif
+		Endif
+	Endif
+
+	If Len(Alltrim(cCodPro)) == 14
+		DbSelectArea("SC2")
+		DbSetOrder(13)
+		DbSeek(xFilial("SC2")+Alltrim(Substr(cCodPro,1,6)), .t.)
+		If Found()
+			While !(SC2->(Eof())) .AND. (XFilial("SC2") == SC2->C2_FILIAL) .AND. (Substr(cCodPro,1,6) == Alltrim(SC2->C2_LOTE))
+				If Substr(cCodPro,7,2) == Substr(SC2->C2_PRODUTO,11,2)
+					cCodPro := (SC2->C2_PRODUTO)
+				Endif
+				DbSelectArea("SC2")
+				DbSkip()
+			Enddo
+		Else
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(15)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			cLocPro := space(15)
+
+			cLocProA := space(15) // Jose 21/08/2024
+			cLocProG := space(15) // Jose 21/08/2024
+
+			oLocPro:Refresh()
+			oCodPro:SetFocus()
+			cLocPro := space(15)
+
+			cLocProA := space(15) // Jose 21/08/2024
+			cLocProG := space(15) // Jose 21/08/2024
+
+			oLocPro:Refresh()
+			nQtd03 := 0
+			oQtd03:Refresh()
+			nQtd30 := 0
+			oQtd30:Refresh()
+			nQtdMark:=0
+			oQtdMark:Refresh()
 			nQtdAvar :=0 // MAA 20260430
 			oQtdAvar:Refresh() // MAA 20260430
-            Return(.f.)
-         Else
-            cCodPro := SB1->B1_COD
-         Endif
-      Endif
-   Endif
+			Return(.f.)
+		Endif
+		DbSelectArea("SC2")
+		DbCloseArea()
+	Endif
 
-   If Len(Alltrim(cCodPro)) == 14
-      DbSelectArea("SC2")
-      DbSetOrder(13)
-      DbSeek(xFilial("SC2")+Alltrim(Substr(cCodPro,1,6)), .t.)
-      If Found() 
-         While !(SC2->(Eof())) .AND. (XFilial("SC2") == SC2->C2_FILIAL) .AND. (Substr(cCodPro,1,6) == Alltrim(SC2->C2_LOTE)) 
-            If Substr(cCodPro,7,2) == Substr(SC2->C2_PRODUTO,11,2) 
-               cCodPro := (SC2->C2_PRODUTO) 
-            Endif
-            DbSelectArea("SC2")
-            DbSkip()        	
-         Enddo
-      Else
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(15)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         cLocPro := space(15)
+	DbSelectArea("SB1")
+	DbSetOrder(1)
+	DbSeek(xFilial("SB1")+cCodPro, .t.)
+	If !Found()
+		ApMsgStop("Codigo Inválido !!!")
+		cCodPro := space(18)
+		oCodPro:Refresh()
+		cDesPro := space(30)
+		oDesPro:Refresh()
+		cLocPro := space(15)
 
-         cLocProA := space(15) // Jose 21/08/2024
-         cLocProG := space(15) // Jose 21/08/2024
+		cLocProA := space(15) // Jose 21/08/2024
+		cLocProG := space(15) // Jose 21/08/2024
 
-         oLocPro:Refresh()
-         oCodPro:SetFocus()
-         cLocPro := space(15)
+		oLocPro:Refresh()
+		oCodPro:SetFocus()
+		cLocPro := space(15)
 
-         cLocProA := space(15) // Jose 21/08/2024
-         cLocProG := space(15) // Jose 21/08/2024
+		cLocProA := space(15) // Jose 21/08/2024
+		cLocProG := space(15) // Jose 21/08/2024
 
-         oLocPro:Refresh()
-         nQtd03 := 0
-         oQtd03:Refresh()
-         nQtd30 := 0
-         oQtd30:Refresh()
-         nQtdMark:=0
-         oQtdMark:Refresh()
-		 nQtdAvar :=0 // MAA 20260430
-		 oQtdAvar:Refresh() // MAA 20260430
-         Return(.f.)
-      Endif	    
-      DbSelectArea("SC2")
-      DbCloseArea()
-   Endif
+		oLocPro:Refresh()
+		nQtd03 := 0
+		oQtd03:Refresh()
+		nQtd30 := 0
+		oQtd30:Refresh()
+		nQtdMark:=0
+		oQtdMark:Refresh()
+		nQtdAvar :=0 // MAA 20260430
+		oQtdAvar:Refresh() // MAA 20260430
+		Return(.f.)
+	Else
+		If !SB1->B1_TIPO $ 'PA' .and. !Substr(Alltrim(cCodPro),4,2) $ '96.97.98.99'
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(18)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			cLocPro := space(15)
 
-   DbSelectArea("SB1")
-   DbSetOrder(1)
-   DbSeek(xFilial("SB1")+cCodPro, .t.)
-   If !Found()
-      ApMsgStop("Codigo Inválido !!!")
-      cCodPro := space(18)
-      oCodPro:Refresh()
-      cDesPro := space(30)
-      oDesPro:Refresh()
-      cLocPro := space(15)
+			cLocProA := space(15) // Jose 21/08/2024
+			cLocProG := space(15) // Jose 21/08/2024
 
-      cLocProA := space(15) // Jose 21/08/2024
-      cLocProG := space(15) // Jose 21/08/2024
+			oLocPro:Refresh()
+			oCodPro:SetFocus()
+			cLocPro := space(15)
 
-      oLocPro:Refresh()
-      oCodPro:SetFocus()
-      cLocPro := space(15)
+			cLocProA := space(15) // Jose 21/08/2024
+			cLocProG := space(15) // Jose 21/08/2024
 
-      cLocProA := space(15) // Jose 21/08/2024
-      cLocProG := space(15) // Jose 21/08/2024
+			oLocPro:Refresh()
+			nQtd03 := 0
+			oQtd03:Refresh()
+			nQtd30 := 0
+			oQtd30:Refresh()
+			nQtdMark:=0
+			oQtdMark:Refresh()
+			nQtdAvar :=0 // MAA 20260430
+			oQtdAvar:Refresh() // MAA 20260430
+			Return(.f.)
+		Else
+			cCodPro := TransForm(SB1->B1_COD, "@R! XX 99.99.999-XX")
+			oCodPro:Refresh()
+			cDesPro := SB1->B1_DESC
+			oDesPro:Refresh()
+			DbSelectArea("SB2")
+			DbSetOrder(1)
+			DbSeek(xFilial("SB2")+SB1->B1_COD+SB1->B1_LOCPAD, .t.)
+			If !Found()
+				cLocPro := space(15)
 
-      oLocPro:Refresh()
-      nQtd03 := 0
-      oQtd03:Refresh()
-      nQtd30 := 0
-      oQtd30:Refresh()
-      nQtdMark:=0
-      oQtdMark:Refresh()
-	  nQtdAvar :=0 // MAA 20260430
-	  oQtdAvar:Refresh() // MAA 20260430
-      Return(.f.)
-   Else
-      If !SB1->B1_TIPO $ 'PA' .and. !Substr(Alltrim(cCodPro),4,2) $ '96.97.98.99'
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(18)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         cLocPro := space(15)
+				cLocProA := space(15) // Jose 21/08/2024
+				cLocProG := space(15) // Jose 21/08/2024
 
-         cLocProA := space(15) // Jose 21/08/2024
-         cLocProG := space(15) // Jose 21/08/2024
+				oLocPro:Refresh()
+				nQtd03 := 0
+				oQtd03:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0       //  Jose 05/07/2024
+				oQtdA3:Refresh()  //  Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0      //  Jose 05/07/2024
+				oQtdSepA:Refresh() //  Jose 05/07/2024
+				nQtd30 := 0
+				oQtd30:Refresh()
+				nQtdMark:=0
+				oQtdMark:Refresh()
+				nQtdAvar :=0 // MAA 20260430
+				oQtdAvar:Refresh() // MAA 20260430
+			Else
+				cLocPro := SB2->B2_LOCALIZ
+				oLocPro:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0         // Jose 05/07/2024
+				oQtdA3:Refresh()    // Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0       // Jose 05/07/2024
+				oQtdSepA:Refresh()  // Jose 05/07/2024
+			Endif
+			//---------    Acescentado por Jose 21/08/2024 ----------------------
 
-         oLocPro:Refresh()
-         oCodPro:SetFocus()
-         cLocPro := space(15)
+			DbSelectArea("SB2")
+			DbSetOrder(1)
+			DbSeek(xFilial("SB2")+SB1->B1_COD+"A3", .t.)
+			//       DbSeek("010108"+SB1->B1_COD+"A3", .t.) // jose 28/05/2025   só para testes
+			If !Found()
+				cLocProA := space(15)
+				oLocPro:Refresh()
+				nQtd03 := 0
+				oQtd03:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0       //  Jose 05/07/2024
+				oQtdA3:Refresh()  //  Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0      //  Jose 05/07/2024
+				oQtdSepA:Refresh() //  Jose 05/07/2024
+				nQtd30 := 0
+				oQtd30:Refresh()
+				nQtdMark:=0
+				oQtdMark:Refresh()
+				nQtdAvar :=0 // MAA 20260430
+				oQtdAvar:Refresh() // MAA 20260430
+			Else
+				cLocProA:= SB2->B2_LOCALIZ
+				oLocPro:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0         // Jose 05/07/2024
+				oQtdA3:Refresh()    // Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0       // Jose 05/07/2024
+				oQtdSepA:Refresh()  // Jose 05/07/2024
+			Endif
 
-         cLocProA := space(15) // Jose 21/08/2024
-         cLocProG := space(15) // Jose 21/08/2024
+			DbSelectArea("SB2")
+			DbSetOrder(1)
+			DbSeek(xFilial("SB2")+SB1->B1_COD+"G3", .t.)
+			If !Found()
+				cLocProG := space(15)
+				oLocPro:Refresh()
+				nQtd03 := 0
+				oQtd03:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0       //  Jose 05/07/2024
+				oQtdA3:Refresh()  //  Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0      //  Jose 05/07/2024
+				oQtdSepA:Refresh() //  Jose 05/07/2024
+				nQtd30 := 0
+				oQtd30:Refresh()
+				nQtdMark:=0
+				oQtdMark:Refresh()
+			Else
+				cLocProG:= SB2->B2_LOCALIZ
+				oLocPro:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0         // Jose 05/07/2024
+				oQtdA3:Refresh()    // Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0       // Jose 05/07/2024
+				oQtdSepA:Refresh()  // Jose 05/07/2024
+			Endif
 
-         oLocPro:Refresh()
-         nQtd03 := 0
-         oQtd03:Refresh()
-         nQtd30 := 0
-         oQtd30:Refresh()
-         nQtdMark:=0
-         oQtdMark:Refresh()
-		 nQtdAvar :=0 // MAA 20260430
-		 oQtdAvar:Refresh() // MAA 20260430
-         Return(.f.)
-      Else
-         cCodPro := TransForm(SB1->B1_COD, "@R! XX 99.99.999-XX")
-         oCodPro:Refresh()
-         cDesPro := SB1->B1_DESC
-         oDesPro:Refresh()
-         DbSelectArea("SB2")
-         DbSetOrder(1)
-         DbSeek(xFilial("SB2")+SB1->B1_COD+SB1->B1_LOCPAD, .t.)
-         If !Found()
-            cLocPro := space(15)
+			//---------    Acrescentado por MAA 20260430 ----------------------
+			SB2->(DbSetOrder(1))
+			If .NOT. SB2->(DbSeek(xFilial("SB2")+SB1->B1_COD+"AV"))
+				cLocProA := space(15)
+				nQtd03 := 0
+				nQtdSep3 := 0
+				nQtdG3 := 0
+				nQtdA3 := 0
+				nQtdSepG := 0
+				nQtdSepA := 0
+				nQtd30 := 0
+				nQtdMark:=0
+				nQtdAvar :=0
 
-            cLocProA := space(15) // Jose 21/08/2024
-            cLocProG := space(15) // Jose 21/08/2024
+				oLocPro:Refresh()
+				oQtd03:Refresh()
+				oQtdSep3:Refresh()
+				oQtdG3:Refresh()
+				oQtdA3:Refresh()
+				oQtdSepG:Refresh()
+				oQtdSepA:Refresh()
+				oQtd30:Refresh()
+				oQtdMark:Refresh()
+				oQtdAvar:Refresh()
+			Else
+				cLocProA:= SB2->B2_LOCALIZ
+				nQtdMark:=SB2->B2_QATU
+				oQtdMark:Refresh()
 
-            oLocPro:Refresh()
-            nQtd03 := 0
-            oQtd03:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0       //  Jose 05/07/2024
-            oQtdA3:Refresh()  //  Jose 05/07/2024           
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0      //  Jose 05/07/2024
-            oQtdSepA:Refresh() //  Jose 05/07/2024
-            nQtd30 := 0
-            oQtd30:Refresh()
-            nQtdMark:=0
-            oQtdMark:Refresh()
-		 nQtdAvar :=0 // MAA 20260430
-		 oQtdAvar:Refresh() // MAA 20260430
-         Else
-            cLocPro := SB2->B2_LOCALIZ
-            oLocPro:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0         // Jose 05/07/2024
-            oQtdA3:Refresh()    // Jose 05/07/2024
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0       // Jose 05/07/2024
-            oQtdSepA:Refresh()  // Jose 05/07/2024
-         Endif
-//---------    Acescentado por Jose 21/08/2024 ----------------------
+				oLocPro:Refresh()
+				nQtdSep3 := 0
+				oQtdSep3:Refresh()
+				nQtdG3 := 0
+				oQtdG3:Refresh()
+				nQtdA3 := 0         // Jose 05/07/2024
+				oQtdA3:Refresh()    // Jose 05/07/2024
+				nQtdSepG := 0
+				oQtdSepG:Refresh()
+				nQtdSepA := 0       // Jose 05/07/2024
+				oQtdSepA:Refresh()  // Jose 05/07/2024
+			Endif
+			//---------   Fim do  Acrescentado por MAA 20260430 ----------------------
 
-         DbSelectArea("SB2")
-         DbSetOrder(1)
-         DbSeek(xFilial("SB2")+SB1->B1_COD+"A3", .t.) 
-//       DbSeek("010108"+SB1->B1_COD+"A3", .t.) // jose 28/05/2025   só para testes		 																		   
-         If !Found()
-            cLocProA := space(15)
-            oLocPro:Refresh()
-            nQtd03 := 0
-            oQtd03:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0       //  Jose 05/07/2024
-            oQtdA3:Refresh()  //  Jose 05/07/2024           
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0      //  Jose 05/07/2024
-            oQtdSepA:Refresh() //  Jose 05/07/2024
-            nQtd30 := 0
-            oQtd30:Refresh()
-            nQtdMark:=0
-            oQtdMark:Refresh()
-		 nQtdAvar :=0 // MAA 20260430
-		 oQtdAvar:Refresh() // MAA 20260430
-         Else
-            cLocProA:= SB2->B2_LOCALIZ
-            oLocPro:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0         // Jose 05/07/2024
-            oQtdA3:Refresh()    // Jose 05/07/2024
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0       // Jose 05/07/2024
-            oQtdSepA:Refresh()  // Jose 05/07/2024
-         Endif
+			//----------    Até aqui Jose  021/08/2024 ----------------------------------
+		Endif
+		cQry1 := ""
+		cQry1 += " WITH TMP AS( "
+		cQry1 += " SELECT B2_COD AS CODIGO, B2_LOCAL AS ALMOX, B2_QATU AS SALDOATUAL, 0 AS QTDESEPARADA "
+		cQry1 += "   FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "
+		cQry1 += "  WHERE SB2.D_E_L_E_T_ ='' "
+		cQry1 += "    AND B2_FILIAL = '"+xFilial("SB2")+"' "
+		cQry1 += "    AND B2_LOCAL IN('03','30','G3','P1','P2','G1','A3') "
+		cQry1 += "    AND B2_COD ='"+SB1->B1_COD+"' "
+		cQry1 += " UNION ALL "
+		cQry1 += " SELECT C6_PRODUTO AS CODIGO, C6_LOCAL AS ALMOX, 0 AS SALDOATUAL, SUM(ZZK_QUANT) AS QTDESEPARADA "
+		cQry1 += "   FROM SC6010 SC6 WITH(NOLOCK) "
+		cQry1 += "        LEFT OUTER JOIN ZZK010 ZZK ON ZZK_FILIAL = C6_FILIAL AND ZZK_PRODUT = C6_PRODUTO AND ZZK_PEDIDO = C6_NUM AND ZZK.D_E_L_E_T_ ='' "
+		cQry1 += "  WHERE SC6.D_E_L_E_T_ ='' "
+		cQry1 += "    AND C6_FILIAL ='"+xFilial("SC6")+"' "
+		cQry1 += "    AND C6_PRODUTO ='"+SB1->B1_COD+"' "
+		cQry1 += "    AND C6_NOTA ='' "
+		cQry1 += " GROUP BY C6_PRODUTO, C6_LOCAL) "
+		cQry1 += " SELECT CODIGO, ALMOX, SUM(SALDOATUAL) AS SALDOTOTAL, SUM(QTDESEPARADA) AS QTDESEPARADA  "
+		cQry1 += " FROM TMP "
+		cQry1 += " GROUP BY CODIGO, ALMOX "
 
-         DbSelectArea("SB2")
-         DbSetOrder(1)
-         DbSeek(xFilial("SB2")+SB1->B1_COD+"G3", .t.)
-         If !Found()
-            cLocProG := space(15)
-            oLocPro:Refresh()
-            nQtd03 := 0
-            oQtd03:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0       //  Jose 05/07/2024
-            oQtdA3:Refresh()  //  Jose 05/07/2024           
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0      //  Jose 05/07/2024
-            oQtdSepA:Refresh() //  Jose 05/07/2024
-            nQtd30 := 0
-            oQtd30:Refresh()
-            nQtdMark:=0
-            oQtdMark:Refresh()
-         Else
-            cLocProG:= SB2->B2_LOCALIZ
-            oLocPro:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0         // Jose 05/07/2024
-            oQtdA3:Refresh()    // Jose 05/07/2024
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0       // Jose 05/07/2024
-            oQtdSepA:Refresh()  // Jose 05/07/2024
-         Endif
+		TCQuery cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
 
-//---------    Acrescentado por MAA 20260430 ----------------------
-         SB2->(DbSetOrder(1))
-         If .NOT. SB2->(DbSeek(xFilial("SB2")+SB1->B1_COD+"AV"))
-            cLocProA := space(15)
-            nQtd03 := 0
-            nQtdSep3 := 0
-            nQtdG3 := 0
-            nQtdA3 := 0        
-            nQtdSepG := 0
-            nQtdSepA := 0      
-            nQtd30 := 0
-            nQtdMark:=0
-		 	nQtdAvar :=0  
+		While !Eof()
+			If TCQ->ALMOX $ 'P1|P2'
+				nQtdPro := nQtdPro+TCQ->SALDOTOTAL
+				oQtdPro:Refresh()
+			Elseif TCQ->ALMOX == '03'
+				nQtd03   := (TCQ->SALDOTOTAL)
+				nQtdSep3 := (TCQ->QTDESEPARADA)
+				nQtdDis  := TCQ->SALDOTOTAL-TCQ->QTDESEPARADA
+				oQtd03:Refresh()
+				oQtdSep3:Refresh()
+				oQtdDis:Refresh()
+			Elseif TCQ->ALMOX == '30'
+				nQtd30   := (TCQ->SALDOTOTAL)
+				oQtd30:Refresh()
+			Elseif SUBSTR(TCQ->ALMOX,1,1) == 'G'
+				nQtdG3   := (TCQ->SALDOTOTAL)
+				nQtdSepG := (TCQ->QTDESEPARADA)
+				nQtdDispG:= TCQ->SALDOTOTAL-TCQ->QTDESEPARADA
+				oQtdG3:Refresh()
+				oQtdSepG:Refresh()
+				oQtdDispG:Refresh()
+			Elseif TCQ->ALMOX == 'A3'              // Jose 05/07/2024
+				nQtdA3   := (TCQ->SALDOTOTAL)      // Jose 05/07/2024
+				nQtdSepA := (TCQ->QTDESEPARADA)    // Jose 05/07/2024
+				nQtdDispA:= TCQ->SALDOTOTAL-TCQ->QTDESEPARADA  // Jose 05/07/2024
+				oQtdA3:Refresh()       // Jose 05/07/2024
+				oQtdSepA:Refresh()     // Jose 05/07/2024
+				oQtdDispA:Refresh()    // Jose 05/07/2024
+			Endif
 
-            oLocPro:Refresh()
-            oQtd03:Refresh()
-            oQtdSep3:Refresh()
-            oQtdG3:Refresh()
-            oQtdA3:Refresh()
-            oQtdSepG:Refresh()
-            oQtdSepA:Refresh()
-            oQtd30:Refresh()
-            oQtdMark:Refresh()
-		 	oQtdAvar:Refresh()
-         Else
-            cLocProA:= SB2->B2_LOCALIZ
-        	 nQtdMark:=SB2->B2_QATU
-            oQtdMark:Refresh()
-		
-		    oLocPro:Refresh()
-            nQtdSep3 := 0
-            oQtdSep3:Refresh()
-            nQtdG3 := 0
-            oQtdG3:Refresh()
-            nQtdA3 := 0         // Jose 05/07/2024
-            oQtdA3:Refresh()    // Jose 05/07/2024
-            nQtdSepG := 0
-            oQtdSepG:Refresh()
-            nQtdSepA := 0       // Jose 05/07/2024
-            oQtdSepA:Refresh()  // Jose 05/07/2024
-         Endif
-//---------   Fim do  Acrescentado por MAA 20260430 ----------------------
+			DbSelectArea("TCQ")
+			DbSkip()
+		Enddo
+	Endif
 
-//----------    Até aqui Jose  021/08/2024 ----------------------------------
-      Endif
-      cQry1 := ""
-      cQry1 += " WITH TMP AS( "
-      cQry1 += " SELECT B2_COD AS CODIGO, B2_LOCAL AS ALMOX, B2_QATU AS SALDOATUAL, 0 AS QTDESEPARADA "
-      cQry1 += "   FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "
-      cQry1 += "  WHERE SB2.D_E_L_E_T_ ='' "
-      cQry1 += "    AND B2_FILIAL = '"+xFilial("SB2")+"' "
-      cQry1 += "    AND B2_LOCAL IN('03','30','G3','P1','P2','G1','A3') "
-      cQry1 += "    AND B2_COD ='"+SB1->B1_COD+"' "
-      cQry1 += " UNION ALL "
-      cQry1 += " SELECT C6_PRODUTO AS CODIGO, C6_LOCAL AS ALMOX, 0 AS SALDOATUAL, SUM(ZZK_QUANT) AS QTDESEPARADA "
-      cQry1 += "   FROM SC6010 SC6 WITH(NOLOCK) "
-      cQry1 += "        LEFT OUTER JOIN ZZK010 ZZK ON ZZK_FILIAL = C6_FILIAL AND ZZK_PRODUT = C6_PRODUTO AND ZZK_PEDIDO = C6_NUM AND ZZK.D_E_L_E_T_ ='' "
-      cQry1 += "  WHERE SC6.D_E_L_E_T_ ='' "
-      cQry1 += "    AND C6_FILIAL ='"+xFilial("SC6")+"' "
-      cQry1 += "    AND C6_PRODUTO ='"+SB1->B1_COD+"' "
-      cQry1 += "    AND C6_NOTA ='' "
-      cQry1 += " GROUP BY C6_PRODUTO, C6_LOCAL) "
-      cQry1 += " SELECT CODIGO, ALMOX, SUM(SALDOATUAL) AS SALDOTOTAL, SUM(QTDESEPARADA) AS QTDESEPARADA  "
-      cQry1 += " FROM TMP "
-      cQry1 += " GROUP BY CODIGO, ALMOX "
-      
-      TCQuery cQry1 ALIAS "TCQ" NEW
-      DbSelectArea("TCQ")
-
-      While !Eof() 
-         If TCQ->ALMOX $ 'P1|P2'
-            nQtdPro := nQtdPro+TCQ->SALDOTOTAL
-            oQtdPro:Refresh()
-         Elseif TCQ->ALMOX $ '03'
-            nQtd03   := (TCQ->SALDOTOTAL)
-            nQtdSep3 := (TCQ->QTDESEPARADA)
-            nQtdDis  := TCQ->SALDOTOTAL-TCQ->QTDESEPARADA
-            oQtd03:Refresh()
-            oQtdSep3:Refresh()
-            oQtdDis:Refresh()
-         Elseif TCQ->ALMOX $ '30'
-            nQtd30   := (TCQ->SALDOTOTAL)
-            oQtd30:Refresh()
-         Elseif SUBSTR(TCQ->ALMOX,1,1) $ 'G'
-            nQtdG3   := (TCQ->SALDOTOTAL)
-            nQtdSepG := (TCQ->QTDESEPARADA)
-            nQtdDispG:= TCQ->SALDOTOTAL-TCQ->QTDESEPARADA
-            oQtdG3:Refresh()
-            oQtdSepG:Refresh()
-            oQtdDispG:Refresh()
-         Elseif TCQ->ALMOX $ 'A3'              // Jose 05/07/2024
-            nQtdA3   := (TCQ->SALDOTOTAL)      // Jose 05/07/2024
-            nQtdSepA := (TCQ->QTDESEPARADA)    // Jose 05/07/2024
-            nQtdDispA:= TCQ->SALDOTOTAL-TCQ->QTDESEPARADA  // Jose 05/07/2024
-            oQtdA3:Refresh()       // Jose 05/07/2024
-            oQtdSepA:Refresh()     // Jose 05/07/2024
-            oQtdDispA:Refresh()    // Jose 05/07/2024
-         Endif
-            
-         DbSelectArea("TCQ")
-         DbSkip()
-      Enddo            
-   Endif         
-   
-   DbSelectArea("TCQ")            
-   DbCloseArea()
+	DbSelectArea("TCQ")
+	DbCloseArea()
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ oTbl1() - Cria temporario para o Alias: ZT1
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl1(nOpcTbl)
-       Local aFds 	 := {}
-       Local cRETFAL := GetMv("MV_RETFAL") 
-       Local cQry1   := ""
-       Local cAuxPed := ""
-       //Local cTmp
+	Local aFds 	 := {}
+	Local cRETFAL := GetMv("MV_RETFAL")
+	Local cQry1   := ""
+	Local cAuxPed := ""
 
-       
-       Aadd( aFds , {"ZT1_FLAG"  , "C", 001, 000} )
-       Aadd( aFds , {"ZT1_MARCA" , "C", 002, 000} )
-       Aadd( aFds , {"ZT1_BORDES", "C", 006, 000} )
-       Aadd( aFds , {"ZT1_BORPED", "C", 006, 000} )
-       Aadd( aFds , {"ZT1_REGIAO", "C", 030, 000} )
-       Aadd( aFds , {"ZT1_PREVIS", "D", 008, 000} )
-       Aadd( aFds , {"ZT1_PEDIDO", "C", 006, 000} )
-       Aadd( aFds , {"ZT1_QUANTI", "N", 007, 000} )
-       Aadd( aFds , {"ZT1_LOCALI", "C", 015, 000} )
-       Aadd( aFds , {"ZT1_GAVETA", "N", 005, 000} )
-       Aadd( aFds , {"ZT1_EXCLUI", "C", 001, 000} )
 
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-       If Select("ZT1") > 0
-          DbSelectArea("ZT1")
-          DbCloseArea()
-       Endif
- /*      cTmp := CriaTrab( aFds, .T. )
-       Use (cTmp) Alias ZT1 New Exclusive
-       Index On DTOS(ZT1_PREVIS) To (cTmp)
-*/
-	//cTmp := U_NovoArqTrab("dbf")
-	//dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
-	//Use (cTmp+".Dbf") Alias "ZT1" VIA "DBFCDXADS" New Exclusive
-	//Index On DTOS(ZT1_PREVIS) To (cTmp)
+	Aadd( aFds , {"ZT1_FLAG"  , "C", 001, 000} )
+	Aadd( aFds , {"ZT1_MARCA" , "C", 002, 000} )
+	Aadd( aFds , {"ZT1_BORDES", "C", 006, 000} )
+	Aadd( aFds , {"ZT1_BORPED", "C", 006, 000} )
+	Aadd( aFds , {"ZT1_REGIAO", "C", 030, 000} )
+	Aadd( aFds , {"ZT1_PREVIS", "D", 008, 000} )
+	Aadd( aFds , {"ZT1_PEDIDO", "C", 006, 000} )
+	Aadd( aFds , {"ZT1_QUANTI", "N", 007, 000} )
+	Aadd( aFds , {"ZT1_LOCALI", "C", 015, 000} )
+	Aadd( aFds , {"ZT1_GAVETA", "N", 005, 000} )
+	Aadd( aFds , {"ZT1_EXCLUI", "C", 001, 000} )
+
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	If Select("ZT1") > 0
+		DbSelectArea("ZT1")
+		DbCloseArea()
+	Endif
 	oTempTbl1 := FWTemporaryTable():New( 'ZT1' )
 	oTempTbl1:SetFields( aFds )
 	oTempTbl1:AddIndex( "cInd01", { "ZT1_PREVIS" } )
 	oTempTbl1:Create()
-       /********************************************************************************************************************************/
+	/********************************************************************************************************************************/
 	cQry1 := ""
 	cQry1 += "SELECT ISNULL(SZB.ZB_CODIGO, '') AS DESPACHO, ISNULL(SZA.ZA_DESCR, '') AS REGIAO, ISNULL(ZA_PREVDSP, '') AS PREVISAO, ZZC.ZZC_PEDIDO AS PEDIDO, ZZC.ZZC_QUANTI AS QUANTIDADE, SZA.ZA_FLAG AS FLAG "
 	cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
@@ -5281,82 +5226,82 @@ Return
 Function  ³ oTbl2() - Cria temporario para o Alias: ZT2
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl2(nOpcTbl)
-   
-   Local aFds := {}
-   Local cQry1 :=""
-   //Local cRETFAL := GetMv("MV_RETFAL")
-   //Local cTmp
 
-   Aadd( aFds , {"ZT2_MARCA" , "C", 002, 0} ) //Flag de marcação
-   Aadd( aFds , {"ZT2_NUMBOR", "C", 006, 0} ) //Numero do Bordero de Pedidos
-   aadd( aFds , {"ZT2_EMISSA", "D", 008, 0} ) //Emissão do Bordero de Pedidos
-   aadd( aFds , {"ZT2_PEDIDO", "C", 006, 0} ) //Pedido
-   aadd( aFds , {"ZT2_QUANTI", "N", 007, 0} ) //Quantidade do Produto
-   aadd( aFds , {"ZT2_LOCEXP", "C", 009, 0} ) //Localização na expedição
-// ---- Acrescentado por Jose 21/08/2024 ----------------------------
-   aadd( aFds , {"ZT2_LOCAL",  "C", 009, 0} ) //Local Pedido
-//----- Até Aqui Jose 21/08/2024 ------------------------------------
-   aadd( aFds , {"ZT2_GAVETA", "N", 005, 0} ) //Vol. Pedido
+	Local aFds := {}
+	Local cQry1 :=""
+	//Local cRETFAL := GetMv("MV_RETFAL")
+	//Local cTmp
 
-   /********************************************************************************************************************************/
-   /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-   If Select("ZT2") > 0
-      DbSelectArea("ZT2")
-      DbCloseArea()
-   Endif
+	Aadd( aFds , {"ZT2_MARCA" , "C", 002, 0} ) //Flag de marcação
+	Aadd( aFds , {"ZT2_NUMBOR", "C", 006, 0} ) //Numero do Bordero de Pedidos
+	aadd( aFds , {"ZT2_EMISSA", "D", 008, 0} ) //Emissão do Bordero de Pedidos
+	aadd( aFds , {"ZT2_PEDIDO", "C", 006, 0} ) //Pedido
+	aadd( aFds , {"ZT2_QUANTI", "N", 007, 0} ) //Quantidade do Produto
+	aadd( aFds , {"ZT2_LOCEXP", "C", 009, 0} ) //Localização na expedição
+	// ---- Acrescentado por Jose 21/08/2024 ----------------------------
+	aadd( aFds , {"ZT2_LOCAL",  "C", 009, 0} ) //Local Pedido
+	//----- Até Aqui Jose 21/08/2024 ------------------------------------
+	aadd( aFds , {"ZT2_GAVETA", "N", 005, 0} ) //Vol. Pedido
 
-   oTempTbl2 := FWTemporaryTable():New( 'ZT2' )
-   oTempTbl2:SetFields( aFds )
-   oTempTbl2:Create()
-   
-   /********************************************************************************************************************************/
-   //Cleber (15/09/09) => inclusão no Join da sentença  AND (ZZC_BORDER = ZG_CODIGO) para que não traga
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	If Select("ZT2") > 0
+		DbSelectArea("ZT2")
+		DbCloseArea()
+	Endif
+
+	oTempTbl2 := FWTemporaryTable():New( 'ZT2' )
+	oTempTbl2:SetFields( aFds )
+	oTempTbl2:Create()
+
+	/********************************************************************************************************************************/
+	//Cleber (15/09/09) => inclusão no Join da sentença  AND (ZZC_BORDER = ZG_CODIGO) para que não traga
 	//itens de borderô que foi excluído manualmente.
-   
-   cQry1 := ""
-   cQry1 += " SELECT ZF_FILIAL, ZF_CODIGO AS BORDERO, ISNULL(SZF.ZF_EMISSAO, '') AS EMISSAO, C6_NUM AS PEDIDO, C6_PRODUTO, C6_QTDVEN AS QUANTIDADE , SUM(ISNULL(ZZK_QUANT,0)) AS ZZK_QUANT, ZG_LOCALIZ AS LOCALIZ, C5_VOLUME1 AS VOLUME, C6_LOCAL AS LOCALL  "
-   cQry1 += " FROM "+RetSqlName("SZF")+" SZF WITH (NOLOCK) "
-   cQry1 += " LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZG_FILIAL = ZF_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
-   cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH(NOLOCK) ON C5_FILIAL = ZG_FILIAL AND C5_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SC5.D_E_L_E_T_ ='' "
-   cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C5_FILIAL = C6_FILIAL AND C5_NUM = C6_NUM AND SC6.D_E_L_E_T_ ='' "
-   cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON ZZK_FILIAL = C6_FILIAL AND ZZK_PEDIDO = C6_NUM AND ZZK_PRODUT = C6_PRODUTO AND ZZK.D_E_L_E_T_ ='' "
-   cQry1 += " WHERE SZF.D_E_L_E_T_ ='' "
-   cQry1 += " AND ZF_FLAG = 'D' "
-   cQry1 += " AND ZF_FILIAL= '"+xFilial("SZF")+"' "
-   cQry1 += " AND C5_APROVA ='1' "
-   cQry1 += " AND C6_PRODUTO = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
-   cQry1 += " GROUP BY ZF_FILIAL, ZF_CODIGO, ZF_EMISSAO, C6_NUM, C6_PRODUTO, C6_QTDVEN, ZG_LOCALIZ, C5_VOLUME1, C6_LOCAL "
-   cQry1 += " HAVING  SUM(ISNULL(ZZK_QUANT,0))=0 "
-   cQry1 += " ORDER BY ZF_FILIAL, ZF_CODIGO, C6_NUM "
 
-   TCQuery cQry1 ALIAS "TCQ" NEW
+	cQry1 := ""
+	cQry1 += " SELECT ZF_FILIAL, ZF_CODIGO AS BORDERO, ISNULL(SZF.ZF_EMISSAO, '') AS EMISSAO, C6_NUM AS PEDIDO, C6_PRODUTO, C6_QTDVEN AS QUANTIDADE , SUM(ISNULL(ZZK_QUANT,0)) AS ZZK_QUANT, ZG_LOCALIZ AS LOCALIZ, C5_VOLUME1 AS VOLUME, C6_LOCAL AS LOCALL  "
+	cQry1 += " FROM "+RetSqlName("SZF")+" SZF WITH (NOLOCK) "
+	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SZG")+" SZG WITH(NOLOCK) ON ZG_FILIAL = ZF_FILIAL AND ZG_CODIGO = ZF_CODIGO AND SZG.D_E_L_E_T_ ='' "
+	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 WITH(NOLOCK) ON C5_FILIAL = ZG_FILIAL AND C5_NUM = SUBSTRING(ZG_PEDIDO,3,6) AND SC5.D_E_L_E_T_ ='' "
+	cQry1 += " LEFT OUTER JOIN "+RetSqlName("SC6")+" SC6 WITH(NOLOCK) ON C5_FILIAL = C6_FILIAL AND C5_NUM = C6_NUM AND SC6.D_E_L_E_T_ ='' "
+	cQry1 += " LEFT OUTER JOIN "+RetSqlName("ZZK")+" ZZK WITH(NOLOCK) ON ZZK_FILIAL = C6_FILIAL AND ZZK_PEDIDO = C6_NUM AND ZZK_PRODUT = C6_PRODUTO AND ZZK.D_E_L_E_T_ ='' "
+	cQry1 += " WHERE SZF.D_E_L_E_T_ ='' "
+	cQry1 += " AND ZF_FLAG = 'D' "
+	cQry1 += " AND ZF_FILIAL= '"+xFilial("SZF")+"' "
+	cQry1 += " AND C5_APROVA ='1' "
+	cQry1 += " AND C6_PRODUTO = '"+StrTran(StrTran(cCodPro, '-'), '.')+"' "
+	cQry1 += " GROUP BY ZF_FILIAL, ZF_CODIGO, ZF_EMISSAO, C6_NUM, C6_PRODUTO, C6_QTDVEN, ZG_LOCALIZ, C5_VOLUME1, C6_LOCAL "
+	cQry1 += " HAVING  SUM(ISNULL(ZZK_QUANT,0))=0 "
+	cQry1 += " ORDER BY ZF_FILIAL, ZF_CODIGO, C6_NUM "
 
-   DbSelectArea("TCQ")
-   DbGoTop()
-   
-   While !Eof()
-      RecLock("ZT2", .t.)
-         ZT2->ZT2_MARCA  := '  '
-         ZT2->ZT2_NUMBOR := TCQ->BORDERO
-         ZT2->ZT2_EMISSA := CTOD(SubStr(TCQ->EMISSAO, 7, 2)+'/'+SubStr(TCQ->EMISSAO, 5, 2)+'/'+SubStr(TCQ->EMISSAO, 1, 4))
-         ZT2->ZT2_PEDIDO := TCQ->PEDIDO
-         ZT2->ZT2_QUANTI := TCQ->QUANTIDADE
-         ZT2->ZT2_LOCEXP := TCQ->LOCALIZ
-         ZT2->ZT2_LOCAL  := TCQ->LOCALL // jOSE 21/08/2024
-         ZT2->ZT2_GAVETA := TCQ->VOLUME
-      MsUnLock()
-      DbSelectArea("TCQ")
-      DbSkip()
-   Enddo
-   DbSelectArea("TCQ")
-   DbCloseArea()
-   
-   DbSelectArea("ZT2")
-   DbGoTop()
-   
-   If nOpcTbl == 2
-      oBrwPed:oBrowse:Refresh()
-   Endif
+	TCQuery cQry1 ALIAS "TCQ" NEW
+
+	DbSelectArea("TCQ")
+	DbGoTop()
+
+	While !Eof()
+		RecLock("ZT2", .t.)
+		ZT2->ZT2_MARCA  := '  '
+		ZT2->ZT2_NUMBOR := TCQ->BORDERO
+		ZT2->ZT2_EMISSA := CTOD(SubStr(TCQ->EMISSAO, 7, 2)+'/'+SubStr(TCQ->EMISSAO, 5, 2)+'/'+SubStr(TCQ->EMISSAO, 1, 4))
+		ZT2->ZT2_PEDIDO := TCQ->PEDIDO
+		ZT2->ZT2_QUANTI := TCQ->QUANTIDADE
+		ZT2->ZT2_LOCEXP := TCQ->LOCALIZ
+		ZT2->ZT2_LOCAL  := TCQ->LOCALL // jOSE 21/08/2024
+		ZT2->ZT2_GAVETA := TCQ->VOLUME
+		MsUnLock()
+		DbSelectArea("TCQ")
+		DbSkip()
+	Enddo
+	DbSelectArea("TCQ")
+	DbCloseArea()
+
+	DbSelectArea("ZT2")
+	DbGoTop()
+
+	If nOpcTbl == 2
+		oBrwPed:oBrowse:Refresh()
+	Endif
 
 Return
 
@@ -5364,418 +5309,221 @@ Return
 Function  ³ ZT1Mark() - Funcao para marcar o MsSelect
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function ZT1Mark()
-       Local lDesMarca := ZT1->(IsMark("ZT1_MARCA", cMarca))
-       //Local nOpca     := 0
-       Private nGetQtd := ZT1->ZT1_QUANTI
+	Local lDesMarca := ZT1->(IsMark("ZT1_MARCA", cMarca))
+	//Local nOpca     := 0
+	Private nGetQtd := ZT1->ZT1_QUANTI
 
-       /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
        ±± Declaração de Variaveis Private dos Objetos                             ±±
-       Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-       SetPrvt("oFont3", "oDlg2", "oSay1", "oGetQtd", "oBtn1")
-       
-       RecLock("ZT1", .F.)
-          If lDesmarca
-             ZT1->ZT1_MARCA := "  "
-             //nQtdSep3 -= nGetQtd
-             //oQtdSep3:Refresh()
-             nQtdMark -= nGetQtd
-             oQtdMark:Refresh()
-             //nQtdSepG := nQtdG3 + nQtdSep3
-             //oQtdSepG:Refresh()
-          Else
-             //oFont3     := TFont():New( "Courier New", 0, -16, , .T., 0, , 700, .F., .F., , , , , , )
-             //oDlg2      := MSDialog():New( 088, 232, 122, 588, "Ajuste de Quantidade", , , .F., , , , , , .T., , , .T. )
-             //oSay1      := TSay():New( 004, 004, {||"Quantidade:"}                            , oDlg2, , oFont3, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 056, 009)
-             //oGetQtd    := TGet():New( 002, 064, {|u| If(PCount() > 0, nGetQtd := u, nGetQtd)}, oDlg2, 060, 011, '@E 999999', {|| positivo() }, CLR_BLACK, CLR_WHITE, oFont3, , , .T., "", , , .F., .F., , .F., .F., "", "nGetQtd", , )
-             //oBtn1      := TButton():New( 002, 136, "Confirma", oDlg2, { || nOpcA := 1, oDlg2:End() }, 037, 013, , , , .T., , "", , , , .F. )
-             //oDlg2:Activate(, , , .T.)
-             //If nOpcA == 1
-                ZT1->ZT1_MARCA  := cMarca
-                ZT1->ZT1_QUANTI := nGetQtd
-                nQtdMark += nGetQtd 
-                oQtdMark:Refresh()
-                //nQtdSep3 += nGetQtd
-                //oQtdSep3:Refresh()
-                //nQtdSepG := nQtdG3 + nQtdSep3
-                //oQtdSepG:Refresh()
-             //Endif
-          Endif
-       ZT1->(MsUnlock())
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oFont3", "oDlg2", "oSay1", "oGetQtd", "oBtn1")
+
+	RecLock("ZT1", .F.)
+	If lDesmarca
+		ZT1->ZT1_MARCA := "  "
+		nQtdMark -= nGetQtd
+	Else
+		ZT1->ZT1_MARCA  := cMarca
+		ZT1->ZT1_QUANTI := nGetQtd
+		nQtdMark += nGetQtd
+	Endif
+	oQtdMark:Refresh()
+	ZT1->(MsUnlock())
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ ZT2Mark() - Funcao para marcar o MsSelect
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function ZT2Mark()
-       Local lDesMarca := ZT2->(IsMark("ZT2_MARCA", cMarca))
-       //Local nOpca     := 0
-       Private nGetQtd := ZT2->ZT2_QUANTI
+	Local lDesMarca := ZT2->(IsMark("ZT2_MARCA", cMarca))
+	//Local nOpca     := 0
+	Private nGetQtd := ZT2->ZT2_QUANTI
 
-       RecLock("ZT2", .F.)
-          If lDesmarca
-             ZT2->ZT2_MARCA := "  "
-             nQtdMark -= nGetQtd 
-             oQtdMark:Refresh()
-
-             //nQtdSep3 -= nGetQtd
-             //oQtdSep3:Refresh()
-             //nQtdSepG := nQtdG3 + nQtdSep3
-             //oQtdSepG:Refresh()
-          Else
-             //oFont3     := TFont():New( "Courier New", 0, -16, , .T., 0, , 700, .F., .F., , , , , , )
-             //oDlg2      := MSDialog():New( 088, 232, 122, 588, "Ajuste de Quantidade", , , .F., , , , , , .T., , , .T. )
-             //oSay1      := TSay():New( 004, 004, {||"Quantidade:"}                            , oDlg2, , oFont3, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 056, 009)
-             //oGetQtd    := TGet():New( 002, 064, {|u| If(PCount() > 0, nGetQtd := u, nGetQtd)}, oDlg2, 060, 011, '@E 999999', {|| positivo() }, CLR_BLACK, CLR_WHITE, oFont3, , , .T., "", , , .F., .F., , .F., .F., "", "nGetQtd", , )
-             //oBtn1      := TButton():New( 002, 136, "Confirma", oDlg2, { || nOpcA := 1, oDlg2:End() }, 037, 013, , , , .T., , "", , , , .F. )
-             //oDlg2:Activate(, , , .T.)
-             //If nOpcA == 1
-                ZT2->ZT2_MARCA  := cMarca
-                ZT2->ZT2_QUANTI := nGetQtd
-                //nQtdSep3 += nGetQtd
-                //oQtdSep3:Refresh()
-                //nQtdSepG := nQtdG3 + nQtdSep3
-                //oQtdSepG:Refresh()
-               nQtdMark += nGetQtd 
-               oQtdMark:Refresh()
-             //Endif
-          Endif
-       ZT2->(MsUnlock())
+	RecLock("ZT2", .F.)
+	If lDesmarca
+		ZT2->ZT2_MARCA := "  "
+		nQtdMark -= nGetQtd
+	Else
+		ZT2->ZT2_MARCA  := cMarca
+		ZT2->ZT2_QUANTI := nGetQtd
+		nQtdMark += nGetQtd
+	Endif
+	oQtdMark:Refresh()
+	ZT2->(MsUnlock())
 Return
 
-/*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-Function  ³ fAtuDad() - Funcao para atualizar dados da tela
-ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-/*
-Static Function fAtuDad(cOpcCon)
-       Local nX
-       Local cQry1 := ""
-       //**************************************************************
-       //*** Validação dos dados das Ordem de produção              ***
-       //**************************************************************
-       If !cNumEmp $ "01060101"
- 	      ApMsgStop('Rotina desativada, baixa do relatório de faltas somente pela rotina do bipe. Atenção !')
-    	  Return
-       Endif
-       If !Empty(cOrdPro)
-          If !nQtdOrd == nQtdSepG
-             ApMsgStop('Divergências entre valores a conferir e conferidos. Verifique!')
-             Return
-          Else
-             For nX := 1 To Len(aOrdPro)
-                 cQry1 := ""
-                 cQry1 += "UPDATE "+RetSqlName("ZZA")+" "
-                 cQry1 += "SET ZZA_RAMPA = 'S' "
-                 cQry1 += "WHERE ZZA_FILIAL = '"+xFilial("ZZA")+"' "
-                 cQry1 += "  AND D_E_L_E_T_ = '' "
-                 cQry1 += "  AND ZZA_PRODUT = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
-                 cQry1 += "  AND ZZA_LOTE   = '"+cCodLot+"' "
-                 cQry1 += "  AND ZZA_SEQENV = '"+aOrdPro[nX][1]+"' "
-                 TCSQLExec(cQry1)
-             Next
-          Endif
-       Endif
-
-       //**************************************************************
-       //*** Bordero de DESPACHO - Somente com gavetas cadastradas. ***
-       //**************************************************************
-       DbSelectArea("ZT1")
-       DbGoTop()
-       While !Eof()
-             If ZT1->(IsMark("ZT1_MARCA", cMarca))
-                DbSelectArea("ZZC")
-                DbSetOrder(1)
-                DbSeek(xFilial("ZZC")+ZT1->ZT1_BORPED+ZT1->ZT1_PEDIDO+Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), .t.)
-                If Found()
-                   lNaoAtu := .f.
-                   RecLock("ZZC", .f.)
-                      //ZZC->ZZC_RESERV += ZT1->ZT1_QUANTI 
-                      ZZC->ZZC_RETIRA += ZT1->ZT1_QUANTI
-                      ZZC->ZZC_SEPARA := Iif(ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI, 'S', 'N')
-                      ZZC->ZZC_VOLRET += fCalVol(ZZC->ZZC_PRODUT, ZZC->ZZC_RETIRA)
-                      ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-                      DbSelectArea("ZZC")
-                   MsUnLock()
-                   //If ZZC->ZZC_RESERV >= ZZC->ZZC_QUANTI //
-                   If ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI
-                      RecLock("ZT1", .f.)
-                         DbDelete()
-                      MsUnLock()
-                      lNaoAtu := .t.
-                   Else
-                      RecLock("ZT1", .f.)
-                         //ZT1->ZT1_QUANTI := (ZZC->ZZC_QUANTI - ZZC->ZZC_RESERV)//(ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)
-						 ZT1->ZT1_QUANTI := (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)
-                         ZT1->ZT1_MARCA  := '  '
-                      MsUnLock()
-                   Endif
-
-                   If cOpcCon $ 'R' //Somente quando chamar a rotina dentro da retirada de estoque.
-                       If !lNaoAtu
-                          nPos := aScan(aCols, {|x| Alltrim(x[1]) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))})
-                          If nPos > 0
-                             cQry1 := ""
-                             cQry1 += "SELECT SUM(ZZC.ZZC_QUANTI - ZZC.ZZC_RETIRA) AS FALTA "
-                             cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC "
-                             cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("SZF")+"' "
-                             cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-                             cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-                             cQry1 += "  AND ZZC.ZZC_PRODUT = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
-                             cQry1 += "  AND ZZC.ZZC_SEPARA <> 'S' "
-                             TCQuery cQry1 ALIAS "FAL" NEW
-                             DbSelectArea("FAL")
-                             aCols[nPos][5] := FAL->FALTA
-                             DbSelectArea("FAL")
-                             DbCloseArea()
-                             If aCols[nPos][5] == 0
-                                aCols[nPos][5] := 999999
-                                aCols[nPos][6] := space(03)
-                             Endif
-                          Endif
-                       Endif
-                   Endif
-
-                Endif
-             Endif
-             DbSelectArea("ZT1")
-             DbSkip()
-       Enddo
-       DbSelectArea("ZT1")
-       DbGoTop()
-       oBrwDes:oBrowse:Refresh()
-
-       //**************************************************************
-       //*** Bordero de PEDIDOS - Somente com gavetas cadastradas.  ***
-       //**************************************************************
-       DbSelectArea("ZT2")
-       DbGoTop()
-       While !Eof()
-             If ZT2->(IsMark("ZT2_MARCA", cMarca))
-                DbSelectArea("ZZC")
-                DbSetOrder(1)
-                DbSeek(xFilial("ZZC")+ZT2->ZT2_NUMBOR+ZT2->ZT2_PEDIDO+StrTran(StrTran(cCodPro, '.'), '-'), .t.)
-                If Found()
-                   lNaoAtu := .f.
-                   RecLock("ZZC", .f.)
-                      ZZC->ZZC_RETIRA += ZT2->ZT2_QUANTI
-                      ZZC->ZZC_SEPARA := Iif(ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI, 'S', 'N')
-                      ZZC->ZZC_VOLRET += fCalVol(ZZC->ZZC_PRODUT, ZZC->ZZC_RETIRA)
-                      ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-                      DbSelectArea("ZZC")
-                   MsUnLock()
-                   If ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI
-                      RecLock("ZT2", .f.)
-                         DbDelete()
-                      MsUnLock()
-                      lNaoAtu := .t.
-                   Else
-                      RecLock("ZT2", .f.)
-                         ZT2->ZT2_QUANTI := (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)
-                         ZT2->ZT2_MARCA  := '  '
-                      MsUnLock()
-                   Endif /*
-       
-                   If cOpcCon $ 'R' //Somente para retirada do estoque
-                      If !lNaoAtu
-                         nPos := aScan(aCols, {|x| Alltrim(x[1]) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))})
-                         If nPos > 0
-                            aCols[nPos][5] := (aCols[nPos][5] - ZZC->ZZC_RETIRA)
-                            If aCols[nPos][5] == 0
-                               aCols[nPos][5] := 999999
-                               aCols[nPos][6] := space(03)
-                            Endif
-                         Endif
-                      Endif
-                   Endif
-       
-                Endif
-             Endif
-             DbSelectArea("ZT2")
-             DbSkip()
-       Enddo
-       DbSelectArea("ZT2")
-       DbGoTop()
-       oBrwPed:oBrowse:Refresh()
-       
-       nQtdSep3 := 0
-       oQtdSep3:Refresh()
-       nQtdSepG := 0
-       oQtdSepG:Refresh()
-       nQtdG3 := 0
-       oQtdG3:Refresh()
-Return
-*/
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ fOrdPro() - Funcao para carregar dados da Ordem de Produção
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fOrdPro()
-       Local cQry1     := ""
-       Local nOpcEnv   := 0
-       Private aAptOrd := {}
+	Local cQry1     := ""
+	Local nOpcEnv   := 0
+	Private aAptOrd := {}
 
-       SetPrvt("oDlgSel", "oSayMsg", "oBrwSel", "oBtnCon")
+	SetPrvt("oDlgSel", "oSayMsg", "oBrwSel", "oBtnCon")
 
-       If Empty(cOrdPro)
-          Return
-       Endif
-       
-       cQry1 += "SELECT ZZK_LOTE "
-       cQry1 += "FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "
-       cQry1 += "WHERE ZZK.ZZK_FILIAL = '"+xFilial("ZZA")+"' "
-       cQry1 += "  AND ZZK.D_E_L_E_T_ = ''
-       cQry1 += "  AND ZZK.ZZK_CODIGO = '"+cOrdPro+"'
-       cQry1 += "  AND ZZK.ZZK_PRODUT = '"+StrTran(StrTran(cCodPro, "."), "-")+"' "
-       //cQry1 += "SELECT * "
-       //cQry1 += "FROM "+RetSqlName("ZZA")+" ZZA WITH (NOLOCK) "
-       //cQry1 += "WHERE ZZA.ZZA_FILIAL = '"+xFilial("ZZA")+"' "
-       //cQry1 += "  AND ZZA.D_E_L_E_T_ = '' "
-       //cQry1 += "  AND ZZA.ZZA_ORDEM  = '"+SubStr(cOrdPro, 1, 11)+"' "
-       TCQuery cQry1 ALIAS "TCQ" NEW
-       DbSelectArea("TCQ")
-       DbGoTop()
-       If !Empty(TCQ->ZZK_LOTE)
-          cCodLot := TCQ->ZZK_LOTE
-          aAptOrd := {}
-          DbSelectArea("TCQ")
-          DbCloseArea()
-          cQry1 := ""
-          cQry1 += "SELECT ZZA_QUANT,ZZA_FLAG,ZZA_RAMPA,ZZA_SEQENV "
-          cQry1 += "FROM "+RetSqlName("ZZA")+" ZZA WITH (NOLOCK) "
-          cQry1 += "WHERE ZZA.ZZA_FILIAL = '"+xFilial("ZZA")+"' "
-          cQry1 += "  AND ZZA.D_E_L_E_T_ = ''
-          cQry1 += "  AND ZZA.ZZA_LOTE   = '"+cCodLot+"'
-          cQry1 += "  AND ZZA.ZZA_PRODUT = '"+StrTran(StrTran(cCodPro, "."), "-")+"'
-          cQry1 += "  AND ZZA.ZZA_RAMPA <> 'S' "
-          cQry1 += "  AND SUBSTRING(ZZA.ZZA_PRODUT, 11, 2) <> '00'
-          TCQuery cQry1 ALIAS "TCQ" NEW
-          DbSelectArea("TCQ")
-          DbGoTop()
-          While !Eof()
-                cTxtSta := ''
-                If TCQ->ZZA_QUANT == 0
-                   cTxtSta := 'ORDEM DE PRODUÇÃO INICIADA'
-                Else
-                   If TCQ->ZZA_FLAG == '6'
-                      cTxtSta := 'ORDEM DE PRODUÇÃO INICIADA'
-                   ElseIf TCQ->ZZA_FLAG == '5'
-                          cTxtSta := 'ORDEM DE PRODUÇÃO BAIXADA'
-                   ElseIf TCQ->ZZA_FLAG == '7'
-                          cTxtSta := 'ENCERRADA PARCIAL'
-                   ElseIf TCQ->ZZA_FLAG == '8'
-                          cTxtSta := 'ENCERRADA TOTAL'
-                   Endif
-                   If TCQ->ZZA_RAMPA == 'S'
-                      cTxtSta := 'DISTRIBUIDA'
-                   Endif
-                   aAdd(aAptOrd, {TCQ->ZZA_SEQENV, TCQ->ZZA_QUANT, cTxtSta, TCQ->ZZA_FLAG})
-                Endif
-                DbSelectArea("TCQ")
-                DbSkip()
-          Enddo
-          DbSelectArea("TCQ")
-          DbCloseArea()
-          aOrdPro := {}
-          If Len(aAptOrd) <= 0
-             ApMsgStop('Não existe Ordem de Produção para distribuir!')
-             cOrdPro := space(11)
-             cCodLot := space(06)
-             //oOrdPro:Refresh()
-             //oOrdPro:SetFocus()
-             Return
-          ElseIf Len(aAptOrd) == 1
-                 If aAptOrd[1][2] <= 0
-                    ApMsgStop('Ordem de produção ainda não encerrada pelo envase!')
-                    cOrdPro := space(11)
-                    cCodLot := space(06)
-                    //oOrdPro:Refresh()
-                    //oOrdPro:SetFocus()
-                    Return
-                 ElseIf aAptOrd[1][2] > 0
-                        If aAptOrd[1][4] $ '7.8'
-                           nQtdOrd := aAptOrd[1][2]
-                           oQtdPro:Refresh()
-                           aAdd(aOrdPro, {aAptOrd[1][1], aAptOrd[1][2]})
-                           Return
-                        Else
-                           ApMsgStop('Ordem de Produção não pode ser conferida, STATUS: '+aAptOrd[1][3])
-                           cOrdPro := space(11)
-                           cCodLot := space(06)
-                           //oOrdPro:Refresh()
-                           //oOrdPro:SetFocus()
-                           Return
-                        Endif
-                 Endif
-          Else
-             /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	If Empty(cOrdPro)
+		Return
+	Endif
+
+	cQry1 += "SELECT ZZK_LOTE "
+	cQry1 += "FROM "+RetSqlName("ZZK")+" ZZK WITH (NOLOCK) "
+	cQry1 += "WHERE ZZK.ZZK_FILIAL = '"+xFilial("ZZA")+"' "
+	cQry1 += "  AND ZZK.D_E_L_E_T_ = ''
+	cQry1 += "  AND ZZK.ZZK_CODIGO = '"+cOrdPro+"'
+	cQry1 += "  AND ZZK.ZZK_PRODUT = '"+StrTran(StrTran(cCodPro, "."), "-")+"' "
+	//cQry1 += "SELECT * "
+	//cQry1 += "FROM "+RetSqlName("ZZA")+" ZZA WITH (NOLOCK) "
+	//cQry1 += "WHERE ZZA.ZZA_FILIAL = '"+xFilial("ZZA")+"' "
+	//cQry1 += "  AND ZZA.D_E_L_E_T_ = '' "
+	//cQry1 += "  AND ZZA.ZZA_ORDEM  = '"+SubStr(cOrdPro, 1, 11)+"' "
+	TCQuery cQry1 ALIAS "TCQ" NEW
+	DbSelectArea("TCQ")
+	DbGoTop()
+	If !Empty(TCQ->ZZK_LOTE)
+		cCodLot := TCQ->ZZK_LOTE
+		aAptOrd := {}
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		cQry1 := ""
+		cQry1 += "SELECT ZZA_QUANT,ZZA_FLAG,ZZA_RAMPA,ZZA_SEQENV "
+		cQry1 += "FROM "+RetSqlName("ZZA")+" ZZA WITH (NOLOCK) "
+		cQry1 += "WHERE ZZA.ZZA_FILIAL = '"+xFilial("ZZA")+"' "
+		cQry1 += "  AND ZZA.D_E_L_E_T_ = ''
+		cQry1 += "  AND ZZA.ZZA_LOTE   = '"+cCodLot+"'
+		cQry1 += "  AND ZZA.ZZA_PRODUT = '"+StrTran(StrTran(cCodPro, "."), "-")+"'
+		cQry1 += "  AND ZZA.ZZA_RAMPA <> 'S' "
+		cQry1 += "  AND SUBSTRING(ZZA.ZZA_PRODUT, 11, 2) <> '00'
+		TCQuery cQry1 ALIAS "TCQ" NEW
+		DbSelectArea("TCQ")
+		DbGoTop()
+		While !Eof()
+			cTxtSta := ''
+			If TCQ->ZZA_QUANT == 0
+				cTxtSta := 'ORDEM DE PRODUÇÃO INICIADA'
+			Else
+				If TCQ->ZZA_FLAG == '6'
+					cTxtSta := 'ORDEM DE PRODUÇÃO INICIADA'
+				ElseIf TCQ->ZZA_FLAG == '5'
+					cTxtSta := 'ORDEM DE PRODUÇÃO BAIXADA'
+				ElseIf TCQ->ZZA_FLAG == '7'
+					cTxtSta := 'ENCERRADA PARCIAL'
+				ElseIf TCQ->ZZA_FLAG == '8'
+					cTxtSta := 'ENCERRADA TOTAL'
+				Endif
+				If TCQ->ZZA_RAMPA == 'S'
+					cTxtSta := 'DISTRIBUIDA'
+				Endif
+				aAdd(aAptOrd, {TCQ->ZZA_SEQENV, TCQ->ZZA_QUANT, cTxtSta, TCQ->ZZA_FLAG})
+			Endif
+			DbSelectArea("TCQ")
+			DbSkip()
+		Enddo
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		aOrdPro := {}
+		If Len(aAptOrd) <= 0
+			ApMsgStop('Não existe Ordem de Produção para distribuir!')
+			cOrdPro := space(11)
+			cCodLot := space(06)
+			//oOrdPro:Refresh()
+			//oOrdPro:SetFocus()
+			Return
+		ElseIf Len(aAptOrd) == 1
+			If aAptOrd[1][2] <= 0
+				ApMsgStop('Ordem de produção ainda não encerrada pelo envase!')
+				cOrdPro := space(11)
+				cCodLot := space(06)
+				//oOrdPro:Refresh()
+				//oOrdPro:SetFocus()
+				Return
+			ElseIf aAptOrd[1][2] > 0
+				If aAptOrd[1][4] $ '7.8'
+					nQtdOrd := aAptOrd[1][2]
+					oQtdPro:Refresh()
+					aAdd(aOrdPro, {aAptOrd[1][1], aAptOrd[1][2]})
+					Return
+				Else
+					ApMsgStop('Ordem de Produção não pode ser conferida, STATUS: '+aAptOrd[1][3])
+					cOrdPro := space(11)
+					cCodLot := space(06)
+					//oOrdPro:Refresh()
+					//oOrdPro:SetFocus()
+					Return
+				Endif
+			Endif
+		Else
+			/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
              ±± Definicao do Dialog e todos os seus componentes.                        ±±
-             Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-             oDlgSel    := MSDialog():New( 088, 232, 297, 525, "Ordens de produções apontadas", , , .F., , , , , , .T., , , .T. )
-             oSayMsg    := TSay():New( 078, 000, {|| "Selecione as ordens de produção para serem conferidas."}, oDlgSel, , , .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 216, 008)
-             oTblSel()
-             DbSelectArea("TMP")
-             oBrwSel    := MsSelect():New( "TMP", "MARCA", "", { {"MARCA", "", "", ""}, {"SEQENV", "", "Seq.", "99"}, {"QUANT", "", "Quantidade", "@E 999999"}, {"Status", "", "Status", "@!"} }, .F., cMarca, {000, 000, 076, 148}, , , oDlgSel ) 
-             oBrwSel:bAval := {||TMPMark()}
-             oBrwSel:oBrowse:lHasMark := .T.
-             oBrwSel:oBrowse:lCanAllmark := .F.
-             oBtnCon    := TButton():New( 088, 110, "Confirma", oDlgSel, {|| nOpcEnv := 1, oDlgSel:End() }, 037, 012, , , , .T., , "", , , , .F. )
+			Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+			oDlgSel    := MSDialog():New( 088, 232, 297, 525, "Ordens de produções apontadas", , , .F., , , , , , .T., , , .T. )
+			oSayMsg    := TSay():New( 078, 000, {|| "Selecione as ordens de produção para serem conferidas."}, oDlgSel, , , .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 216, 008)
+			oTblSel()
+			DbSelectArea("TMP")
+			oBrwSel    := MsSelect():New( "TMP", "MARCA", "", { {"MARCA", "", "", ""}, {"SEQENV", "", "Seq.", "99"}, {"QUANT", "", "Quantidade", "@E 999999"}, {"Status", "", "Status", "@!"} }, .F., cMarca, {000, 000, 076, 148}, , , oDlgSel )
+			oBrwSel:bAval := {||TMPMark()}
+			oBrwSel:oBrowse:lHasMark := .T.
+			oBrwSel:oBrowse:lCanAllmark := .F.
+			oBtnCon    := TButton():New( 088, 110, "Confirma", oDlgSel, {|| nOpcEnv := 1, oDlgSel:End() }, 037, 012, , , , .T., , "", , , , .F. )
 
-             oDlgSel:Activate(, , , .T.)
-             If nOpcEnv == 1
-                nQtdOrd := 0
-                DbSelectArea("TMP")
-                DbGoTop()
-                While !Eof()
-                      If TMP->(IsMark("MARCA", cMarca))
-                         nQtdOrd += TMP->QUANT
-                         aAdd(aOrdPro, {TMP->SEQENV, TMP->QUANT})
-                      Endif
-                      DbSelectArea("TMP")
-                      DbSkip()
-                Enddo
-                oQtdPro:Refresh()
-             Else
-                nQtdOrd := 0
-                oQtdPro:Refresh()
-                cOrdPro := space(11)
-                cCodLot := space(06)
-                //oOrdPro:Refresh()
-                //oOrdPro:SetFocus()
-             Endif
-             DbSelectArea("TMP")
-             DbCloseArea()
-             oTempTbl5:Delete()
-             Return
-          Endif
-       Else
-          ApMsgStop('Código de Pallet inválido!')
-          DbSelectArea("TCQ")
-          DbCloseArea()
-          cOrdPro := space(11)
-          //oOrdPro:Refresh()
-          //oOrdPro:SetFocus()
-          Return
-       Endif
+			oDlgSel:Activate(, , , .T.)
+			If nOpcEnv == 1
+				nQtdOrd := 0
+				DbSelectArea("TMP")
+				DbGoTop()
+				While !Eof()
+					If TMP->(IsMark("MARCA", cMarca))
+						nQtdOrd += TMP->QUANT
+						aAdd(aOrdPro, {TMP->SEQENV, TMP->QUANT})
+					Endif
+					DbSelectArea("TMP")
+					DbSkip()
+				Enddo
+				oQtdPro:Refresh()
+			Else
+				nQtdOrd := 0
+				oQtdPro:Refresh()
+				cOrdPro := space(11)
+				cCodLot := space(06)
+				//oOrdPro:Refresh()
+				//oOrdPro:SetFocus()
+			Endif
+			DbSelectArea("TMP")
+			DbCloseArea()
+			oTempTbl5:Delete()
+			Return
+		Endif
+	Else
+		ApMsgStop('Código de Pallet inválido!')
+		DbSelectArea("TCQ")
+		DbCloseArea()
+		cOrdPro := space(11)
+		//oOrdPro:Refresh()
+		//oOrdPro:SetFocus()
+		Return
+	Endif
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ oTblSel() - Cria temporario para o Alias: TMP
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTblSel()
-       Local aFds := {}
-       //Local cTmp
-       Local nY
+	Local aFds := {}
+	//Local cTmp
+	Local nY
 
-       aAdd( aFds , {"MARCA"  , "C", 002,000} )
-       aAdd( aFds , {"SEQENV" , "C", 002,000} )
-       aAdd( aFds , {"QUANT"  , "N", 006,000} )
-       aAdd( aFds , {"STATUS" , "C", 020,000} )
-       aAdd( aFds , {"FLAG"   , "C", 001,000} )
+	aAdd( aFds , {"MARCA"  , "C", 002,000} )
+	aAdd( aFds , {"SEQENV" , "C", 002,000} )
+	aAdd( aFds , {"QUANT"  , "N", 006,000} )
+	aAdd( aFds , {"STATUS" , "C", 020,000} )
+	aAdd( aFds , {"FLAG"   , "C", 001,000} )
 
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-  /*     cTmp := CriaTrab( aFds, .T. )
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	/*     cTmp := CriaTrab( aFds, .T. )
        Use (cTmp) Alias TMP New Exclusive
        Index On SEQENV To (cTmp)
-*/       
+	*/
 	//cTmp := U_NovoArqTrab("dbf")
 	//dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
 	//Use (cTmp+".Dbf") Alias "TMP" VIA "DBFCDXADS" New Exclusive
@@ -5784,7 +5532,7 @@ Static Function oTblSel()
 	oTempTbl5:SetFields( aFds )
 	oTempTbl5:AddIndex( "cInd01", { "SEQENV" } )
 	oTempTbl5:Create()
-       /********************************************************************************************************************************/
+	/********************************************************************************************************************************/
 
 	For nY := 1 To Len(aAptOrd)
 		RecLock("TMP", .t.)
@@ -5803,69 +5551,69 @@ Return
 Function  ³ TMPMark() - Funcao para marcar o MsSelect
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function TMPMark()
-       Local lDesMarca := TMP->(IsMark("MARCA", cMarca))
-       RecLock("TMP", .F.)
-          If lDesmarca
-             TMP->MARCA := "  "                                      	
-          Else
-             TMP->MARCA  := cMarca
-          Endif
-       TMP->(MsUnlock())
-       oBrwSel:oBrowse:Refresh()
+	Local lDesMarca := TMP->(IsMark("MARCA", cMarca))
+	RecLock("TMP", .F.)
+	If lDesmarca
+		TMP->MARCA := "  "
+	Else
+		TMP->MARCA  := cMarca
+	Endif
+	TMP->(MsUnlock())
+	oBrwSel:oBrowse:Refresh()
 Return
 
 Static Function fAbrLoc() // jOSE 24/04/2025  aqui
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de cVariable dos componentes                                 ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     Private cGetCod := Space(15)
-     Private cMarca  := GetMark()
-     Private cNumOrd := "00"
-     Private lCheck  :=.T.
-     
-     If Empty(StrTran(StrTran(cCodPro, '.'), '-'))
-        MsgStop("Favor informar o código do produto...")
-        Return
-     Endif
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	Private cGetCod := Space(15)
+	Private cMarca  := GetMark()
+	Private cNumOrd := "00"
+	Private lCheck  :=.T.
+
+	If Empty(StrTran(StrTran(cCodPro, '.'), '-'))
+		MsgStop("Favor informar o código do produto...")
+		Return
+	Endif
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de Variaveis Private dos Objetos                             ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     SetPrvt("oFont1", "oDlg2", "oGetCod", "oGetDes", "oBtnVol", "oBtnCon", "oBrwLoc", "oBtnDel","oBtnAlt")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oFont1", "oDlg2", "oGetCod", "oGetDes", "oBtnVol", "oBtnCon", "oBrwLoc", "oBtnDel","oBtnAlt")
 
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Definicao do Dialog e todos os seus componentes.                        ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     oFont1     := TFont():New( "MS Sans Serif",0,-16,,.F.,0,,400,.F.,.F.,,,,,, )
-     oDlg4      := MSDialog():New( 187,392,461,660,"Localização provisória",,,.F.,,,,,,.T.,,,.T. )
-     oGetCod    := TGet():New( 004,004,{|u| If(PCount()>0,cGetCod:=u,cGetCod)},oDlg4,060,015,'',,CLR_BLACK,CLR_WHITE,oFont1,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","cGetCod",,)
-     oBtnVol    := TButton():New( 120,092,"Voltar",oDlg4,{ || oDlg4:End() },037,015,,,,.T.,,"",,,,.F. )
-     //oBtnCon    := TButton():New( 120,048,"Confirmar",oDlg4,{ || fGrvLoc() },037,012,,,,.T.,,"",,,,.F. )
-     oTblLoc()
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	oFont1     := TFont():New( "MS Sans Serif",0,-16,,.F.,0,,400,.F.,.F.,,,,,, )
+	oDlg4      := MSDialog():New( 187,392,461,660,"Localização provisória",,,.F.,,,,,,.T.,,,.T. )
+	oGetCod    := TGet():New( 004,004,{|u| If(PCount()>0,cGetCod:=u,cGetCod)},oDlg4,060,015,'',,CLR_BLACK,CLR_WHITE,oFont1,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","cGetCod",,)
+	oBtnVol    := TButton():New( 120,092,"Voltar",oDlg4,{ || oDlg4:End() },037,015,,,,.T.,,"",,,,.F. )
+	//oBtnCon    := TButton():New( 120,048,"Confirmar",oDlg4,{ || fGrvLoc() },037,012,,,,.T.,,"",,,,.F. )
+	oTblLoc()
 
-     DbSelectArea("LOC")
-     DbSetOrder(1)
-     oBrwLoc    := MsSelect():New( "LOC","LOC_DEL","",{ {"LOC_DEL", "", "", ""}, {"LOC_ORD", "", "Ordem", "@!"}, {"LOC_LOC", "", "Localizacao", "@!"}},.F.,cMarca,{024,004,084,128},,, oDlg4 ) 
-     oBrwLoc:bAval := {||TMPLocM()}
-     oBrwLoc:oBrowse:lHasMark := .T.
-     oBrwLoc:oBrowse:lCanAllmark := .F.
-      DbSelectArea("SZW")
-     DbSetOrder(4)
-     DbSeek(xFilial("SZW")+'BRFATA03  '+RetCodUsr()+substr(cNumEmp,1,2)+substr(cNumEmp,FWSizeFilial()+1,2), .t.)
-     If Found()
-        cAcessos := SZW->ZW_ACESSOS
-     Endif
-     If SubStr(cAcessos, 10, 1) $ '*' //Usuário Ativo
-     Endif
-     If SubStr(cAcessos, 9, 1) $ '*' // booes da Localização Provisória
-         oBtnDel    := TButton():New  ( 088,004,"Deleta"  ,oDlg4,{ || fDelIte() },037,012,,,,.T.,,"",,,,.F. )
-         oBtnAlt    := TButton():New  ( 088,048,"Altera"  ,oDlg4,{ || fAltIte() },037,012,,,,.T.,,"",,,,.F. )
-         oBtnAdd    := TButton():New  ( 088,092,"Adiciona",oDlg4,{ || fAddIte() },037,012,,,,.T.,,"",,,,.F. )
-     Endif
-     oCBox1     := TCheckBox():New( 108,090,"Etiqueta",{|u| If(PCount() > 0, lCheck := u, lCheck)},oDlg4,080,012,,,oFont,,CLR_BLUE ,CLR_WHITE,,.t.,"Imprime Etiqueta Localização",, )	
-     oGetCod:SetFocus()
-     oDlg4:Activate(,,,.T.)
-     DbSelectArea("LOC")
-     DbCloseArea()
+	DbSelectArea("LOC")
+	DbSetOrder(1)
+	oBrwLoc    := MsSelect():New( "LOC","LOC_DEL","",{ {"LOC_DEL", "", "", ""}, {"LOC_ORD", "", "Ordem", "@!"}, {"LOC_LOC", "", "Localizacao", "@!"}},.F.,cMarca,{024,004,084,128},,, oDlg4 )
+	oBrwLoc:bAval := {||TMPLocM()}
+	oBrwLoc:oBrowse:lHasMark := .T.
+	oBrwLoc:oBrowse:lCanAllmark := .F.
+	DbSelectArea("SZW")
+	DbSetOrder(4)
+	DbSeek(xFilial("SZW")+'BRFATA03  '+RetCodUsr()+substr(cNumEmp,1,2)+substr(cNumEmp,FWSizeFilial()+1,2), .t.)
+	If Found()
+		cAcessos := SZW->ZW_ACESSOS
+	Endif
+	If SubStr(cAcessos, 10, 1) $ '*' //Usuário Ativo
+	Endif
+	If SubStr(cAcessos, 9, 1) $ '*' // booes da Localização Provisória
+		oBtnDel    := TButton():New  ( 088,004,"Deleta"  ,oDlg4,{ || fDelIte() },037,012,,,,.T.,,"",,,,.F. )
+		oBtnAlt    := TButton():New  ( 088,048,"Altera"  ,oDlg4,{ || fAltIte() },037,012,,,,.T.,,"",,,,.F. )
+		oBtnAdd    := TButton():New  ( 088,092,"Adiciona",oDlg4,{ || fAddIte() },037,012,,,,.T.,,"",,,,.F. )
+	Endif
+	oCBox1     := TCheckBox():New( 108,090,"Etiqueta",{|u| If(PCount() > 0, lCheck := u, lCheck)},oDlg4,080,012,,,oFont,,CLR_BLUE ,CLR_WHITE,,.t.,"Imprime Etiqueta Localização",, )
+	oGetCod:SetFocus()
+	oDlg4:Activate(,,,.T.)
+	DbSelectArea("LOC")
+	DbCloseArea()
 Return
 
 
@@ -5874,37 +5622,37 @@ Function  ³ fIEtProv() - Impressão da Etiqueta com a localização
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fIEtProv()  // Jose 24/04/2025
 
-    //Verificação de Impressora ativa
-    //oPrint   := TMSPrinter():New("Impressão de Etiquetas")
-    //lPrinter := oPrint:IsPrinterActive()
+	//Verificação de Impressora ativa
+	//oPrint   := TMSPrinter():New("Impressão de Etiquetas")
+	//lPrinter := oPrint:IsPrinterActive()
 
 	cModelo   := "ZEBRA"
-    cPorta    := "LPT1" //Porta da impressora
-    nTam      := 120    //Tamanho da etiqueta
-    lTipo     := .f.    //.f.=Local; .t.=Servidor ou Outro Servidor
-    lDrvWin   := .t.    //Usa Drive do Windows
+	cPorta    := "LPT1" //Porta da impressora
+	nTam      := 120    //Tamanho da etiqueta
+	lTipo     := .f.    //.f.=Local; .t.=Servidor ou Outro Servidor
+	lDrvWin   := .t.    //Usa Drive do Windows
 
-    MSCBPRINTER(cModelo, cPorta, , nTam, lTipo, , , , , , lDrvWin)
-       
-    If !MSCBIsPrinter('LPT1')
-    	Messagebox("Impressora não encontrada!","Atenção",48)
-      MSCBCLOSEPRINTER()
-    Else   
-	    
-	    MSCBBEGIN(1, 6, , .f.)
+	MSCBPRINTER(cModelo, cPorta, , nTam, lTipo, , , , , , lDrvWin)
+
+	If !MSCBIsPrinter('LPT1')
+		Messagebox("Impressora não encontrada!","Atenção",48)
+		MSCBCLOSEPRINTER()
+	Else
+
+		MSCBBEGIN(1, 6, , .f.)
 		/*
 		MB01 - Interleaved 2 of 5 / EAN14
-		MB02 - Code 39 
-		MB03 - EAN 8 
-		MB04 - EAN 13 
-		MB05 - UPC A 
-		MB06 - UPC E 
+		MB02 - Code 39
+		MB03 - EAN 8
+		MB04 - EAN 13
+		MB05 - UPC A
+		MB06 - UPC E
 		MB07 - CODE 128 */
-        MSCBSAYBAR(15, 01, ALLTRIM(cGetCod), "N", "MB07", 08, .F., .T., .F., , 3, 2)
-        MSCBSay(03,17," "+Alltrim(cGetCod) ,"N","0","100,100") // JOSE 25/04/2025  "N","0","120,120"
-        MSCBCHKSTATUS(.f.)
-        cText := MSCBEND()
-        MSCBCLOSEPRINTER()
+		MSCBSAYBAR(15, 01, ALLTRIM(cGetCod), "N", "MB07", 08, .F., .T., .F., , 3, 2)
+		MSCBSay(03,17," "+Alltrim(cGetCod) ,"N","0","100,100") // JOSE 25/04/2025  "N","0","120,120"
+		MSCBCHKSTATUS(.f.)
+		cText := MSCBEND()
+		MSCBCLOSEPRINTER()
 
 	Endif
 
@@ -5914,23 +5662,23 @@ Return
 Function  ³ oTblLoc() - Cria temporario para o Alias: TMP
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTblLoc() // Jose 24/04/2025
-       Local aFds := {}
-       //Local cTmp
-       If ChkFile("LOC")
-          DbSelectArea("LOC")
-          DbCloseArea()
-       Endif
+	Local aFds := {}
+	//Local cTmp
+	If ChkFile("LOC")
+		DbSelectArea("LOC")
+		DbCloseArea()
+	Endif
 
-       aAdd( aFds , {"LOC_DEL" ,"C", 002, 000} )
-       aAdd( aFds , {"LOC_ORD" ,"C", 003, 000} )
-       aAdd( aFds , {"LOC_LOC" ,"C", 20, 000} ) //  Jose 25/04/2025  , 15, 000}
+	aAdd( aFds , {"LOC_DEL" ,"C", 002, 000} )
+	aAdd( aFds , {"LOC_ORD" ,"C", 003, 000} )
+	aAdd( aFds , {"LOC_LOC" ,"C", 20, 000} ) //  Jose 25/04/2025  , 15, 000}
 
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
- /*    cTmp := CriaTrab( aFds, .T. )
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	/*    cTmp := CriaTrab( aFds, .T. )
        Use (cTmp) Alias LOC New Exclusive
        Index On LOC_ORD To (cTmp)
-*/
+	*/
 	//cTmp := U_NovoArqTrab("dbf")
 	//dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
 	//Use (cTmp+".Dbf") Alias "LOC" VIA "DBFCDXADS" New Exclusive
@@ -5939,7 +5687,7 @@ Static Function oTblLoc() // Jose 24/04/2025
 	oTempTbl6:SetFields( aFds )
 	oTempTbl6:AddIndex( "cInd01", { "LOC_ORD" } )
 	oTempTbl6:Create()
-       /********************************************************************************************************************************/
+	/********************************************************************************************************************************/
 
 	DbSelectArea("ZZL")
 	DbSetOrder(1)
@@ -5962,122 +5710,121 @@ Return
 Function  ³ TMPLocM() - Funcao para marcar o MsSelect
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function TMPLocM()
-       Local lDesMarca := LOC->(IsMark("LOC_DEL", cMarca))
-       RecLock("LOC", .F.)
-          If lDesmarca
-             LOC->LOC_DEL := "  "
-          Else
-             LOC->LOC_DEL := cMarca
-          Endif
-      
-       LOC->(MsUnlock())
+	Local lDesMarca := LOC->(IsMark("LOC_DEL", cMarca))
+	RecLock("LOC", .F.)
+	If lDesmarca
+		LOC->LOC_DEL := "  "
+	Else
+		LOC->LOC_DEL := cMarca
+	Endif
+
+	LOC->(MsUnlock())
 Return
 
 Static Function fAddIte()         // Função Adicionar Localização Provisória   // Jose 24/04/2025
-       If !Empty(cGetCod)
-          cNumOrd := Soma1(cNumOrd)
-          RecLock("LOC", .t.)
-             LOC->LOC_DEL := "  "
-             LOC->LOC_ORD := cNumOrd
-             LOC->LOC_LOC := cGetCod
-          MsUnLock()
-          RecLock("ZZL", .t.)
-             ZZL->ZZL_FILIAL := xFilial("ZZL")
-             ZZL->ZZL_PRODUT := Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))
-             ZZL->ZZL_ORDEM  := cNumOrd
-             ZZL->ZZL_LOCALI := Upper(cGetCod)
-             ZZL->ZZL_DTINC  := dDataBase
-             ZZL->ZZL_HRINC  := SubStr(StrTran(Time(), ":"), 1, 4)
-          MsUnLock()
-       Else
-	 	   MsgStop("Atenção, preencha a nova Localização/Qtde do produto!!")
-    	   Return	   
-       Endif
+	If !Empty(cGetCod)
+		cNumOrd := Soma1(cNumOrd)
+		RecLock("LOC", .t.)
+		LOC->LOC_DEL := "  "
+		LOC->LOC_ORD := cNumOrd
+		LOC->LOC_LOC := cGetCod
+		MsUnLock()
+		RecLock("ZZL", .t.)
+		ZZL->ZZL_FILIAL := xFilial("ZZL")
+		ZZL->ZZL_PRODUT := Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))
+		ZZL->ZZL_ORDEM  := cNumOrd
+		ZZL->ZZL_LOCALI := Upper(cGetCod)
+		ZZL->ZZL_DTINC  := dDataBase
+		ZZL->ZZL_HRINC  := SubStr(StrTran(Time(), ":"), 1, 4)
+		MsUnLock()
+	Else
+		MsgStop("Atenção, preencha a nova Localização/Qtde do produto!!")
+		Return
+	Endif
 
-       If lCheck .and. len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-')))==12 // se for PA e o flag etiqueta estiver marcado
-       	   fIEtProv() // Imprime Etiqueta
-       Endif       
-       cGetCod := Space(20) // Jose 25/04/2025   Space(15)
-       oGetCod:Refresh()
-	
-       If ChkFile("LOC")
-           DbSelectArea("LOC")
-           DbCloseArea()
-    	   oTblLoc()
-       Endif
-       //oBrwLoc:oBrowse:bGoTop()
-       oBrwLoc:oBrowse:Refresh()
-       oGetCod:SetFocus()
-       
+	If lCheck .and. len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-')))==12 // se for PA e o flag etiqueta estiver marcado
+		fIEtProv() // Imprime Etiqueta
+	Endif
+	cGetCod := Space(20) // Jose 25/04/2025   Space(15)
+	oGetCod:Refresh()
 
-Return()
+	If ChkFile("LOC")
+		DbSelectArea("LOC")
+		DbCloseArea()
+		oTblLoc()
+	Endif
+	//oBrwLoc:oBrowse:bGoTop()
+	oBrwLoc:oBrowse:Refresh()
+	oGetCod:SetFocus()
+
+Return(NIL)
 
 Static Function fDelIte()            // Função Excluir Localização Provisória Marcada
-       Local cEnd := ""
-       
-         DbSelectArea("LOC")
-         DbGoTop()
-         While !Eof()
-            If LOC->(IsMark("LOC_DEL", cMarca))
-               DbSelectArea("ZZL")
-               DbSetOrder(1)
-               DbSeek(xFilial("ZZL")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+space( 15 - len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))))+LOC->LOC_ORD, .T.)
-                  If Found()
-                     cEnd += TRIM(ZZL->ZZL_LOCALI)+ Chr(13) + Chr(10) 
-                  Endif
-            Endif
-         DbSelectArea("LOC")
-         DbSkip()
-         Enddo
+	Local cEnd := ""
 
-		/*Adicionado por Lucas - 17-09-2025. Chamado R9351*/
-       If MsgYesNo('Atenção, deleta os itens marcados?'+ Chr(13) + Chr(10)+cEnd, 'Atenção', 'ALERT')
-          DbSelectArea("LOC")
-          DbGoTop()
-          While !Eof()
-                If LOC->(IsMark("LOC_DEL", cMarca))
-                   DbSelectArea("ZZL")
-                   DbSetOrder(1)
-                   DbSeek(xFilial("ZZL")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+space( 15 - len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))))+LOC->LOC_ORD, .T.)
-                   If Found()
-                      cEnd += TRIM(ZZL->ZZL_LOCALI)+" - "
-                      RecLock("ZZL", .f.)
-                         ZZL->ZZL_DTDEL  := dDataBase
-                         ZZL->ZZL_HRDEL  := SubStr(StrTran(Time(), ":"), 1, 4)
-                         DbDelete()
-                      MsUnLock()
-                   Endif
-                   RecLock("LOC", .f.)
-                      DbDelete()
-                   MsUnLock()
-                Endif
-                DbSelectArea("LOC")
-                DbSkip()
-          Enddo
-          If cEnd <> ""
-            Messagebox("Endereços excluídos -> "+cEnd,"Atenção",48)
-          Endif
-       Else
-          DbSelectArea("LOC")
-          DbGoTop()
-          While !Eof()
-                RecLock("LOC", .f.)
-                   LOC->LOC_DEL := "  "
-                MsUnLock()
-                DbSelectArea("LOC")
-                DbSkip()
-          Enddo
-       Endif
-       If ChkFile("LOC")
-           DbSelectArea("LOC")
-           DbCloseArea()
-    	   oTblLoc()
-       Endif
-       //oBrwLoc:oBrowse:bGoTop()
-       oBrwLoc:oBrowse:Refresh()
-       oGetCod:SetFocus()
-	   /*
-	   
+	DbSelectArea("LOC")
+	DbGoTop()
+	While !Eof()
+		If LOC->(IsMark("LOC_DEL", cMarca))
+			DbSelectArea("ZZL")
+			DbSetOrder(1)
+			DbSeek(xFilial("ZZL")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+space( 15 - len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))))+LOC->LOC_ORD, .T.)
+			If Found()
+				cEnd += TRIM(ZZL->ZZL_LOCALI)+ Chr(13) + Chr(10)
+			Endif
+		Endif
+		DbSelectArea("LOC")
+		DbSkip()
+	Enddo
+
+	/*Adicionado por Lucas - 17-09-2025. Chamado R9351*/
+	If MsgYesNo('Atenção, deleta os itens marcados?'+ Chr(13) + Chr(10)+cEnd, 'Atenção', 'ALERT')
+		DbSelectArea("LOC")
+		DbGoTop()
+		While !Eof()
+			If LOC->(IsMark("LOC_DEL", cMarca))
+				DbSelectArea("ZZL")
+				DbSetOrder(1)
+				DbSeek(xFilial("ZZL")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+space( 15 - len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))))+LOC->LOC_ORD, .T.)
+				If Found()
+					cEnd += TRIM(ZZL->ZZL_LOCALI)+" - "
+					RecLock("ZZL", .f.)
+					ZZL->ZZL_DTDEL  := dDataBase
+					ZZL->ZZL_HRDEL  := SubStr(StrTran(Time(), ":"), 1, 4)
+					DbDelete()
+					MsUnLock()
+				Endif
+				RecLock("LOC", .f.)
+				DbDelete()
+				MsUnLock()
+			Endif
+			DbSelectArea("LOC")
+			DbSkip()
+		Enddo
+		If cEnd <> ""
+			Messagebox("Endereços excluídos -> "+cEnd,"Atenção",48)
+		Endif
+	Else
+		DbSelectArea("LOC")
+		DbGoTop()
+		While !Eof()
+			RecLock("LOC", .f.)
+			LOC->LOC_DEL := "  "
+			MsUnLock()
+			DbSelectArea("LOC")
+			DbSkip()
+		Enddo
+	Endif
+	If ChkFile("LOC")
+		DbSelectArea("LOC")
+		DbCloseArea()
+		oTblLoc()
+	Endif
+	//oBrwLoc:oBrowse:bGoTop()
+	oBrwLoc:oBrowse:Refresh()
+	oGetCod:SetFocus()
+	/*
+
 	   If ChkFile("LOC")
     	   DbSelectArea("LOC")
        	   DbSetOrder(1)
@@ -6085,52 +5832,52 @@ Static Function fDelIte()            // Função Excluir Localização Provisória Ma
        Endif
        oBrwLoc:oBrowse:bGoTop
        oBrwLoc:oBrowse:Refresh()
-       oGetCod:SetFocus() */
-				
+	oGetCod:SetFocus() */
+
 Return
 
 Static Function fAltIte()            // Função Alterar Localização Provisória Marcada
 	If Empty(cGetCod)
- 	   MsgStop("Atenção, preencha a nova Qtde ou Localização do produto!!")
-    Else		
-       If MsgYesNo('Atenção, alterar a Quantidade/Localização do primeiro item MARCADO ?', 'Atenção', 'ALERT')
-          DbSelectArea("LOC")
-          DbGoTop()
-          While !Eof()
-          	If LOC->(IsMark("LOC_DEL", cMarca))
-            	DbSelectArea("ZZL")
-                DbSetOrder(1)
-                DbSeek(xFilial("ZZL")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+space( 15 - len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))))+LOC->LOC_ORD, .T.)
-                If Found()
-                	RecLock("ZZL", .f.)
-                    	ZZL->ZZL_LOCALI := Upper(cGetCod)
-                 	MsUnLock()
-                Endif
-       			DbSelectArea("LOC")
-		       	DbGoTop()
-       			cGetCod := Space(15)
-       			oGetCod:Refresh()
-		        oGetCod:SetFocus()
-		       	Exit
-           	Endif
-          	DbSelectArea("LOC")
-          	DbSkip()
-          Enddo
-       Endif
-       DbSelectArea("LOC")
-       DbGoTop()
-       cGetCod := Space(15)
-       oGetCod:Refresh()
-       oGetCod:SetFocus()
-    Endif
-    If ChkFile("LOC")
-        DbSelectArea("LOC")
-        DbCloseArea()
-	    oTblLoc()
-    Endif
-    //oBrwLoc:oBrowse:bGoTop()
-    oBrwLoc:oBrowse:Refresh()
-    oGetCod:SetFocus()
+		MsgStop("Atenção, preencha a nova Qtde ou Localização do produto!!")
+	Else
+		If MsgYesNo('Atenção, alterar a Quantidade/Localização do primeiro item MARCADO ?', 'Atenção', 'ALERT')
+			DbSelectArea("LOC")
+			DbGoTop()
+			While !Eof()
+				If LOC->(IsMark("LOC_DEL", cMarca))
+					DbSelectArea("ZZL")
+					DbSetOrder(1)
+					DbSeek(xFilial("ZZL")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+space( 15 - len(Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))))+LOC->LOC_ORD, .T.)
+					If Found()
+						RecLock("ZZL", .f.)
+						ZZL->ZZL_LOCALI := Upper(cGetCod)
+						MsUnLock()
+					Endif
+					DbSelectArea("LOC")
+					DbGoTop()
+					cGetCod := Space(15)
+					oGetCod:Refresh()
+					oGetCod:SetFocus()
+					Exit
+				Endif
+				DbSelectArea("LOC")
+				DbSkip()
+			Enddo
+		Endif
+		DbSelectArea("LOC")
+		DbGoTop()
+		cGetCod := Space(15)
+		oGetCod:Refresh()
+		oGetCod:SetFocus()
+	Endif
+	If ChkFile("LOC")
+		DbSelectArea("LOC")
+		DbCloseArea()
+		oTblLoc()
+	Endif
+	//oBrwLoc:oBrowse:bGoTop()
+	oBrwLoc:oBrowse:Refresh()
+	oGetCod:SetFocus()
 
 Return
 
@@ -6149,78 +5896,78 @@ Return
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 User Function TransfBorPed()
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de cVariable dos componentes                                 ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     Private cGet1TBo   := Space(6)
-     Private cGet2TBo   := Space(6)
-     Private cGet3TBo   := Space(8)
-     Private cGet4TBo   := Space(8)
-     Private cSay1TBo   := Space(1)
-     Private cSay2TBo   := Space(1)
-     Private nRMenu1T  
-     Private cMarca     := GetMark()
-     Private oTempTbl9
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	Private cGet1TBo   := Space(6)
+	Private cGet2TBo   := Space(6)
+	Private cGet3TBo   := Space(8)
+	Private cGet4TBo   := Space(8)
+	Private cSay1TBo   := Space(1)
+	Private cSay2TBo   := Space(1)
+	Private nRMenu1T
+	Private cMarca     := GetMark()
+	Private oTempTbl9
 
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de Variaveis Private dos Objetos                             ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     SetPrvt("oFont1", "oDlg1TBo", "oSay1TBo", "oSay2TBo", "oSay3TBo", "oSay4TBo", "oRMenu1T", "oGet1TBo", "oGet2TBo", "oGet3TBo", "oGet4TBo", "oBtn1TBo", "oBtn2TBo", "oBtn3TBo")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oFont1", "oDlg1TBo", "oSay1TBo", "oSay2TBo", "oSay3TBo", "oSay4TBo", "oRMenu1T", "oGet1TBo", "oGet2TBo", "oGet3TBo", "oGet4TBo", "oBtn1TBo", "oBtn2TBo", "oBtn3TBo")
 
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Definicao do Dialog e todos os seus componentes.                        ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     oFont1     := TFont():New( "MS Sans Serif", 0, -17, , .T., 0, , 700, .F., .F., , , , , , )
-     oDlg1TBo   := MSDialog():New( 091, 232, 556, 757, "Transferência de Borderos de Pedido", , , .F., , , , , , .T., , , .T. )
-     oSay1TBo   := TSay():New( 020, 004, {||"Do Bordero:"}  , oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 064, 012)
-     oGet1TBo   := TGet():New( 019, 060, {|u| If(PCount() > 0, cGet1TBo := u, cGet1TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F., "SZF", "cGet1TBo", , )
-     oSay2TBo   := TSay():New( 020, 135, {||"Para Bordero:"}, oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 068, 012)
-     oGet2TBo   := TGet():New( 019, 204, {|u| If(PCount() > 0, cGet2TBo := u, cGet2TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F., "SZF", "cGet2TBo", , )
-     oSay3TBo   := TSay():New( 215, 004, {||"Volumes:"}, oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 068, 012)
-     oGet3TBo   := TGet():New( 214, 060, {|u| If(PCount() > 0, cGet3TBo := u, cGet3TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F.,      , "cGet3TBo", , )
-     oSay4TBo   := TSay():New( 215, 145, {||"Peso:"}, oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 068, 012)
-     oGet4TBo   := TGet():New( 214, 204, {|u| If(PCount() > 0, cGet4TBo := u, cGet4TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F.,      , "cGet4TBo", , )
-     //GoRMenu1   := TGroup():New( 004, 004, 034, 080, "", oDlg1TBo, CLR_BLACK, CLR_WHITE, .T., .F. )
-     //oRMenu1T   := TRadMenu():New( 008, 010, {"1 Pedido", "Multiplos Pedidos"}, {|u| If(PCount() > 0, nRMenu1T := u, nRMenu1T)}, oDlg1TBo, , , CLR_BLACK, CLR_WHITE, "", , , 056, 16, , .F., .F., .T. )
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	oFont1     := TFont():New( "MS Sans Serif", 0, -17, , .T., 0, , 700, .F., .F., , , , , , )
+	oDlg1TBo   := MSDialog():New( 091, 232, 556, 757, "Transferência de Borderos de Pedido", , , .F., , , , , , .T., , , .T. )
+	oSay1TBo   := TSay():New( 020, 004, {||"Do Bordero:"}  , oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 064, 012)
+	oGet1TBo   := TGet():New( 019, 060, {|u| If(PCount() > 0, cGet1TBo := u, cGet1TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F., "SZF", "cGet1TBo", , )
+	oSay2TBo   := TSay():New( 020, 135, {||"Para Bordero:"}, oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 068, 012)
+	oGet2TBo   := TGet():New( 019, 204, {|u| If(PCount() > 0, cGet2TBo := u, cGet2TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F., "SZF", "cGet2TBo", , )
+	oSay3TBo   := TSay():New( 215, 004, {||"Volumes:"}, oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 068, 012)
+	oGet3TBo   := TGet():New( 214, 060, {|u| If(PCount() > 0, cGet3TBo := u, cGet3TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F.,      , "cGet3TBo", , )
+	oSay4TBo   := TSay():New( 215, 145, {||"Peso:"}, oDlg1TBo, , oFont1, .F., .F., .F., .T., CLR_BLUE, CLR_WHITE, 068, 012)
+	oGet4TBo   := TGet():New( 214, 204, {|u| If(PCount() > 0, cGet4TBo := u, cGet4TBo)}, oDlg1TBo, 040, 012, '', , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F.,      , "cGet4TBo", , )
+	//GoRMenu1   := TGroup():New( 004, 004, 034, 080, "", oDlg1TBo, CLR_BLACK, CLR_WHITE, .T., .F. )
+	//oRMenu1T   := TRadMenu():New( 008, 010, {"1 Pedido", "Multiplos Pedidos"}, {|u| If(PCount() > 0, nRMenu1T := u, nRMenu1T)}, oDlg1TBo, , , CLR_BLACK, CLR_WHITE, "", , , 056, 16, , .F., .F., .T. )
 
-     oBtn1TBo   := TButton():New( 002, 226, "Sair"        , oDlg1TBo, { || oDlg1TBo:End() }, 037, 012, , , , .T., , "", , , , .F. )
-     oBtn2TBo   := TButton():New( 002, 176, "Confirma"    , oDlg1TBo, { || fComTran()     }, 037, 012, , , , .T., , "", , , , .F. )
-     oBtn3TBo   := TButton():New( 002, 126, "Novo Bordero", oDlg1TBo, { || fGerNewB()     }, 037, 012, , , , .T., , "", , , , .F. )
-     
-     oTbl1TBo()
-     DbSelectArea("TMPTBO")
-     oBrw1TBo   := MsSelect():New( "TMPTBO", "MARCA", "", { {"MARCA", "", "", ""}, {"PEDID", "", "Pedido", "99999999"}, {"NOMCL", "", "Nome Cliente", "@!"}, {"_LOCAL", "", "Localizacao", "@!"}, {"VOLUM", "", "Volume", "9999"} }, .F., cMarca, {036, 004, 210, 262}, , , oDlg1TBo ) 
-     oBrw1TBo:oBrowse:lColDrag    := .t.
-     oBrw1TBo:oBrowse:lHasMark    := .t.
-     oBrw1TBo:oBrowse:lCanAllmark := .t.
-     oBrw1TBo:oBrowse:bAllMark    := {|| InvTrans(cMarca, @oBrw1TBo) }
-     oGet1TBo:bValid := {|| fValBorDe() }
-     oGet2TBo:bValid := {|| fValBorPa() }
-     oDlg1TBo:Activate(,,,.T.)
-     DbSelectArea("TMPTBO")
-     DbCloseArea()
-     oTempTbl9:Delete()
+	oBtn1TBo   := TButton():New( 002, 226, "Sair"        , oDlg1TBo, { || oDlg1TBo:End() }, 037, 012, , , , .T., , "", , , , .F. )
+	oBtn2TBo   := TButton():New( 002, 176, "Confirma"    , oDlg1TBo, { || fComTran()     }, 037, 012, , , , .T., , "", , , , .F. )
+	oBtn3TBo   := TButton():New( 002, 126, "Novo Bordero", oDlg1TBo, { || fGerNewB()     }, 037, 012, , , , .T., , "", , , , .F. )
+
+	oTbl1TBo()
+	DbSelectArea("TMPTBO")
+	oBrw1TBo   := MsSelect():New( "TMPTBO", "MARCA", "", { {"MARCA", "", "", ""}, {"PEDID", "", "Pedido", "99999999"}, {"NOMCL", "", "Nome Cliente", "@!"}, {"_LOCAL", "", "Localizacao", "@!"}, {"VOLUM", "", "Volume", "9999"} }, .F., cMarca, {036, 004, 210, 262}, , , oDlg1TBo )
+	oBrw1TBo:oBrowse:lColDrag    := .t.
+	oBrw1TBo:oBrowse:lHasMark    := .t.
+	oBrw1TBo:oBrowse:lCanAllmark := .t.
+	oBrw1TBo:oBrowse:bAllMark    := {|| InvTrans(cMarca, @oBrw1TBo) }
+	oGet1TBo:bValid := {|| fValBorDe() }
+	oGet2TBo:bValid := {|| fValBorPa() }
+	oDlg1TBo:Activate(,,,.T.)
+	DbSelectArea("TMPTBO")
+	DbCloseArea()
+	oTempTbl9:Delete()
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ oTbl1TBo() - Cria temporario para o Alias: TMPTBO
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl1TBo()
-       Local aFds := {}
-       //Local cTmp
+	Local aFds := {}
+	//Local cTmp
 
-       Aadd( aFds , {"MARCA", "C", 002, 000} )
-       Aadd( aFds , {"PEDID", "C", 008, 000} )
-       Aadd( aFds , {"NOMCL", "C", 040, 000} )
-       Aadd( aFds , {"_LOCAL", "C", 015, 000} )
-       Aadd( aFds , {"VOLUM", "N", 005, 000} )
+	Aadd( aFds , {"MARCA", "C", 002, 000} )
+	Aadd( aFds , {"PEDID", "C", 008, 000} )
+	Aadd( aFds , {"NOMCL", "C", 040, 000} )
+	Aadd( aFds , {"_LOCAL", "C", 015, 000} )
+	Aadd( aFds , {"VOLUM", "N", 005, 000} )
 
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-/*     cTmp := CriaTrab( aFds, .T. )
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	/*     cTmp := CriaTrab( aFds, .T. )
        Use (cTmp) Alias TMPTBO New Exclusive
        Index On PEDID To (cTmp)
-*/
+	*/
 	//cTmp := U_NovoArqTrab("dbf")
 	//dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
 	//Use (cTmp+".Dbf") Alias "TMPTBO" VIA "DBFCDXADS" New Exclusive
@@ -6230,7 +5977,7 @@ Static Function oTbl1TBo()
 	oTempTbl9:SetFields( aFds )
 	oTempTbl9:AddIndex( "cInd01", { "PEDID" } )
 	oTempTbl9:Create()
-       /********************************************************************************************************************************/       
+	/********************************************************************************************************************************/
 Return
 
 Static Function fValBorDe()
@@ -6318,128 +6065,128 @@ Static Function fGerNewB()
 	//Local cQry1 := ""
 	Local nRecSZF := 0
 	Local cCodBor := 0
-       /*
+	/*
        cQry1 := " "
        cQry1 += "SELECT (MAX(ZF_CODIGO)+1) AS ZF_PROXIMO "
        cQry1 += "FROM "+RetSqlName("SZF")+" SZF WITH (NOLOCK) "
        cQry1 += "WHERE SZF.ZF_FILIAL  = '"+xFilial("SZF")+"' "
        cQry1 += "  AND SZF.D_E_L_E_T_ = '' "
        TCQuery cQry1 ALIAS "TMP" NEW
-       DbSelectArea("TMP") 
+       DbSelectArea("TMP")
        If !Eof()
 		   cCodBor := StrZero(TMP->ZF_PROXIMO, 6)
  	   Else
  	   	   cCodBor := "000001"
- 	   Endif		
-	   DbSelectArea("TMP")	
-       DbCloseArea()    */
-       
-       If !Empty(cGet1TBo)
-     	  cCodBor := U_NumSeqLot("SZF")
-          DbSelectArea("SZF")
-          nRecSZF := SZF->(Recno())
-          cGet2TBo := StrZero(Val(cCodBor), 6)
-          TMPTBO->(dbGoto(nRecSZF))
-          oGet2TBo:lReadOnly := .f.
-          oGet2TBo:Refresh()
-          oBrw1TBo:oBrowse:SetFocus()
-          SZF->(dbGoto(nRecSZF))
-          oBrw1TBo:oBrowse:Refresh()
-       Endif
+ 	   Endif
+	   DbSelectArea("TMP")
+	DbCloseArea()    */
+
+	If !Empty(cGet1TBo)
+		cCodBor := U_NumSeqLot("SZF")
+		DbSelectArea("SZF")
+		nRecSZF := SZF->(Recno())
+		cGet2TBo := StrZero(Val(cCodBor), 6)
+		TMPTBO->(dbGoto(nRecSZF))
+		oGet2TBo:lReadOnly := .f.
+		oGet2TBo:Refresh()
+		oBrw1TBo:oBrowse:SetFocus()
+		SZF->(dbGoto(nRecSZF))
+		oBrw1TBo:oBrowse:Refresh()
+	Endif
 Return
 
 Static Function fComTran()
-       Local cBusTipo :=""
-       If Empty(cGet1TBo) .or. Empty(cGet2TBo)                                                                                          
-          MsgStop("A transferência não poderá ser realizada devido a um dos borderos estarem em branco.")
-          Return
-       Endif
-       cStrSZG := "('"
-       cStrZZC := "('"
-       cBusTipo:= Posicione("SZF", 1, xFilial("SZF")+cGet1TBo, "ZF_TIPOBOR")
-       DbSelectArea("TMPTBO")
-       DbGoTop()
-       While !Eof()
-             If IsMark("MARCA", cMarca)
-                cStrSZG += TMPTBO->PEDID+"', '"
-                cStrZZC += SubStr(TMPTBO->PEDID, 3, 6)+"', '"
-             Endif
-             DbSelectArea("TMPTBO")
-             DbSkip()
-       EndDo
-       cStrSZG := SubStr(cStrSZG, 1, Len(cStrSZG)-3)+")"
-       cStrZZC := SubStr(cStrZZC, 1, Len(cStrZZC)-3)+")"
-       
-       If Len(Alltrim(cStrSZG)) >5 // Verificar se existe pelo menos um pedido marcado
-       
-       		// CRIAR NOVO BORDERÔ DE PEDIDOS CASO SEJA ESCOLHIDO UM NOVO
-       		DbSelectArea("SZF")
-       		DbSetOrder(1)
-       		DbSeek(xFilial("SZF")+cGet2TBo, .t.)
-       		If !Found()
-         		If MsgYesNo("Confirma a transferência do(s) pedido(s) marcado(s) para o novo borderô de número "+cGet2TBo+" ?", "Atenção")
-       	     		RecLock("SZF", .t.)
-         	   			SZF->ZF_FILIAL  := xFilial("SZF")
-            			SZF->ZF_CODIGO  := cGet2TBo
-            			SZF->ZF_EMISSAO := dDataBase
-            			SZF->ZF_FLAG    := 'D'
-            			If GetMv("MV_XHABBOR")
-            				SZF->ZF_TIPOBOR := cBusTipo  // TRAZER PARA UM NOVO BORDERO O TIPO DO BORDERO ANTIGO
-            			Endif
-          			MsUnlock()
-                	DbSelectArea("SZF")
-                	DbCloseArea()			
-       	    	Else
-       	 			Return
-       	 		Endif		
-       		Endif
-       
-       		//TROCAR SZG  -- ITENS BORDERO DE PEDIDOS       
-       		cQry1 := " "
-       		cQry1 += " UPDATE SZG010 "
-       		cQry1 += "SET ZG_CODIGO = '"+cGet2TBo+"' "
-       		cQry1 += "WHERE ZG_FILIAL = '"+xFilial("SZG")+"' "
-       		cQry1 += "  AND D_E_L_E_T_ = '' "
-       		cQry1 += "  AND ZG_PEDIDO IN "+cStrSZG
-       		TCSQLExec(cQry1)
-       		//TROCAR ZZC    -- SEPARAÇÃO DE PRODUTOS
-       		cQry1 := " "
-       		cQry1 += "UPDATE ZZC010 "
-       		cQry1 += "SET ZZC_BORDER = '"+cGet2TBo+"' "
-       		cQry1 += "WHERE ZZC_FILIAL = '"+xFilial("ZZC")+"' "
-       		cQry1 += "  AND D_E_L_E_T_ = '' "
-       		cQry1 += "  AND ZZC_PEDIDO IN "+cStrZZC
-       		TCSQLExec(cQry1)
-       
-       		DbSelectArea("SZG")
-      		DbSetOrder(1)
-       		DbSeek(xFilial("SZG")+cGet1TBo,.t.)
-       		If !Found()
-					If MsgYesNo("O borderô de número "+cGet1TBo+" ficou vazio após a transferência. Deseja Excluí-lo ?", "Atenção")
-      	        		DbSelectArea("SZF")
-                		DbSetOrder(1)
-       	     			DbSeek(xFilial("SZF")+cGet1TBo, .t.)
-       					If Found()
-                			RecLock("SZF", .f.)
-                    			DbDelete()
-                    		MsUnLock()
-                		Else
-							MsgBox("Borderô não foi excluído. Verifique na no cadastro de borderôs", "Informação", "INFO")
-                		Endif
-                		DbSelectArea("SZF")
-                		DbCloseArea()			
-            		Endif   
-      	 	Endif
-       		DbSelectArea("SZG")
-       		DbCloseArea()
+	Local cBusTipo :=""
+	If Empty(cGet1TBo) .or. Empty(cGet2TBo)
+		MsgStop("A transferência não poderá ser realizada devido a um dos borderos estarem em branco.")
+		Return
+	Endif
+	cStrSZG := "('"
+	cStrZZC := "('"
+	cBusTipo:= Posicione("SZF", 1, xFilial("SZF")+cGet1TBo, "ZF_TIPOBOR")
+	DbSelectArea("TMPTBO")
+	DbGoTop()
+	While !Eof()
+		If IsMark("MARCA", cMarca)
+			cStrSZG += TMPTBO->PEDID+"', '"
+			cStrZZC += SubStr(TMPTBO->PEDID, 3, 6)+"', '"
+		Endif
+		DbSelectArea("TMPTBO")
+		DbSkip()
+	EndDo
+	cStrSZG := SubStr(cStrSZG, 1, Len(cStrSZG)-3)+")"
+	cStrZZC := SubStr(cStrZZC, 1, Len(cStrZZC)-3)+")"
 
-       		oDlg1TBo:End()
-	   Else
-			MsgBox("É preciso marcar algum pedido antes de tentar transferir", "Atenção", "INFO")
-			oBrw1TBo:oBrowse:SetFocus()
-			oBrw1TBo:oBrowse:Refresh()
-	   Endif		
-		
+	If Len(Alltrim(cStrSZG)) >5 // Verificar se existe pelo menos um pedido marcado
+
+		// CRIAR NOVO BORDERÔ DE PEDIDOS CASO SEJA ESCOLHIDO UM NOVO
+		DbSelectArea("SZF")
+		DbSetOrder(1)
+		DbSeek(xFilial("SZF")+cGet2TBo, .t.)
+		If !Found()
+			If MsgYesNo("Confirma a transferência do(s) pedido(s) marcado(s) para o novo borderô de número "+cGet2TBo+" ?", "Atenção")
+				RecLock("SZF", .t.)
+				SZF->ZF_FILIAL  := xFilial("SZF")
+				SZF->ZF_CODIGO  := cGet2TBo
+				SZF->ZF_EMISSAO := dDataBase
+				SZF->ZF_FLAG    := 'D'
+				If GetMv("MV_XHABBOR")
+					SZF->ZF_TIPOBOR := cBusTipo  // TRAZER PARA UM NOVO BORDERO O TIPO DO BORDERO ANTIGO
+				Endif
+				MsUnlock()
+				DbSelectArea("SZF")
+				DbCloseArea()
+			Else
+				Return
+			Endif
+		Endif
+
+		//TROCAR SZG  -- ITENS BORDERO DE PEDIDOS
+		cQry1 := " "
+		cQry1 += " UPDATE SZG010 "
+		cQry1 += "SET ZG_CODIGO = '"+cGet2TBo+"' "
+		cQry1 += "WHERE ZG_FILIAL = '"+xFilial("SZG")+"' "
+		cQry1 += "  AND D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZG_PEDIDO IN "+cStrSZG
+		TCSQLExec(cQry1)
+		//TROCAR ZZC    -- SEPARAÇÃO DE PRODUTOS
+		cQry1 := " "
+		cQry1 += "UPDATE ZZC010 "
+		cQry1 += "SET ZZC_BORDER = '"+cGet2TBo+"' "
+		cQry1 += "WHERE ZZC_FILIAL = '"+xFilial("ZZC")+"' "
+		cQry1 += "  AND D_E_L_E_T_ = '' "
+		cQry1 += "  AND ZZC_PEDIDO IN "+cStrZZC
+		TCSQLExec(cQry1)
+
+		DbSelectArea("SZG")
+		DbSetOrder(1)
+		DbSeek(xFilial("SZG")+cGet1TBo,.t.)
+		If !Found()
+			If MsgYesNo("O borderô de número "+cGet1TBo+" ficou vazio após a transferência. Deseja Excluí-lo ?", "Atenção")
+				DbSelectArea("SZF")
+				DbSetOrder(1)
+				DbSeek(xFilial("SZF")+cGet1TBo, .t.)
+				If Found()
+					RecLock("SZF", .f.)
+					DbDelete()
+					MsUnLock()
+				Else
+					MsgBox("Borderô não foi excluído. Verifique na no cadastro de borderôs", "Informação", "INFO")
+				Endif
+				DbSelectArea("SZF")
+				DbCloseArea()
+			Endif
+		Endif
+		DbSelectArea("SZG")
+		DbCloseArea()
+
+		oDlg1TBo:End()
+	Else
+		MsgBox("É preciso marcar algum pedido antes de tentar transferir", "Atenção", "INFO")
+		oBrw1TBo:oBrowse:SetFocus()
+		oBrw1TBo:oBrowse:Refresh()
+	Endif
+
 Return
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -6468,73 +6215,73 @@ Return
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 
 User Function REMONPED()
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de cVariable dos componentes                                 ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     Private cMGet1Re  
-     Private oTempTblA
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	Private cMGet1Re
+	Private oTempTblA
 
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Declaração de Variaveis Private dos Objetos                             ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     SetPrvt("oDlg1Rem", "oBrw1Rem", "oBtn1Rem", "oBtn2Rem", "oGrp1Rem", "oMGet1Re", "oBtn3Rem")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oDlg1Rem", "oBrw1Rem", "oBtn1Rem", "oBtn2Rem", "oGrp1Rem", "oMGet1Re", "oBtn3Rem")
 
-     /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
      ±± Definicao do Dialog e todos os seus componentes.                        ±±
-     Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-     oDlg1Rem   := MSDialog():New( 287, 235, 766, 1217, "Re-Monta Borderô de Pedidos", , , .F., , , , , , .T., , , .T. )
-     oTbl1Rem()
-     DbSelectArea("TMPREM")
-     oBrw1Rem   := MsSelect():New( "TMPREM", "MARCA", "", { {"PEDID", "", "Pedido", ""}, {"CLIEN", "", "Cliente", ""}, {"VOLUM", "", "Volume", ""}, {"CARGA", "", "Carga", ""}, {"_LOCAL", "", "Localizacao", "@!"}, {"ESTOQ", "", "Estoque", "@E 9999999999"}, {"NAOES", "", "Não Est.", "@E 9999999999"}, {"PERSE", "", "% Separado", "@R 999.99%"} }, .F., , {020, 004, 140, 480}, , , oDlg1Rem ) 
-     oBrw1Rem:oBrowse:bChange := { || fTrocaPed() }
-     oBtn1Rem   := TButton():New( 004, 412, "Sair"     , oDlg1Rem, { || oDlg1Rem:End() }, 068, 012, , , , .T., , "", , , , .F. )
-     //oBtn2Rem   := TButton():New( 004, 208, "Transfere", oDlg1Rem, , 068, 012, , , , .T., , "", , , , .F. )
-     oGrp1Rem   := TGroup():New( 144, 004, 232, 480, "Itens Faltantes", oDlg1Rem, CLR_BLACK, CLR_WHITE, .T., .F. )
-     oMGet1Re   := TMultiGet():New( 152, 008, {|u| If(PCount() > 0, cMGet1Re := u, cMGet1Re)}, oGrp1Rem, 468, 076, , , CLR_BLACK, CLR_WHITE, , .T., "", , , .F., .F., .F., , , .F., , )
-     //oBtn3Rem   := TButton():New( 004, 004, "Novo Bordero", oDlg1Rem, , 068, 012, , , , .T., , "", , , , .F. )
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	oDlg1Rem   := MSDialog():New( 287, 235, 766, 1217, "Re-Monta Borderô de Pedidos", , , .F., , , , , , .T., , , .T. )
+	oTbl1Rem()
+	DbSelectArea("TMPREM")
+	oBrw1Rem   := MsSelect():New( "TMPREM", "MARCA", "", { {"PEDID", "", "Pedido", ""}, {"CLIEN", "", "Cliente", ""}, {"VOLUM", "", "Volume", ""}, {"CARGA", "", "Carga", ""}, {"_LOCAL", "", "Localizacao", "@!"}, {"ESTOQ", "", "Estoque", "@E 9999999999"}, {"NAOES", "", "Não Est.", "@E 9999999999"}, {"PERSE", "", "% Separado", "@R 999.99%"} }, .F., , {020, 004, 140, 480}, , , oDlg1Rem )
+	oBrw1Rem:oBrowse:bChange := { || fTrocaPed() }
+	oBtn1Rem   := TButton():New( 004, 412, "Sair"     , oDlg1Rem, { || oDlg1Rem:End() }, 068, 012, , , , .T., , "", , , , .F. )
+	//oBtn2Rem   := TButton():New( 004, 208, "Transfere", oDlg1Rem, , 068, 012, , , , .T., , "", , , , .F. )
+	oGrp1Rem   := TGroup():New( 144, 004, 232, 480, "Itens Faltantes", oDlg1Rem, CLR_BLACK, CLR_WHITE, .T., .F. )
+	oMGet1Re   := TMultiGet():New( 152, 008, {|u| If(PCount() > 0, cMGet1Re := u, cMGet1Re)}, oGrp1Rem, 468, 076, , , CLR_BLACK, CLR_WHITE, , .T., "", , , .F., .F., .F., , , .F., , )
+	//oBtn3Rem   := TButton():New( 004, 004, "Novo Bordero", oDlg1Rem, , 068, 012, , , , .T., , "", , , , .F. )
 
-     oDlg1Rem:Activate(,,,.T.)
-     DbSelectArea("TMPREM")
-     DbCloseArea()
-     oTempTblA:Delete()
+	oDlg1Rem:Activate(,,,.T.)
+	DbSelectArea("TMPREM")
+	DbCloseArea()
+	oTempTblA:Delete()
 Return
 
 Static Function fTrocaPed()
-       If TMPREM->PERSE < 100
-          cObsMsg := "| QTDE. PRODUTO          DESCRIÇÃO                      VOLUME     LOCALIZAÇÃO     PRX. DESP.            |"+CHR(13)+CHR(10)
-          cObsMsg += "+--------------------------------------------------------------------------------------------------------+"+CHR(13)+CHR(10)
-          
-          cMGet1Re := cObsMsg
-       Else
-          cMGet1Re := ""
-       Endif
-       oMGet1Re:Refresh()
+	If TMPREM->PERSE < 100
+		cObsMsg := "| QTDE. PRODUTO          DESCRIÇÃO                      VOLUME     LOCALIZAÇÃO     PRX. DESP.            |"+CHR(13)+CHR(10)
+		cObsMsg += "+--------------------------------------------------------------------------------------------------------+"+CHR(13)+CHR(10)
+
+		cMGet1Re := cObsMsg
+	Else
+		cMGet1Re := ""
+	Endif
+	oMGet1Re:Refresh()
 Return
 
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ oTbl1Rem() - Cria temporario para o Alias: TMPREM
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function oTbl1Rem()
-       Local aFds := {}
-       //Local cTmp
+	Local aFds := {}
+	//Local cTmp
 
-       aAdd( aFds, {"MARCA", "C", 002, 000} )
-       aAdd( aFds, {"PEDID", "C", 006, 000} )
-       aAdd( aFds, {"CLIEN", "C", 042, 000} )
-       aAdd( aFds, {"VOLUM", "N", 004, 000} )
-       aAdd( aFds, {"CARGA", "C", 006, 000} )
-       aAdd( aFds, {"_LOCAL", "C", 009, 000} )
-       aAdd( aFds, {"PERSE", "N", 006, 002} )
-       aAdd( aFds, {"JASEP", "N", 010, 000} )
-       aAdd( aFds, {"NASEP", "N", 010, 000} )
-       aAdd( aFds, {"ESTOQ", "N", 010, 000} )
-       aAdd( aFds, {"NAOES", "N", 010, 000} )
+	aAdd( aFds, {"MARCA", "C", 002, 000} )
+	aAdd( aFds, {"PEDID", "C", 006, 000} )
+	aAdd( aFds, {"CLIEN", "C", 042, 000} )
+	aAdd( aFds, {"VOLUM", "N", 004, 000} )
+	aAdd( aFds, {"CARGA", "C", 006, 000} )
+	aAdd( aFds, {"_LOCAL", "C", 009, 000} )
+	aAdd( aFds, {"PERSE", "N", 006, 002} )
+	aAdd( aFds, {"JASEP", "N", 010, 000} )
+	aAdd( aFds, {"NASEP", "N", 010, 000} )
+	aAdd( aFds, {"ESTOQ", "N", 010, 000} )
+	aAdd( aFds, {"NAOES", "N", 010, 000} )
 
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-/*     cTmp := CriaTrab( aFds, .T. )
+	/********************************************************************************************************************************/
+	/*** BLOCO ALTERADO EM 28/10/2019 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
+	/*     cTmp := CriaTrab( aFds, .T. )
        Use (cTmp) Alias TMPREM New Exclusive
-*/
+	*/
 	//cTmp := U_NovoArqTrab("dbf")
 	//dbcreate(cTmp+".dbf", aFds, "DBFCDXADS")
 	//Use (cTmp+".Dbf") Alias "TMPREM" VIA "DBFCDXADS" New Exclusive
@@ -6546,7 +6293,7 @@ Static Function oTbl1Rem()
 	oTempTblA:AddIndex( "cInd01", { "STR(PERSE   )" } )
 	oTempTblA:AddIndex( "cInd02", { "PEDID" } )
 	oTempTblA:Create()
-       /********************************************************************************************************************************/
+	/********************************************************************************************************************************/
 	cQry1 := ""
 	cQry1 += "SELECT ZZC.ZZC_BORDER, ZZC.ZZC_CARGA, ZZC.ZZC_PEDIDO, ZZC.ZZC_SEPARA, SUM(ZZC.ZZC_VOLUME) AS QTDE, SC5.C5_CLIENTE+'/'+SC5.C5_LOJACLI+' - '+SA1.A1_NOME AS CLIENTE, SZG.ZG_LOCALIZ "
 	cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC WITH (NOLOCK) "
@@ -6585,7 +6332,7 @@ Static Function oTbl1Rem()
 			cQry1 += "  AND SC6.C6_NUM      = '"+TCQ->ZZC_PEDIDO+"' "
 			cQry2 := "  AND SB2.B2_LOCALIZ <> '' "
 			cQry3 := "  AND SB2.B2_LOCALIZ  = '' "
-                /* Itens em Estoque */
+			/* Itens em Estoque */
 			cQryA := cQry1 + cQry2
 			TCQuery cQryA ALIAS "TMPEST" NEW
 			DbSelectArea("TMPEST")
@@ -6594,7 +6341,7 @@ Static Function oTbl1Rem()
 			DbSelectArea("TMPEST")
 			DbCloseArea()
 
-                /* Itens não Estoque */
+			/* Itens não Estoque */
 			cQryA := cQry1 + cQry3
 			TCQuery cQryA ALIAS "TMPEST" NEW
 			DbSelectArea("TMPEST")
@@ -6632,47 +6379,47 @@ Return
 
 //  Jose   05/05/2025 -----------------------------------------------------------------------
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-Function  ³ fIEtProA() - Impressão da Etiqueta com a localização Provisório Araraquara                     
+Function  ³ fIEtProA() - Impressão da Etiqueta com a localização Provisório Araraquara
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fIEtProA()  // Jose 24/04/2025
 
-    //Verificação de Impressora ativa
-    //oPrint   := TMSPrinter():New("Impressão de Etiquetas")
-    //lPrinter := oPrint:IsPrinterActive()
+	//Verificação de Impressora ativa
+	//oPrint   := TMSPrinter():New("Impressão de Etiquetas")
+	//lPrinter := oPrint:IsPrinterActive()
 
 
-    If ALLTRIM(cLocProA) = ""
-       Messagebox("Sem Local Padrão Araraquara!","Atenção",48)
-       Return
-    EndIF
-	 cModelo   := "ZEBRA"
-    cPorta    := "LPT1" //Porta da impressora
-    nTam      := 120    //Tamanho da etiqueta
-    lTipo     := .f.    //.f.=Local; .t.=Servidor ou Outro Servidor
-    lDrvWin   := .t.    //Usa Drive do Windows
+	If ALLTRIM(cLocProA) = ""
+		Messagebox("Sem Local Padrão Araraquara!","Atenção",48)
+		Return
+	EndIF
+	cModelo   := "ZEBRA"
+	cPorta    := "LPT1" //Porta da impressora
+	nTam      := 120    //Tamanho da etiqueta
+	lTipo     := .f.    //.f.=Local; .t.=Servidor ou Outro Servidor
+	lDrvWin   := .t.    //Usa Drive do Windows
 
-    MSCBPRINTER(cModelo, cPorta, , nTam, lTipo, , , , , , lDrvWin)
-       
-    If !MSCBIsPrinter('LPT1')
-       Messagebox("Impressora não encontrada!","Atenção",48)
-       MSCBCLOSEPRINTER()
-    Else   
-	    MSCBBEGIN(1, 6, , .f.)
-	  /*
+	MSCBPRINTER(cModelo, cPorta, , nTam, lTipo, , , , , , lDrvWin)
+
+	If !MSCBIsPrinter('LPT1')
+		Messagebox("Impressora não encontrada!","Atenção",48)
+		MSCBCLOSEPRINTER()
+	Else
+		MSCBBEGIN(1, 6, , .f.)
+		/*
 		 MB01 - Interleaved 2 of 5 / EAN14
-	 	 MB02 - Code 39 
-		 MB03 - EAN 8 
-		 MB04 - EAN 13 
-		 MB05 - UPC A 
-		 MB06 - UPC E 
-		 MB07 - CODE 128 
-     */
-	MSCBSAYBAR(20, 05, ALLTRIM(cLocProA), "N", "MB07", 10, .F., .T., .F., , 3, 2) // Jose 28/05/2025 15, 01 ,08,
-	MSCBSay(15,40," "+Alltrim(cLocProA) ,"N","0","190,120") // Jose 28/05/2025  03,17    "100,100"
-	MSCBCHKSTATUS(.f.)
-	cText := MSCBEND()
-	MSCBCLOSEPRINTER()
-Endif
+	 	 MB02 - Code 39
+		 MB03 - EAN 8
+		 MB04 - EAN 13
+		 MB05 - UPC A
+		 MB06 - UPC E
+		 MB07 - CODE 128
+		*/
+		MSCBSAYBAR(20, 05, ALLTRIM(cLocProA), "N", "MB07", 10, .F., .T., .F., , 3, 2) // Jose 28/05/2025 15, 01 ,08,
+		MSCBSay(15,40," "+Alltrim(cLocProA) ,"N","0","190,120") // Jose 28/05/2025  03,17    "100,100"
+		MSCBCHKSTATUS(.f.)
+		cText := MSCBEND()
+		MSCBCLOSEPRINTER()
+	Endif
 
 Return
 // Até Aqui Jose 05/05/2025 ----------------------------------------------------------------------------------
@@ -6680,58 +6427,58 @@ Return
 
 // Jose 07/05/2025 por Solicitação do André TI ---------------------------------------------------------------
 User Function fArLoc2()
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Declaração de cVariable dos componentes                                 ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   Private cGetCod := Space(15)
-   Private cCodPro := Space(12)
-   Private cGetFix := Space(15)
-   Private cDesPro := Space(35)
-   Private cMarca  := GetMark()
-   Private cNumOrd := "000"
-   Private lCheck  :=.T.
-   
-   //If Empty(StrTran(StrTran(cCodPro, '.'), '-'))
-   //   MsgStop("Favor informar o código do produto...")
-   //   Return
-   //Endif
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	Private cGetCod := Space(15)
+	Private cCodPro := Space(12)
+	Private cGetFix := Space(15)
+	Private cDesPro := Space(35)
+	Private cMarca  := GetMark()
+	Private cNumOrd := "000"
+	Private lCheck  :=.T.
+
+	//If Empty(StrTran(StrTran(cCodPro, '.'), '-'))
+	//   MsgStop("Favor informar o código do produto...")
+	//   Return
+	//Endif
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Declaração de Variaveis Private dos Objetos                             ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   SetPrvt("oFont1", "oDlg2", "oGetCod", "oGetDes", "oBtnVol", "oBtnCon", "oBrwLoc", "oBtnDel","oBtnAlt","oDesPro","oGetFix")
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	SetPrvt("oFont1", "oDlg2", "oGetCod", "oGetDes", "oBtnVol", "oBtnCon", "oBrwLoc", "oBtnDel","oBtnAlt","oDesPro","oGetFix")
 
-   /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+	/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
    ±± Definicao do Dialog e todos os seus componentes.                        ±±
-   Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-   oFont1     := TFont():New( "MS Sans Serif",0,-18,,.F.,0,,600,.F.,.F.,,,,,, )
-   oDlg4      := MSDialog():New( 187,322,491,850,"Manutenção de localização de produtos",,,.F.,,,,,,.T.,,,.T. )
-   oCodPro    := TGet():New( 010,004,{|u| If(PCount()> 0,CCODPRO:=u,CCODPRO)},oDlg4,080,15,'@!',,CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F., "", "cCodPro", , )
-   //oCodPro:bLostFocus := {|| fCodPr2(), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl1(2)}, "Aguarde...", "Buscando dados..."), ), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl2(2)}, "Aguarde...", "Buscando dados..."), )}
-   oCodPro:bLostFocus := {|| fCodPr2(),  Iif(!Empty(cCodPro), MsAguarde( {||  oTblLoc()}, "Aguarde...", "Buscando dados..."), ) }
-   oDesPro    := TGet():New( 010,088,{|u| If(PCount()> 0,cDesPro:=u,cDesPro)},oDlg4, 180, 15,'' , , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .T., .F., "", "cDesPro", , )
-   oGetCod    := TGet():New( 034,004,{|u| If(PCount()>0,cGetCod:=u,cGetCod)},oDlg4,080,015,'',,CLR_BLACK,CLR_WHITE,oFont1,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","cGetCod",,)
-   oGetFix    := TGet():New( 034,170,{|u| If(PCount()>0,cGetFix:=u,cGetFix)},oDlg4,080,015,'',,CLR_BLACK,CLR_WHITE,oFont1, , , .T., "", , , .F., .F., , .T., .F., "","cGetFix",,)
-   oTblLoc()
+	Ù±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+	oFont1     := TFont():New( "MS Sans Serif",0,-18,,.F.,0,,600,.F.,.F.,,,,,, )
+	oDlg4      := MSDialog():New( 187,322,491,850,"Manutenção de localização de produtos",,,.F.,,,,,,.T.,,,.T. )
+	oCodPro    := TGet():New( 010,004,{|u| If(PCount()> 0,CCODPRO:=u,CCODPRO)},oDlg4,080,15,'@!',,CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .F., .F., "", "cCodPro", , )
+	//oCodPro:bLostFocus := {|| fCodPr2(), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl1(2)}, "Aguarde...", "Buscando dados..."), ), Iif(!Empty(cCodPro), MsAguarde( {|| oTbl2(2)}, "Aguarde...", "Buscando dados..."), )}
+	oCodPro:bLostFocus := {|| fCodPr2(),  Iif(!Empty(cCodPro), MsAguarde( {||  oTblLoc()}, "Aguarde...", "Buscando dados..."), ) }
+	oDesPro    := TGet():New( 010,088,{|u| If(PCount()> 0,cDesPro:=u,cDesPro)},oDlg4, 180, 15,'' , , CLR_BLACK, CLR_WHITE, oFont1, , , .T., "", , , .F., .F., , .T., .F., "", "cDesPro", , )
+	oGetCod    := TGet():New( 034,004,{|u| If(PCount()>0,cGetCod:=u,cGetCod)},oDlg4,080,015,'',,CLR_BLACK,CLR_WHITE,oFont1,,,.T.,"",,,.F.,.F.,,.F.,.F.,"","cGetCod",,)
+	oGetFix    := TGet():New( 034,170,{|u| If(PCount()>0,cGetFix:=u,cGetFix)},oDlg4,080,015,'',,CLR_BLACK,CLR_WHITE,oFont1, , , .T., "", , , .F., .F., , .T., .F., "","cGetFix",,)
+	oTblLoc()
 
-   DbSelectArea("LOC")
-   DbSetOrder(1)
-   oBrwLoc    := MsSelect():New( "LOC","LOC_DEL","",{ {"LOC_DEL", "", "", ""}, {"LOC_ORD", "", "Ordem", "@!"}, {"LOC_LOC", "", "Localizacao", "@!"}},.F.,cMarca,{054,004,124,228},,, oDlg4 )
-   oBrwLoc:bAval := {||TMPLocM()}
+	DbSelectArea("LOC")
+	DbSetOrder(1)
+	oBrwLoc    := MsSelect():New( "LOC","LOC_DEL","",{ {"LOC_DEL", "", "", ""}, {"LOC_ORD", "", "Ordem", "@!"}, {"LOC_LOC", "", "Localizacao", "@!"}},.F.,cMarca,{054,004,124,228},,, oDlg4 )
+	oBrwLoc:bAval := {||TMPLocM()}
 
-   oBrwLoc:oBrowse:lHasMark := .T.
-   oBrwLoc:oBrowse:lCanAllmark := .F.
+	oBrwLoc:oBrowse:lHasMark := .T.
+	oBrwLoc:oBrowse:lCanAllmark := .F.
 
-   oBtnDel    := TButton():New  ( 135,004,"Deleta"  ,oDlg4,{ || fDelIte() } ,037,015,,,,.T.,,"",,,,.F. )
-   oBtnAlt    := TButton():New  ( 135,064,"Altera"  ,oDlg4,{ || fAltIte() } ,037,015,,,,.T.,,"",,,,.F. )
-   oBtnAdd    := TButton():New  ( 135,124,"Adiciona",oDlg4,{ || fAddIte() } ,037,015,,,,.T.,,"",,,,.F. )
-   oBtnVol    := TButton():New  ( 135,184,"Voltar"  ,oDlg4,{ || oDlg4:End()},037,015,,,,.T.,,"",,,,.F. )
-   //oCBox1     := TCheckBox():New( 108,090,"Etiqueta",{|u| If(PCount() > 0, lCheck := u, lCheck)},oDlg4,080,012,,,oFont,,CLR_BLUE ,CLR_WHITE,,.t.,"Imprime Etiqueta Localização",, )?????
-   lCheck :=.F.
-   oCodPro:SetFocus()
-   oDlg4:Activate(,,,.T.)
-   
-   DbSelectArea("LOC")
-   DbCloseArea()
+	oBtnDel    := TButton():New  ( 135,004,"Deleta"  ,oDlg4,{ || fDelIte() } ,037,015,,,,.T.,,"",,,,.F. )
+	oBtnAlt    := TButton():New  ( 135,064,"Altera"  ,oDlg4,{ || fAltIte() } ,037,015,,,,.T.,,"",,,,.F. )
+	oBtnAdd    := TButton():New  ( 135,124,"Adiciona",oDlg4,{ || fAddIte() } ,037,015,,,,.T.,,"",,,,.F. )
+	oBtnVol    := TButton():New  ( 135,184,"Voltar"  ,oDlg4,{ || oDlg4:End()},037,015,,,,.T.,,"",,,,.F. )
+	//oCBox1     := TCheckBox():New( 108,090,"Etiqueta",{|u| If(PCount() > 0, lCheck := u, lCheck)},oDlg4,080,012,,,oFont,,CLR_BLUE ,CLR_WHITE,,.t.,"Imprime Etiqueta Localização",, )?????
+	lCheck :=.F.
+	oCodPro:SetFocus()
+	oDlg4:Activate(,,,.T.)
+
+	DbSelectArea("LOC")
+	DbCloseArea()
 
 Return
 
@@ -6740,137 +6487,137 @@ Return
 Function  ³ fCodPr2() - Busca informações de tela após da digitação do código de barras ou do produto
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 Static Function fCodPr2()
-   
-   cCodPro   := StrTran(StrTran(cCodPro, '-'), '.')
-   cGetFix   := Space(15)
-   oGetFix:Refresh()
 
-   If Empty(cCodPro)
-      Return
-   ElseIf SubStr(cCodPro, 1, 3) $ '789'
-      DbSelectArea("SB1")
-      DbSetOrder(5)
-      DbSeek(xFilial("SB1")+Substr(cCodPro,1,12), .t.)
-      If !Found()
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(15)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         oCodPro:SetFocus()
-         Return(.f.)
-      Else
-         If !SB1->B1_TIPO $ 'PA'
-            ApMsgStop("Codigo Inválido !!!")
-            cCodPro := space(15)
-            oCodPro:Refresh()
-            cDesPro := space(30)
-            oDesPro:Refresh()
-            oCodPro:SetFocus()
-            Return(.f.)
-         Else
-            cCodPro := SB1->B1_COD
-         Endif
-      Endif
-   ElseIf Len(Alltrim(cCodPro)) == 42
-      DbSelectArea("SB1")
-      DbSetOrder(5)
-      DbSeek(xFilial("SB1")+Substr(cCodPro,04,12), .t.)      
-      If !Found()
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(42)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         cLocPro := space(15)
-         oCodPro:SetFocus()
-         cLocPro := space(15)
-         Return(.f.)
-      Else
-         If !SB1->B1_TIPO $ 'PA'
-            ApMsgStop("Codigo Inválido !!!")
-            cCodPro := space(42)
-            oCodPro:Refresh()
-            cDesPro := space(30)
-            oDesPro:Refresh()
-            oCodPro:SetFocus()
-            Return(.f.)
-         Else
-            cCodPro := SB1->B1_COD
-         Endif
-      Endif
-   Endif
+	cCodPro   := StrTran(StrTran(cCodPro, '-'), '.')
+	cGetFix   := Space(15)
+	oGetFix:Refresh()
 
-   If Len(Alltrim(cCodPro)) == 14
-      DbSelectArea("SC2")
-      DbSetOrder(13)
-      DbSeek(xFilial("SC2")+Alltrim(Substr(cCodPro,1,6)), .t.)
-      If Found()
-         While !(SC2->(Eof())) .AND. (XFilial("SC2") == SC2->C2_FILIAL) .AND. (Substr(cCodPro,1,6) == Alltrim(SC2->C2_LOTE))
-            If Substr(cCodPro,7,2) == Substr(SC2->C2_PRODUTO,11,2)
-               cCodPro := (SC2->C2_PRODUTO)
-            Endif
-            DbSelectArea("SC2")
-            DbSkip()       
-         Enddo
-      Else
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(15)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         oCodPro:SetFocus()
-         Return(.f.)
-      Endif?    
-      DbSelectArea("SC2")
-      DbCloseArea()
-   Endif
+	If Empty(cCodPro)
+		Return
+	ElseIf SubStr(cCodPro, 1, 3) $ '789'
+		DbSelectArea("SB1")
+		DbSetOrder(5)
+		DbSeek(xFilial("SB1")+Substr(cCodPro,1,12), .t.)
+		If !Found()
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(15)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			oCodPro:SetFocus()
+			Return(.f.)
+		Else
+			If !SB1->B1_TIPO $ 'PA'
+				ApMsgStop("Codigo Inválido !!!")
+				cCodPro := space(15)
+				oCodPro:Refresh()
+				cDesPro := space(30)
+				oDesPro:Refresh()
+				oCodPro:SetFocus()
+				Return(.f.)
+			Else
+				cCodPro := SB1->B1_COD
+			Endif
+		Endif
+	ElseIf Len(Alltrim(cCodPro)) == 42
+		DbSelectArea("SB1")
+		DbSetOrder(5)
+		DbSeek(xFilial("SB1")+Substr(cCodPro,04,12), .t.)
+		If !Found()
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(42)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			cLocPro := space(15)
+			oCodPro:SetFocus()
+			cLocPro := space(15)
+			Return(.f.)
+		Else
+			If !SB1->B1_TIPO $ 'PA'
+				ApMsgStop("Codigo Inválido !!!")
+				cCodPro := space(42)
+				oCodPro:Refresh()
+				cDesPro := space(30)
+				oDesPro:Refresh()
+				oCodPro:SetFocus()
+				Return(.f.)
+			Else
+				cCodPro := SB1->B1_COD
+			Endif
+		Endif
+	Endif
 
-   DbSelectArea("SB1")
-   DbSetOrder(1)
-   DbSeek(xFilial("SB1")+cCodPro, .t.)
-   If !Found()
-      ApMsgStop("Codigo Inválido !!!")
-      cCodPro := space(18)
-      oCodPro:Refresh()
-      cDesPro := space(30)
-      oDesPro:Refresh()
-      oCodPro:SetFocus()
-      Return(.f.)
-   Else
-      If !SB1->B1_TIPO $ 'PA' .and. !Substr(Alltrim(cCodPro),4,2) $ '96.97.98.99'
-         ApMsgStop("Codigo Inválido !!!")
-         cCodPro := space(18)
-         oCodPro:Refresh()
-         cDesPro := space(30)
-         oDesPro:Refresh()
-         oCodPro:SetFocus()
-         Return(.f.)
-      Else
-         //cCodPro := TransForm(SB1->B1_COD, "@R! XX 99.99.999-99")
-         cCodPro := SB1->B1_COD
-         oCodPro:Refresh()
-         cDesPro := SB1->B1_DESC
-         oDesPro:Refresh()
-         DbSelectArea("SB2")
-         DbSetOrder(1)
-         DbSeek(xFilial("SB2")+SB1->B1_COD+'A3', .t.)
-         If !Found()
-            cGetFix := space(15)
-            oGetFix:Refresh()
-         Else
-            cGetFix := SB2->B2_LOCALIZ
-            oGetFix:Refresh()
-         Endif
-      Endif
-   Endif
-   If ChkFile("LOC")
-      DbSelectArea("LOC")
-      DbCloseArea()
-      oTblLoc()
-   Endif
-   oBrwLoc:oBrowse:Refresh()
-   oGetCod:SetFocus()
-Return
+	If Len(Alltrim(cCodPro)) == 14
+		DbSelectArea("SC2")
+		DbSetOrder(13)
+		DbSeek(xFilial("SC2")+Alltrim(Substr(cCodPro,1,6)), .t.)
+		If Found()
+			While !(SC2->(Eof())) .AND. (XFilial("SC2") == SC2->C2_FILIAL) .AND. (Substr(cCodPro,1,6) == Alltrim(SC2->C2_LOTE))
+				If Substr(cCodPro,7,2) == Substr(SC2->C2_PRODUTO,11,2)
+					cCodPro := (SC2->C2_PRODUTO)
+				Endif
+				DbSelectArea("SC2")
+				DbSkip()
+			Enddo
+		Else
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(15)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			oCodPro:SetFocus()
+			Return(.f.)
+			Endif?
+			DbSelectArea("SC2")
+			DbCloseArea()
+		Endif
 
-//  Até Aqui Jose 07/05/2025 por Solicitação do André TI -------------------------------------------------------
+		DbSelectArea("SB1")
+		DbSetOrder(1)
+		DbSeek(xFilial("SB1")+cCodPro, .t.)
+		If !Found()
+			ApMsgStop("Codigo Inválido !!!")
+			cCodPro := space(18)
+			oCodPro:Refresh()
+			cDesPro := space(30)
+			oDesPro:Refresh()
+			oCodPro:SetFocus()
+			Return(.f.)
+		Else
+			If !SB1->B1_TIPO $ 'PA' .and. !Substr(Alltrim(cCodPro),4,2) $ '96.97.98.99'
+				ApMsgStop("Codigo Inválido !!!")
+				cCodPro := space(18)
+				oCodPro:Refresh()
+				cDesPro := space(30)
+				oDesPro:Refresh()
+				oCodPro:SetFocus()
+				Return(.f.)
+			Else
+				//cCodPro := TransForm(SB1->B1_COD, "@R! XX 99.99.999-99")
+				cCodPro := SB1->B1_COD
+				oCodPro:Refresh()
+				cDesPro := SB1->B1_DESC
+				oDesPro:Refresh()
+				DbSelectArea("SB2")
+				DbSetOrder(1)
+				DbSeek(xFilial("SB2")+SB1->B1_COD+'A3', .t.)
+				If !Found()
+					cGetFix := space(15)
+					oGetFix:Refresh()
+				Else
+					cGetFix := SB2->B2_LOCALIZ
+					oGetFix:Refresh()
+				Endif
+			Endif
+		Endif
+		If ChkFile("LOC")
+			DbSelectArea("LOC")
+			DbCloseArea()
+			oTblLoc()
+		Endif
+		oBrwLoc:oBrowse:Refresh()
+		oGetCod:SetFocus()
+		Return
+
+		//  Até Aqui Jose 07/05/2025 por Solicitação do André TI -------------------------------------------------------
