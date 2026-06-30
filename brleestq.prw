@@ -55,7 +55,7 @@ Static Function BRLEEST01()
 
     If .NOT. Empty(cArquivo)
         MsAguarde({|| BRLEEST02(@cArquivo) },"Aguarde","Verificando as informações do arquivo..")
-    else
+    Else
         FWAlertInfo("Não foi Selecionado Arquivo!!", "Nao Selecionado")
     End
 Return
