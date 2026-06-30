@@ -4,29 +4,26 @@
 #include 'topconn.ch'
 #xtranslate bSETGET(<uVar>) => { | u | If( PCount() == 0, <uVar>, <uVar> := u ) }
 
-
-/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-  ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-  ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-  ±±ºPrograma  ³ BRPCPX04 ºAutor  ³ Luís G. de Souza   º Data ³  25/11/04   º±±
-  ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-  ±±ºDesc.     ³ Lançamento das ordens de produções em batch.               º±±
-  ±±º          ³                                                            º±±
-  ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-  ±±ºUso       ³ Brasilux Tintas Técnicas Ltda.                             º±±
-  ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-  ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-  ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-  Alterações: Cleber Orati Domingues -> Utilizaçào de SigaAuto - BRPCP013
+/*/{Protheus.doc} BRPCPX04
+Lançamento das ordens de produções em batch.  
+@type function Processamento
+@version 1.00  
+@author Luís G. de Souza  / Alterado por marioantonaccio
+@since 25/11/04 / alterado em 06/05/2026
+@return character, sem retorno
+@see
+Cleber Orati Domingues -> Utilizaçào de SigaAuto - BRPCP013
               Luís Gustavo de Souza  -> Melhorias nas telas do programa, alteração
                                         nos nomes das funções, utilização de objetos,
                                         implementação de função para geração de arquivo
                                         para dosador
               Cleber(03/03/15) -> Melhoria no bloqueio que impede que mais de 1 pessoa acesse a rotina
-*/
+/*/
 User Function BRPCPX04()
+
      Local aTcq          := {}
      Local aGerTxt       := {}
+<<<<<<< Updated upstream
    //Local cFlagRot      := ""
    //Local cAuxQbr       := ""
    //Local cQbr1Tx       := ""
@@ -36,6 +33,14 @@ User Function BRPCPX04()
    //Local cMsgTel       := ""
      Local cArqBloq, aBloq,_cAreaBloq,cAux
      Local _lOpen        := .F. //LGS#20200204 - Adequação para release 12.1.25
+=======
+     Local cArqBloq     :=" "
+     Local  aBloq       :={}
+     Local  cAreaBloq   :=" "
+     Local  cAux        :=""  
+     Local  lOpen        := .F. //LGS#20200204 - Adequação para release 12.1.25
+     
+>>>>>>> Stashed changes
      Private aGerTxtOps  := {}
      Private cCallMenu   := "L"
      Private xLotes           // Tab. c/ os lotes gerados.     
@@ -48,18 +53,20 @@ User Function BRPCPX04()
      Private _cAliasSX3  := GetNextAlias() //LGS#20200204 - Adequação para release 12.1.25
      Private oTempTbl01
      	
-     If !(cNumEmp == "01010101") .AND. !(cNumEmp == "01010104") .AND. !(cNumEmp == "01060101") .AND. !(substr(cNumEmp,1,2) == "05")
-        MSGBOX("Essa empresa não aceita cadastro de lotes de produção","ATENÇÃO...","STOP")
-        Return nil
+     If  .NOT. (cNumEmp $ "01010101/01010104/01060101") .AND. .NOT. (Substr(cNumEmp,1,2) == "05")
+        FWAlertError("Essa empresa não aceita cadastro de lotes de produção","ATENÇÃO...")
+        Return (NIL)
      Endif
+     
      u_zcfga01( 'BRPCPX04' ) //LGS#2021201 - Gravação de log de utilização da rotina
+     
      // ABERTURA DO DICIONÁRIO SX3 - LGS#20200204 - Adequação para release 12.1.25
      OpenSXs( NIL, NIL, NIL, NIL, NIL, _cAliasSX3, "SX3", NIL, .F. )
-     _lOpen := Select( _cAliasSX3 ) > 0
+     lOpen := Select( _cAliasSX3 ) > 0
 
-     If !_lOpen //LGS#20200204 - Adequação para release 12.1.25
-        MessageBox( "Não foi possível abrir o dicionário SX3.", "Atenção...", 16 )
-        Return
+     If .NOT. lOpen //LGS#20200204 - Adequação para release 12.1.25
+        FWAlertWarning( "Não foi possível abrir o dicionário SX3.", "Atenção..." )
+        Return (NIL)
      Endif
 
      SetFunName("MATA650") //LGS#20190507 - Para funcionar a integração com o PPI Multitask
@@ -69,25 +76,26 @@ User Function BRPCPX04()
   	 cRotina  := Stuff(cRotina, Len(cRotina)+1, 10 - Len(cRotina), space(10 - Len(cRotina)))
    	 cAcessos := Posicione("SZW", 4, xFilial("SZW")+cRotina+cCodUsr+SUBSTR(cNumEmp,1,2)+SUBSTR(cNumEmp,FWSizeFilial()+1,2), "ZW_ACESSOS")
 
-   	 lAcs1    := Iif(SubStr(cAcessos, 01, 1) == '*', .t., .f.) //Acessa a rotina
-     lAcs2    := Iif(SubStr(cAcessos, 02, 1) == '*', .t., .f.) // Visualiza envasadores (Antigo Cadastro de Envasadores)
+   	 lAcs1    := Iif(SubStr(cAcessos, 01, 1) == '*', .T., .F.) //Acessa a rotina
+     lAcs2    := Iif(SubStr(cAcessos, 02, 1) == '*', .T., .F.) // Visualiza envasadores (Antigo Cadastro de Envasadores)
 
 	 If !lAcs1
-       	MsgBox("Usuário não possui acesso a essa a essa Rotina", "Atenção", "STOP")
-       	DbSelectArea( _cAliasSX3 )
-       	DbCloseArea()
-       	Return
+       	FWAlertError("Usuário não possui acesso a essa a essa Rotina", "Atenção")
+       	( _cAliasSX3 )->(DbCloseArea())
+       	Return (NIL)
      Endif
 
      // Verificar se tem alguém usando a rotina
      cArqBloq := "BRPCPX04"+Substr(ALLTRIM(cNumEmp),3,6) //Cleber (13/02/20)  -> Reajuste da função  BloqProg
+     
      aBloq := U_BloqProg(cArqBloq) //Retorna matriz com primeira coluna verdadeiro ou falso se tá bloqueado e segunda coluna com nome de quem está bloqueando ou nome da área de trabalho gerada
+    
     if aBloq[1,1] //Já estava bloqueado?
    		cAux := "O programa já está sendo usado por: "+aBloq[1,2]
-		Messagebox(cAux,"Atenção!",48) 		
+		  FWAlertWarning(cAux,"Atenção!") 		
 		Return
-	endif
-	_cAreaBloq := aBloq[1,4]
+	Endif
+	cAreaBloq := aBloq[1,4]
 
 
      
@@ -106,17 +114,20 @@ User Function BRPCPX04()
      //      PutMv("MV_BXOPLAN", "N"+"|"+Alltrim(cUserName)+"|"+Time()+"|"+Dtoc(MsDate()) )
      aTcq = {}    
      AADD( aTcq, { "LOTE", "C", 6, 0 } )
+<<<<<<< Updated upstream
 
      /********************************************************************************************************************************/
      /*** BLOCO ALTERADO EM 06/02/2020 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
      //xLotes = CriaTrab(aTcq, .t.)
+=======
+ 
+>>>>>>> Stashed changes
      xLotes := GetNextAlias()
      //Use &xLotes Alias &xLotes new
      oTempTbl01 := FWTemporaryTable():New( xLotes )
      oTempTbl01:SetFields( aTcq )
      oTempTbl01:Create()
-     /********************************************************************************************************************************/
-
+  
      VerLotesAb() // Preencher tabela temporária com lotes em aberto que não foram processados antes.
 
      Private aRotina    := { { OemToAnsi("Pesquisar")        , 'AxPesqui'       , 0, 1   },; //Pesquisar
@@ -126,63 +137,38 @@ User Function BRPCPX04()
                              { OemToAnsi("Reprocesso")       , 'U_FATX04_1("R")', 0, 5   } } //Reprocesso
 
      If lAcs2
-     //   aAdd(aRotina, { OemToAnsi("Envasador"), 'U_FATX04_2()', 0, 9 } )
          aAdd(aRotina, { OemToAnsi("Gera Op Por ponto de pedido"), 'U_ZPCPAX4()', 0, 9 } )
      Endif
 
-     DbSelectArea("SZZ")
-     DbSetOrder(1)
+     SZZ->(DbSetOrder(1))
      MBrowse(06, 01, 22, 75, "SZZ")
      
      //Processa geração de Ordens de produções
      Processa({|lEnd| fGerOPS(@aGerTxt) } )  
+
   	 If (cNumEmp == "01010101")   // gerar txts somente para Matriz
      		Processa({|lEnd| u_fGerTXTOps(aGerTxt) } )
      Endif
+
      //Entra no cadastro de Ordens de produções para geração das intermediárias
      Mata650()
      
      // Apagar Arq. Temporário
      If Select( xLotes ) > 0   //  Jose 26/06/2024
-        DbSelectArea(xLotes)
-        DbCloseArea( )
+        xLotes->(DbCloseArea())
      EndIf  //  Jose 26/06/2024
+  
      oTempTbl01:Delete()   //LGS#20200206 - Adequação de release 12.1.25 e posteriores
      DbSelectArea( _cAliasSX3 )
      DbCloseArea()
 
-     /*If File(xLotes+".dbf")
-       	cAux = xLotes+".dbf"
-       	Delete File &cAux
-     Endif*/
-
      DbSelectArea("SZZ")      
      
-     //PutMv("MV_BXOPLAN", "")
-
-     /*Else
-	     cAuxQbr := cFlagRot
-         cQbr1Tx := SubStr(cAuxQbr, 1, Iif( At("|", cAuxQbr) == 0, 10, At("|", cAuxQbr) - 1) )
-         cAuxQbr := Stuff(cAuxQbr, 1, At("|", cAuxQbr), "" )
-         cQbr2Tx := SubStr(cAuxQbr, 1, Iif( At("|", cAuxQbr) == 0, 10, At("|", cAuxQbr) - 1) )
-         cAuxQbr := Stuff(cAuxQbr, 1, At("|", cAuxQbr), "" )
-         cQbr3Tx := SubStr(cAuxQbr, 1, Iif( At("|", cAuxQbr) == 0, 10, At("|", cAuxQbr) - 1) )
-         cAuxQbr := Stuff(cAuxQbr, 1, At("|", cAuxQbr), "" )
-         cQbr4Tx := SubStr(cAuxQbr, 1, Iif( At("|", cAuxQbr) == 0, 10, At("|", cAuxQbr) - 1)  )
-         cMsgTel := "O Cadastro de O.P X Lote esta sendo usado pelo usuário: "+cQbr2Tx+", desde às: "+cQbr3Tx+" do dia "+cQbr4Tx+". Aguarde !!!"
-
-         MsgStop(cMsgTel)
-
-         If Hrs2Min( time() ) - Hrs2Min( SubStr( cFlagRot, 2 + At( "|", SubStr( cFlagRot, 3) ) + 1 ) ) >= 20 .or. Hrs2Min( time() ) - Hrs2Min( SubStr( cFlagRot, 2 + At( "|", SubStr( cFlagRot, 3) ) + 1 ) ) < 0
-         	PutMv("MV_BXOPLAN", "")
-         Endif
-     Endif*/
-
-     DbSelectArea(_cAreaBloq) //Cleber (13/02/20)  -> Reajuste da função  BloqProg
+     DbSelectArea(cAreaBloq) //Cleber (13/02/20)  -> Reajuste da função  BloqProg
      DBRUnlock( aBloq[1,3]) //Cleber (13/02/20)  -> Reajuste da função  BloqProg
      DbCloseArea() //Cleber (13/02/20)  -> Reajuste da função  BloqProg
-    //PutMV( "ZP_PAR0014", '' )
-Return
+
+Return (NIL)
 
 /*****************************************************************************************************************/
 /*** FATX04_1 - Rotinas de Visualização / Inclusão / Complemento / Reprocessamento de ordens de produção       ***/
@@ -199,8 +185,7 @@ User Function FATX04_1(cOpc)
      						         // T - TEMPO MAIOR DO QUE 6 MESES SEM PRODUZIR 
      						         // P - PRIMEIRA PRODUÇÃO DO PRODUTO
                               // L - PRIMEIRO LOTE  
-   //Local nReg         := SZM->(Recno())
-     LOCAL cAuxProd 	  := ""
+     Local  cAuxProd 	  := ""
      Local _nQuant     := 0
      Local aAreaAnt 	  := U_PegaArea({"SC2"})
      Local pMes        := GETMV("ZP_PAR0082") // Config comparativo maior que X Meses
@@ -213,7 +198,13 @@ User Function FATX04_1(cOpc)
      Private dPrevIni     := dDataBase
      Private dPrevFim     := dDataBase
      Private cPrevVol     := 0
-     Private oLote, oEmissao, oDescric, oPrevIni, oPrevFim, _oProduto, oPrevVol
+     Private oLote
+     Private oEmissao
+     Private oDescric
+     Private oPrevIni
+     Private oPrevFim
+     Private _oProduto
+     Private oPrevVol
      Private nOpcA        := 0
      Private _cProduto    := CriaVar("ZZ_PRODUTO")
      Private aHeader      := {}
@@ -226,7 +217,7 @@ User Function FATX04_1(cOpc)
      DbSelectArea("SZZ")
      TcRefresh("SZZ") 
 	  TcRefresh("SZZ010")       
-     If !cOpc $ 'I'
+     If .NOT. cOpc $ 'I'
         _cLote    := SZZ->ZZ_LOTE
         dEmissao  := SZZ->ZZ_DTEMIS
         _cProduto := iif(len(alltrim(SZZ->ZZ_PRODUTO)) == 12,(SZZ->ZZ_PRODUTO),substr(SZZ->ZZ_PRODUTO,1,5))
@@ -258,23 +249,23 @@ User Function FATX04_1(cOpc)
             oGetD := MsGetDados():New( 070, 001, 160, 276, nOpcE, cLinOk, cTudoOk, "", .T., aAltGetDados, 2,.f. , nLinhas, cFieldOk)
             oDlgp:nStyle         := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
 
-            oLote:bWhen          := {|| .f. }
+            oLote:bWhen          := {|| .F. }
             oEmissao:bLostFocus  := {|| fValCab(@dEmissao, @oEmissao, @dPrevIni, @oPrevIni, @dPrevFim, @oPrevFim, @_cProduto, @_oProduto, @cDescric, @oDescric, @oPrevVol, @cPrevVol, 1) }
             _oProduto:bLostFocus := {|| fValCab(@dEmissao, @oEmissao, @dPrevIni, @oPrevIni, @dPrevFim, @oPrevFim, @_cProduto, @_oProduto, @cDescric, @oDescric, @oPrevVol, @cPrevVol, 2) }
-            oDescric:bWhen       := {|| .f. }
-            If !cOpc $ 'I'
-               oEmissao:bWhen      := {|| .f. }
-               _oProduto:bWhen     := {|| .f. }
-               oPrevIni:bWhen      := {|| .f. }
-               oPrevFim:bWhen      := {|| .f. }
-               oPrevVol:bWhen      := {|| .f. }
+            oDescric:bWhen       := {|| .F. }
+
+            If .NOT. cOpc $ 'I'
+               oEmissao:bWhen      := {|| .F. }
+               _oProduto:bWhen     := {|| .F. }
+               oPrevIni:bWhen      := {|| .F. }
+               oPrevFim:bWhen      := {|| .F. }
+               oPrevVol:bWhen      := {|| .F. }
             Endif
-   //ACTIVATE MSDIALOG oDlgp CENTERED VALID _lSaida ON INIT EnchoiceBar( oDlgp, {|| Iif(oGetD:TudoOk(), nOpcA := 1, nOpcA := 0), Iif(nOpcA == 1, _lSaida := .t., nOpcA := 0), Iif(nOpcA == 1, oDlgp:End(), nOpcA := 0) }, {|| nOpcA := 0, _lSaida := .t., oDlgp:End()} )
      	    
      ACTIVATE MSDIALOG oDlgp CENTERED ON INIT EnchoiceBar(oDlgp, {||nOpcA:=If(oGetD:TudoOk() , 1,0),If(nOpcA==1,oDlgp:End(),Nil)},{||oDlgp:End()}) 
      
      If nOpcA == 1
-        If cOpc $ 'R'
+        If cOpc == 'R'
            DbSelectArea(xLotes)
            RecLock(xLotes,.T.)
            Replace lote with _cLote 
@@ -282,19 +273,21 @@ User Function FATX04_1(cOpc)
         ElseIf cOpc == "C"
                _QtdPI := 0.00
                nConv    := Posicione("SB1", 1, xFilial("SB1")+_cProduto, "B1_CONV")
+
                DbSelectArea(xLotes)
                RecLock(xLotes,.T.)
-               Replace lote with _cLote 
+               xLotes->lote:=_cLote 
                MsUnLock()
+               
                For _nY := 1 to Len(aCols)
-                   If aCols[_nY][Len(aHeader)+1] == .f.    
+                   If .NOT. aCols[_nY][Len(aHeader)+1]     
                    	 cAuxProd := iif(len(alltrim(_cProduto)) == 12,substr(_cProduto,1,10),substr(_cProduto,1,5))+aCols[_nY][1]
                       DbSelectArea("SZZ")
-                      Reclock("SZZ", .t.)
+                      Reclock("SZZ", .T.)
                       SZZ->ZZ_FILIAL  := xFilial("SZZ")
                       SZZ->ZZ_LOTE    := _cLote
                       SZZ->ZZ_DTEMIS  := dEmissao
-                      SZZ->ZZ_PRODUTO := cAuxProd //  Alltrim(SubStr(Alltrim(_cProduto), 1, 10)+aCols[_nY][1])
+                      SZZ->ZZ_PRODUTO := cAuxProd  
                       SZZ->ZZ_DESCR   := cDescric
                       SZZ->ZZ_PREVI   := dPrevIni
                       SZZ->ZZ_PREVF   := dPrevFim
@@ -306,20 +299,15 @@ User Function FATX04_1(cOpc)
                       MsUnlock()
                       _cGravou := .t.
 
-                      DbSelectArea("SZ5")
-                      DbSetOrder(1)
-                      DbSeek(xFilial("SZ5")+acols[_nY][1],.t.)
-                      If Found()
-                         DbSelectArea("SG1")
-                         DbSetorder(1)
-                         DbSeek(xFilial("SG1")+SubStr(Alltrim(SubStr(Alltrim(_cProduto), 1, 10))+aCols[_nY][1]+Space(15), 1, 15)+_cProduto, .t.)
-                         if !found()
-                            //_QtdPI := _QtdPI + Round((aCols[_nY][3] * SZ5->Z5_VOLUME), 2) 
+                      SZ5->(DbSetOrder(1))
+                      If SZ5->((xFilial("SZ5")+acols[_nY][1]))
+                         SG1->(DbSetorder(1))
+                         If SG1->(DbSeek(xFilial("SG1")+SubStr(Alltrim(SubStr(Alltrim(_cProduto), 1, 10))+aCols[_nY][1]+Space(15), 1, 15)+_cProduto))
                               _QtdPI := _QtdPI + Round((aCols[_nY][3] * nConv), 2)
                          else 
-	                         do while !eof() .and. (SG1->G1_FILIAL = xFilial("SG1")) .and. (SG1->G1_COD = SubStr(Alltrim(SubStr(Alltrim(_cProduto), 1, 10))+aCols[_nY][1]+Space(15), 1, 15)) .and. (SG1->G1_COMP = _cProduto)
+	                         while .NOT. SG1->(EOF()) .and. (SG1->G1_FILIAL = xFilial("SG1")) .and. (SG1->G1_COD = SubStr(Alltrim(SubStr(Alltrim(_cProduto), 1, 10))+aCols[_nY][1]+Space(15), 1, 15)) .and. (SG1->G1_COMP = _cProduto)
     	                       _QtdPI := _QtdPI + ( (aCols[_nY][3] * SG1->G1_QUANT) / ((100 - SG1->G1_PERDA) / 100) )
-        	                    dbskip()
+        	                    SG1->(dbskip())
             	             Enddo 
             	         endif 
                       Endif
@@ -329,11 +317,9 @@ User Function FATX04_1(cOpc)
         ElseIf cOpc == "I"
                cRoteiro := Posicione("SB1", 1, xFilial("SB1")+_cProduto, "B1_OPERPAD")
                nConv    := Posicione("SB1", 1, xFilial("SB1")+_cProduto, "B1_CONV")
-               DbSelectArea("SG2")
-               DbSetOrder(1)
-               DbSeek(xFilial("SG2")+_cProduto+cRoteiro, .t.)
-               If !Found()
-                  MsgBox("Produto não tem roteiro padrão de operações cadastrado. Verifique !", "Informação...", "INFO")
+               SG2->(DbSetOrder(1))
+               If .NOT. SG2->(DbSeek(xFilial("SG2")+_cProduto+cRoteiro))
+                  FWAlertWarning("Produto não tem roteiro padrão de operações cadastrado. Verifique !", "Informação...")
                Endif
                _QtdPI := 0
               If (cNumEmp == "01010101") // Jose 25/03/2025
@@ -344,8 +330,8 @@ User Function FATX04_1(cOpc)
 //            _cLote  := U_NroSqLote("SZZ") // Jose 11/03/2025 25/03/2025
                
                DbSelectArea(xLotes) 
-               RecLock(xLotes, .t.) 
-                  Replace lote with _cLote 
+               RecLock(xLotes, .T.) 
+               xLotes->lote:=_cLote 
                MsUnLock() 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                cQry1 := ""
@@ -372,9 +358,9 @@ User Function FATX04_1(cOpc)
 	            Endif
                DbSelectArea("QI2WF")
                DbCloseArea()
-
+               aProd:={}
                For _nY := 1 to Len(aCols)
-                   If aCols[_nY][Len(aHeader)+1] == .f.   
+                   If .NOT. aCols[_nY][Len(aHeader)+1]   
                    	 cAuxProd := iif(len(alltrim(_cProduto)) == 12,substr(_cProduto,1,10),substr(_cProduto,1,5))+aCols[_nY][1]
                       DbSelectArea("SZZ")
                       RecLock("SZZ", .t.)
@@ -392,7 +378,7 @@ User Function FATX04_1(cOpc)
                       SZZ->ZZ_TPINCL  := "I"
                       MsUnlock()
                       _cGravou := .T.
-				
+                     
                       DbSelectArea("SZ5")
                       DbSetOrder(1)
                       DbSeek(xfilial("SZ5")+acols[_nY][1],.F.)
@@ -401,12 +387,28 @@ User Function FATX04_1(cOpc)
                          DbSetorder(1)
                          DbSeek(xFilial("SG1")+SubStr(Alltrim(SubStr(Alltrim(_cProduto), 1, 10))+aCols[_nY][1]+Space(15), 1, 15)+_cProduto, .t.)
                          If !found()
-                            //_QtdPI := _QtdPI + Round((aCols[_nY][3] * SZ5->Z5_VOLUME), 2) // ALTERANDO O CALCULO DE VOLUME DO SZ5 PARA O B1_CONV
                             _QtdPI := _QtdPI + Round((aCols[_nY][3] * nConv), 2)
+
+                            //MAA 20260506
+                            If  Ascan(aProd,{ |x| x[1] == _cProduto}) == 0
+                            AADD(aProd,{_cProduto,Round((aCols[_nY][3] * nConv), 2),"Nao SG1"})
+                           End
+                           //End MAA
+                         
                          Else 
 	                         do while !eof() .and. (SG1->G1_FILIAL = xFilial("SG1")) .and. (SG1->G1_COD = SubStr(Alltrim(SubStr(Alltrim(_cProduto), 1, 10))+aCols[_nY][1]+Space(15), 1, 15)) .and. (SG1->G1_COMP = _cProduto)
     	                        _QtdPI := _QtdPI + ( (aCols[_nY][3] * SG1->G1_QUANT) / ((100 - SG1->G1_PERDA) / 100) )
-        	                    dbskip()
+                              
+                              //MAA 20260506
+                            nPos:= Ascan(aProd,{ |x| x[1] == _cProduto})  
+                            If  nPos == 0
+                              AADD(aProd,{_cProduto,( (aCols[_nY][3] * SG1->G1_QUANT) / ((100 - SG1->G1_PERDA) / 100) ),"SG1"})
+                           Else
+                              aProd[nPos][2]+=( (aCols[_nY][3] * SG1->G1_QUANT) / ((100 - SG1->G1_PERDA) / 100) )
+                           End
+                           //End MAA
+                        
+                             dbskip()
             	             Enddo 
             	         Endif 
 
@@ -414,6 +416,34 @@ User Function FATX04_1(cOpc)
                       DbSelectArea("SC2")
                    Endif
                Next
+               
+               //MAA - ANalisa Estoques
+               cMSg:=""
+               nTotQtd:=0
+               For _nY := 1 to Len(aProd)
+                   SB2->(dbSetOrder(1))
+                   If SB2->(dbSeek(xFilial("SB2")+aProd[_nY][1]))
+                        While .NOT. SB2->(EOF()) .and. ;
+                              SB2->B2_FILIAL == xFilial("SB2") .and.;
+                               SB2->B2_COD == aPRod[_nY][1]
+                           nTotQtd+=SB2->B2_QATU
+                          SB2->(dbSkip()) 
+                        End
+                        If aProd[_nY][2] > nTotQtd
+                           cMsg+="Prod: "+aProd[_nY][1]+" Sem Estoque!! "
+                           cMsg+="Qtd Nec: "+cValToChar(aProd[_nY][2])+" Est: "+cValToChar(nTotQtd)
+                           cMsg+=" Obs: "+aProd[_nY][3]+ CRLF
+                        End
+                        nTotQtd:=0
+                   End 
+               Next
+               If .NOT. Empty(cMsg)
+                  If .NOT. FWAlertNoYes(cMsg+CRLF+CRLF+"Deseja Continuar ?","Sem Estoque")
+                     Return (NIL)
+                  End   
+               End
+               // End Analise Estoque
+
                If ((_QtdPI * 100) - int(_QtdPI * 100)) > 0
                   nAux = int(_QtdPI*100+1)/100
                   _QtdPI = nAux
@@ -437,11 +467,11 @@ User Function FATX04_1(cOpc)
                If !Eof() .and. SC2WF->MESES > Val(pMes)
 			   	   //If SC2WF->MESES > 5
 				   	   cTexto := "Emissão de Ordem de produção com última produção a mais de "+pMes+" meses."
-					      cTexto+= CHR(13)+CHR(10)+"Produto -> "+cAuxProd
-					      cTexto+= CHR(13)+CHR(10)+"Lote  -> "+_cLote+" gerado por : "+ Posicione("SZH", 1, xFilial("SZH")+__cUserId, "ZH_NOME")
-					      cTexto+= CHR(13)+CHR(10)+"Qtde  -> "+TRANSFORM(_nQuant,'@E 999,999,999.99')
-			   		   cTexto+= CHR(13)+CHR(10)+"Produzido a  "+TRANSFORM(SC2WF->MESES,'@E 999')+" meses atrás."
-				   	   cTexto+= CHR(13)+CHR(10)+"Prog. Origem : BRPCPX04"
+					      cTexto+= CRLF+"Produto -> "+cAuxProd
+					      cTexto+= CRLF+"Lote  -> "+_cLote+" gerado por : "+ Posicione("SZH", 1, xFilial("SZH")+__cUserId, "ZH_NOME")
+					      cTexto+= CRLF+"Qtde  -> "+TRANSFORM(_nQuant,'@E 999,999,999.99')
+			   		   cTexto+= CRLF+"Produzido a  "+TRANSFORM(SC2WF->MESES,'@E 999')+" meses atrás."
+				   	   cTexto+= CRLF+"Prog. Origem : BRPCPX04"
 					   If Substr(xFilial("SC2"),1,2)== "06"
 						    U_EnvMail("DISSOLTEX - Emissão de Ordem de produção com última produção a "+TRANSFORM(SC2WF->MESES,'@E 999')+" meses. " ,cTexto,cParaB,"") 
                   Else
@@ -456,18 +486,16 @@ User Function FATX04_1(cOpc)
             Else 
                 DbCloseArea()
             Endif
-//          DbSelectArea("SC2WF")
-//			   DbCloseArea()
 
 			   DbSelectArea("SC2")
 			   DbSetOrder(2) // Filial + Produto + Entrega
     		   DbSeek(xFilial("SC2")+(cAuxProd), .t.)
     		   If !Found() 
 			   	cTexto := "Emissão de Ordem de produção de produto novo."
-				   cTexto+= CHR(13)+CHR(10)+"Produto -> "+cAuxProd
-				   cTexto+= CHR(13)+CHR(10)+"Lote  -> "+_cLote+" gerado por : "+ Posicione("SZH", 1, xFilial("SZH")+__cUserId, "ZH_NOME")
-				   cTexto+= CHR(13)+CHR(10)+"Qtde  -> "+TRANSFORM(_nQuant,'@E 999,999,999.99')
-	   		   cTexto+= CHR(13)+CHR(10)+"Prog. Origem : BRPCPX04"
+				   cTexto+= CRLF+"Produto -> "+cAuxProd
+				   cTexto+= CRLF+"Lote  -> "+_cLote+" gerado por : "+ Posicione("SZH", 1, xFilial("SZH")+__cUserId, "ZH_NOME")
+				   cTexto+= CRLF+"Qtde  -> "+TRANSFORM(_nQuant,'@E 999,999,999.99')
+	   		   cTexto+= CRLF+"Prog. Origem : BRPCPX04"
 				   If Substr(xFilial("SC2"),1,2)== "06"
 					    U_EnvMail("DISSOLTEX - Emissão de Ordem de produção de produto novo. (Primeira Produção) " ,cTexto,cParaB,"") 
        	    	   Else
@@ -481,21 +509,17 @@ User Function FATX04_1(cOpc)
             Else 
                 DbCloseArea()
             Endif
-//          DbSelectArea("SC2WF")
-//			   DbCloseArea()
 
   	         Endif
 //-------------   Acrescentado o 1º Lote  Jose 20/07/2023 ----------------------------------
 
-			   DbSelectArea("SC2")
-			   DbSetOrder(2) // Filial + Produto + Entrega
-    		   DbSeek(xFilial("SC2")+(cAuxProd), .t.)
-    		   If !Found() 
-			   	cTexto := "Emissão de Ordem de produção de produto Com Primeiro Lote."
-				   cTexto+= CHR(13)+CHR(10)+"Produto -> "+cAuxProd
-				   cTexto+= CHR(13)+CHR(10)+"Lote  -> "+_cLote+" gerado por : "+ Posicione("SZH", 1, xFilial("SZH")+__cUserId, "ZH_NOME")
-				   cTexto+= CHR(13)+CHR(10)+"Qtde  -> "+TRANSFORM(_nQuant,'@E 999,999,999.99')
-	   		   cTexto+= CHR(13)+CHR(10)+"Prog. Origem : BRPCPX04"
+			   SC2->(DbSetOrder(2)) // Filial + Produto + Entrega
+    		   If .NOT. SC2->(DbSeek(xFilial("SC2")+(cAuxProd)))
+    		   	cTexto := "Emissão de Ordem de produção de produto Com Primeiro Lote."
+				   cTexto+= CRLF+"Produto -> "+cAuxProd
+				   cTexto+= CRLF+"Lote  -> "+_cLote+" gerado por : "+ Posicione("SZH", 1, xFilial("SZH")+__cUserId, "ZH_NOME")
+				   cTexto+= CRLF+"Qtde  -> "+TRANSFORM(_nQuant,'@E 999,999,999.99')
+	   		   cTexto+= CRLF+"Prog. Origem : BRPCPX04"
 				   If Substr(xFilial("SC2"),1,2)== "06"
 					   U_EnvMail("DISSOLTEX - Emissão de Ordem de produção de produto Com 1º Lote. (Primeiro Lote de Produção) " ,cTexto,cParaB,"") 
        	    	 Else
@@ -525,14 +549,14 @@ User Function FATX04_1(cOpc)
      Endif
      
      U_VoltaArea(aAreaAnt)
+
 Return
 
 /*****************************************************************************************************************/
 /*** FVALCAB - Rotina de validação do cabeçalho                                                               ***/
 /*****************************************************************************************************************/
 Static Function fValCab(dEmissao, oEmissao, dPrevIni, oPrevIni, dPrevFim, oPrevFim, _cProduto, _oProduto, cDescric, oDescric, oPrevVol, cPrevVol, nOpc)
-     Local lRet:=.T. as logical  // maa
-       //Local ltemGGF :=.f.
+
 	   If nOpc == 1
           dPrevFim := dEmissao
           dPrevIni := dEmissao
@@ -655,103 +679,22 @@ Static Function fValCab(dEmissao, oEmissao, dPrevIni, oPrevIni, dPrevFim, oPrevF
                         _oProduto:SetFocus(.t.)
                         Return(.f.)
                      Endif
-              Endif
-       
-        //-- Analisa saldo zerado de componentes --MAA
-   If lRet
-      BEGINSQL ALIAS "SALDOS"
-         SELECT
-            SB1.B1_COD,
-            SG1.G1_COMP,
-            SUM(SG1.G1_QUANT) AS G1_QUANT,
-            SUM(SB2.B2_QATU) AS B2_QATU
-         FROM
-            %TABLE:SB1% SB1,
-            (
-               SELECT
-                  SUM(B2_QATU) AS B2_QATU,
-                  B2_FILIAL,
-                  B2_COD
-               FROM
-                  %TABLE:SB2% SB2
-               WHERE
-                  %NOTDEL%
-                  AND B2_FILIAL = %XFILIAL:SB2%
-               GROUP BY
-                  B2_FILIAL,
-                  B2_COD
-            ) SB2,
-            %TABLE:SG1% SG1
-         WHERE
-            SB1.%NOTDEL%
-            AND SB1.B1_FILIAL = %XFILIAL:SB1%
-            AND SB1.B1_COD = %EXP:_cProduto%
-            AND SB1.B1_FILIAL = SB2.B2_FILIAL
-            AND SB1.B1_COD = SG1.G1_COD
-            AND SB1.B1_UREV >= SG1.G1_REVINI
-            AND SB1.B1_UREV <= SG1.G1_REVFIM
-            AND SG1.G1_FILIAL = SB2.B2_FILIAL
-            AND SG1.%NOTDEL%
-            AND SUBSTRING(SG1.G1_COMP, 1, 2) <> 'GG'
-            AND SG1.G1_COMP = SB2.B2_COD
-         GROUP BY
-            SB1.B1_COD,
-            SG1.G1_COMP
-         HAVING
-            SUM(SG1.G1_QUANT) > SUM(SB2.B2_QATU)
-      ENDSQL
-
-      If .NOT. SALDOS->(EOF()) .AND. .NOT. SALDOS->(BOF())
-         cComp := ""
-         While .NOT. SALDOS->(EOF())
-            cComp := SALDOS->G1_COMP+CRLF
-            SALDOS->(DbSkip())
-         Enddo
-         FWAlertError("Produto(s) com saldo zerado de componentes!"+CRLF+cComp,"Saldo Zerado")
-         lRet := .F.
-         SALDOS->(DbCloseArea())
-         _cProduto := space(15)
-         cDescric := space(40)
-         _oProduto:SetFocus(.t.)
-         Return(NIL)
-      Endif
-      If Select("SALDOS") > 0
-         SALDOS->(DbCloseArea())
-      End
-   Endif
-   // FIm Analise Saldos - MAA    
-       
+              Endif      
+      
        Endif
-       oEmissao:Refresh() ; oPrevIni:Refresh() ; oPrevFim:Refresh() ; _oProduto:Refresh() ; oDescric:Refresh() ; oPrevVol:Refresh()
+       oEmissao:Refresh() 
+       oPrevIni:Refresh() 
+       oPrevFim:Refresh() 
+       _oProduto:Refresh() 
+       oDescric:Refresh() 
+       oPrevVol:Refresh()
+
 Return(.t.)
 
 /*****************************************************************************************************************/
 /*** fMonHea - Monta cabeçalho do acols                                                                        ***/
 /*****************************************************************************************************************/
 Static Function fMonHea(aHeader, nUsado)
-       /********************************************************************************************************************************/
-       /*** BLOCO ALTERADO EM 04/02/2020 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-       /*
-       DbSelectArea("SX3")
-       DbSetOrder(1)
-       DbSeek("SZZ")
-       While !Eof() .And. (SX3->X3_ARQUIVO == "SZZ")
-             If  (Alltrim(SX3->X3_CAMPO) $ "ZZ_EMB,ZZ_DESEMB,ZZ_QTDETI,ZZ_PEDIDO") .and. ;
-                  X3Uso(SX3->X3_USADO) .and. (cNivel >= SX3->X3_NIVEL) 
-                  nUsado += 1
-            	   Aadd(aHeader,{Trim(( _cAliasSX3 )->( X3_TITULO )),;
-                  SX3->X3_CAMPO,;
-                  SX3->X3_PICTURE,;
-                  SX3->X3_TAMANHO,;
-                  SX3->X3_DECIMAL,;
-                  "",;
-                  "",;
-                  SX3->X3_TIPO,;
-                  "",;
-                  "" })
-             Endif
-             DbSkip()
-       EndDo */
        DbSelectArea( _cAliasSX3 )
        DbSetOrder(1)
        DbSeek("SZZ")
@@ -915,33 +858,14 @@ User Function fCamOPB()
                Endif
            Next	
            If !lRet
-              M->ZZ_EMB := space(02) ; aCols[n][nPosEmb] := space(02) ; aCols[n][nPosDes] := space(20) ; aCols[n][nPosQtd] := 0 ; aCols[n][nPosPed] := space(08)
+              M->ZZ_EMB := space(02) 
+              aCols[n][nPosEmb] := space(02) 
+              aCols[n][nPosDes] := space(20) 
+              aCols[n][nPosQtd] := 0 
+              aCols[n][nPosPed] := space(08)
               Return(.f.)
            Endif
         Endif
-/*     Elseif __ReadVar $ 'M->ZZ_QTDETI'
-       	cPrevVol :=0
-       	For nY := 1 to Len(aCols)
-	        If aCols[nY][Len(aHeader)+1] == .f.    
-       			cProdVol :=0
-       			cProdEmba:= iif(len(alltrim(_cProduto)) = 12,SubStr(Alltrim(_cProduto), 1, 10),substr(alltrim(_cProduto),1,5))+aCols[nY][nPosEmb]
-                cProdVol  = Posicione("SB1", 1, xFilial("SB1")+cProdEmba, "B1_CONV")
-	            DbSelectArea("SB1")
-     		    DbSetorder(1)
-           		DbSeek(xFilial("SB1")+cProdEmba,.t.)
-        	    If Found()
-           			If Len(aCols) >1
-           				cPrevVol += (aCols[nY][3] * cProdVol)
-           		    Else
-						cPrevVol += (M->ZZ_QTDETI * cProdVol)
-					Endif
-           		Else
-                  	MsgBox("Produto não localizado!", "Atenção", "STOP")
-           			Return(.f.)
-           		Endif
-           	Endif
-        Next		
-     	oPrevVol:Refresh()   */
      ElseIf __ReadVar $ 'M->ZZ_PEDIDO'
             If aCols[n][Len(aHeader)+1] == .f.
                cArea      = alias()
@@ -980,11 +904,11 @@ User Function fLinOPB()
      If aCols[n][Len(aHeader)+1] == .f.
         If Empty(aCols[n][nPosEmb]) 
            MsgBox("Informe o código da embalagem !", "Atenção", "STOP")
-           Return(.f.)
+           Return(.F.)
         Else
            If aCols[n][nPosQtd] <= 0
               MsgBox("Informe a quantidade maior que zero!", "Atenção", "STOP")
-              Return(.f.)
+              Return(.F.)
            Endif
         Endif
      Endif
@@ -997,15 +921,13 @@ Return(.t.)
 /*****************************************************************************************************************/
 User Function fTudOPB()
      Local nPosEmb := aScan( aHeader, { |x| Alltrim(x[2]) == "ZZ_EMB"    } )
-     //Local nPosDes := aScan( aHeader, { |x| Alltrim(x[2]) == "ZZ_DESEMB" } )
      Local nPosQtd := aScan( aHeader, { |x| Alltrim(x[2]) == "ZZ_QTDETI" } )
-     //Local nPosPed := aScan( aHeader, { |x| Alltrim(x[2]) == "ZZ_PEDIDO" } )
      Local lRet    := .t.
      Local _nY
      
      If Empty(_cProduto)
         MsgBox("Código do Produto não pode estar em branco!", "Atenção", "STOP")
-        Return(.f.)
+        Return(.F.)
      Endif
      For _nY := 1 To Len(aCols)
          If aCols[_nY][Len(aHeader)+1] == .f.
@@ -1052,35 +974,31 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
        While !eof()
              cAuxLote = LOTE
              cAuxFilial = xFilial("SZZ")
-             DbSelectArea("SZZ")
-             DbSeek(cAuxFilial+cAuxLote, .t.)
-             While !eof() .and. (cAuxFilial == xFilial("SZZ")) .and. (cAuxLote == SZZ->ZZ_LOTE)
-                 //lVerCon := .f.
+             SZZ->(dbSetOrder(1))
+             SZZ->(DbSeek(cAuxFilial+cAuxLote))
+             While .NOT. SZZ->(EOF()) .and. (cAuxFilial == xFilial("SZZ")) .and. (cAuxLote == SZZ->ZZ_LOTE)
+         
                    lVerSol := .f.
                    If SZZ->ZZ_FLAG == 'S'
-                      Dbselectarea("SZZ")
-                      DbSkip()
+                      SZZ->(DbSkip())
                       Loop
                    Endif
-                   DbSelectArea("SB1")
-                   DbSetOrder(1)
-                   DbSeek(xFilial("SB1")+SZZ->ZZ_PRODUTO)
-                   If Found()
-                      If SB1->B1_TIPO $ "PI"
+                   SB1->(DbSetOrder(1))
+                   If SB1->(DbSeek(xFilial("SB1")+SZZ->ZZ_PRODUTO))
+                      If SB1->B1_TIPO == "PI"
                          cAutExpl = "S"
-                       //lVerCon := .t.
                          lVerSol := .t.
                       Else
                          cAutExpl = "N"
                       Endif
-                      cRoteiro := Posicione("SB1", 1, xFilial("SB1")+SZZ->ZZ_PRODUTO, "B1_OPERPAD")
-                      nQuant2  := IIF(SB1->B1_TIPCONV != "D", (SZZ->ZZ_QTDETI * SB1->B1_CONV), (SZZ->ZZ_QTDETI / SB1->B1_CONV) )
+                      cRoteiro := SB1->B1_OPERPAD // Posicione("SB1", 1, xFilial("SB1")+SZZ->ZZ_PRODUTO, "B1_OPERPAD")
+                      nQuant2  := IIF(SB1->B1_TIPCONV <> "D", (SZZ->ZZ_QTDETI * SB1->B1_CONV), (SZZ->ZZ_QTDETI / SB1->B1_CONV) )
                       If (SZZ->ZZ_PREVI + SB1->B1_PE) > SZZ->ZZ_PREVF
                          dAuxData := SZZ->ZZ_PREVI + SB1->B1_PE
                       Else
                          dAuxData := SZZ->ZZ_PREVF
                       Endif
-                      If SZZ->ZZ_TPINCL $ 'C'
+                      If SZZ->ZZ_TPINCL == 'C'
                          dAuxData := dDataBase
                       Endif
                       if dAuxData < dDataBase
@@ -1113,23 +1031,11 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
                       dbsetorder(1)
                       dbseek(xFilial("SC2")) //  jose 06/03/2025 aq1ui esta dando erro
                       MSExecAuto( {|x| MATA650(x)}, aAutoSC2)  
-//                    U_MinhaFuncao()  //Jose 19/05/2025
-//                    aerro := MostraErro()     // Ver  Jose 07/04/2025  JOse 13/05/2025
-//                    If lMsErroAuto = .T. // Jose 07/04/2025   jose 13/05/2025
-//                       If MostraErro() = "C650NOREV"  // Jose 07/04/2025   jose 13/05/2025
-//                          MostraErro() // Jose 07/04/2025   jose 13/05/2025
-//                       Else // Jose 07/04/2025   jose 13/05/2025
-//                          aerro := "" // Jose 07/04/2025   jose 13/05/2025
-//                       EndIf // Jose 07/04/2025   jose 13/05/2025
-//                      Else  // Jose 07/04/2025   jose 13/05/2025
-                      aerro := "" // Jose 07/04/2025   jose 13/05/2025
-//                    EndIf  // Jose 07/04/2025   jose 13/05/2025
-                      // incluido por nelieder em 23/10/23 .OR. ("C650NOREV" $ aerro)
-                      //If !lMsErroAuto .OR. ("C650NOREV" $ aerro) jose 13/05/2025
+
                       If ("C650NOREV" <> aerro) // jose 13/05/2025 saindo em duplicidade o PA quando fazia complemento 
                          DbSelectArea("SZZ")
                          RecLock("SZZ", .f.)
-                            SZZ->ZZ_FLAG := 'S'
+                         SZZ->ZZ_FLAG := 'S'
                          MsUnLock()
 
                          If SZZ->ZZ_TPINCL == 'C'
@@ -1168,10 +1074,7 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
                             cQry1 += " WHERE SD4.D4_FILIAL  = '"+xFilial("SD4")+"' "
                             cQry1 += "  AND SD4.D_E_L_E_T_  = '' "
                             cQry1 += "  AND SD4.D4_OP       = '"+SC2->C2_NUM+SC2->C2_ITEM+SC2->C2_SEQUEN+SC2->C2_ITEMGRD+"' "
-                            //LGS#20200206 - Adequação de release 12.1.25 e posteriores
-                            //cQry1 += "  AND SD4.D4_COD IN ("+GetMv('MV_XSOLUCA')+")"
                             cQry1 += "  AND SD4.D4_COD IN (" + _cMVXSOLUC + ',' + _cMVXSOLU0 + ',' +  _cMVXSOLU5 + ")" 
-                            //cQry1 += "  AND SB1.B1_XSOLUCA  = 'S' "
                             TCQuery cQry1 ALIAS "QEMP" NEW 
                             DbSelectArea("QEMP")
                             nQtdCon := QEMP->D4_QUANT
@@ -1180,7 +1083,7 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
                             DbSelectArea("QEMP")
                             DbCloseArea()
                             If Alltrim(cCodCon) $ Alltrim(_cMVXSOLUC) .and. nQtdTota > 200 .and. !Empty(cCodCon)  // alterado de 300 para 200 conforme chamado 007431
-                          //If nQtdCon >= 300.00 .and. !Empty(cCodCon)
+                  
    	                           nQtdLMi  := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_LM")
        	                       	nTipCon  := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_TIPCONV")
            	                   	nFatCon  := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_CONV")
@@ -1194,7 +1097,7 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
                                  Else // Jose 25/03/2025
                                      _cLote := U_NumSeqLot("SZZ") // Jose 25/03/2025
                                  Endif // Jose 25/03/2025
-//                              	_cLote   := U_NroSqLote("SZZ") // Jose 25/03/2025
+
                                	aAutoSC2 := {}
    	                           aadd(aAutoSC2, {"C2_FILIAL"  , xFilial("SC2")                , NIL})
        	                       	aadd(aAutoSC2, {"C2_ITEM"   , "01"                           , NIL})
@@ -1241,7 +1144,6 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
                                  Else // Jose 25/03/2025
                                      _cLote := U_NumSeqLot("SZZ") // Jose 25/03/2025
                                  Endif // Jose 25/03/2025
-//                             	_cLote   := U_NroSqLote("SZZ") // Jose 25/03/2025
                                	aAutoSC2 := {}
    	                           aadd(aAutoSC2, {"C2_FILIAL"  , xFilial("SC2")                , NIL})
        	                       	aadd(aAutoSC2, {"C2_ITEM"   , "01"                           , NIL})
@@ -1266,7 +1168,7 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
        				           	   Dbseek(xFilial("SC2"))
                				   	MSExecAuto( {|x| MATA650(x)}, aAutoSC2)
                	                   	
-           	                   	If !lMsErroAuto
+           	                   	If  .NOT. lMsErroAuto
                	                 	//Gera arquivo TXT para InkMaker
 					                     aAdd(aGerTxt, {cCodCon, SC2->C2_LOTE, SC2->C2_NUM+SC2->C2_ITEM+SC2->C2_SEQUEN, SC2->C2_EMISSAO, nQtdCon })
                                	Else
@@ -1323,71 +1225,7 @@ If Select( xLotes ) > 0 // Jose 26/06/2024
 
 //-------------     Até Aqui Jose 05/09/2024 ------------------
                          Endif 
-                         //Ver empenhos para OP se tem concentrado e a quantidade.
-                         /*
-                         If lVerCon
-                            cQry1 := ""
-                            cQry1 += "SELECT D4_OP,D4_COD,D4_QUANT "
-                            cQry1 += "FROM "+RetSqlName("SD4")+" SD4 WITH (NOLOCK) "
-                            cQry1 += "WHERE SD4.D4_FILIAL  = '"+xFilial("SD4")+"' "
-                            cQry1 += "  AND SD4.D_E_L_E_T_ = '' "
-                            cQry1 += "  AND SD4.D4_OP      = '"+SC2->C2_NUM+SC2->C2_ITEM+SC2->C2_SEQUEN+SC2->C2_ITEMGRD+"' "
-                            cQry1 += "  AND SUBSTRING(SD4.D4_COD, 1, 5) = '"+SUBSTR(SC2->C2_PRODUTO, 6, 5)+"' "
-                            TCQuery cQry1 ALIAS "QEMP" NEW 
-                            DbSelectArea("QEMP")
-                            nQtdCon := QEMP->D4_QUANT
-                            cCodCon := QEMP->D4_COD
-                            DbSelectArea("QEMP")
-                            DbCloseArea()
-                            If !Empty(cCodCon)
-                               nQtdLMi := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_LM")
-                               nTipCon := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_TIPCONV")
-                               nFatCon := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_CONV")
-                               nQtdCo2 := IIF(nTipCon == "M", (nQtdCon * nFatCon), (nQtdCon / nFatCon) )
-                               cUniMed := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_UM")
-                               lTemLoc := !Empty(Posicione("SB2", 1, xFilial("SB2")+Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_COD")+Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_LOCPAD"), "B2_LOCALIZ"))
-                               If lTemLoc //Se tem localização
-                                  If nQtdCon >= 30.0 //Se Quantidade do Concentrado for maior ou igual a 30
-                                     lGerCon := .t.
-                                  Else
-                                     lGerCon := .f.
-                                  Endif
-                               Else
-                                  lGerCon := .t.
-                               Endif
-                               If lGerCon
-                                  cLocPad := Posicione("SB1", 1, xFilial("SB1")+cCodCon, "B1_LOCPAD")
-                                  cNumOp  := SC2->C2_NUM
-                                  aAutoSC2 := {}
-                                  aadd(aAutoSC2, {"C2_FILIAL"  , xFilial("SC2")                , NIL})
-                                  aadd(aAutoSC2, {"C2_ITEM"   , "02"                           , NIL})
-                                  aadd(aAutoSC2, {"C2_SEQUEN" , "001"                          , NIL})
-                                  aadd(aAutoSC2, {"C2_NUM"    , cNumOp                         , NIL})
-                                  aadd(aAutoSC2, {"C2_PRODUTO", cCodCon                        , NIL})
-                                  aadd(aAutoSC2, {"AUTEXPLODE", cAutExpl                       , NIL})
-                                  aadd(aAutoSC2, {"C2_LOCAL"  , cLocPad                        , NIL})
-                                  aadd(aAutoSC2, {"C2_QUANT"  , nQtdCon                        , NIL})
-                                  aadd(aAutoSC2, {"C2_QTSEGUM", nQtdCo2                        , NIL})
-                                  aadd(aAutoSC2, {"C2_UM"     , cUniMed                        , NIL})
-                                  aadd(aAutoSC2, {"C2_DATPRI" , SZZ->ZZ_PREVI                  , NIL})
-                                  aadd(aAutoSC2, {"C2_DATPRF" , dAuxData                       , NIL})
-                                  aadd(aAutoSC2, {"C2_EMISSAO", SZZ->ZZ_DTEMIS                 , NIL})
-                                  aadd(aAutoSC2, {"C2_TPOP"   , "F"                            , NIL})
-                                  aadd(aAutoSC2, {"C2_ROTEIRO", cRoteiro                       , NIL})
-                                  lMsErroAuto := .f.
-                                  Dbselectarea("SC2")
-                                  MSExecAuto( {|x| MATA650(x)}, aAutoSC2)
-                                  If !lMsErroAuto
-                                     //Gera arquivo TXT para InkMaker
-                                     aAdd(aGerTxt, {cCodCon, '      ', cNumOp+'02'+'001', SZZ->ZZ_DTEMIS, nQtdCon })
-                                  Else
-                                  	 MostraErro()
-                                  Endif
-                               Endif
-                            Endif
-                         Endif */
                       Else
-//  Jose 20/03/2025      MsgBox("O Produto "+SZZ->ZZ_PRODUTO+" do Lote "+cAuxLote+" não foi processado!", "Atencao!", "STOP")
 //  Jose 20/03/2025      MostraErro()
                       Endif
                    Endif
@@ -1434,14 +1272,11 @@ User Function fGerTXTOps(aGerTxt)
                  While !Eof() .and. Alltrim(SD4->D4_OP) == Alltrim(aGerTxt[_nY][3])
                  	 If _nPos <= 20
                          //LGS#20200206 - Adequação de release 12.1.25 e posteriores
-                         //If !Alltrim(SD4->D4_COD) $ Alltrim(GETMV("MV_RETENOP"))
-                         If !Alltrim(SD4->D4_COD) $ Alltrim( _cMVRETEN )
+        
+                         If .NOT. Alltrim(SD4->D4_COD) $ Alltrim( _cMVRETEN )
                              If Substr(Posicione("SC2", 1, xFilial("SC2")+SD4->D4_OP, "C2_PRODUTO"),6,2) =='05' .and. Len(Alltrim(Posicione("SC2", 1, xFilial("SC2")+SD4->D4_OP, "C2_PRODUTO")))==12
-	                             If !Posicione("SB1", 1, xFilial("SB1")+Alltrim(SD4->D4_COD), "B1_DESC") $ 'PASTA' .and. SD4->D4_QUANT >= 0.2 .AND. !U_IsProdCusto( SD4->D4_COD )
+	                             If .NOT. Posicione("SB1", 1, xFilial("SB1")+Alltrim(SD4->D4_COD), "B1_DESC") $ 'PASTA' .and. SD4->D4_QUANT >= 0.2 .AND. !U_IsProdCusto( SD4->D4_COD )
 		                             aAdd(aMatIte, {SD4->D4_QUANT, Alltrim(SD4->D4_COD), SD4->D4_QUANT / Posicione("SB1", 1, xFilial("SB1")+SD4->D4_COD, "B1_PESOESP") } )
-    		                         //aQtdMat[1][_nPos] := SD4->D4_QUANT
-        		                     //aCodMat[1][_nPos] := Alltrim(SD4->D4_COD)
-            		                 //aVolMat[1][_nPos] := SD4->D4_QUANT / Posicione("SB1", 1, xFilial("SB1")+SD4->D4_COD, "B1_PESOESP")
                 		             _nPos += 1
                              
 	                	             If Posicione("SB1", 1, xFilial("SB1")+SD4->D4_COD, "B1_DOSADOR") $ 'S'
@@ -1514,7 +1349,6 @@ User Function fGerTXTOps(aGerTxt)
               cNumOrd  := aGerTxt[_nY][3]
               cNumLot  := aGerTxt[_nY][2]
               //lPatOps := File(GETMV("MV_DOSADOR")+"DOSADOR.CFG")
-              //lPatOps := File(cPatOps+"DOSADOR.CFG") //LGS#20200204 - Adequação de release 12.1.25 e posteriores
 			  lPatOps := waitrun( 'XCOPY' + " \\10.1.1.160\DADOS\OP\DOSADOR.CFG " + "c:\temp\" + " /y" ) == 0 //LGS#20210714 - Ajuste pois a função FILE não estava funcionando.
               If lPatOps
                  //cPatMes := Alltrim(GETMV("MV_DOSADOR"))
@@ -1524,9 +1358,7 @@ User Function fGerTXTOps(aGerTxt)
               Endif
               cArqMes := cPatMes+SubStr(aGerTxt[_nY][3], 1, 6)+'.DAT' //Para Fabrica II
 
-              //If File(cArqMes)
-                 //cCodPro := Alltrim(MemoLine(MemoRead(cArqMes), 250, 4))
-                 //cNumOp  := Alltrim(MemoLine(MemoRead(cArqMes), 250, 7))
+
               cNumOP := aGerTxt[_nY][3]
               DbSelectArea("SC2")
               DbSetOrder(1)
@@ -1653,27 +1485,6 @@ User Function FATX04_2()
      Private aHeader := {}
 
      //Montagem do aHeader
-     /********************************************************************************************************************************/
-     /*** BLOCO ALTERADO EM 04/02/2020 POR LUIS GUSTAVO, EM ATENDIMENTO A ATUALIZAÇÃO DE RELEASE PROTHEUS 12.1.25                  ***/
-     /*
-     DbSelectArea("SX3")
-     DbSetOrder(2)
-     MsSeek("C2_OP")
-     nUsado += 1
-     AADD(aHeader, { 'O.P.'       , 'NUMORD', '999999'   ,  6, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
-     MsSeek("C2_PRODUTO")
-     nUsado += 1
-     AADD(aHeader, { 'Embal.'     , 'CODORD', '99'       ,  2, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
-     MsSeek("C2_QUANT")
-     nUsado += 1
-     AADD(aHeader, { 'Qtd. Solic.', 'QTDSOL', '@E 999999.99',  6, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
-     MsSeek("C2_QUANT")
-     nUsado += 1
-     AADD(aHeader, { 'Qtd. Apont.', 'QTDAPT', '@E 999999.99',  6, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
-     nUsado += 1
-     AADD(aHeader, { 'Qtd. Ñ. Pr.', 'QTDNPR', '@E 999999.99',  6, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )
-     nUsado += 1
-     AADD(aHeader, { '           ', 'QTDVAG', '@!'          ,  1, 0, '', X3_USADO, X3_TIPO, X3_ARQUIVO, X3_CONTEXT } )     */
      DbSelectArea( _cAliasSX3 )
      DbSetOrder(2)
      MsSeek("C2_OP")

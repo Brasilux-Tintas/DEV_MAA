@@ -4186,6 +4186,10 @@ User Function FATA03_A(cOpcCon)
    Private cMarca     := GetMark()
    Private cAuxPed    := ""
    Private nQtdPro    := 0
+<<<<<<< Updated upstream
+=======
+   Private nQtdAvar   := 0
+>>>>>>> Stashed changes
    Private lProest    := .f.
    Private oTempTbl1                //Variável criada para arquivo temporário compatibilização com release 12.1.25
    Private oTempTbl2                //Variável criada para arquivo temporário compatibilização com release 12.1.25
@@ -4201,7 +4205,11 @@ User Function FATA03_A(cOpcCon)
    SetPrvt("oSayDes", "oDesPro", "oSayLoc", "oLocPro", "oGrpPrE", "oSayOrd", "oOrdPro", "oSayPro", "oQtdPro", "oSaySep3")
    SetPrvt("oQtdSep3", "oSayG3", "oQtdG3", "oSaySepG", "oQtdSepG", "oSay03", "oQtd03", "oSayDispG", "oQtdDispG", "oSayDis", "oQtdA3", "oSaySepA", "oQtdSepA", "oSayDispA", "oQtdDispA")
    SetPrvt("oQtdDis", "oGrpDes", "oBrwDes", "oGrpPed", "oBrwPed", "oSay30", "oQtd30")
+<<<<<<< Updated upstream
    SetPrvt("oBtnSal", "oBtnTra", "oBtnMoP", "oBtnTrP","oBtnINF", "oSayMark", "oQtdMark")
+=======
+   SetPrvt("oBtnSal", "oBtnTra", "oBtnMoP", "oBtnTrP","oBtnINF", "oSayMark", "oQtdMark","oSayAvar")
+>>>>>>> Stashed changes
 
 
    /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
@@ -4250,7 +4258,11 @@ User Function FATA03_A(cOpcCon)
 //  até aqui Jose 21/08/2024 ---------------------------------
 
 
+<<<<<<< Updated upstream
    oGrpPrE    := TGroup():New( 048, 004, 080, 600, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
+=======
+   oGrpPrE    := TGroup():New( 048, 004, 080, 550, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
+>>>>>>> Stashed changes
  //oSayOrd  := TSay():New( 056, 008, {||"Pallet:"}                                 , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 032, 008)
  //oOrdPro  := TGet():New( 064, 008, {|u| If(PCount() > 0, cOrdPro := u, cOrdPro)}, oGrpPrE, 060, 10, '999999/9999'  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "cOrdPro", , )
  //oOrdPro:bLostFocus := {|| fOrdPro() }
@@ -4280,6 +4292,7 @@ User Function FATA03_A(cOpcCon)
 /*-------------- Aqui Jose 05/072024  ------------------------------------*/
    oSayMark   := TSay():New( 056, 470, {||"Marcados"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
    oQtdMark   := TGet():New( 064, 470, {|u| If(PCount() > 0, nQtdMark := u, nQtdMark)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdMark", , )  // Jose 05/07/2024   056, 344,
+<<<<<<< Updated upstream
 
   // maa
   nQtdAvar	:= 0     
@@ -4309,6 +4322,36 @@ User Function FATA03_A(cOpcCon)
    oBrwPed:oBrowse:lCanAllmark := .F.
    //oBrwPed:oBrowse:bLDBLClick  := { || fBordEspec() }
 
+=======
+   
+   // maa
+   oSayAvar   := TSay():New( 056, 510, {||"Avarias"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
+   oQtdAvar   := TGet():New( 064, 510, {|u| If(PCount() > 0, nQtdAvar := u, nQtdAvar)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdAvar", , )  // Jose 05/07/2024   056, 344,
+
+   //oQtdG3:bLostFocus := {|| nQtdSepG := nQtdG3 + nQtdSep3, oQtdG3:Refresh(), oQtdSepG:Refresh() }
+      
+   oGrpDes    := TGroup():New( 084,004,160,510,"Bordero de Despacho",oDlg1,CLR_BLACK,CLR_WHITE,.T.,.F. )  // Jose 05/07/2024 388
+   
+   oTbl1(1)
+   DbSelectArea("ZT1")
+   DbGoTop()
+   oBrwDes    := MsSelect():New( "ZT1", "ZT1_MARCA", "", { {"ZT1_MARCA", "", "", ""}, {"ZT1_BORDES", "", "Despacho", ""}, {"ZT1_BORPED", "", "Pedido", ""}, {"ZT1_REGIAO", "", "Regiao", ""}, {"ZT1_PREVIS", "", "Previsão", ""}, {"ZT1_PEDIDO", "", "Pedido", ""}, {"ZT1_QUANTI", "", "Quantidade", ""}, {"ZT1_LOCALI", "", "Expedição", ""},{"ZT1_GAVETA", "", "Vol. Ped.", ""} }, .F., cMarca, {092, 008, 156, 506}, , , oGrpDes, , aCores ) // Jose 05/07/2024 384
+   oBrwDes:oBrowse:bChange := {||DbSelectArea("ZT1") }
+   oBrwDes:bAval := {||ZT1Mark()}
+   oBrwDes:oBrowse:lHasMark := .T.
+   oBrwDes:oBrowse:lCanAllmark := .F.
+
+   oGrpPed    := TGroup():New( 164, 004, 280, 510, "Bordero de Pedidos",oDlg1,CLR_BLACK,CLR_WHITE,.T.,.F. )  // Jose 05/07/2024 388   Jose 05/05/2025   164, 004, 240, 510,
+   oTbl2(1)
+   DbSelectArea("ZT2")
+   oBrwPed    := MsSelect():New( "ZT2", "ZT2_MARCA", "", { {"ZT2_MARCA", "", "", ""}, {"ZT2_NUMBOR", "", "Bord. Ped.", "@R 999999"}, {"ZT2_EMISSA", "", "Emissão"   , ""}, {"ZT2_PEDIDO", "", "Pedido"    , "999999"}, {"ZT2_QUANTI", "", "Quantidade", "@E 99,999.9999"},  {"ZT2_LOCEXP", "", "Expedição" , ""},  {"ZT2_LOCAL", "", "Local Ped" , ""} , {"ZT2_GAVETA", "", "Vol. Ped."    , ""} }, .F., cMarca, {172, 008, 276, 506}, , , oGrpPed )  // Jose 05/07/2024 384 // Jose 21/08/2024  jose 05/05/2025  172, 008, 236, 506}
+   oBrwPed:oBrowse:bChange := {||DbSelectArea("ZT2") }
+   oBrwPed:bAval               := {||ZT2Mark()}
+   oBrwPed:oBrowse:lHasMark    := .T.
+   oBrwPed:oBrowse:lCanAllmark := .F.
+   //oBrwPed:oBrowse:bLDBLClick  := { || fBordEspec() }
+
+>>>>>>> Stashed changes
    oDlg1:nStyle := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
    oCodPro:SetFocus()
    oDlg1:Activate(,,,.T.)
@@ -4723,6 +4766,10 @@ Static Function fCodPro()
    oQtd03:Refresh()
    oQtdDispG:Refresh()
    oQtdDis:Refresh()
+<<<<<<< Updated upstream
+=======
+   oQtdAvar:Refresh()
+>>>>>>> Stashed changes
    
    lProEst := !Empty(Posicione("SB2", 1, xFilial("SB2")+Posicione("SB1", 1, xFilial("SB1")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), "B1_LOCPAD"), "B2_LOCALIZ"))
    If Empty(cCodPro)
@@ -5051,8 +5098,13 @@ Static Function fCodPro()
 		 	oQtdAvar:Refresh()
          Else
             cLocProA:= SB2->B2_LOCALIZ
+<<<<<<< Updated upstream
         	 nQtdMark:=SB2->B2_QATU
             oQtdMark:Refresh()
+=======
+        	 nQtdAvar:=SB2->B2_QATU
+            oQtdAvar:Refresh()
+>>>>>>> Stashed changes
 		
 		    oLocPro:Refresh()
             nQtdSep3 := 0
@@ -5076,7 +5128,11 @@ Static Function fCodPro()
       cQry1 += "   FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "
       cQry1 += "  WHERE SB2.D_E_L_E_T_ ='' "
       cQry1 += "    AND B2_FILIAL = '"+xFilial("SB2")+"' "
+<<<<<<< Updated upstream
       cQry1 += "    AND B2_LOCAL IN('03','30','G3','P1','P2','G1','A3') "
+=======
+      cQry1 += "    AND B2_LOCAL IN('03','30','G3','P1','P2','G1','A3','AV') "
+>>>>>>> Stashed changes
       cQry1 += "    AND B2_COD ='"+SB1->B1_COD+"' "
       cQry1 += " UNION ALL "
       cQry1 += " SELECT C6_PRODUTO AS CODIGO, C6_LOCAL AS ALMOX, 0 AS SALDOATUAL, SUM(ZZK_QUANT) AS QTDESEPARADA "
@@ -5104,7 +5160,11 @@ Static Function fCodPro()
             nQtdDis  := TCQ->SALDOTOTAL-TCQ->QTDESEPARADA
             oQtd03:Refresh()
             oQtdSep3:Refresh()
+<<<<<<< Updated upstream
             oQtdDis:Refresh()
+=======
+            oQtdDis:Refresh()   
+>>>>>>> Stashed changes
          Elseif TCQ->ALMOX $ '30'
             nQtd30   := (TCQ->SALDOTOTAL)
             oQtd30:Refresh()
@@ -5122,9 +5182,18 @@ Static Function fCodPro()
             oQtdA3:Refresh()       // Jose 05/07/2024
             oQtdSepA:Refresh()     // Jose 05/07/2024
             oQtdDispA:Refresh()    // Jose 05/07/2024
+<<<<<<< Updated upstream
          Endif
             
          DbSelectArea("TCQ")
+=======
+         Elseif TCQ->ALMOX == 'AV' //maa 06/05/2026
+            nQtdAvar   := (TCQ->SALDOTOTAL)
+            oQtdAvar:Refresh()
+         Endif
+            
+		DbSelectArea("TCQ")
+>>>>>>> Stashed changes
          DbSkip()
       Enddo            
    Endif         
