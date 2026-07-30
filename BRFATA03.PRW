@@ -4,7 +4,7 @@
 #INCLUDE 'RWMAKE.CH'
 #INCLUDE 'COLORS.CH'
 #INCLUDE 'FONT.CH'
-#INCLUDE 'INKEY.CH'
+//#INCLUDE 'INKEY.CH'
 #INCLUDE 'vkey.CH'
 #xtranslate bsetget(<uvar>) => { | u | If( PCount() == 0, <uvar>, <uvar> := u ) }
 
@@ -4186,10 +4186,7 @@ User Function FATA03_A(cOpcCon)
    Private cMarca     := GetMark()
    Private cAuxPed    := ""
    Private nQtdPro    := 0
-<<<<<<< Updated upstream
-=======
    Private nQtdAvar   := 0
->>>>>>> Stashed changes
    Private lProest    := .f.
    Private oTempTbl1                //Variável criada para arquivo temporário compatibilização com release 12.1.25
    Private oTempTbl2                //Variável criada para arquivo temporário compatibilização com release 12.1.25
@@ -4205,11 +4202,7 @@ User Function FATA03_A(cOpcCon)
    SetPrvt("oSayDes", "oDesPro", "oSayLoc", "oLocPro", "oGrpPrE", "oSayOrd", "oOrdPro", "oSayPro", "oQtdPro", "oSaySep3")
    SetPrvt("oQtdSep3", "oSayG3", "oQtdG3", "oSaySepG", "oQtdSepG", "oSay03", "oQtd03", "oSayDispG", "oQtdDispG", "oSayDis", "oQtdA3", "oSaySepA", "oQtdSepA", "oSayDispA", "oQtdDispA")
    SetPrvt("oQtdDis", "oGrpDes", "oBrwDes", "oGrpPed", "oBrwPed", "oSay30", "oQtd30")
-<<<<<<< Updated upstream
-   SetPrvt("oBtnSal", "oBtnTra", "oBtnMoP", "oBtnTrP","oBtnINF", "oSayMark", "oQtdMark")
-=======
    SetPrvt("oBtnSal", "oBtnTra", "oBtnMoP", "oBtnTrP","oBtnINF", "oSayMark", "oQtdMark","oSayAvar")
->>>>>>> Stashed changes
 
 
    /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
@@ -4258,11 +4251,7 @@ User Function FATA03_A(cOpcCon)
 //  até aqui Jose 21/08/2024 ---------------------------------
 
 
-<<<<<<< Updated upstream
-   oGrpPrE    := TGroup():New( 048, 004, 080, 600, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
-=======
    oGrpPrE    := TGroup():New( 048, 004, 080, 550, "Estoque...", oDlg1, CLR_BLACK, CLR_WHITE, .T., .F. )  // Jose 05/07/2024 antes 388 agora 510
->>>>>>> Stashed changes
  //oSayOrd  := TSay():New( 056, 008, {||"Pallet:"}                                 , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 032, 008)
  //oOrdPro  := TGet():New( 064, 008, {|u| If(PCount() > 0, cOrdPro := u, cOrdPro)}, oGrpPrE, 060, 10, '999999/9999'  , , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .F., .F., "", "cOrdPro", , )
  //oOrdPro:bLostFocus := {|| fOrdPro() }
@@ -4292,7 +4281,6 @@ User Function FATA03_A(cOpcCon)
 /*-------------- Aqui Jose 05/072024  ------------------------------------*/
    oSayMark   := TSay():New( 056, 470, {||"Marcados"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
    oQtdMark   := TGet():New( 064, 470, {|u| If(PCount() > 0, nQtdMark := u, nQtdMark)}, oGrpPrE, 032, 10, '@E 999999', , CLR_BLACK, CLR_WHITE, oFont2, , , .T., "", , , .F., .F., , .T., .F., "", "nQtdMark", , )  // Jose 05/07/2024   056, 344,
-<<<<<<< Updated upstream
 
   // maa
   nQtdAvar	:= 0     
@@ -4322,7 +4310,6 @@ User Function FATA03_A(cOpcCon)
    oBrwPed:oBrowse:lCanAllmark := .F.
    //oBrwPed:oBrowse:bLDBLClick  := { || fBordEspec() }
 
-=======
    
    // maa
    oSayAvar   := TSay():New( 056, 510, {||"Avarias"}                            , oGrpPrE, , oFont1, .F., .F., .F., .T., CLR_BLACK, CLR_WHITE, 042, 008)  // Jose 05/07/2024   056, 344,
@@ -4351,7 +4338,6 @@ User Function FATA03_A(cOpcCon)
    oBrwPed:oBrowse:lCanAllmark := .F.
    //oBrwPed:oBrowse:bLDBLClick  := { || fBordEspec() }
 
->>>>>>> Stashed changes
    oDlg1:nStyle := nOR( DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE )
    oCodPro:SetFocus()
    oDlg1:Activate(,,,.T.)
@@ -4766,10 +4752,7 @@ Static Function fCodPro()
    oQtd03:Refresh()
    oQtdDispG:Refresh()
    oQtdDis:Refresh()
-<<<<<<< Updated upstream
-=======
    oQtdAvar:Refresh()
->>>>>>> Stashed changes
    
    lProEst := !Empty(Posicione("SB2", 1, xFilial("SB2")+Posicione("SB1", 1, xFilial("SB1")+Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), "B1_LOCPAD"), "B2_LOCALIZ"))
    If Empty(cCodPro)
@@ -5098,13 +5081,8 @@ Static Function fCodPro()
 		 	oQtdAvar:Refresh()
          Else
             cLocProA:= SB2->B2_LOCALIZ
-<<<<<<< Updated upstream
-        	 nQtdMark:=SB2->B2_QATU
-            oQtdMark:Refresh()
-=======
         	 nQtdAvar:=SB2->B2_QATU
             oQtdAvar:Refresh()
->>>>>>> Stashed changes
 		
 		    oLocPro:Refresh()
             nQtdSep3 := 0
@@ -5128,11 +5106,7 @@ Static Function fCodPro()
       cQry1 += "   FROM "+RetSqlName("SB2")+" SB2 WITH (NOLOCK) "
       cQry1 += "  WHERE SB2.D_E_L_E_T_ ='' "
       cQry1 += "    AND B2_FILIAL = '"+xFilial("SB2")+"' "
-<<<<<<< Updated upstream
-      cQry1 += "    AND B2_LOCAL IN('03','30','G3','P1','P2','G1','A3') "
-=======
       cQry1 += "    AND B2_LOCAL IN('03','30','G3','P1','P2','G1','A3','AV') "
->>>>>>> Stashed changes
       cQry1 += "    AND B2_COD ='"+SB1->B1_COD+"' "
       cQry1 += " UNION ALL "
       cQry1 += " SELECT C6_PRODUTO AS CODIGO, C6_LOCAL AS ALMOX, 0 AS SALDOATUAL, SUM(ZZK_QUANT) AS QTDESEPARADA "
@@ -5160,11 +5134,7 @@ Static Function fCodPro()
             nQtdDis  := TCQ->SALDOTOTAL-TCQ->QTDESEPARADA
             oQtd03:Refresh()
             oQtdSep3:Refresh()
-<<<<<<< Updated upstream
-            oQtdDis:Refresh()
-=======
             oQtdDis:Refresh()   
->>>>>>> Stashed changes
          Elseif TCQ->ALMOX $ '30'
             nQtd30   := (TCQ->SALDOTOTAL)
             oQtd30:Refresh()
@@ -5182,18 +5152,12 @@ Static Function fCodPro()
             oQtdA3:Refresh()       // Jose 05/07/2024
             oQtdSepA:Refresh()     // Jose 05/07/2024
             oQtdDispA:Refresh()    // Jose 05/07/2024
-<<<<<<< Updated upstream
-         Endif
-            
-         DbSelectArea("TCQ")
-=======
          Elseif TCQ->ALMOX == 'AV' //maa 06/05/2026
             nQtdAvar   := (TCQ->SALDOTOTAL)
             oQtdAvar:Refresh()
          Endif
             
 		DbSelectArea("TCQ")
->>>>>>> Stashed changes
          DbSkip()
       Enddo            
    Endif         
@@ -5511,168 +5475,6 @@ Static Function ZT2Mark()
        ZT2->(MsUnlock())
 Return
 
-/*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-Function  ³ fAtuDad() - Funcao para atualizar dados da tela
-ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
-/*
-Static Function fAtuDad(cOpcCon)
-       Local nX
-       Local cQry1 := ""
-       //**************************************************************
-       //*** Validação dos dados das Ordem de produção              ***
-       //**************************************************************
-       If !cNumEmp $ "01060101"
- 	      ApMsgStop('Rotina desativada, baixa do relatório de faltas somente pela rotina do bipe. Atenção !')
-    	  Return
-       Endif
-       If !Empty(cOrdPro)
-          If !nQtdOrd == nQtdSepG
-             ApMsgStop('Divergências entre valores a conferir e conferidos. Verifique!')
-             Return
-          Else
-             For nX := 1 To Len(aOrdPro)
-                 cQry1 := ""
-                 cQry1 += "UPDATE "+RetSqlName("ZZA")+" "
-                 cQry1 += "SET ZZA_RAMPA = 'S' "
-                 cQry1 += "WHERE ZZA_FILIAL = '"+xFilial("ZZA")+"' "
-                 cQry1 += "  AND D_E_L_E_T_ = '' "
-                 cQry1 += "  AND ZZA_PRODUT = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
-                 cQry1 += "  AND ZZA_LOTE   = '"+cCodLot+"' "
-                 cQry1 += "  AND ZZA_SEQENV = '"+aOrdPro[nX][1]+"' "
-                 TCSQLExec(cQry1)
-             Next
-          Endif
-       Endif
-
-       //**************************************************************
-       //*** Bordero de DESPACHO - Somente com gavetas cadastradas. ***
-       //**************************************************************
-       DbSelectArea("ZT1")
-       DbGoTop()
-       While !Eof()
-             If ZT1->(IsMark("ZT1_MARCA", cMarca))
-                DbSelectArea("ZZC")
-                DbSetOrder(1)
-                DbSeek(xFilial("ZZC")+ZT1->ZT1_BORPED+ZT1->ZT1_PEDIDO+Alltrim(StrTran(StrTran(cCodPro, '.'), '-')), .t.)
-                If Found()
-                   lNaoAtu := .f.
-                   RecLock("ZZC", .f.)
-                      //ZZC->ZZC_RESERV += ZT1->ZT1_QUANTI 
-                      ZZC->ZZC_RETIRA += ZT1->ZT1_QUANTI
-                      ZZC->ZZC_SEPARA := Iif(ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI, 'S', 'N')
-                      ZZC->ZZC_VOLRET += fCalVol(ZZC->ZZC_PRODUT, ZZC->ZZC_RETIRA)
-                      ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-                      DbSelectArea("ZZC")
-                   MsUnLock()
-                   //If ZZC->ZZC_RESERV >= ZZC->ZZC_QUANTI //
-                   If ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI
-                      RecLock("ZT1", .f.)
-                         DbDelete()
-                      MsUnLock()
-                      lNaoAtu := .t.
-                   Else
-                      RecLock("ZT1", .f.)
-                         //ZT1->ZT1_QUANTI := (ZZC->ZZC_QUANTI - ZZC->ZZC_RESERV)//(ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)
-						 ZT1->ZT1_QUANTI := (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)
-                         ZT1->ZT1_MARCA  := '  '
-                      MsUnLock()
-                   Endif
-
-                   If cOpcCon $ 'R' //Somente quando chamar a rotina dentro da retirada de estoque.
-                       If !lNaoAtu
-                          nPos := aScan(aCols, {|x| Alltrim(x[1]) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))})
-                          If nPos > 0
-                             cQry1 := ""
-                             cQry1 += "SELECT SUM(ZZC.ZZC_QUANTI - ZZC.ZZC_RETIRA) AS FALTA "
-                             cQry1 += "FROM "+RetSqlName("ZZC")+" ZZC "
-                             cQry1 += "WHERE ZZC.ZZC_FILIAL = '"+xFilial("SZF")+"' "
-                             cQry1 += "  AND ZZC.D_E_L_E_T_ = '' "
-                             cQry1 += "  AND ZZC.ZZC_BORDER = '"+SZF->ZF_CODIGO+"' "
-                             cQry1 += "  AND ZZC.ZZC_PRODUT = '"+Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))+"' "
-                             cQry1 += "  AND ZZC.ZZC_SEPARA <> 'S' "
-                             TCQuery cQry1 ALIAS "FAL" NEW
-                             DbSelectArea("FAL")
-                             aCols[nPos][5] := FAL->FALTA
-                             DbSelectArea("FAL")
-                             DbCloseArea()
-                             If aCols[nPos][5] == 0
-                                aCols[nPos][5] := 999999
-                                aCols[nPos][6] := space(03)
-                             Endif
-                          Endif
-                       Endif
-                   Endif
-
-                Endif
-             Endif
-             DbSelectArea("ZT1")
-             DbSkip()
-       Enddo
-       DbSelectArea("ZT1")
-       DbGoTop()
-       oBrwDes:oBrowse:Refresh()
-
-       //**************************************************************
-       //*** Bordero de PEDIDOS - Somente com gavetas cadastradas.  ***
-       //**************************************************************
-       DbSelectArea("ZT2")
-       DbGoTop()
-       While !Eof()
-             If ZT2->(IsMark("ZT2_MARCA", cMarca))
-                DbSelectArea("ZZC")
-                DbSetOrder(1)
-                DbSeek(xFilial("ZZC")+ZT2->ZT2_NUMBOR+ZT2->ZT2_PEDIDO+StrTran(StrTran(cCodPro, '.'), '-'), .t.)
-                If Found()
-                   lNaoAtu := .f.
-                   RecLock("ZZC", .f.)
-                      ZZC->ZZC_RETIRA += ZT2->ZT2_QUANTI
-                      ZZC->ZZC_SEPARA := Iif(ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI, 'S', 'N')
-                      ZZC->ZZC_VOLRET += fCalVol(ZZC->ZZC_PRODUT, ZZC->ZZC_RETIRA)
-                      ZZC->ZZC_DTHOT  := DTOC(dDataBase)+' - '+Time()
-                      DbSelectArea("ZZC")
-                   MsUnLock()
-                   If ZZC->ZZC_RETIRA >= ZZC->ZZC_QUANTI
-                      RecLock("ZT2", .f.)
-                         DbDelete()
-                      MsUnLock()
-                      lNaoAtu := .t.
-                   Else
-                      RecLock("ZT2", .f.)
-                         ZT2->ZT2_QUANTI := (ZZC->ZZC_QUANTI - ZZC->ZZC_RETIRA)
-                         ZT2->ZT2_MARCA  := '  '
-                      MsUnLock()
-                   Endif /*
-       
-                   If cOpcCon $ 'R' //Somente para retirada do estoque
-                      If !lNaoAtu
-                         nPos := aScan(aCols, {|x| Alltrim(x[1]) == Alltrim(StrTran(StrTran(cCodPro, '.'), '-'))})
-                         If nPos > 0
-                            aCols[nPos][5] := (aCols[nPos][5] - ZZC->ZZC_RETIRA)
-                            If aCols[nPos][5] == 0
-                               aCols[nPos][5] := 999999
-                               aCols[nPos][6] := space(03)
-                            Endif
-                         Endif
-                      Endif
-                   Endif
-       
-                Endif
-             Endif
-             DbSelectArea("ZT2")
-             DbSkip()
-       Enddo
-       DbSelectArea("ZT2")
-       DbGoTop()
-       oBrwPed:oBrowse:Refresh()
-       
-       nQtdSep3 := 0
-       oQtdSep3:Refresh()
-       nQtdSepG := 0
-       oQtdSepG:Refresh()
-       nQtdG3 := 0
-       oQtdG3:Refresh()
-Return
-*/
 /*ÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Function  ³ fOrdPro() - Funcao para carregar dados da Ordem de Produção
 ÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/

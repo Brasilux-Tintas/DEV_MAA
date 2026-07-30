@@ -57,8 +57,13 @@ Static Function fExecuta()
     //Se tiver conteúdo digitado
     If .NOT. Empty(cFormula)
         //Inicio a utilização da tentativa
+        If FWAlertYesNo("É Customização?", "Customização ou padrao")
+            cFormula:="U_"+cFormula+"()"
+        End
+        
         Begin Sequence
-            &("U_"+cFormula+"()")
+          //  &("U_"+cFormula+"()")
+            &(cFormula)
         End Sequence
          
         //Restaurando bloco de erro do sistema

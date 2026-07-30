@@ -92,6 +92,7 @@ cMsg += 'NF Vinculada: ' + If( len(aNfVinc) > 0, "SIM", "NAO" ) + CRLF
 
 Alert(cMsg)
     */
+    
     If Alltrim(FWGrpCompany()) == '01' //Empresas do grupo BRASILUX
 
         cInfAdic := ""
@@ -227,6 +228,11 @@ Alert(cMsg)
                     SA2->(dbSeek(xFilial("SA2")+aNota[7]+aNota[8]))
                     //vALIDA ie
                     aadd(aDest,VldIE(SA2->A2_INSCR,.NOT.(SA2->A2_CLAS == "N")))
+                    	IF SA2->(FieldPos("A2_MENSNF"))>0
+	   			   IF .NOT. empty(alltrim(SA2->A2_MENSNF))
+   					  cMensCli += alltrim(SA2->A2_MENSNF)+"**"
+				   endif
+				ENDIF
                 End
 
             Endif
@@ -349,4 +355,4 @@ Alert(cMsg)
 
     FwRestArea(aArea)
 
-RETURN (aRetorno)
+Return (aRetorno)

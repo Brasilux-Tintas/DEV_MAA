@@ -1,0 +1,10 @@
+/* Menu Principal */
+po-menu {
+--color: #b4e2fd;
+--background-color: #2C3739;
+--color-menu-color-menu-item-text: #b4e2fd;
+}
+/* Titulo da BArra Esquerda */
+.po-font-title {
+    color: #b4e2fd;
+}

@@ -13,6 +13,7 @@ User Function MT170SC1()
         SC1->C1_APROV:="L"
         MsUnLock()
     End
+    
     // Apaga registro na SCR caso tenha
     SCR->(dbSetOrder(1))
 

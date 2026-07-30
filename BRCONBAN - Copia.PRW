@@ -1,13 +1,428 @@
-#include "Protheus.ch"
-#include "fileio.ch"
-#include "RPTDef.ch"
+//#include "rwmake.ch"
+#include "PROTHEUS.CH"
+#include "Fileio.ch"
+#include "TBICONN.CH"
+#include "topconn.ch"
+#include "COLORS.CH"
+#include "RPTDEF.CH"
 #include "FWPrintSetup.ch"
+#include "font.ch"
+#include "PROTHEUS.CH"
+#include "RPTDEF.CH"
 
-#Define PAD_LEFT    0
-#Define PAD_RIGHT   1
-#Define PAD_CENTER  2
-#Define COR_CINZA   RGB(180, 180, 180)
-#Define COR_PRETO   RGB(000, 000, 000)
+/*/{Protheus.doc} BRCONBAN
+Programa que exibe as informações salvas na tabela ZAK -  Comprovantes de Pagamento Bradesco
+@type function Menu
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return character, sem retorno
+/*/
+User Function BRCONBAN()
+	Local aArea       := FWGetArea()                    as array
+	Local oBrowse                                       as object
+	Private aRotina   := {}                             as array
+	Private cCadastro := "Extrator de Retorno Bancario" as character
+	Private cCGCAtu   := ""                             as character
+	Private cString   := "ZAK"                          as character
+
+	//Aviso( 'VarInfo', VarInfo('xEmpFil', totvs.framework.company.xEmpFil("SE1","01","010106") , , .F. ) ,{'ok'} ,4,,,, .T.)
+	aRotina := MenuDef()
+
+	oBrowse := FWMBrowse():New()
+	oBrowse:SetAlias("ZAK")
+	oBrowse:SetDescription(cCadastro)
+	oBrowse:DisableDetails()
+
+	oBrowse:Activate()
+	FWRestArea(aArea)
+
+Return (Nil)
+
+/*/{Protheus.doc} MenuDef
+Opções de Menu
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return array, opções que podem ser acessadas
+/*/
+Static Function MenuDef()
+	Local aRotina := {}
+
+	aadd(aRotina, {"Visualizar", "AXVISUAL"    , 0, 2})
+	aadd(aRotina, {"Pesquisar" , "U_BRCONBRA()", 0, 2})
+	aadd(aRotina, {"Importar"  , "U_BRPAGRET()", 0, 3})
+
+Return (aRotina)
+
+/*/{Protheus.doc} BRCONBRA
+Programa que faz a consulta e exibe a informação salva na tabela ZAK
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return character, sem retorno
+/*/
+User Function BRCONBRA()
+
+    Private aButtons := {}                  as array
+    Private aSays    := {}                  as array
+    Private cCPF     := ""                  as character
+    Private cFunci   := ""                  as character
+    Private cNomRel  := ""                  as character
+    Private cQry     := ""                  as character
+    Private cTitulo  := "CONSULTA BRADESCO" as character
+    Private lParam   := .F.                 as logical
+
+    AADD(aSays, "Informe o CPF do funcionário para buscar suas informações!")
+
+    AADD(aButtons, {5, .T., {||  xParamBox()           }})
+    AADD(aButtons, {1, .T., {|o| fBusca(o)             }})
+    AADD(aButtons, {2, .T., {|o| dbCloseArea(), MS_Flush(), o:oWnd:End()}})
+
+    FormBatch(cTitulo, aSays, aButtons,, 200, 405)
+
+Return (NIL)
+
+/*/{Protheus.doc} fBusca
+Rotina de Busca - Objeto
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param o, object, Objeto que permite digitação apra busaca
+@return character, sem retorno
+/*/
+Static Function fBusca(o)
+    If ConsArq()
+        o:oWnd:End()
+    EndIf
+Return (NIL)
+
+/*/{Protheus.doc} fMontaQry
+Mota query de pesquisa 
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param cCPFParam, character, informação a ser pesquisada
+@return character, query montada
+/*/
+Static Function fMontaQry(cCPFParam)
+    Local cQ := ""
+    cQ := "    SELECT DISTINCT                          " + CRLF
+    cQ += "    ZAK.ZAK_FUNCPF  AS CPF,                  " + CRLF
+    cQ += "    ZAK.ZAK_FUNNOM  AS NOME,                 " + CRLF
+    cQ += "    ZAK.ZAK_FUNCON  AS CONTA,                " + CRLF
+    cQ += "    ZAK.ZAK_FUNAGE  AS AGENCIA,              " + CRLF
+    cQ += "    ZAK.ZAK_FUNBAN  AS BANCO,                " + CRLF
+    cQ += "    ZAK.ZAK_FUNTIP  AS TIPO                  " + CRLF
+    cQ += "    FROM " + RetSqlName("ZAK") + " ZAK       " + CRLF
+    cQ += "    WHERE ZAK.D_E_L_E_T_ = ' '               " + CRLF
+    cQ += "    AND ZAK.ZAK_FUNCPF = '" + cCPFParam + "' " + CRLF
+    cQ += "    ORDER BY NOME                            " + CRLF
+Return (cQ)
+
+/*/{Protheus.doc} ConsArq
+Executa a Consulta
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return object, inicia o processo
+/*/
+Static Function ConsArq()
+    Local aDados := {}             as array
+    Local cAlias := GetNextAlias() as character
+
+    If .NOT. lParam
+        MsgAlert("Parâmetros não informados, consulta cancelada.")
+        Return .F.
+    EndIf
+
+    cCPF := fLimpaCPF(cFunci)
+
+    If Empty(cCPF)
+        MsgAlert("CPF não informado, consulta cancelada.")
+        Return .F.
+    EndIf
+
+    cQry := fMontaQry(cCPF)
+
+    If Select(cAlias) <> 0
+        (cAlias)->(dbCloseArea())
+    EndIf
+
+    DbUseArea(.T., "TOPCONN", TCGenQry(,, cQry), cAlias, .F., .T.)
+    DbSelectArea(cAlias)
+  
+    While !Eof()
+        AAdd(aDados, {;
+            AllTrim((cAlias)->CPF)    ,;
+            AllTrim((cAlias)->NOME)   ,;
+            AllTrim((cAlias)->CONTA)  ,;
+            AllTrim((cAlias)->AGENCIA),;
+            AllTrim((cAlias)->BANCO)  ,;
+            AllTrim((cAlias)->TIPO)   ;
+            })
+        DbSkip()
+    EndDo
+
+    (cAlias)->(dbCloseArea())
+
+Return (fMostDados(aDados, cFunci))
+
+/*/{Protheus.doc} xParamBox
+Tela de pesquisa
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return character, sem retorno
+/*/
+Static Function xParamBox()
+    Local aParambox := {} as array
+    Local aRet      := {} as array
+
+    AADD(aParambox, {1, "Funcionário (CPF)", Space(14), "", "", "ZAK", "", 0, .F.})
+
+    If Parambox(aParambox, "Informe o CPF", @aRet)
+        cFunci := AllTrim(aRet[1])
+        lParam := .T.
+    Else
+        lParam := .F.
+    EndIf
+Return (NIL)
+
+/*/{Protheus.doc} fMostDados
+Mostra dados de Pesquisa
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param aDados, array, Array com Dados
+@param cFunci, character, CPF do funcionário
+@return logical, indica se fecha a pesquisa
+/*/
+Static Function fMostDados(aDados, cFunci)
+    Local cBrw      := ""  as character
+    Local lFechaIni := .T. as logical
+    Local lVolta    := .F. as logical
+    Local oBrw             as object
+    Local oBtnExp          as object
+    Local oBtnSai          as object
+    Local oBtnVol          as object
+    Local oDlg             as object
+
+    If Len(aDados) == 0
+        ApMsgStop("Funcionário sem informações cadastradas.")
+        fLimpaParam()
+        Return .F.
+    EndIf
+
+    DEFINE MSDIALOG oDlg ;
+        TITLE OemToAnsi("Folha de Pagamento - " + AllTrim(cFunci)) ;
+        From 000, 000 To 290, 900 PIXEL
+
+    @ 005, 005 LISTBOX oBrw VAR cBrw ;
+        FIELDS HEADER "CPF", "NOME", "CONTA", "AGENCIA", "BANCO", "TIPO" ;
+        SIZE 440, 125 OF oDlg PIXEL
+
+    oBrw:SetArray(aDados)
+    oBrw:bLine := {|| {;
+        fMaskCPF(aDados[oBrw:nAt][1]),;
+        OemToAnsi(aDados[oBrw:nAt][2]),;
+        aDados[oBrw:nAt][3],;
+        aDados[oBrw:nAt][4],;
+        aDados[oBrw:nAt][5],;
+        aDados[oBrw:nAt][6];
+        }}
+    oBrw:lAdjustColSize := .T.
+    oDlg:nStyle := nOR(DS_MODALFRAME, WS_POPUP, WS_CAPTION, WS_VISIBLE)
+
+    @ 132, 005 BUTTON oBtnVol PROMPT "Voltar"   SIZE 070, 013 OF oDlg ACTION (lVolta := .T., oDlg:End()) PIXEL
+    @ 132, 080 BUTTON oBtnExp PROMPT "Exportar" SIZE 055, 013 OF oDlg ACTION fRelFun(aDados, cFunci) PIXEL
+    @ 132, 385 BUTTON oBtnSai PROMPT "Sair"     SIZE 050, 013 OF oDlg ACTION (fLimpaParam(), lFechaIni := .F., oDlg:End()) PIXEL
+
+    ACTIVATE MSDIALOG oDlg CENTERED
+
+    If lVolta
+        xParamBox()
+        If lParam
+            Return ConsArq()
+        EndIf
+        fLimpaParam()
+        Return .F.
+    EndIf
+Return (lFechaIni)
+
+/*/{Protheus.doc} fRelFun
+Relatório do Funcionário
+@type function Relatorio
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param aDados, array, Array com Dados
+@param cFunci, character, CPF do funcionário
+@return character, sem retorno
+/*/
+Static Function fRelFun(aDados, cFunci)
+    Local oReport := Nil as object
+
+    If Len(aDados) == 0
+        MsgAlert(OemToAnsi("Nenhum dado para exportar."))
+        Return
+    EndIf
+
+    cCPF := aDados[1][1]
+    cNomRel := OemToAnsi(AllTrim(cFunci))
+
+    oReport := fDefRelFun()
+    oReport:PrintDialog()
+
+    cCPF := ""
+    cNomRel := ""
+Return (NIL)
+
+/*/{Protheus.doc} fDefRelFun
+Imprime Comprovante
+@type function Relatorio
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return Object, obejto do relatorio
+/*/
+Static Function fDefRelFun()
+    Local oReport  := Nil as object
+    Local oSection := Nil as object
+
+    oReport := TReport():New( ;
+        "BRCRELFUN",;
+        OemToAnsi("Detalhe do Pagamento - Crédito em Conta Salário"),;
+        ,;
+        {|oRpt| fPrnRelFun(oRpt)},;
+        OemToAnsi("Funcionário: " + cNomRel) ;
+        )
+
+    oReport:SetTotalInLine(.F.)
+    oReport:lParamPage := .F.
+    oReport:oPage:SetPaperSize(9)
+    oReport:SetPortrait()
+    oReport:SetLineHeight(50)
+    oReport:nFontBody := 10
+
+    oSection := TRSection():New(oReport, OemToAnsi("Dados do Funcionário"), {"QRY_ZAKREL"})
+    oSection:SetTotalInLine(.F.)
+
+    TRCell():New(oSection, "CPF"    , "QRY_ZAKREL", "CPF"              ,, 20,,, "LEFT",,,,, .F.,,, .T.)
+    TRCell():New(oSection, "NOME"   , "QRY_ZAKREL", OemToAnsi("Nome")  ,, 50,,, "LEFT",,,,, .F.,,, .F.)
+    TRCell():New(oSection, "BANCO"  , "QRY_ZAKREL", "Banco"            ,, 10,,, "LEFT",,,,, .F.,,, .F.)
+    TRCell():New(oSection, "AGENCIA", "QRY_ZAKREL", OemToAnsi("Agência"),, 10,,, "LEFT",,,,, .F.,,, .F.)
+    TRCell():New(oSection, "CONTA"  , "QRY_ZAKREL", "Conta"            ,, 20,,, "LEFT",,,,, .F.,,, .F.)
+    TRCell():New(oSection, "TIPO"   , "QRY_ZAKREL", "Tipo"             ,, 15,,, "LEFT",,,,, .F.,,, .F.)
+
+Return (oReport)
+
+/*/{Protheus.doc} fPrnRelFun
+Executa o relatorio
+@type function Relatorio
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param oReport, object, obejto do relatorio
+@return character, sem retorno
+/*/
+Static Function fPrnRelFun(oReport)
+    Local aArea  := FWGetArea() as array
+    Local nAtual := 0           as numeric
+    Local nTotal := 0           as numeric
+    Local oSect  := Nil         as object
+
+    oSect := oReport:Section(1)
+
+    If Select("QRY_ZAKREL") <> 0
+        dbSelectArea("QRY_ZAKREL")
+        dbCloseArea()
+    EndIf
+
+    PlsQuery(cQry, "QRY_ZAKREL")
+    dbSelectArea("QRY_ZAKREL")
+    Count To nTotal
+    oReport:SetMeter(nTotal)
+
+    oSect:Init()
+    QRY_ZAKREL->(dbGoTop())
+    While !QRY_ZAKREL->(Eof())
+        nAtual++
+        oReport:SetMsgPrint(OemToAnsi("Imprimindo " + cValToChar(nAtual) + " de " + cValToChar(nTotal)))
+        oReport:IncMeter()
+        oSect:PrintLine()
+        QRY_ZAKREL->(dbSkip())
+    EndDo
+    oSect:Finish()
+    QRY_ZAKREL->(dbCloseArea())
+
+    FWRestArea(aArea)
+Return (NIL)
+
+/*/{Protheus.doc} fLimpaParam
+Limpa totalmente os parametros caso o funcionario não tenha dados 
+assim já volta vazia para uma nova consulta
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@return Character, sem retorno
+/*/
+Static Function fLimpaParam()
+    cCPF   := ""  
+    cFunci := ""   
+    cQry   := ""   
+    lParam := .F.  
+Return (NIL)
+
+
+/*/{Protheus.doc} fMaskCPF
+Mascara para usar no CPF
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param cCPFParam, character, CPF para consulta
+@return character, Varaivel de CPF com mascara
+/*/
+Static Function fMaskCPF(cCPFParam)
+    Local cRet := AllTrim(cCPFParam) as character
+    If Len(cRet) == 11
+        cRet := SubStr(cRet,1,3) + "." + SubStr(cRet,4,3) + "." + SubStr(cRet,7,3) + "-" + SubStr(cRet,10,2)
+    EndIf
+Return (cRet)
+
+/*/{Protheus.doc} fLimpaCPF
+Verifica se o CPF esta vazio ou se tem a quantidade de caracteres e após isso limpa a formatação
+@type function Tela
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param cCPFParam, character, CPF para consulta
+@return character, Variavel do CPF
+/*/
+Static Function fLimpaCPF(cCPFParam)
+    Local cRet  := AllTrim(StrTran(StrTran(StrTran(cCPFParam, ".", ""), "-", ""), " ", "")) as characer
+    Local cTemp := ""                                                                       as character
+    Local nI    := 0                                                                        as numeric
+
+    For nI := 1 To Len(cRet)
+        If SubStr(cRet, nI, 1) >= "0" .And. SubStr(cRet, nI, 1) <= "9"
+            cTemp += SubStr(cRet, nI, 1)
+        EndIf
+    Next nI
+
+    If Len(cTemp) <> 11 .Or. Empty(cTemp)
+        Return ""
+    EndIf
+Return (cTemp)
 
 /*/{Protheus.doc} BRPAGRET
 Programa que le o arquivo de retorno de pagamento bancario (.ret),
@@ -60,6 +475,10 @@ User Function BRPAGRET()
 	If .NOT. FWAlertNoYes(cMsgIntro, "Extrator de Retorno Bancario")
 		Return (NIL)
 	Else
+		If FWAlertNoYes("Deseja pré-processar e copiar os aquivos retorno de pagamento?", "Arquivos de Retorno Bancario")
+		   ShellExecute( "open", "c:\spool\VerifBancario.exe", "", "", 1 )	
+		End
+
 		Processa({|| BRPAGRET01()}, "Processando retorno bancario...")
 	EndIf
 
@@ -86,7 +505,7 @@ Static Function BRPAGRET01()
 	Local cDataHoraFim := "" as character
 	Local cDataHoraIni := "" as character
 	Local cDiretorio   := "" as character
-	Local cDirRede     := "" as character // Diretorio de rede inicial do cGetFile
+	//Local cDirRede     := "" as character // Diretorio de rede inicial do cGetFile
 	Local cDrive       := "" as character
 	Local cExtensao    := "" as character
 	Local cFiltroNome  := "" as character // Filtro de nome digitado pelo usuario
@@ -95,6 +514,7 @@ Static Function BRPAGRET01()
 	Local cLinha       := "" as character
 	Local cLogArq      := "" as character
 	Local cNome        := "" as character
+	Local cArqOrig     := "" as character
 
 	// --- Numericos ---
 	Local nHandle    := 0 as numeric
@@ -102,7 +522,8 @@ Static Function BRPAGRET01()
 	Local nHLog      := 0 as numeric
 	Local nRegistros := 0 as numeric
 	Local nTotal     := 0 as numeric
-	Private cArqOrig     := "" as character
+	Private cArqImp  := "" as character
+
 	cDataHoraIni := DtoC(Date()) + " " + Time()
 	cHoraIni     := Time()
 
@@ -113,7 +534,7 @@ Static Function BRPAGRET01()
 	//      UNC direto      : "\\servidor\compartilhamento\retornos\"
 	//      Linux/Totvs     : "/mnt/rede/retornos/"
 	// =========================================================
-	cDirRede := "\\servidor\retornos\"   // << ALTERE PARA O CAMINHO DA REDE
+	//cDirRede := "\\servidor\retornos\"   // << ALTERE PARA O CAMINHO DA REDE
 
 	// =========================================================
 	// 2. SELECAO DO ARQUIVO VIA cGetFile COM DIRETORIO DE REDE
@@ -188,6 +609,7 @@ Static Function BRPAGRET01()
 	SplitPath(cArqOrig, @cDrive, @cDiretorio, @cNome, @cExtensao)
 	cArqCSV := cDrive + cDiretorio + ChgFileExt(cNome, "_extrato.csv")
 	cLogArq := cDrive + cDiretorio + ChgFileExt(cNome, "_extrato.log")
+	cArqImp:=cNome
 
 	//validar pois o mesmo não considera os arquivos na mesma pasta para uma proxima leitura...
 	// Remove arquivos anteriores
@@ -562,6 +984,7 @@ Retorna a string original se nao for uma data valida.
 /*/
 Static Function BRPAGRET03(cData)
 	Local cRet := "" as character
+	
 	cData := AllTrim(cData)
 	If Len(cData) == 8 .AND. cData == StrTran(cData, " ", "")
 		If Val(cData) > 0 .OR. cData == "00000000"
@@ -591,12 +1014,12 @@ Grava uma linha extraida no CSV e no LOG.
 @param cAutent,     character, Autenticacao bancaria
 @param nTotal,      numeric,   Acumulador do valor total (by reference)
 @param aRegistros,  array,     Registros extraidos para impressao (by reference)
-@return nil
+@return character,sem retorno
 /*/
 Static Function BRPAGRET05(nHCSV, nHLog, cEmpAgeA, cEmpConA, cCodEmpA, cEmpBanA, cEmpPagA, cFunBanA, cFunAgeA, cFunConA, cNomeA, cCPFA, cTipoA, cDtLancA, cNroPagA, cDtCredA, nValorA, cDtPrevA, cAutent, nTotal, aRegistros)
-	Local aArea    := GetArea()
-	Local aAreaZAK := NIL
-	Local _cFilial := cFilAnt
+	Local _cFilial := cFilAnt   as character
+	Local aArea    := GetArea() as array
+	Local aAreaZAK := NIL       as array
 
 	// --- Grava no CSV ---
 	FWrite(nHCSV, ;
@@ -645,7 +1068,7 @@ Static Function BRPAGRET05(nHCSV, nHLog, cEmpAgeA, cEmpConA, cCodEmpA, cEmpBanA,
 	//MAA
 	ZAK->ZAK_DTIMP 	:= dDataBase
 	ZAK->USRIMP		:= UsrRetName(RetCodUsr())
-	ZAK_ARQUIV		:= AllTrim(cArqOrig)
+	ZAK_ARQUIV		:= AllTrim(cArqImp)
 	MsUnLock()
 
 	nTotal += nValorA
@@ -655,15 +1078,35 @@ Static Function BRPAGRET05(nHCSV, nHLog, cEmpAgeA, cEmpConA, cCodEmpA, cEmpBanA,
 	RestArea(aArea)
 
 Return (NIL)
-// Converte "DD/MM/AAAA" para Date
+
+/*/{Protheus.doc} BRPAGRET_CtoD
+Converte "DD/MM/AAAA" para Date
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param cData, character, variavel contendo a data no formato DD/MM/AAAA
+@return date, variavel data convertida
+/*/
 Static Function BRPAGRET_CtoD(cData)
+
 	Local dRet := CtoD("") as date
+
 	If Len(AllTrim(cData)) == 10
 		// Protheus espera formato do SET DATE (geralmente DDMMYYYY via CtoD)
 		dRet := StoD(SubStr(cData,7,4) + SubStr(cData,4,2) + SubStr(cData,1,2))
 	EndIf
 Return (dRet)
-// Mantem apenas digitos de uma string.
+
+/*/{Protheus.doc} BRPAGRET09
+Mantem apenas digitos de uma string.
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param cTexto, character, variavel a ser verificada
+@return character, variavel contendo apenas digitos
+/*/
 Static Function BRPAGRET09(cTexto)
 	Local cRet  := "" as character
 	Local nI    := 0  as numeric
@@ -677,13 +1120,22 @@ Static Function BRPAGRET09(cTexto)
 	Next
 
 Return (cRet)
-
-// Valida o CNPJ do header contra a empresa/filial logada no Protheus.
+ 
+/*/{Protheus.doc} BRPAGRET10
+Valida o CNPJ do header contra a empresa/filial logada no Protheus.
+@type function Processamento
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param cEmpDoc, character, Empresa do Docuemntop
+@param cEmpNome, character, Nome da Empresa
+@return Logical, indica se a validação CNPJ está ok
+/*/
 Static Function BRPAGRET10(cEmpDoc, cEmpNome)
-	Local aArea   := GetArea()
-	Local aAreaM0 := NIL
 	// Local cCGCAtu := "" as character
-	Local lRet    := .T. as logical
+	Local aArea   := GetArea() as array
+	Local aAreaM0 := NIL       as array
+	Local lRet    := .T.       as logical
 
 	DbSelectArea("SM0")
 	aAreaM0 := GetArea()
@@ -722,22 +1174,22 @@ Para exibir a logo, mantenha o arquivo BRADESCO.BMP no StartPath do AppServer.
 @param nTotal,      numeric,   Valor total extraido
 @param cFiltroNome, character, Filtro aplicado
 @param cArqOrig,    character, Arquivo origem processado
-@return nil
+@return character, sem retorno
 /*/
 Static Function BRPAGRET06(aRegistros, nTotal, cFiltroNome, cArqOrig)
-	Local oPrint    := NIL
-	Local oFontTit  := NIL
-	Local oFontCab  := NIL
-	Local oFontDet  := NIL
-	Local oFontRod  := NIL
-	Local cArquivo  := ""  as character
-	Local cLogo     := ""  as character
-	Local cFiltro   := ""  as character
-	Local cOrigem   := ""  as character
-	Local nLin      := 0   as numeric
-	Local nLinFim   := 520 as numeric
-	Local nPag      := 1   as numeric
-	Local nI        := 0   as numeric
+	Local cArquivo := ""  as character
+	Local cFiltro  := ""  as character
+	Local cLogo    := ""  as character
+	Local cOrigem  := ""  as character
+	Local nI       := 0   as numeric
+	Local nLin     := 0   as numeric
+	Local nLinFim  := 520 as numeric
+	Local nPag     := 1   as numeric
+	Local oFontCab := NIL as object
+	Local oFontDet := NIL as object
+	Local oFontRod := NIL as object
+	Local oFontTit := NIL as object
+	Local oPrint   := NIL as object
 
 	cArquivo := "BRPAGRET_" + DToS(Date()) + "_" + StrTran(Time(), ":", "-")
 	cLogo    := GetSrvProfString("StartPath", "") + "BRADESCO.BMP"
@@ -765,20 +1217,20 @@ Static Function BRPAGRET06(aRegistros, nTotal, cFiltroNome, cArqOrig)
 			nLin := 105
 		EndIf
 
-		oPrint:SayAlign(nLin, 040, aRegistros[nI][01], oFontDet, 080, 10, COR_PRETO, PAD_LEFT, 0)
-		oPrint:SayAlign(nLin, 125, SubStr(aRegistros[nI][02], 1, 34), oFontDet, 180, 10, COR_PRETO, PAD_LEFT, 0)
-		oPrint:SayAlign(nLin, 310, aRegistros[nI][04], oFontDet, 035, 10, COR_PRETO, PAD_CENTER, 0)
-		oPrint:SayAlign(nLin, 350, aRegistros[nI][05], oFontDet, 060, 10, COR_PRETO, PAD_CENTER, 0)
-		oPrint:SayAlign(nLin, 415, aRegistros[nI][06], oFontDet, 060, 10, COR_PRETO, PAD_CENTER, 0)
-		oPrint:SayAlign(nLin, 480, Transform(aRegistros[nI][07], "@E 999,999,999.99"), oFontDet, 090, 10, COR_PRETO, PAD_RIGHT, 0)
-		oPrint:SayAlign(nLin, 575, aRegistros[nI][08], oFontDet, 170, 10, COR_PRETO, PAD_LEFT, 0)
+		oPrint:SayAlign(nLin, 040, aRegistros[nI][01], oFontDet, 080, 10, /*nClrText*/, PAD_LEFT, 0)
+		oPrint:SayAlign(nLin, 125, SubStr(aRegistros[nI][02], 1, 34), oFontDet, 180, 10, /*nClrText*/, PAD_LEFT, 0)
+		oPrint:SayAlign(nLin, 310, aRegistros[nI][04], oFontDet, 035, 10, /*nClrText*/, PAD_CENTER, 0)
+		oPrint:SayAlign(nLin, 350, aRegistros[nI][05], oFontDet, 060, 10, /*nClrText*/, PAD_CENTER, 0)
+		oPrint:SayAlign(nLin, 415, aRegistros[nI][06], oFontDet, 060, 10, /*nClrText*/, PAD_CENTER, 0)
+		oPrint:SayAlign(nLin, 480, Transform(aRegistros[nI][07], "@E 999,999,999.99"), oFontDet, 090, 10, /*nClrText*/, PAD_RIGHT, 0)
+		oPrint:SayAlign(nLin, 575, aRegistros[nI][08], oFontDet, 170, 10, /*nClrText*/, PAD_LEFT, 0)
 		nLin += 12
 	Next
 
 	oPrint:Line(nLin + 4, 040, nLin + 4, 745, COR_CINZA)
 	nLin += 10
-	oPrint:SayAlign(nLin, 395, "TOTAL", oFontCab, 080, 10, COR_PRETO, PAD_RIGHT, 0)
-	oPrint:SayAlign(nLin, 480, Transform(nTotal, "@E 999,999,999.99"), oFontCab, 090, 10, COR_PRETO, PAD_RIGHT, 0)
+	oPrint:SayAlign(nLin, 395, "TOTAL", oFontCab, 080, 10, /*nClrText*/, PAD_RIGHT, 0)
+	oPrint:SayAlign(nLin, 480, Transform(nTotal, "@E 999,999,999.99"), oFontCab, 090, 10, /*nClrText*/, PAD_RIGHT, 0)
 	BRPAGRET08(oPrint, oFontRod, nPag)
 
 	oPrint:Preview()
@@ -787,8 +1239,17 @@ Return (NIL)
 
 /*/{Protheus.doc} BRPAGRET07
 Imprime cabecalho do relatorio Bradesco.
-@type function Auxiliar
-@return nil
+@type function Relatorio
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param oPrint, object, Obejto Relatorio
+@param oFontTit, object, Objeto Fonte do Titulo
+@param oFontCab, object, Objeto Fonte do Cabecalho
+@param cLogo, character, Caminho do Logo
+@param cFiltro, character, Filtro aplicado
+@param cOrigem, character, Origem do Arquivo
+@return character, sem retorno
 /*/
 Static Function BRPAGRET07(oPrint, oFontTit, oFontCab, cLogo, cFiltro, cOrigem)
 
@@ -796,26 +1257,32 @@ Static Function BRPAGRET07(oPrint, oFontTit, oFontCab, cLogo, cFiltro, cOrigem)
 	If File(cLogo)
 		oPrint:SayBitmap(020, 040, cLogo, 055, 028)
 	EndIf
-	oPrint:SayAlign(025, 110, "Retorno Bancario Bradesco", oFontTit, 280, 18, COR_PRETO, PAD_LEFT, 0)
-	oPrint:SayAlign(048, 110, "Filtro: " + cFiltro, oFontCab, 300, 10, COR_PRETO, PAD_LEFT, 0)
-	oPrint:SayAlign(062, 110, "Arquivo: ..." + cOrigem, oFontCab, 500, 10, COR_PRETO, PAD_LEFT, 0)
+	oPrint:SayAlign(025, 110, "Retorno Bancario Bradesco", oFontTit, 280, 18, /*nClrText*/, PAD_LEFT, 0)
+	oPrint:SayAlign(048, 110, "Filtro: " + cFiltro, oFontCab, 300, 10, /*nClrText*/, PAD_LEFT, 0)
+	oPrint:SayAlign(062, 110, "Arquivo: ..." + cOrigem, oFontCab, 500, 10, /*nClrText*/, PAD_LEFT, 0)
 
 	oPrint:Line(082, 040, 082, 745, COR_CINZA)
-	oPrint:SayAlign(090, 040, "CONTA", oFontCab, 080, 10, COR_PRETO, PAD_LEFT, 0)
-	oPrint:SayAlign(090, 125, "NOME", oFontCab, 180, 10, COR_PRETO, PAD_LEFT, 0)
-	oPrint:SayAlign(090, 310, "TIPO", oFontCab, 035, 10, COR_PRETO, PAD_CENTER, 0)
-	oPrint:SayAlign(090, 350, "DT LANC.", oFontCab, 060, 10, COR_PRETO, PAD_CENTER, 0)
-	oPrint:SayAlign(090, 415, "DT CRED.", oFontCab, 060, 10, COR_PRETO, PAD_CENTER, 0)
-	oPrint:SayAlign(090, 480, "VALOR", oFontCab, 090, 10, COR_PRETO, PAD_RIGHT, 0)
-	oPrint:SayAlign(090, 575, "AUTENTICACAO", oFontCab, 170, 10, COR_PRETO, PAD_LEFT, 0)
+	oPrint:SayAlign(090, 040, "CONTA", oFontCab, 080, 10, /*nClrText*/, PAD_LEFT, 0)
+	oPrint:SayAlign(090, 125, "NOME", oFontCab, 180, 10, /*nClrText*/, PAD_LEFT, 0)
+	oPrint:SayAlign(090, 310, "TIPO", oFontCab, 035, 10, /*nClrText*/, PAD_CENTER, 0)
+	oPrint:SayAlign(090, 350, "DT LANC.", oFontCab, 060, 10, /*nClrText*/, PAD_CENTER, 0)
+	oPrint:SayAlign(090, 415, "DT CRED.", oFontCab, 060, 10, /*nClrText*/, PAD_CENTER, 0)
+	oPrint:SayAlign(090, 480, "VALOR", oFontCab, 090, 10, /*nClrText*/, PAD_RIGHT, 0)
+	oPrint:SayAlign(090, 575, "AUTENTICACAO", oFontCab, 170, 10, /*nClrText*/, PAD_LEFT, 0)
 	oPrint:Line(102, 040, 102, 745, COR_CINZA)
 
 Return (NIL)
 
 /*/{Protheus.doc} BRPAGRET08
 Imprime rodape e fecha pagina do relatorio Bradesco.
-@type function Auxiliar
-@return nil
+@type function Relatorio
+@version  1.00
+@author marioantonaccio
+@since 20/07/2026
+@param oPrint, object, Objeto Relatorio
+@param oFontRod, object, Objeto Fonte de Rodape
+@param nPag, numeric, Numero da Pagina
+@return character, sem retorno
 /*/
 Static Function BRPAGRET08(oPrint, oFontRod, nPag)
 
@@ -863,7 +1330,3 @@ Static Function BRPAGRET04(cTexto)
 	End
 
 Return (cRet)
-
-
-
-

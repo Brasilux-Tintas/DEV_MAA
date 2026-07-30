@@ -1,279 +1,368 @@
 #INCLUDE "PROTHEUS.CH"
 #INCLUDE "TOPCONN.CH"
-/*/{Protheus.doc} BRALTCST
-Permite a alteração de CST/Origem nos campos D1_CLASFIS/D2_CLASFIS/B1_ORIGEM
+#INCLUDE "RWMAKE.CH"
+/*/{Protheus.doc} BRALTCSTSD2
+Altera o campo D2_CLASFIS de SD2 e D1_CLASFIS de SD1 e atualiza B1_ORIGEM em SB1
 @type function Processamento
-@version  1.0
-@author marioantonaccio
-@since 10/03/2026
+@version 1.1
+@author GitHub Copilot
+@since 16/06/2026
 @return character, sem retorno
 /*/
 User Function BRALTCST()
-    Local aSays        := {}
-    Local aButtons     := {}
-    Local lOk          := .F.
+    Local aSays    := {}
+    Local aButtons := {}
+    Local lOk      := .F.
+    Local cResp:=""
+    Private lConfirma:=.F.
+    Private dDataIni:=CTOD(" ")
+    aAdd(aSays, "Programa para ajustar CST de SD2 e SD1 e definir origem do produto.")
+    aAdd(aSays, "Busca registros a partir de 01/05/2026 com D2_CLASFIS ou D1_CLASFIS de 2 posicoes.")
+    aAdd(aSays, "O campo sera atualizado para ZERO (0)+CST e B1_ORIGEM sera preenchido com ZERO (0)")
+    aAdd(aSays," se estiver vazio.")
 
-    //Identifica se a rotina esta em uso
-    If .NOT. SuperGetMV("BR_ALTCST",.F.,.F.)
-        Return(NIL)
-    End
+    aAdd(aButtons, { 1, .T., {|| lOk := .T., FechaBatch() } })
+    aAdd(aButtons, { 2, .T., {|| lOk := .F., FechaBatch() } })
 
-    //Popula as linhas que serão mostradas na tela
-    aAdd(aSays, "Esse programa tem como objetivo efetuar a troca de um CST que esteja errado")
-    aAdd(aSays, "(2 posicoes) corrigindo para 3 posicoes.")
+    FormBatch("Atualização SD2/SD1 e Origem Produto", aSays, aButtons)
 
-    //Botões da tela, cada botão tem um Bloco de Código
-    aAdd(aButtons, { 1, .T., {|| lOk := .T., FechaBatch() }} )
-    aAdd(aButtons, { 2, .T., {|| lOk := .F., FechaBatch() }} )
-
-    //Chama a tela principal
-    FormBatch("Alteração de CST", aSays, aButtons)
-
-    //Se foi confirmado a tela
     If lOk
-        Processa( { |lEnd| BRACST01() }, "Processando Alteração CST/Origem.....")
-    EndIf
+        cResp  := FWInputBox("Data Inicio de Ajuste", "Informe a Data para inicio do Ajuste" )
+        dDataIni:=CTOD(cResp)
+        If FWAlertYesNo("Confirma atualização de dados?", "Atualiza Dados")
+            lConfirma:=.T.
+        End
+        Processa( { |lEnd| BRALCST01() }, "Processando registros SD2 e SD1...")
+    End
 
 Return (NIL)
 
-/*/{Protheus.doc} BRACST01
-Processo de alteração de CST/Origem
-@type function Processamento
-@version  1.00
-@author marioantonaccio
-@since 10/03/2026
-@return character, sem retorno
-/*/
-Static Function BRACST01()
+Static Function BRALCST01()
+    Local cOrigem    := "0" as character
+    Local cClasFis   := " " as character
+    Local cOrigAnt   := " " as character
+    Local nReg    := 0   as Numeric
+    Local nRegSB1 := 0   as Numeric
+    Local nRegSD1 := 0   as Numeric
+    Local nRegSD2 := 0   as Numeric
+    Local nRegSFT := 0   as Numeric
+    Local cSeq:=" "
 
-    Local cClasFis := " " as character
-    Local cMsg     := " " as character
-    Local cOrigem  := "0" as character
-    Local cRegNFE  := " " as character
-    Local cRegNFS  := " " as character
-    Local cRegPr   := " " as character
-    Local nReg     := 0   as Numeric
-    Local nRegNFE  := 0   as Numeric
-    Local nRegNFS  := 0   as Numeric
-    Local nRegPr   := 0   as Numeric
+    BeginSql Alias "XZAJ"
+    SELECT
+        MAX(ZAJ_SEQ) AS SEQ
+    FROM
+        %TABLE:ZAJ%
+    WHERE
+        %NOTDEL%
+        AND ZAJ_DTALT = %EXP:DTOS(dDataIni)%
+    EndSQL
+    cSeq:=Soma1(XZAJ->SEQ)
+    XZAJ->(dbCloseArea())
 
-    //Seleciona os Registros SD2
-    BeginSql AlIAS "XSD2"
+    BeginSql Alias "XSD2"
         SELECT
             R_E_C_N_O_ AS REGSD2
         FROM
             %TABLE:SD2%
         WHERE
             %NOTDEL%
+            AND D2_EMISSAO >= %EXP:DTOS(dDataIni)%
             AND LEN(TRIM(D2_CLASFIS)) = 2
     EndSQL
 
-    //Contagem de registros conforme parametro
-    nReg:=CONTAR("XSD2",".NOT. EOF()")
+    nReg := CONTAR("XSD2", ".NOT. EOF()")
 
-    // Se nao existir registros retorna
     If nReg > 0
-
-        //Confirma execução rotina
         SD2->(dbSetOrder(1))
         XSD2->(dbGoTop())
-
         ProcRegua(nReg)
+
         While XSD2->(.NOT. EOF())
-
-            IncProc("Processando...SD2")
-
+            IncProc("Processando... SD2")
             SD2->(dbGoTo(XSD2->REGSD2))
 
-            SB1->(dbSetOrder(1))
-            If SB1->(dbSeek(xFilial("SB1")+SD2->D2_COD))
-                If Empty(SB1->B1_ORIGEM) .and. SB1->B1_IMPORT <>"S"
-                    cRegPr:=StrZero(nRegpr,2,0)
-
-                    RecLock("SB1",.F.)
-                    //SB1->B1_ORIGEM := cOrigem
-                    MsUnLock()
-
-                    //Grava Log
-                    ZAJ->(dbSetOrder(1))
-                    ZAJ->(dbSetOrder(1))
-                    RecLock("ZAJ",.T.)
-                    ZAJ->ZAJ_FILIAL := FWxFilial( 'ZAJ' )
-                    ZAJ->ZAJ_NUMERO := "ALTCST "
-                    ZAJ->ZAJ_FORNEC := SB1->B1_FILIAL
-                    ZAJ->ZAJ_LOJA   := " "
-                    ZAJ->ZAJ_PROD   := SB1->B1_COD
-                    ZAJ->ZAJ_CAMPO  := "B1_ORIGEM"
-                    ZAJ->ZAJ_DE     := " "
-                    ZAJ->ZAJ_PARA   := cOrigem
-                    ZAJ->ZAJ_SEQ    := Soma1(cRegPr)
-                    ZAJ->ZAJ_DTALT  := dDataBase
-                    ZAJ->ZAJ_HORA   := Time()
-                    ZAJ->ZAJ_USRALT := cUserName
-                    ZAJ->ZAJ_TIPO   := "PR"
-                    MsUnLock()
-                    nRegPr++
-                End
-            End
-
             If Len(Alltrim(SD2->D2_CLASFIS)) == 2
-                cRegNFS:=StrZero(nRegNFS,2,0)
-                cClasFis:=AllTrim(SD2->D2_CLASFIS)
+                cClasFis := AllTrim(SD2->D2_CLASFIS)
+                If lConfirma
+                    RecLock("SD2", .F.)
+                    SD2->D2_CLASFIS := cOrigem + cClasFis
+                    MsUnLock()
+                End
+                nRegSD2++
 
-                RecLock("SD2",.F.)
-                //SD2->D2_CLASFIS:=cOrigem+cClasFis
-                MsUnLock()
-
-                //Grava Log
-                ZAJ->(dbSetOrder(1))
-                ZAJ->(dbSetOrder(1))
-                RecLock("ZAJ",.T.)
-                ZAJ->ZAJ_FILIAL := FWxFilial( 'ZAJ' )
-                ZAJ->ZAJ_NUMERO := SD2->D2_DOC
+                RecLock("ZAJ", .T.)
+                ZAJ->ZAJ_FILIAL := SD2->D2_FILIAL //FWxFilial("ZAJ")
+                ZAJ->ZAJ_NUMERO := SD2->D2_DOC+SD2->D2_SERIE
                 ZAJ->ZAJ_FORNEC := SD2->D2_CLIENTE
                 ZAJ->ZAJ_LOJA   := SD2->D2_LOJA
                 ZAJ->ZAJ_PROD   := SD2->D2_COD
                 ZAJ->ZAJ_CAMPO  := "D2_CLASFIS"
                 ZAJ->ZAJ_DE     := cClasFis
-                ZAJ->ZAJ_PARA   := SD2->D2_CLASFIS
-                ZAJ->ZAJ_SEQ    := Soma1(cRegNFS)
+                ZAJ->ZAJ_PARA   := cOrigem + cClasFis
+                ZAJ->ZAJ_SEQ    := cSeq
                 ZAJ->ZAJ_DTALT  := dDataBase
                 ZAJ->ZAJ_HORA   := Time()
                 ZAJ->ZAJ_USRALT := cUserName
                 ZAJ->ZAJ_TIPO   := "D2"
+                If FieldPos ("ZAJ_CHAVE") > 0
+                    ZAJ->ZAJ_CHAVE:="SD2"
+                End
+                If FieldPos ("ZAJ_RECTAB") > 0
+                    ZAJ->ZAJ_RECTAB:=XSD2->REGSD2
+                End
                 MsUnLock()
-                cRegNFS++
+            End
+
+            SB1->(dbSetOrder(1))
+            //If SB1->(dbSeek(xFilial("SB1") + SD2->D2_COD))
+            If SB1->(dbSeek(SD2->D2_FILIAL + SD2->D2_COD))
+                If Empty(SB1->B1_ORIGEM) .and. SB1->B1_IMPORT <> "S"
+                    cOrigAnt := SB1->B1_ORIGEM
+                    If lConfirma
+                        RecLock("SB1", .F.)
+                        SB1->B1_ORIGEM := cOrigem
+                        MsUnLock()
+                    End
+                    nRegSB1++
+
+                    RecLock("ZAJ", .T.)
+                    ZAJ->ZAJ_FILIAL := SB1->B1_FILIAL //FWxFilial("ZAJ")
+                    ZAJ->ZAJ_NUMERO := "PRODUTO"
+                    ZAJ->ZAJ_FORNEC := SB1->B1_GRUPO
+                    ZAJ->ZAJ_LOJA   := SB1->B1_TIPO
+                    ZAJ->ZAJ_PROD   := SB1->B1_COD
+                    ZAJ->ZAJ_CAMPO  := "B1_ORIGEM"
+                    ZAJ->ZAJ_DE     := cOrigAnt
+                    ZAJ->ZAJ_PARA   := cOrigem
+                    ZAJ->ZAJ_SEQ    := cSeq
+                    ZAJ->ZAJ_DTALT  := dDataBase
+                    ZAJ->ZAJ_HORA   := Time()
+                    ZAJ->ZAJ_USRALT := cUserName
+                    ZAJ->ZAJ_TIPO   := "PR"
+                    If FieldPos ("ZAJ_CHAVE") > 0
+                        ZAJ->ZAJ_CHAVE:="SB1"
+                    End
+                    If FieldPos ("ZAJ_RECTAB") > 0
+                        ZAJ->ZAJ_RECTAB:=SB1->(RecNo())
+                    End
+                    MsUnLock()
+                End
             End
 
             XSD2->(dbSkip())
-        
         End
 
         XSD2->(dbCloseArea())
-    
     End
 
-    //Seleciona os Registros SD1
-    BeginSql AlIAS "XSD1"
+    BeginSql Alias "XSD1"
         SELECT
             R_E_C_N_O_ AS REGSD1
         FROM
             %TABLE:SD1%
         WHERE
             %NOTDEL%
+            AND D1_DTDIGIT >= %EXP:DTOS(dDataIni)%
             AND LEN(TRIM(D1_CLASFIS)) = 2
     EndSQL
 
-    //Contaem de registros conforme parametro
-    nReg:=CONTAR("XSD1",".NOT. EOF()")
+    nReg := CONTAR("XSD1", ".NOT. EOF()")
 
-    // Se nao existir registros retorna
-    If nReg >  0
-
+    If nReg > 0
         SD1->(dbSetOrder(1))
-
         XSD1->(dbGoTop())
-
         ProcRegua(nReg)
 
         While XSD1->(.NOT. EOF())
-
-            IncProc("Processando...SD1")
-
+            IncProc("Processando... SD1")
             SD1->(dbGoTo(XSD1->REGSD1))
-            SB1->(dbSetOrder(1))
-
-            If SB1->(dbSeek(xFilial("SB1")+SD1->D1_COD))
-
-                If Empty(SB1->B1_ORIGEM) .and. SB1->B1_IMPORT <>"S"
-                    cRegPr:=StrZero(nRegpr,2,0)
-
-                    RecLock("SB1",.F.)
-                    // SB1->B1_ORIGEM := cOrigem
-                    MsUnLock()
-
-                    //Grava Log
-                    ZAJ->(dbSetOrder(1))
-                    ZAJ->(dbSetOrder(1))
-                    RecLock("ZAJ",.T.)
-                    ZAJ->ZAJ_FILIAL := FWxFilial( 'ZAJ' )
-                    ZAJ->ZAJ_NUMERO := "ALTCST "
-                    ZAJ->ZAJ_FORNEC := SB1->B1_FILIAL
-                    ZAJ->ZAJ_LOJA   := " "
-                    ZAJ->ZAJ_PROD   := SB1->B1_COD
-                    ZAJ->ZAJ_CAMPO  := "B1_ORIGEM"
-                    ZAJ->ZAJ_DE     := " "
-                    ZAJ->ZAJ_PARA   := cOrigem
-                    ZAJ->ZAJ_SEQ    := Soma1(cRegPr)
-                    ZAJ->ZAJ_DTALT  := dDataBase
-                    ZAJ->ZAJ_HORA   := Time()
-                    ZAJ->ZAJ_USRALT := cUserName
-                    ZAJ->ZAJ_TIPO   := "PR"
-                    MsUnLock()
-                    nRegPr++
-                End
-            End
 
             If Len(Alltrim(SD1->D1_CLASFIS)) == 2
-                cRegNFE:=StrZero(nRegNFE,2,0)
-                cClasFis:=AllTrim(SD1->D1_CLASFIS)
+                cClasFis        := AllTrim(SD1->D1_CLASFIS)
+                If lConfirma
+                    RecLock("SD1", .F.)
+                    SD1->D1_CLASFIS := cOrigem + cClasFis
+                    MsUnLock()
+                End
+                nRegSD1++
 
-                RecLock("SD1",.F.)
-                //  SD1->D1_CLASFIS:=cOrigem+cClasFis
-                MsUnLock()
-
-                //Grava Log
-                ZAJ->(dbSetOrder(1))
-                ZAJ->(dbSetOrder(1))
-                RecLock("ZAJ",.T.)
-                ZAJ->ZAJ_FILIAL := FWxFilial( 'ZAJ' )
-                ZAJ->ZAJ_NUMERO := SD1->D1_DOC
+                RecLock("ZAJ", .T.)
+                ZAJ->ZAJ_FILIAL :=SD1->D1_FILIAL // FWxFilial("ZAJ")
+                ZAJ->ZAJ_NUMERO := SD1->D1_DOC+SD1->D1_SERIE
                 ZAJ->ZAJ_FORNEC := SD1->D1_FORNECE
                 ZAJ->ZAJ_LOJA   := SD1->D1_LOJA
                 ZAJ->ZAJ_PROD   := SD1->D1_COD
                 ZAJ->ZAJ_CAMPO  := "D1_CLASFIS"
                 ZAJ->ZAJ_DE     := cClasFis
-                ZAJ->ZAJ_PARA   := SD1->D1_CLASFIS
-                ZAJ->ZAJ_SEQ    := Soma1(cRegNFE)
+                ZAJ->ZAJ_PARA   := cOrigem + cClasFis
+                ZAJ->ZAJ_SEQ    := cSeq
                 ZAJ->ZAJ_DTALT  := dDataBase
                 ZAJ->ZAJ_HORA   := Time()
                 ZAJ->ZAJ_USRALT := cUserName
                 ZAJ->ZAJ_TIPO   := "D1"
+                If FieldPos ("ZAJ_CHAVE") > 0
+                    ZAJ->ZAJ_CHAVE:="SD1"
+                End
+                If FieldPos ("ZAJ_RECTAB") > 0
+                    ZAJ->ZAJ_RECTAB:=XSD1->REGSD1
+                End
                 MsUnLock()
-                cRegNFE++
+            End
+
+            SB1->(dbSetOrder(1))
+            //If SB1->(dbSeek(xFilial("SB1") + SD1->D1_COD))
+            If SB1->(dbSeek(SD1->D1_FILIAL + SD1->D1_COD))
+                If Empty(SB1->B1_ORIGEM) .and. SB1->B1_IMPORT <> "S"
+                    cOrigAnt := SB1->B1_ORIGEM
+                    If lConfirma
+                        RecLock("SB1", .F.)
+                        SB1->B1_ORIGEM := cOrigem
+                        MsUnLock()
+                    End
+                    nRegSB1++
+
+                    RecLock("ZAJ", .T.)
+                    ZAJ->ZAJ_FILIAL :=SB1->B1_FILIAL // FWxFilial("ZAJ")
+                    ZAJ->ZAJ_NUMERO := "PRODUTO"
+                    ZAJ->ZAJ_FORNEC := SB1->B1_GRUPO
+                    ZAJ->ZAJ_LOJA   := SB1->B1_TIPO
+                    ZAJ->ZAJ_PROD   := SB1->B1_COD
+                    ZAJ->ZAJ_CAMPO  := "B1_ORIGEM"
+                    ZAJ->ZAJ_DE     := cOrigAnt
+                    ZAJ->ZAJ_PARA   := cOrigem
+                    ZAJ->ZAJ_SEQ    := cSeq
+                    ZAJ->ZAJ_DTALT  := dDataBase
+                    ZAJ->ZAJ_HORA   := Time()
+                    ZAJ->ZAJ_USRALT := cUserName
+                    ZAJ->ZAJ_TIPO   := "PR"
+                    If FieldPos ("ZAJ_CHAVE") > 0
+                        ZAJ->ZAJ_CHAVE:="SB1"
+                    End
+                    If FieldPos ("ZAJ_RECTAB") > 0
+                        ZAJ->ZAJ_RECTAB:=SB1->(RecNo())
+                    End
+                    MsUnLock()
+                End
             End
 
             XSD1->(dbSkip())
-        
         End
-    
+
         XSD1->(dbCloseArea())
-    
     End
 
-    cMsg:="Rotina Finalizada Com SUCESSO!!!"+CRLF+CRLF
-    cMsg+="Registros Alterados Total: "+cValToChar(nRegPR+nREgNFS+nREgNFE)+CRLF+CRLF
-    cMsg+="Registros Alterados SB1  : "+cValToChar(nRegPR)+CRLF+CRLF
-    cMsg+="Registros Alterados SD1  : "+cValToChar(nRegNFE)+CRLF+CRLF
-    cMsg+="Registros Alterados SD2  : "+cValToChar(nRegNFS)+CRLF+CRLF
-    FWAlertSuccess(cMsg, "Rotina Finalizada")
+ BeginSql Alias "XSFT"
+        SELECT
+            R_E_C_N_O_ AS REGSFT
+        FROM
+            %TABLE:SFT%
+        WHERE
+            %NOTDEL%
+            AND FT_ENTRADA >= %EXP:DTOS(dDataIni)%
+            AND LEN(TRIM(FT_CLASFIS)) = 2
+    EndSQL
 
-    If FWAlertYesNo("Deseja ver o Log de Alteração?", "LOG de alterações")
-        BRACST02()
+    nReg := CONTAR("XSFT", ".NOT. EOF()")
+
+    If nReg > 0
+        SFT->(dbSetOrder(1))
+        XSFT->(dbGoTop())
+        ProcRegua(nReg)
+
+        While XSFT->(.NOT. EOF())
+            IncProc("Processando... SFT")
+            SFT->(dbGoTo(XSFT->REGSFT))
+
+            If Len(Alltrim(SFT->FT_CLASFIS)) == 2
+                cClasFis        := AllTrim(SFT->FT_CLASFIS)
+                If lConfirma
+                    RecLock("SFT", .F.)
+                    SFT->FT_CLASFIS := cOrigem + cClasFis
+                    MsUnLock()
+                End
+                nRegSFT++
+
+                RecLock("ZAJ", .T.)
+                ZAJ->ZAJ_FILIAL := SFT->FT_FILIAL // FWxFilial("ZAJ")
+                ZAJ->ZAJ_NUMERO := SFT->FT_NFISCAL+SFT->FT_SERIE
+                ZAJ->ZAJ_FORNEC := SFT->FT_CLIEFOR
+                ZAJ->ZAJ_LOJA   := SFT->FT_LOJA
+                ZAJ->ZAJ_PROD   := SFT->FT_PRODUTO
+                ZAJ->ZAJ_CAMPO  := "FT_CLASFIS"
+                ZAJ->ZAJ_DE     := cClasFis
+                ZAJ->ZAJ_PARA   := cOrigem + cClasFis
+                ZAJ->ZAJ_SEQ    := cSeq
+                ZAJ->ZAJ_DTALT  := dDataBase
+                ZAJ->ZAJ_HORA   := Time()
+                ZAJ->ZAJ_USRALT := cUserName
+                ZAJ->ZAJ_TIPO   := "FT"
+                If FieldPos ("ZAJ_CHAVE") > 0
+                    ZAJ->ZAJ_CHAVE:="SFT"
+                End
+                If FieldPos ("ZAJ_RECTAB") > 0
+                    ZAJ->ZAJ_RECTAB:=XSFT->REGSFT
+                End
+                MsUnLock()
+            End
+
+            SB1->(dbSetOrder(1))
+            //If SB1->(dbSeek(xFilial("SB1") + SD1->D1_COD))
+            If SB1->(dbSeek(SFT->FT_FILIAL + SFT->FT_PRODUTO))
+                If Empty(SB1->B1_ORIGEM) .and. SB1->B1_IMPORT <> "S"
+                    cOrigAnt := SB1->B1_ORIGEM
+                    If lConfirma
+                        RecLock("SB1", .F.)
+                        SB1->B1_ORIGEM := cOrigem
+                        MsUnLock()
+                    End
+                    nRegSB1++
+
+                    RecLock("ZAJ", .T.)
+                    ZAJ->ZAJ_FILIAL :=SB1->B1_FILIAL // FWxFilial("ZAJ")
+                    ZAJ->ZAJ_NUMERO := "PRODUTO"
+                    ZAJ->ZAJ_FORNEC := SB1->B1_GRUPO
+                    ZAJ->ZAJ_LOJA   := SB1->B1_TIPO
+                    ZAJ->ZAJ_PROD   := SB1->B1_COD
+                    ZAJ->ZAJ_CAMPO  := "B1_ORIGEM"
+                    ZAJ->ZAJ_DE     := cOrigAnt
+                    ZAJ->ZAJ_PARA   := cOrigem
+                    ZAJ->ZAJ_SEQ    := cSeq
+                    ZAJ->ZAJ_DTALT  := dDataBase
+                    ZAJ->ZAJ_HORA   := Time()
+                    ZAJ->ZAJ_USRALT := cUserName
+                    ZAJ->ZAJ_TIPO   := "PR"
+                    If FieldPos ("ZAJ_CHAVE") > 0
+                        ZAJ->ZAJ_CHAVE:="SB1"
+                    End
+                    If FieldPos ("ZAJ_RECTAB") > 0
+                        ZAJ->ZAJ_RECTAB:=SB1->(RecNo())
+                    End
+                    MsUnLock()
+                End
+            End
+
+            XSFT->(dbSkip())
+        End
+
+        XSFT->(dbCloseArea())
     End
 
-Return(Nil)
+    FWAlertSuccess("Rotina finalizada com sucesso!" + CRLF + CRLF + ;
+        "SD2 alterados  : " + cValToChar(nRegSD2) + CRLF + ;
+        "SD1 alterados  : " + cValToChar(nRegSD1) + CRLF + ;
+        "SFT alterados  : " + cValToChar(nRegSFT) + CRLF + ;
+        "SB1 atualizados: " + cValToChar(nRegSB1) + CRLF + ;
+        " "+ CRLF + ;
+        "Total Registros Processados: " + cValToChar(nRegSB1+nRegSD1+nRegSD2+nRegSFT),"Finalizado")
 
-/*/{Protheus.doc} BRACST02()
-Geraçao e impressao de arquivo de LOG de Alterações
-@type function Relatorio
-@version  1.0
-@author marioantonaccio
-@since 11/03/2026
-@return character, sem retorno
-/*/
-Static Function BRACST02()
+    If FWAlertYesNo("Imprime relatorio de LOG?", "Imprime LOG")
+        BRALCST02()
+    End
 
+Return (NIL)
+
+Static Function BRALCST02()
     Private oReport                  as Object
     Private oSecSC                   as Object
 
@@ -308,8 +397,8 @@ Static Function ReportDef()
     //³ExpC5 : Descricao                                                       ³
     //³                                                                        ³
     //--------------------------------------------------------------------------
-    oReport:=TReport():New("BRACST02",cTitle,"", {|oReport| _FQuery(),RPrintCom(oReport)},;
-        "Este programa emite o Relatorio de LOG de Alteracao de CST/Origem.")
+    oReport:=TReport():New("BRALCSTA",cTitle,"", {|oReport| BRALCST04(),RPrintCom(oReport)},;
+        "Este programa emite o Relatorio de LOG de Alteracao de CST.")
 
     oReport:lParamPage:=.F.
     oReport:lTotalInLine:=.F.
@@ -351,19 +440,20 @@ Static Function RPrintCom(oReport)
 
     oSecSC := oReport:Section(1)
 
-    TRCell():New(oSecSC, "ZAJ_NUMERO", " ", "No.DOC"        , " " , TamSX3( 'ZAJ_NUMERO' )[01], /*lPixel*/, {||XDEM->ZAJ_NUMERO}         , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_FORNEC", " ", "Cliente"       , " " , TamSX3( 'ZAJ_FORNEC' )[01], /*lPixel*/, {||XDEM->ZAJ_FORNEC}         , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_LOJA"  , " ", "Loja"          , " " , TamSX3( 'ZAJ_LOJA' )[01]  , /*lPixel*/, {||XDEM->ZAJ_LOJA}           , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_PROD"  , " ", "Produto"       , " " , TamSX3( 'ZAJ_PROD' )[01]  , /*lPixel*/, {||XDEM->ZAJ_PROD}           , "LEFT")
-    TRCell():New(oSecSC, "NCAMPO"    , " ", "Campo Alterado", " " , 20                        , /*lPixel*/, {||RetTitle(XDEM->ZAJ_CAMPO)}, "LEFT")
-    TRCell():New(oSecSC, "ZAJ_DE"    , " ", "DE"            , "@!", TamSX3("ZAJ_DE")[01]+5    , /*lPixel*/, {||XDEM->ZAJ_DE}             , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_PARA"  , " ", "PARA"          , "@!", TamSX3("ZAJ_PARA")[01]    , /*lPixel*/, {||XDEM->ZAJ_PARA}           , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_DTALT" , " ", "Data Alter"    , "@D", TamSX3("ZAJ_DTALT")[01]+5 , /*lPixel*/, {||XDEM->ZAJ_DTALT}          , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_HORA"  , " ", "Hora Alter"    , "@!", TamSX3("ZAJ_HORA")[01]+5  , /*lPixel*/, {||XDEM->ZAJ_HORA}           , "LEFT")
-    TRCell():New(oSecSC, "ZAJ_USRALT", " ", "Usuario Alt"   , " " , TamSX3("ZAJ_USRALT")[01]  , /*lPixel*/, {||XDEM->ZAJ_USRALT}         , "LEFT")
+    TRCell():New(oSec, "ZAJ_FILIAL", " ", "Filial"      , " " , TamSX3( 'ZAJ_FILIAL' )[01] , {||XDEM->ZAJ_FILIAL}         , "LEFT")
+    TRCell():New(oSec, "ZAJ_NUMERO", " ", "No.DOC"      , " " , TamSX3( 'ZAJ_NUMERO' )[01] , {||XDEM->ZAJ_NUMERO}         , "LEFT")
+    TRCell():New(oSec, "ZAJ_PROD"  , " ", "Produto"     , " " , TamSX3( 'ZAJ_PROD' )[01]   , {||XDEM->ZAJ_PROD}           , "LEFT")
+    TRCell():New(oSec, "ZAJ_FORNEC", " ", "Forn/Cliente", " " , TamSX3( 'ZAJ_FORNEC' )[01] , {||XDEM->ZAJ_FORNEC}         , "LEFT")
+    TRCell():New(oSec, "ZAJ_LOJA"  , " ", "Loja"        , " " , TamSX3( 'ZAJ_LOJA' )[01]   , {||XDEM->ZAJ_LOJA}           , "LEFT")
+    TRCell():New(oSec, "ZAJ_CAMPO" , " ", "Campo"       , " " , 20                         , {||RetTitle(XDEM->ZAJ_CAMPO)}, "LEFT")
+    TRCell():New(oSec, "ZAJ_DE"    , " ", "DE"          , "@!", TamSX3( 'ZAJ_DE' )[01]+5   , {||XDEM->ZAJ_DE}             , "LEFT")
+    TRCell():New(oSec, "ZAJ_PARA"  , " ", "PARA"        , "@!", TamSX3( 'ZAJ_PARA' )[01]   , {||XDEM->ZAJ_PARA}           , "LEFT")
+    TRCell():New(oSec, "ZAJ_DTALT" , " ", "Data"        , "@D", TamSX3( 'ZAJ_DTALT' )[01]+5, {||XDEM->ZAJ_DTALT}          , "LEFT")
+    TRCell():New(oSec, "ZAJ_HORA"  , " ", "Hora"        , "@!", TamSX3( 'ZAJ_HORA' )[01]+5 , {||XDEM->ZAJ_HORA}           , "LEFT")
+    TRCell():New(oSec, "ZAJ_USRALT", " ", "Usuario"     , " " , TamSX3( 'ZAJ_USRALT' )[01] , {||XDEM->ZAJ_USRALT}         , "LEFT")
 
     // Quebra 1 - Solicitacao
-    oBreak1 := TRBreak():New(oSecSC,{|| (XDEM->ZAJ_PROD) },"Processo")
+    oBreak1 := TRBreak():New(oSecSC,{|| (XDEM->ZAJ_FILIAL) },"Processo")
 
     oReport:SetTotalInLine(.F.)
     oReport:lUnderLine := .F.
@@ -418,20 +508,10 @@ Static Function RPrintCom(oReport)
 
 Return (NIL)
 
-/*/{Protheus.doc} _FQuery
-Motagem Uqry para filtro
-@type function Processamento
-@version  1.0
-@author marioantonaccio
-@since 30/01/2026
-@return character, sem retorno
-/*/
-Static Function _FQuery()
-
-    //Montando consulta de dados
+Static Function BRALCST04()
     BeginSql Alias "XDEM"
-        COLUMN ZAJ_DTALT AS DATE
         SELECT
+            ZAJ_FILIAL,
             ZAJ_NUMERO,
             ZAJ_PROD,
             ZAJ_FORNEC,
@@ -446,8 +526,7 @@ Static Function _FQuery()
             %TABLE:ZAJ%
         WHERE
             %NOTDEL%
-            AND ZAJ_FILIAL = %XFILIAL:ZAJ%
-            AND ZAJ_DTALT = %EXP:DTOS(dDataBase)%
+            AND ZAJ_DTALT = %EXP:DTOS(dDataBASE)%
             AND ZAJ_TIPO IN ('PR', 'D1', 'D2')
         ORDER BY
             ZAJ_PROD,

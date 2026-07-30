@@ -19,12 +19,17 @@ User Function BRALTVND()
     //Verifica se usuario tem acesso a funcao
     If .NOT. U_VldAcesso(FUNNAME())
         FwAlertError("Acesso NÃO autorizado---->"+FUNNAME(),"Atenção")
-        Return (NIL)
+        If RetCodUsr() <> '001327'
+            Return (NIL)
+        EndIf
     End
+   
     //Identifica se a rotina esta em uso
     If .NOT. SuperGetMV("BR_ALTVND",.F.,.F.)
         FwAlertError("Rotina nao Liberada para uso!","Atenção (BR_ALTVND)")
-        Return(NIL)
+         If RetCodUsr() <> '001327'
+            Return (NIL)
+        EndIf
     End
 
     U_ZCFGA01( 'BRALTVND' )
@@ -104,19 +109,23 @@ Static Function BRALTV01()
         EndIf
     End
 
+/*
+    //So informativo
     SA1->(dbSetOrder(1))
     If .NOT. Empty(mv_par03) .And. .NOT. SA1->(DbSeek(xFilial("SA1") + mv_par03))
-        FWAlertError("Cliente Inicial nao encontrado!!", "Cliente Invalido")
-        Return(NIL)
+        FWAlertWarning("Cliente Inicial nao encontrado!! "+mv_par03, "Cliente Invalido")
     End
 
     If .NOT. Empty(mv_par04) .And. .NOT. SA1->(DbSeek(xFilial("SA1") + mv_par04))
-        FWAlertError("Cliente Final nao encontrado!!", "Cliente Invalido")
+        FWAlertWarning("Cliente Final nao encontrado!! " +mv_par04, "Cliente Invalido")
+    End
+   
+    If Empty(mv_par04) 
+        FWAlertWarning("Cliente Final nao pode ser vazio!!", "Cliente Final Vazio")
         Return(NIL)
     End
-
     // Fim validação Parametros
-
+*/
     aCampos  :={"A1_VEND", "A1_X_EXPO", "A1_X_SIM3G"}
 
     //Seleciona os Registros
@@ -127,6 +136,7 @@ Static Function BRALTV01()
             %TABLE:SA1%
         WHERE
             %NOTDEL%
+            AND A1_FILIAL = %XFILIAL:SA1%
             AND A1_VEND = %EXP:MV_PAR01%
             AND A1_COD >= %EXP:MV_PAR03%
             AND A1_COD <= %EXP:MV_PAR04%
@@ -142,9 +152,11 @@ Static Function BRALTV01()
         Return(NIL)
     End
 
-    cMsg:="Existem "+cValToChar(nReg)+ " Clientes"+CRLF
-    cMsg+="para esse vendedor: "+mv_par01+CRLF+CRLF
-    cMsg+="Deseja efetuar a Alteração desse vendedor "+mv_par01+ " para esse:" +mv_par02+" ?"
+    cMsg:="Existem "+'<b>'+cValToChar(nReg)+'</b>'+ " Clientes"+CRLF
+    cMsg+="para esse vendedor: "+'<b>'+mv_par01+'</b>'+CRLF+CRLF
+    cMsg+="Deseja efetuar a Alteração:" + CRLF + CRLF + ;
+   '<b>'+ "Do   Vendedor: " + mv_par01  + CRLF + ;
+          "Para Vendedor: " + mv_par02  +" ?"  +'</b>'
 
     //Confirma execução rotina
     If FWAlertNoYes(cMsg, "Alteração de Vendedor")
@@ -183,7 +195,6 @@ Static Function BRALTV01()
                     cCampo:="SA1->"+aCampos[nI]
 
                     If aConteud[nI] <> &cCampo
-
                         ZAJ->(dbSetOrder(1))
                         RecLock("ZAJ",.T.)
                         ZAJ->ZAJ_FILIAL := FWxFilial( 'ZAJ' )
